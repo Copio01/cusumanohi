@@ -80,6 +80,9 @@
         .slider-dots { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); display: flex; gap: 10px; z-index: 10; }
         .dot { width: 12px; height: 12px; border-radius: 50%; background-color: rgba(255, 255, 255, 0.5); cursor: pointer; transition: background-color 0.3s; }
         .dot.active { background-color: var(--white); }
+        /* Loading spinner for slider */
+        .slider-loading-spinner { display: none; margin: 2rem auto; border: 4px solid #f3f3f3; border-top: 4px solid var(--primary-color); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
 
         /* Admin Login Button */
         .admin-login-float { position: fixed; bottom: 20px; right: 20px; z-index: 1001; }
@@ -117,6 +120,14 @@
         .form-actions .btn { width: 100%; }
         .separator-text { text-align: center; margin: 1rem 0; font-weight: 700; color: #aaa; text-transform: uppercase; }
         
+        /* Accessibility: Add focus styles for interactive elements */
+        .main-nav a:focus, .main-nav .nav-contact-btn:focus, .slider-arrow:focus, .dot:focus, .modal-close-btn:focus, .btn:focus {
+            outline: 2px solid var(--accent-color);
+            outline-offset: 2px;
+        }
+        /* Visually hidden class for screen readers */
+        .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); border: 0; }
+
         @media (max-width: 768px) {
             .header-content { flex-direction: column; }
             .main-nav { margin-top: 1rem; }
@@ -148,15 +159,16 @@
             </div>
         </section>
 
-        <section id="gallery-slider-section" class="container">
+        <section id="gallery-slider-section" class="container" aria-label="Gallery slider section">
             <h2 class="section-title">Our Work</h2>
-            <div class="slider-container">
+            <div class="slider-container" role="region" aria-label="Image slider">
+                <div class="slider-loading-spinner" id="slider-loading-spinner" aria-label="Loading images"></div>
                 <div class="slider-track">
                     <!-- Slides will be dynamically inserted here by JavaScript -->
                 </div>
-                <button class="slider-arrow prev" id="prevBtn">&#10094;</button>
-                <button class="slider-arrow next" id="nextBtn">&#10095;</button>
-                <div class="slider-dots" id="dots-container"></div>
+                <button class="slider-arrow prev" id="prevBtn" aria-label="Previous slide">&#10094;</button>
+                <button class="slider-arrow next" id="nextBtn" aria-label="Next slide">&#10095;</button>
+                <div class="slider-dots" id="dots-container" aria-label="Slider navigation dots"></div>
             </div>
         </section>
 
@@ -175,15 +187,15 @@
         </a>
     </div>
 
-    <div class="modal-overlay" id="contactModal">
+    <div class="modal-overlay" id="contactModal" role="dialog" aria-modal="true" aria-labelledby="contactModalTitle">
         <div class="modal-content">
-            <button class="modal-close-btn" id="modalCloseBtn">&times;</button>
-            <h2>Contact Us</h2>
+            <button class="modal-close-btn" id="modalCloseBtn" aria-label="Close contact form">&times;</button>
+            <h2 id="contactModalTitle">Contact Us</h2>
             <form class="contact-form" action="#" method="POST">
-                <div class="form-group"><label for="message">How can we help?</label><textarea id="message" name="message" required class="field-element"></textarea></div>
-                <div class="name-fields" style="display:flex; gap: 1rem;"><div class="form-group" style="width:50%"><label for="fname">First Name</label><input type="text" id="fname" name="fname" required class="field-element"></div><div class="form-group" style="width:50%"><label for="lname">Last Name</label><input type="text" id="lname" name="lname" required class="field-element"></div></div>
-                <div class="form-group"><label for="email">Email</label><input type="email" id="email" name="email" required class="field-element"></div>
-                <div class="form-group"><label for="phone">Phone (Optional)</label><input type="tel" id="phone" name="phone" class="field-element"></div>
+                <div class="form-group"><label for="contact-message">How can we help?</label><textarea id="contact-message" name="message" required class="field-element"></textarea></div>
+                <div class="name-fields" style="display:flex; gap: 1rem;"><div class="form-group" style="width:50%"><label for="contact-fname">First Name</label><input type="text" id="contact-fname" name="fname" required class="field-element"></div><div class="form-group" style="width:50%"><label for="contact-lname">Last Name</label><input type="text" id="contact-lname" name="lname" required class="field-element"></div></div>
+                <div class="form-group"><label for="contact-email">Email</label><input type="email" id="contact-email" name="email" required class="field-element"></div>
+                <div class="form-group"><label for="contact-phone">Phone (Optional)</label><input type="tel" id="contact-phone" name="phone" class="field-element"></div>
                 <div class="form-actions"><button type="submit" class="btn btn-primary">Submit Form</button><p class="separator-text">or</p><a href="tel:7342416805" class="btn btn-secondary">Call Us Directly</a></div>
             </form>
         </div>
@@ -218,6 +230,7 @@
         const dotsContainer = gallerySliderSection.querySelector('#dots-container');
         const prevBtn = gallerySliderSection.querySelector('#prevBtn');
         const nextBtn = gallerySliderSection.querySelector('#nextBtn');
+        const sliderLoadingSpinner = document.getElementById('slider-loading-spinner');
         let slides = [];
         let currentIndex = 0;
         let intervalId;
@@ -225,9 +238,10 @@
         async function setupSliderListener() {
             try {
                 if (!db) throw new Error("Firebase not initialized.");
+                sliderLoadingSpinner.style.display = 'block';
                 const imagesCol = collection(db, 'sliderImages');
-                
                 onSnapshot(imagesCol, (snapshot) => {
+                    sliderLoadingSpinner.style.display = 'none';
                     if (snapshot.empty) {
                         gallerySliderSection.style.display = 'block';
                         sliderTrack.innerHTML = `<div class="slide"><img src="https://placehold.co/1200x600/0a4d68/white?text=Gallery+Coming+Soon" alt="Gallery coming soon"></div>`;
@@ -236,20 +250,19 @@
                         dotsContainer.style.display = 'none';
                         return;
                     }
-                    
                     prevBtn.style.display = 'block';
                     nextBtn.style.display = 'block';
                     dotsContainer.style.display = 'flex';
                     gallerySliderSection.style.display = 'block';
                     const imageUrls = snapshot.docs.map(doc => doc.data().url);
                     buildSliderDOM(imageUrls);
-
                 }, (error) => {
+                    sliderLoadingSpinner.style.display = 'none';
                     console.error("Error fetching slider images. This is likely a Firestore security rule issue.", error);
                     gallerySliderSection.style.display = 'none';
                 });
-
             } catch (error) {
+                sliderLoadingSpinner.style.display = 'none';
                 console.error("Could not set up slider listener:", error);
                 gallerySliderSection.style.display = 'none';
             }
@@ -320,7 +333,36 @@
         const navContactBtn = document.getElementById('navContactBtn');
         const ctaContactBtn = document.getElementById('ctaContactBtn');
         const modalCloseBtn = document.getElementById('modalCloseBtn');
-        const openModal = () => contactModal.classList.add('active');
+        // Accessibility: trap focus in modal
+        function trapFocus(element) {
+            const focusableEls = element.querySelectorAll('a, button, textarea, input, select, [tabindex]:not([tabindex="-1"])');
+            const firstFocusableEl = focusableEls[0];
+            const lastFocusableEl = focusableEls[focusableEls.length - 1];
+            element.addEventListener('keydown', function(e) {
+                if (e.key === 'Tab') {
+                    if (e.shiftKey) { // shift + tab
+                        if (document.activeElement === firstFocusableEl) {
+                            e.preventDefault();
+                            lastFocusableEl.focus();
+                        }
+                    } else { // tab
+                        if (document.activeElement === lastFocusableEl) {
+                            e.preventDefault();
+                            firstFocusableEl.focus();
+                        }
+                    }
+                }
+                if (e.key === 'Escape') closeModal();
+            });
+        }
+        const openModal = () => {
+            contactModal.classList.add('active');
+            setTimeout(() => {
+                const firstInput = contactModal.querySelector('input, textarea, button');
+                if (firstInput) firstInput.focus();
+            }, 100);
+            trapFocus(contactModal);
+        };
         const closeModal = () => contactModal.classList.remove('active');
         navContactBtn.addEventListener('click', openModal);
         ctaContactBtn.addEventListener('click', openModal);
@@ -328,4 +370,4 @@
         contactModal.addEventListener('click', e => { if(e.target === contactModal) closeModal(); });
     </script>
 </body>
-</ht
+</html>
