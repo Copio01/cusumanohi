@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cusumano Home Improvements | Monroe, MI</title>
+    <meta name="description" content="Expert home improvement services in Monroe, MI. Specializing in roofing, siding, windows, decks, and dumpster rentals. Call for a free quote!">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Poppins:wght@600&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary-color: #0a4d68;
+            --secondary-color: #088395;
+            --accent-color: #f5a623;
+            --light-gray: #f9f9f9;
+            --dark-gray: #333333;
+            --white: #ffffff;
+            --font-heading: 'Poppins', sans-serif;
+            --font-body: 'Roboto', sans-serif;
+        }
+        *, *::before, *::after { box-sizing: border-box; }
+        html { scroll-behavior: smooth; scroll-padding-top: 80px; }
+        body { margin: 0; font-family: var(--font-body); background-color: var(--white); color: var(--dark-gray); line-height: 1.7; }
+        .container { width: 90%; max-width: 1200px; margin: 0 auto; padding: 4rem 0; }
+        h1, h2, h3 { font-family: var(--font-heading); color: var(--primary-color); margin-top: 0; }
+        h2.section-title { text-align: center; font-size: 2.5rem; margin-bottom: 3rem; }
+
+        /* Header & Navigation */
+        .main-header { background-color: var(--white); padding: 1rem 0; border-bottom: 1px solid #e0e0e0; position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        .header-content { display: flex; justify-content: space-between; align-items: center; width: 90%; max-width: 1200px; margin: 0 auto; }
+        .logo { font-family: var(--font-heading); font-size: 1.5rem; font-weight: 600; color: var(--primary-color); text-decoration: none; padding-bottom: 0.2em; /* Added padding to prevent text cutoff */ }
+        .main-nav a, .main-nav .nav-contact-btn { color: var(--dark-gray); text-decoration: none; margin-left: 2rem; font-weight: 700; position: relative; padding: 0.5rem 0; background: none; border: none; font-size: inherit; font-family: inherit; cursor: pointer; }
+        .main-nav a::after, .main-nav .nav-contact-btn::after { content: ''; position: absolute; bottom: 0; left: 0; width: 0; height: 2px; background-color: var(--accent-color); transition: width 0.3s ease; }
+        .main-nav a:hover::after, .main-nav .nav-contact-btn:hover::after { width: 100%; }
+
+        /* Static Hero Banner */
+        .hero-banner {
+            position: relative;
+            width: 100%;
+            height: 70vh; 
+            max-height: 750px;
+            background-image: url('https://i.imgur.com/MzVsC2K.jpeg');
+            background-size: contain; /* Changed from 'cover' to 'contain' */
+            background-position: center;
+            background-repeat: no-repeat; /* Added to prevent tiling */
+            background-color: #eef2f3; /* Added a fallback background color */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .hero-overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(10, 77, 104, 0.5); 
+            display: flex; flex-direction: column; 
+            justify-content: space-around; 
+            align-items: center; text-align: center; color: var(--white); 
+            padding: 3rem 1rem; 
+        }
+        .hero-overlay h1 { font-size: 3.5rem; margin-bottom: 1rem; color: var(--white); text-shadow: 1px 1px 3px rgba(0,0,0,0.4); }
+        .hero-overlay p { font-size: 1.2rem; max-width: 600px; margin: 0 auto 2rem; text-shadow: 1px 1px 3px rgba(0,0,0,0.4); }
+
+        /* Image Slider Section */
+        #gallery-slider-section {
+            display: none; /* Hidden by default, shown by JS */
+            padding-top: 4rem;
+        }
+        .slider-container { position: relative; width: 100%; height: 50vh; max-height: 600px; overflow: hidden; background-color: #e0e0e0; border-radius: 8px; }
+        .slider-track { display: flex; height: 100%; transition: transform 0.5s ease-in-out; }
+        .slide { flex: 0 0 100%; width: 100%; height: 100%; position: relative; }
+        .slide img { width: 100%; height: 100%; object-fit: cover; border-radius: 8px; }
+        .slider-arrow { position: absolute; top: 50%; transform: translateY(-50%); background-color: rgba(255, 255, 255, 0.7); border: none; border-radius: 50%; width: 50px; height: 50px; cursor: pointer; z-index: 10; font-size: 1.5rem; transition: background-color 0.2s; }
+        .slider-arrow:hover { background-color: var(--white); }
+        .slider-arrow.prev { left: 15px; }
+        .slider-arrow.next { right: 15px; }
+        .slider-dots { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); display: flex; gap: 10px; z-index: 10; }
+        .dot { width: 12px; height: 12px; border-radius: 50%; background-color: rgba(255, 255, 255, 0.5); cursor: pointer; transition: background-color 0.3s; }
+        .dot.active { background-color: var(--white); }
+
+        /* Admin Login Button */
+        .admin-login-float { position: fixed; bottom: 20px; right: 20px; z-index: 1001; }
+        .admin-login-float a { display: flex; align-items: center; justify-content: center; width: 50px; height: 50px; background-color: var(--primary-color); color: var(--white); border-radius: 50%; text-decoration: none; box-shadow: 0 4px 12px rgba(0,0,0,0.2); transition: transform 0.2s; }
+        .admin-login-float a:hover { transform: scale(1.1); }
+        
+        /* Other Sections... */
+        .btn { display: inline-block; padding: 1rem 2rem; border-radius: 5px; text-decoration: none; font-weight: 700; transition: transform 0.2s ease, box-shadow 0.2s ease; cursor: pointer; border: none; }
+        .btn-primary { background-color: var(--accent-color); color: var(--white); }
+        .btn-secondary { background-color: var(--secondary-color); color: var(--white); }
+        .btn:hover { transform: translateY(-3px); box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
+        #about { background-color: var(--light-gray); }
+        .about-content { text-align: center; max-width: 800px; margin: 0 auto; font-size: 1.1rem; }
+        .services-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; }
+        .service-card { background-color: var(--white); border: 1px solid #e0e0e0; border-radius: 8px; padding: 2rem; text-align: center; transition: transform 0.3s ease, box-shadow 0.3s ease; }
+        .service-card:hover { transform: translateY(-10px); box-shadow: 0 10px 20px rgba(0,0,0,0.08); }
+        .service-icon { width: 60px; height: 60px; margin-bottom: 1.5rem; color: var(--secondary-color); }
+        .service-card h3 { font-size: 1.5rem; margin-bottom: 1rem; }
+        #contact { background-color: var(--primary-color); color: var(--white); text-align: center; }
+        #contact h2 { color: var(--white); }
+        #contact p { font-size: 1.1rem; margin-bottom: 2rem; }
+        .main-footer { background-color: var(--dark-gray); color: var(--light-gray); text-align: center; padding: 2rem 1rem; }
+        
+        /* Modal Styles ... */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.6); display: none; justify-content: center; align-items: center; z-index: 2000; opacity: 0; transition: opacity 0.3s ease; }
+        .modal-overlay.active { display: flex; opacity: 1; }
+        .modal-content { background-color: var(--white); padding: 2rem 2.5rem; border-radius: 8px; box-shadow: 0 5px 25px rgba(0,0,0,0.2); width: 90%; max-width: 500px; position: relative; transform: translateY(-50px); transition: transform 0.3s ease; }
+        .modal-overlay.active .modal-content { transform: translateY(0); }
+        .modal-close-btn { position: absolute; top: 15px; right: 15px; background: none; border: none; font-size: 2rem; color: #aaa; cursor: pointer; line-height: 1; }
+        .modal-content h2 { margin-bottom: 1.5rem; text-align: center; }
+        .contact-form .form-group { margin-bottom: 1rem; }
+        .contact-form label { display: block; margin-bottom: 0.5rem; font-weight: 700; }
+        .contact-form .field-element { width: 100%; padding: 0.75rem; border: 1px solid #ccc; border-radius: 5px; font-size: 1rem; }
+        .form-actions { margin-top: 1.5rem; }
+        .form-actions .btn { width: 100%; }
+        .separator-text { text-align: center; margin: 1rem 0; font-weight: 700; color: #aaa; text-transform: uppercase; }
+        
+        @media (max-width: 768px) {
+            .header-content { flex-direction: column; }
+            .main-nav { margin-top: 1rem; }
+            .hero-overlay h1, .slide-overlay h1 { font-size: 2.5rem; }
+        }
+
+    </style>
+</head>
+<body>
+    <header class="main-header">
+        <div class="header-content">
+            <a href="#" class="logo">Cusumano Home Improvements</a>
+            <nav class="main-nav">
+                <a href="#about">About</a>
+                <a href="#services">Services</a>
+                <button class="nav-contact-btn" id="navContactBtn">Contact</button>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <section class="hero-banner">
+            <div class="hero-overlay">
+                <div>
+                    <h1>Transform Your Space</h1>
+                    <p>Quality construction and home improvement services in Monroe, MI</p>
+                </div>
+                <a href="tel:7342416805" class="btn btn-primary">Call For a Free Quote</a>
+            </div>
+        </section>
+
+        <section id="gallery-slider-section" class="container">
+            <h2 class="section-title">Our Work</h2>
+            <div class="slider-container">
+                <div class="slider-track">
+                    <!-- Slides will be dynamically inserted here by JavaScript -->
+                </div>
+                <button class="slider-arrow prev" id="prevBtn">&#10094;</button>
+                <button class="slider-arrow next" id="nextBtn">&#10095;</button>
+                <div class="slider-dots" id="dots-container"></div>
+            </div>
+        </section>
+
+        <section id="about"><div class="container"><h2 class="section-title">About Our Company</h2><div class="about-content"><p>For over 20 years, Cusumano Home Improvements has been a family-owned and operated business proudly serving the Monroe, MI area. We are dedicated to delivering the highest quality of work, specializing in residential construction and convenient dumpster rentals. Our commitment is to our craft and, most importantly, to our customers' satisfaction.</p></div></div></section>
+        <section id="services"><div class="container"><h2 class="section-title">Our Services</h2><div class="services-grid"><article class="service-card"><svg class="service-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg><h3>Roofing</h3><p>Complete roofing solutions including new construction, re-roofs, and leak repairs using only high-quality, durable materials.</p></article><article class="service-card"><svg class="service-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg><h3>Siding</h3><p>Enhance your home's curb appeal and protection with our wide variety of siding options, including vinyl, wood, and fiber cement.</p></article><article class="service-card"><svg class="service-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg><h3>Windows</h3><p>Professional installation of energy-efficient windows. We offer many styles like double-hung and casement for a perfect fit.</p></article><article class="service-card"><svg class="service-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"></path></svg><h3>Decks</h3><p>We design and build custom decks or repair existing ones, creating beautiful and lasting outdoor living spaces for you to enjoy.</p></article><article class="service-card"><svg class="service-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg><h3>Dumpster Rentals</h3><p>Convenient and competitively priced dumpster rentals for your project needs, with various sizes and flexible scheduling.</p></article></div></div></section>
+        <section id="contact"><div class="container"><h2 class="section-title">Ready to Start Your Project?</h2><p>Contact us today for a free, no-obligation quote. We're ready to help bring your vision to life.</p><button id="ctaContactBtn" class="btn btn-primary">Get a Quote by Email</button></div></section>
+    </main>
+
+    <footer class="main-footer">
+        <p>&copy; 2024 Cusumano Home Improvements. All Rights Reserved.</p>
+    </footer>
+
+    <div class="admin-login-float">
+        <a href="admin.html" title="Admin Login">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h7"/><polyline points="15 12 19 12 19 8 15 8 15 12"/><path d="M17 16v-4h-2V8a3 3 0 0 1 3-3h0a3 3 0 0 1 3 3v4h-2v4Z"/></svg>
+        </a>
+    </div>
+
+    <div class="modal-overlay" id="contactModal">
+        <div class="modal-content">
+            <button class="modal-close-btn" id="modalCloseBtn">&times;</button>
+            <h2>Contact Us</h2>
+            <form class="contact-form" action="#" method="POST">
+                <div class="form-group"><label for="message">How can we help?</label><textarea id="message" name="message" required class="field-element"></textarea></div>
+                <div class="name-fields" style="display:flex; gap: 1rem;"><div class="form-group" style="width:50%"><label for="fname">First Name</label><input type="text" id="fname" name="fname" required class="field-element"></div><div class="form-group" style="width:50%"><label for="lname">Last Name</label><input type="text" id="lname" name="lname" required class="field-element"></div></div>
+                <div class="form-group"><label for="email">Email</label><input type="email" id="email" name="email" required class="field-element"></div>
+                <div class="form-group"><label for="phone">Phone (Optional)</label><input type="tel" id="phone" name="phone" class="field-element"></div>
+                <div class="form-actions"><button type="submit" class="btn btn-primary">Submit Form</button><p class="separator-text">or</p><a href="tel:7342416805" class="btn btn-secondary">Call Us Directly</a></div>
+            </form>
+        </div>
+    </div>
+
+    <script type="module">
+        // --- Firebase Imports ---
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-app.js";
+        import { getFirestore, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-firestore.js";
+        
+        // --- Your Firebase Configuration ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyBVtq6dAEuybJNmTTv8dXBxTVUgw1t0ZMk",
+            authDomain: "cusumano-website.firebaseapp.com",
+            projectId: "cusumano-website",
+            storageBucket: "cusumano-website.firebasestorage.app",
+            messagingSenderId: "20051552210",
+            appId: "1:20051552210:web:7eb3b22baa3fec184e4a0b"
+        };
+        // ----------------------------------------------------
+
+        let app, db;
+        try {
+            app = initializeApp(firebaseConfig);
+            db = getFirestore(app);
+        } catch (error) {
+            console.error("Firebase initialization failed. Please check your config.", error);
+        }
+
+        const gallerySliderSection = document.getElementById('gallery-slider-section');
+        const sliderTrack = gallerySliderSection.querySelector('.slider-track');
+        const dotsContainer = gallerySliderSection.querySelector('#dots-container');
+        const prevBtn = gallerySliderSection.querySelector('#prevBtn');
+        const nextBtn = gallerySliderSection.querySelector('#nextBtn');
+        let slides = [];
+        let currentIndex = 0;
+        let intervalId;
+
+        async function setupSliderListener() {
+            try {
+                if (!db) throw new Error("Firebase not initialized.");
+                const imagesCol = collection(db, 'sliderImages');
+                
+                onSnapshot(imagesCol, (snapshot) => {
+                    if (snapshot.empty) {
+                        gallerySliderSection.style.display = 'block';
+                        sliderTrack.innerHTML = `<div class="slide"><img src="https://placehold.co/1200x600/0a4d68/white?text=Gallery+Coming+Soon" alt="Gallery coming soon"></div>`;
+                        prevBtn.style.display = 'none';
+                        nextBtn.style.display = 'none';
+                        dotsContainer.style.display = 'none';
+                        return;
+                    }
+                    
+                    prevBtn.style.display = 'block';
+                    nextBtn.style.display = 'block';
+                    dotsContainer.style.display = 'flex';
+                    gallerySliderSection.style.display = 'block';
+                    const imageUrls = snapshot.docs.map(doc => doc.data().url);
+                    buildSliderDOM(imageUrls);
+
+                }, (error) => {
+                    console.error("Error fetching slider images. This is likely a Firestore security rule issue.", error);
+                    gallerySliderSection.style.display = 'none';
+                });
+
+            } catch (error) {
+                console.error("Could not set up slider listener:", error);
+                gallerySliderSection.style.display = 'none';
+            }
+        }
+        
+        function buildSliderDOM(imageUrls) {
+            const currentImage = slides[currentIndex] ? slides[currentIndex].querySelector('img').src : null;
+            const newImageAtCurrentIndex = imageUrls[currentIndex];
+
+            if (sliderTrack.children.length === imageUrls.length && currentImage === newImageAtCurrentIndex) {
+                return;
+            }
+
+            sliderTrack.innerHTML = '';
+            dotsContainer.innerHTML = '';
+
+            imageUrls.forEach((url, index) => {
+                const slide = document.createElement('div');
+                slide.className = 'slide';
+                slide.innerHTML = `<img src="${url}" alt="Homepage Slider Image ${index + 1}" onerror="this.onerror=null;this.src='https://placehold.co/1920x1080/ccc/333?text=Image+Not+Found';">`;
+                sliderTrack.appendChild(slide);
+
+                const dot = document.createElement('div');
+                dot.className = 'dot';
+                dot.addEventListener('click', () => { goToSlide(index); resetInterval(); });
+                dotsContainer.appendChild(dot);
+            });
+
+            slides = Array.from(sliderTrack.children);
+            if (slides.length > 0) {
+                 if (currentIndex >= slides.length) currentIndex = 0;
+                 updateSlider();
+                 resetInterval();
+            }
+        }
+
+        function updateSlider() {
+            if (slides.length === 0) return;
+            sliderTrack.style.transform = `translateX(-${currentIndex * 100}%)`;
+            document.querySelectorAll('.dot').forEach((dot, index) => dot.classList.toggle('active', index === currentIndex));
+        }
+        
+        function goToSlide(index) {
+            if (slides.length === 0) return;
+            currentIndex = (index + slides.length) % slides.length;
+            updateSlider();
+        }
+        
+        function nextSlide() { goToSlide(currentIndex + 1); }
+        function prevSlide() { goToSlide(currentIndex - 1); }
+        
+        function startInterval() {
+            clearInterval(intervalId);
+            if(slides.length > 1) intervalId = setInterval(nextSlide, 5000);
+        }
+        
+        function resetInterval() {
+            startInterval();
+        }
+
+        nextBtn.addEventListener('click', () => { nextSlide(); resetInterval(); });
+        prevBtn.addEventListener('click', () => { prevSlide(); resetInterval(); });
+
+        document.addEventListener('DOMContentLoaded', setupSliderListener);
+        
+        // Modal script
+        const contactModal = document.getElementById('contactModal');
+        const navContactBtn = document.getElementById('navContactBtn');
+        const ctaContactBtn = document.getElementById('ctaContactBtn');
+        const modalCloseBtn = document.getElementById('modalCloseBtn');
+        const openModal = () => contactModal.classList.add('active');
+        const closeModal = () => contactModal.classList.remove('active');
+        navContactBtn.addEventListener('click', openModal);
+        ctaContactBtn.addEventListener('click', openModal);
+        modalCloseBtn.addEventListener('click', closeModal);
+        contactModal.addEventListener('click', e => { if(e.target === contactModal) closeModal(); });
+    </script>
+</body>
+</ht
