@@ -77,9 +77,9 @@
             position: absolute;
             top: 10px;
             left: 20px;
-            width: 50px;
-            height: 50px;
-            border-radius: 0; /* Removed border-radius to make it square */
+            width: 80px; /* Increased width from 50px */
+            height: 50px; /* Maintained height */
+            border-radius: 4px; /* Changed from circle to slight rounded corners */
             overflow: hidden;
             box-shadow: 0 3px 10px rgba(0,0,0,0.15);
             border: 2px solid var(--accent-color);
@@ -93,7 +93,7 @@
         .company-logo img {
             width: 100%;
             height: 100%;
-            object-fit: contain; /* Changed to 'contain' to ensure full image is shown */
+            object-fit: contain; /* Changed from 'contain' to ensure full image is shown */
         }
     </style>
 </head>
