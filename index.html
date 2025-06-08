@@ -67,12 +67,7 @@
         .hero-banner {
             background-size: cover;
             background-position: center;
-            animation: heroFadeIn 1.2s cubic-bezier(.4,0,.2,1);
             background-attachment: fixed;
-        }
-        @keyframes heroFadeIn {
-            from { opacity: 0; transform: scale(1.04); }
-            to { opacity: 1; transform: scale(1); }
         }
         .hero-overlay {
             background: linear-gradient(120deg, rgba(10,77,104,0.7) 60%, rgba(8,131,149,0.5) 100%);
@@ -231,11 +226,11 @@
         /* Company Logo in Header - IMPROVED RESPONSIVE VERSION */
         .company-logo {
             position: absolute;
-            top: 10px;
-            left: 20px;
-            width: 60px;
-            height: 60px;
-            border-radius: 8px; /* Slight rounding for better appearance */
+            top: 8px;
+            left: 15px;
+            width: 65px;
+            height: 50px; /* Made more rectangular */
+            border-radius: 6px; /* Reduced rounding slightly */
             overflow: hidden;
             box-shadow: 0 3px 10px rgba(0,0,0,0.15);
             border: 2px solid var(--accent-color);
@@ -262,7 +257,8 @@
             max-width: 1200px;
             margin: 0 auto;
             position: relative;
-            min-height: 70px; /* Ensure enough space for logo */
+            min-height: 75px; /* Increased to accommodate larger logo */
+            padding: 0.5rem 0; /* Added padding for better spacing */
         }
 
         /* Logo positioning adjustment to avoid overlap */
@@ -273,26 +269,27 @@
             color: var(--primary-color);
             text-decoration: none;
             padding-bottom: 0.2em;
-            margin-left: 80px; /* Space for the logo */
+            margin-left: 85px; /* Increased space for the larger logo */
         }
 
         /* Enhanced responsive design */
         @media (max-width: 768px) {
             .company-logo {
-                width: 45px;
-                height: 45px;
-                top: 8px;
-                left: 15px;
+                width: 50px;
+                height: 38px; /* Proportionally smaller but still rectangular */
+                top: 6px;
+                left: 12px;
             }
             
             .logo {
                 font-size: 1.2rem;
-                margin-left: 65px; /* Adjusted for smaller logo */
+                margin-left: 70px; /* Adjusted for smaller logo */
             }
             
             .header-content {
                 flex-direction: column;
                 padding: 0.5rem 0;
+                min-height: 65px;
             }
             
             .main-nav {
@@ -320,15 +317,19 @@
 
         @media (max-width: 480px) {
             .company-logo {
-                width: 40px;
-                height: 40px;
+                width: 45px;
+                height: 34px; /* Kept rectangular proportions */
                 top: 5px;
                 left: 10px;
             }
             
             .logo {
                 font-size: 1rem;
-                margin-left: 55px;
+                margin-left: 60px; /* Adjusted spacing */
+            }
+            
+            .header-content {
+                min-height: 60px;
             }
             
             .hero-banner {
