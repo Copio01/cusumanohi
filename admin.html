@@ -4,1944 +4,253 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Panel | Cusumano Home Improvements</title>
+    <meta name="robots" content="noindex, nofollow">
     
+    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Poppins:wght@600&display=swap" rel="stylesheet">
 
+    <!-- CSS Styles -->
+    <link rel="stylesheet" href="css/normalize.css">
+    <link rel="stylesheet" href="css/styles.css">
     <style>
-        :root {
-            --primary-color: #0a4d68; --secondary-color: #088395; --accent-color: #f5a623;
-            --light-bg: #f7f8fc; --dark-gray: #333333; --medium-gray: #6c757d;
-            --white: #ffffff; --danger-color: #e63946; --success-color: #2a9d8f;
-            --font-heading: 'Poppins', sans-serif; --font-body: 'Roboto', sans-serif;
-            --shadow-md: 0 4px 12px rgba(0,0,0,0.1);
-        }
-        body { margin: 0; font-family: var(--font-body); background-color: #f7f8fc; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
-        #login-screen { background-color: var(--white); padding: 3rem; border-radius: 12px; box-shadow: var(--shadow-md); width: 100%; max-width: 420px; text-align: center; border: 1px solid #e9ecef; }
-        .login-logo { font-family: var(--font-heading); font-weight: 700; font-size: 1.8rem; color: var(--primary-color); margin-bottom: 0.5rem; }
-        .form-group { margin-bottom: 1.5rem; text-align: left; position: relative; }
-        .form-group label { display: block; margin-bottom: 0.5rem; font-weight: 700; font-size: 0.9rem; }
-        .form-group input { width: 100%; padding: 0.8rem 1rem; border: 1px solid #ced4da; border-radius: 8px; font-size: 1rem; }
-        .btn { display: inline-block; width: 100%; padding: 0.9rem 1.5rem; border-radius: 8px; font-weight: 700; cursor: pointer; border: none; font-size: 1.1rem; font-family: var(--font-heading); background-color: var(--primary-color); color: var(--white); transition: background-color 0.2s, transform 0.2s; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
-        .btn:hover { background-color: #088395; transform: translateY(-3px); }
-        .logout-btn { background-color: transparent; color: var(--danger-color); border: 2px solid var(--danger-color); padding: 0.5rem 1rem; border-radius: 8px; cursor: pointer; font-weight: 700; }
-        .logout-btn:hover { background-color: rgba(230, 57, 70, 0.1); }
-        #upload-btn { background-color: var(--success-color); }
-        #upload-btn:hover { background-color: #238b80 !important; }
-        #login-error { color: var(--danger-color); background-color: rgba(230, 57, 70, 0.1); margin-top: 1.5rem; padding: 0.8rem; border-radius: 8px; display: none; }
-        #admin-dashboard { width: 100%; height: 100vh; display: none; flex-direction: column; background-color: var(--light-bg); }
-        .admin-header { background-color: var(--white); padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e9ecef; position: relative; }
-        .admin-header h1 { font-size: 1.5rem; color: var(--primary-color); }
-        .logout-btn { background-color: transparent; color: var(--danger-color); border: 2px solid var(--danger-color); padding: 0.5rem 1rem; border-radius: 8px; cursor: pointer; font-weight: 700; }
-        .admin-main { padding: 2.5rem; flex-grow: 1; overflow-y: auto; }
-        .control-card { background-color: var(--white); padding: 2rem; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); border: 1px solid #e9ecef; }
-        .control-card h2 { display: flex; align-items: center; gap: 0.75rem; margin-top: 0; font-size: 1.3rem; }
-        
-        .image-gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
-        .img-card { position: relative; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-        .img-card img { width: 100%; height: 150px; object-fit: cover; display: block; }
-        .img-card .delete-btn { position: absolute; top: 8px; right: 8px; background-color: rgba(230, 57, 70, 0.8); color: white; border: none; border-radius: 50%; width: 30px; height: 30px; cursor: pointer; font-size: 1rem; line-height: 30px; text-align: center; }
-        .img-card .order-controls {
-            position: absolute;
-            bottom: 10px;
-            right: 10px;
-            display: flex;
-            gap: 5px;
-        }
-
-        .img-card .order-btn {
-            background-color: rgba(255, 255, 255, 0.8);
-            color: var(--primary-color);
-            border: none;
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            cursor: pointer;
-            font-size: 0.8rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: background-color 0.2s;
-        }
-
-        .img-card .order-btn:hover {
-            background-color: rgba(255, 255, 255, 1);
-        }
-
-        .img-card .order-number {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            background-color: var(--primary-color);
+        /* Admin-specific styles */
+        .admin-header {
+            background: var(--primary-color);
             color: white;
-            font-size: 0.8rem;
-            font-weight: bold;
-            padding: 2px 8px;
-            border-radius: 12px;
-        }
-        .upload-area { border: 2px dashed #ced4da; border-radius: 8px; padding: 2rem; text-align: center; background-color: #f8f9fa; }
-        #upload-progress { width: 100%; margin-top: 1rem; display: none; }
-        
-        /* Loading Spinner */
-        .spinner { display: none; margin: 1.5rem auto; border: 4px solid #f3f3f3; border-top: 4px solid var(--primary-color); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
-        @keyframes spin { 100% { transform: rotate(360deg); } }
-        /* Toast Notification */
-        .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: var(--primary-color); color: #fff; padding: 1rem 2rem; border-radius: 8px; box-shadow: var(--shadow-md); opacity: 0; pointer-events: none; transition: opacity 0.3s; z-index: 2000; }
-        .toast.show { opacity: 1; pointer-events: auto; }
-        /* Drag & Drop Highlight */
-        .upload-area.dragover { border-color: var(--accent-color); background: #fffbe6; }
-        /* Accessibility: Focus styles for all interactive elements */
-        .btn:focus, .logout-btn:focus, .delete-btn:focus, .slider-arrow:focus, .dot:focus, #upload-btn:focus, #image-upload-input:focus {
-            outline: 2px solid var(--accent-color);
-            outline-offset: 2px;
-        }
-        /* Visually hidden class for screen readers */
-        .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); border: 0; }
-        /* Responsive: Make image cards and upload area more mobile-friendly */
-        @media (max-width: 400px) {
-            .img-card img { height: 100px; }
-            .upload-area { padding: 1rem; }
-        }
-        /* Responsive tweaks */
-        @media (max-width: 600px) {
-            .admin-main { padding: 1rem; }
-            .control-card { padding: 1rem; }
-            #login-screen { padding: 1.5rem; }
-        }
-
-        /* Company Logo in Header */
-        .company-logo {
-            position: absolute;
-            top: 10px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 80px;
-            height: 50px;
-            border-radius: 4px;
-            overflow: hidden;
-            box-shadow: 0 3px 10px rgba(0,0,0,0.15);
-            border: 2px solid var(--accent-color);
-            transition: transform 0.3s ease;
-            z-index: 10;
-        }
-
-        .company-logo:hover {
-            transform: translateX(-50%) scale(1.1);
-        }
-
-        .company-logo img {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-        }
-
-        /* Website Visual Editor Styles */
-        .section-tabs {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.5rem;
-            margin-bottom: 1.5rem;
-            border-bottom: 1px solid #e9ecef;
-            padding-bottom: 1rem;
-        }
-
-        .section-tab {
-            background-color: #f1f3f5;
-            border: 1px solid #dee2e6;
-            border-radius: 6px;
-            padding: 0.6rem 1rem;
-            cursor: pointer;
-            font-weight: 600;
-            color: var(--medium-gray);
-            transition: all 0.2s ease;
-        }
-
-        .section-tab:hover {
-            background-color: #e9ecef;
-            color: var(--dark-gray);
-        }
-
-        .section-tab.active {
-            background-color: var(--primary-color);
-            color: white;
-            border-color: var(--primary-color);
-        }
-
-        .section-editor-container {
-            background-color: #f8f9fa;
-            border: 1px solid #e9ecef;
-            border-radius: 8px;
-            padding: 1.5rem;
-        }
-
-        .section-editor {
-            display: none;
-        }
-
-        .section-editor.active {
-            display: block;
-        }
-
-        .section-editor h3 {
-            margin-top: 0;
-            color: var(--primary-color);
-            font-size: 1.2rem;
-            border-bottom: 2px solid #e9ecef;
-            padding-bottom: 0.5rem;
-            margin-bottom: 1rem;
-        }
-
-        .form-group textarea.field-element {
-            min-height: 100px;
-            resize: vertical;
-        }
-
-        .preview-container {
-            margin-top: 2rem;
-            border-top: 1px dashed #dee2e6;
-            padding-top: 1rem;
-        }
-
-        .preview-container h4 {
-            color: var(--primary-color);
-            margin-bottom: 1rem;
-        }
-
-        .section-preview {
-            background-color: white;
-            border: 1px solid #e9ecef;
-            border-radius: 8px;
-            padding: 1.5rem;
-            min-height: 100px;
-            position: relative;
-        }
-
-        /* Service item editor styling */
-        .service-item {
-            background-color: white;
-            border: 1px solid #dee2e6;
-            border-radius: 8px;
-            padding: 1rem;
-            margin-bottom: 1rem;
-            position: relative;
-        }
-
-        .service-item-header {
+            padding: 1rem 2rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 1rem;
-            padding-bottom: 0.5rem;
-            border-bottom: 1px solid #e9ecef;
         }
-
-        .service-item-title {
-            font-weight: 600;
-            color: var(--primary-color);
-            font-size: 1.1rem;
+        
+        .admin-header h1 {
+            color: white;
+            margin: 0;
+            font-size: 1.5rem;
         }
-
-        .service-item-controls {
+        
+        .admin-container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 2rem auto;
+        }
+        
+        .admin-panel {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 24px rgba(10,77,104,0.10);
+            overflow: hidden;
+        }
+        
+        .admin-nav {
+            background: #f0f0f0;
+            padding: 1rem;
+        }
+        
+        .admin-nav ul {
             display: flex;
-            gap: 0.5rem;
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            gap: 1rem;
         }
-
-        .service-item-btn {
-            background-color: transparent;
-            border: none;
+        
+        .admin-nav a {
+            text-decoration: none;
+            color: var(--dark-gray);
+            font-weight: 500;
+            padding: 0.5rem 1rem;
             border-radius: 4px;
-            cursor: pointer;
-            width: 30px;
-            height: 30px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
             transition: background-color 0.2s;
         }
-
-        .service-item-btn.up-btn, .service-item-btn.down-btn {
-            color: var(--primary-color);
+        
+        .admin-nav a.active, .admin-nav a:hover {
+            background-color: var(--primary-color);
+            color: white;
         }
-
-        .service-item-btn.delete-btn {
-            color: var(--danger-color);
+        
+        .admin-content {
+            padding: 2rem;
         }
-
-        .service-item-btn:hover {
-            background-color: #f1f3f5;
+        
+        .admin-section {
+            margin-bottom: 2rem;
         }
-
-        .service-item-expand {
+        
+        .admin-section h2 {
+            border-bottom: 2px solid var(--accent-color);
+            padding-bottom: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .data-table {
             width: 100%;
-            text-align: center;
-            background-color: #f1f3f5;
-            border: none;
-            border-radius: 4px;
-            padding: 0.3rem;
-            margin-top: 0.5rem;
-            cursor: pointer;
-            font-size: 0.9rem;
+            border-collapse: collapse;
         }
-
-        .service-item-content {
-            display: none;
+        
+        .data-table th, .data-table td {
+            padding: 0.75rem;
+            border-bottom: 1px solid #e0e0e0;
+            text-align: left;
         }
-
-        .service-item-content.expanded {
-            display: block;
-            margin-top: 1rem;
+        
+        .data-table th {
+            background-color: #f5f5f5;
         }
-
-        /* Field help text */
-        .field-help {
-            font-size: 0.85rem;
-            color: var(--medium-gray);
-            margin-top: 0.3rem;
-            margin-bottom: 0;
+        
+        .data-table tr:hover {
+            background-color: #f9f9f9;
         }
-
-        /* Save status message */
-        .save-status {
-            margin-top: 1rem;
-        }
-
-        /* Icon selector */
-        .icon-selector {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(40px, 1fr));
+        
+        .action-buttons {
+            display: flex;
             gap: 0.5rem;
-            margin-top: 0.5rem;
-            max-height: 130px;
-            overflow-y: auto;
-            background-color: #f8f9fa;
-            border: 1px solid #dee2e6;
-            border-radius: 4px;
-            padding: 0.5rem;
         }
-
-        .icon-option {
-            width: 40px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border: 1px solid #dee2e6;
+        
+        .btn-edit, .btn-delete, .btn-view {
+            padding: 0.25rem 0.5rem;
             border-radius: 4px;
+            border: none;
             cursor: pointer;
-            background-color: white;
-        }
-
-        .icon-option:hover {
-            background-color: #f1f3f5;
-        }
-
-        .icon-option.selected {
-            border-color: var(--accent-color);
-            background-color: rgba(245, 166, 35, 0.1);
-        }
-
-        .icon-preview {
-            width: 40px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border: 1px solid #dee2e6;
-            border-radius: 4px;
-            background-color: white;
-            margin-right: 1rem;
-        }
-
-        .icon-selector-header {
-            display: flex;
-            align-items: center;
-            margin-bottom: 0.5rem;
-        }
-
-        /* Toggle switch styling */
-        .toggle-switch {
-            position: relative;
-            display: inline-block;
-            width: 48px;
-            height: 24px;
-            margin-right: 16px;
-        }
-
-        .toggle-switch input { 
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-
-        .toggle-slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: #ccc;
-            transition: .4s;
-            border-radius: 24px;
-        }
-
-        .toggle-slider:before {
-            position: absolute;
-            content: "";
-            height: 18px;
-            width: 18px;
-            left: 3px;
-            bottom: 3px;
-            background-color: white;
-            transition: .4s;
-            border-radius: 50%;
-        }
-
-        input:checked + .toggle-slider {
-            background-color: var(--success-color);
-        }
-
-        input:focus + .toggle-slider {
-            box-shadow: 0 0 1px var(--success-color);
-        }
-
-        input:checked + .toggle-slider:before {
-            transform: translateX(24px);
-        }
-
-        .setting-item {
-            display: flex;
-            align-items: center;
-            margin-bottom: 1rem;
-        }
-
-        .setting-label h3 {
-            margin: 0;
-            font-size: 1rem;
-        }
-
-        .setting-label p {
-            margin: 0.3rem 0 0 0;
             font-size: 0.9rem;
-            color: var(--medium-gray);
         }
-
-        /* Visual Editor Responsiveness */
-        @media (max-width: 768px) {
-            .section-tabs {
-                flex-direction: column;
-                gap: 0.3rem;
-            }
-            
-            .section-tab {
-                text-align: center;
-            }
-            
-            .section-editor-container {
-                padding: 1rem;
-            }
-            
-            .service-item-header {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-            
-            .service-item-controls {
-                margin-top: 0.5rem;
-                width: 100%;
-                justify-content: flex-end;
-            }
+        
+        .btn-view {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .btn-edit {
+            background-color: #f5a623;
+            color: white;
+        }
+        
+        .btn-delete {
+            background-color: #e53935;
+            color: white;
+        }
+        
+        .form-panel {
+            background: #f9f9f9;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
         }
     </style>
 </head>
 <body>
-
-    <div id="login-screen">
-        <h1 class="login-logo">Cusumano</h1>
-        <p>Admin Panel</p>
-        <div class="form-group">
-            <label for="email">Email</label>
-            <input type="email" id="email" placeholder="Enter your email" aria-label="Email" autocomplete="username">
-        </div>
-        <div class="form-group">
-            <label for="password">Password</label>
-            <input type="password" id="password" placeholder="Enter your password" aria-label="Password" autocomplete="current-password">
-        </div>
-        <button id="login-btn" class="btn" aria-label="Login">Login</button>
-        <p id="login-error" role="alert">Error logging in. Check email/password.</p>
-        <div class="spinner" id="login-spinner" aria-label="Loading"></div>
-    </div>
-
-    <div id="admin-dashboard">
-        <header class="admin-header">
-            <h1>Dashboard</h1>
-            <button id="logout-btn" class="logout-btn">Logout</button>
-            <a href="index.html" class="company-logo" aria-label="Return to Home Page">
-                <img src="images/logo.png" alt="Cusumano Home Improvements">
-            </a>
-        </header>
-
-        <main class="admin-main">
-            <div class="control-card">
-                <h2>Homepage Slider</h2>
-                <p>Add or remove photos from the main image slider. Changes will appear on the live site instantly.</p>
-                <div class="image-gallery" id="image-gallery-container" aria-live="polite">
-                    <!-- Images from Firebase will be loaded here -->
-                </div>
-                <div class="upload-area" id="upload-area" tabindex="0" aria-label="Image upload area">
-                    <p>Click or drag file to this area to upload</p>
-                    <input type="file" id="image-upload-input" accept="image/jpeg, image/png, image/webp" hidden aria-label="Choose image to upload">
-                    <button id="upload-btn" class="btn" style="width: auto; background: var(--success-color);" aria-label="Choose Image">Choose Image</button>
-                    <div id="preview-container" style="margin:1rem 0;"></div>
-                    <progress id="upload-progress" value="0" max="100"></progress>
-                    <div class="spinner" id="upload-spinner" aria-label="Uploading"></div>
-                </div>
+    <header class="admin-header">
+        <h1>Cusumano Home Improvements - Admin Panel</h1>
+        <a href="index.html" class="btn-primary">View Site</a>
+    </header>
+    
+    <div class="admin-container">
+        <div class="admin-panel">
+            <nav class="admin-nav">
+                <ul>
+                    <li><a href="#" class="active">Dashboard</a></li>
+                    <li><a href="#">Inquiries</a></li>
+                    <li><a href="#">Portfolio</a></li>
+                    <li><a href="#">Services</a></li>
+                    <li><a href="#">Settings</a></li>
+                </ul>
+            </nav>
+            
+            <div class="admin-content">
+                <section class="admin-section">
+                    <h2>Recent Inquiries</h2>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Phone</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>June 7, 2025</td>
+                                <td>John Smith</td>
+                                <td>john@example.com</td>
+                                <td>(555) 123-4567</td>
+                                <td>New</td>
+                                <td class="action-buttons">
+                                    <button class="btn-view">View</button>
+                                    <button class="btn-edit">Respond</button>
+                                    <button class="btn-delete">Delete</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>June 5, 2025</td>
+                                <td>Sarah Johnson</td>
+                                <td>sarah@example.com</td>
+                                <td>(555) 987-6543</td>
+                                <td>Responded</td>
+                                <td class="action-buttons">
+                                    <button class="btn-view">View</button>
+                                    <button class="btn-edit">Respond</button>
+                                    <button class="btn-delete">Delete</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </section>
+                
+                <section class="admin-section">
+                    <h2>Website Analytics</h2>
+                    <div class="form-panel">
+                        <p>Analytics data will be displayed here.</p>
+                        <p><strong>Page Views (Last 7 Days):</strong> 324</p>
+                        <p><strong>Inquiries (Last 7 Days):</strong> 8</p>
+                        <p><strong>Most Viewed Service:</strong> Siding Installation</p>
+                    </div>
+                </section>
+                
+                <section class="admin-section">
+                    <h2>Quick Actions</h2>
+                    <div class="form-panel">
+                        <button class="btn-primary">Add New Portfolio Item</button>
+                        <button class="btn-primary">Update Service Pricing</button>
+                        <button class="btn-primary">Edit Contact Information</button>
+                    </div>
+                </section>
             </div>
-
-            <!-- Facebook Social Section Controls -->
-            <div class="control-card" style="margin-top: 2rem;">
-                <h2>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="#4267B2" style="margin-right: 10px;">
-                        <path d="M18.77 7.46H14.5v-1.9c0-.9.6-1.1 1-1.1h3V.5h-4.33C10.24.5 9.5 3.44 9.5 5.32v2.15h-3v4h3v12h5v-12h3.85l.42-4z"/>
-                    </svg>
-                    Facebook Feed
-                </h2>
-                <p>Control the visibility of your Facebook feed section on the homepage.</p>
-                
-                <div class="settings-group">
-                    <div class="setting-item">
-                        <label class="toggle-switch">
-                            <input type="checkbox" id="facebook-visibility-toggle" checked>
-                            <span class="toggle-slider"></span>
-                        </label>
-                        <div class="setting-label">
-                            <h3>Show Facebook Feed</h3>
-                            <p>Toggle to show or hide the Facebook feed section on your homepage.</p>
-                        </div>
-                    </div>
-                    
-                    <div class="form-group" style="margin-top: 1.5rem;">
-                        <label for="facebook-url">Facebook Page URL</label>
-                        <input type="text" id="facebook-url" class="field-element" value="https://www.facebook.com/cusumanocement/" placeholder="https://www.facebook.com/yourpage">
-                        <p class="field-help">Enter the URL to your Facebook page.</p>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="facebook-heading">Section Heading</label>
-                        <input type="text" id="facebook-heading" class="field-element" value="Connect With Us" placeholder="Connect With Us">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="facebook-text">Description Text</label>
-                        <textarea id="facebook-text" class="field-element" rows="3" placeholder="Follow our Facebook page to see our latest work...">Follow our Facebook page to see our most recent work, special offers, and home improvement tips. We regularly post photos of completed projects to showcase our quality workmanship.</textarea>
-                    </div>
-                    
-                    <button id="save-facebook-settings" class="btn" style="width: auto; margin-top: 1rem;">Save Facebook Settings</button>
-                    <div class="spinner" id="facebook-spinner" aria-label="Saving" style="display: none;"></div>
-                    <div id="facebook-save-status" class="save-status"></div>
-                </div>
-            </div>
-
-            <!-- Website Visual Editor -->
-            <div class="control-card" style="margin-top: 2rem;">
-                <h2>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 10px;">
-                        <path d="M12 19l7-7 3 3-7 7-3-3z"></path>
-                        <path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"></path>
-                        <path d="M2 2l7.586 7.586"></path>
-                        <circle cx="11" cy="11" r="2"></circle>
-                    </svg>
-                    Website Visual Editor
-                </h2>
-                <p>Customize sections of your website easily. Changes will be applied immediately.</p>
-                
-                <!-- Section Navigation -->
-                <div class="section-tabs">
-                    <button class="section-tab active" data-section="hero">Hero Section</button>
-                    <button class="section-tab" data-section="branding">Branding</button>
-                    <button class="section-tab" data-section="about">About Section</button>
-                    <button class="section-tab" data-section="services">Services Section</button>
-                    <button class="section-tab" data-section="contact">Contact Section</button>
-                    <button class="section-tab" data-section="footer">Footer Section</button>
-                </div>
-                
-                <!-- Section Editor Containers -->
-                <div class="section-editor-container">
-                    <!-- Hero Section Editor -->
-                    <div class="section-editor active" data-section="hero">
-                        <h3>Hero Section</h3>
-                        <div class="form-group">
-                            <label for="hero-heading">Main Heading</label>
-                            <input type="text" id="hero-heading" class="field-element" placeholder="e.g., Transform Your Space">
-                        </div>
-                        <div class="form-group">
-                            <label for="hero-subheading">Sub Heading</label>
-                            <input type="text" id="hero-subheading" class="field-element" placeholder="e.g., Quality construction and home improvement services...">
-                        </div>
-                        <div class="form-group">
-                            <label for="hero-button-text">Button Text</label>
-                            <input type="text" id="hero-button-text" class="field-element" placeholder="e.g., Call For a Free Quote">
-                        </div>
-                        <div class="form-group">
-                            <label for="hero-button-link">Button Link</label>
-                            <input type="text" id="hero-button-link" class="field-element" placeholder="e.g., tel:7347778158">
-                        </div>
-                        <div class="preview-container">
-                            <h4>Preview</h4>
-                            <div class="section-preview" id="hero-preview">
-                                <!-- Hero preview will be shown here -->
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Branding Section Editor -->
-                    <div class="section-editor" data-section="branding">
-                        <h3>Branding</h3>
-                        <div class="form-group">
-                            <label for="brand-logo">Logo Upload</label>
-                            <div class="upload-area" id="logo-upload-area" tabindex="0" aria-label="Logo upload area">
-                                <p>Click or drag file to this area to upload your logo</p>
-                                <input type="file" id="brand-logo" accept="image/jpeg, image/png, image/webp" hidden aria-label="Choose logo image">
-                                <button id="logo-upload-btn" class="btn" style="width: auto; background: var(--success-color);" aria-label="Choose Logo">Choose Logo</button>
-                                <div id="logo-preview-container" style="margin:1rem 0;"></div>
-                                <progress id="logo-upload-progress" value="0" max="100"></progress>
-                                <div class="spinner" id="logo-upload-spinner" aria-label="Uploading"></div>
-                            </div>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="brand-favicon">Favicon Upload</label>
-                            <div class="upload-area" id="favicon-upload-area" tabindex="0" aria-label="Favicon upload area">
-                                <p>Click or drag file to this area to upload your favicon</p>
-                                <input type="file" id="brand-favicon" accept="image/x-icon, image/png" hidden aria-label="Choose favicon image">
-                                <button id="favicon-upload-btn" class="btn" style="width: auto; background: var(--success-color);" aria-label="Choose Favicon">Choose Favicon</button>
-                                <div id="favicon-preview-container" style="margin:1rem 0;"></div>
-                                <progress id="favicon-upload-progress" value="0" max="100"></progress>
-                                <div class="spinner" id="favicon-upload-spinner" aria-label="Uploading"></div>
-                            </div>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="brand-colors">Brand Colors</label>
-                            <input type="text" id="brand-colors" class="field-element" placeholder="e.g., #0a4d68, #088395, #f5a623">
-                            <p class="field-help">Enter your brand colors as HEX codes, separated by commas.</p>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="brand-fonts">Brand Fonts</label>
-                            <input type="text" id="brand-fonts" class="field-element" placeholder="e.g., Poppins, Roboto">
-                            <p class="field-help">Enter your brand fonts, separated by commas.</p>
-                        </div>
-                        
-                        <div class="preview-container">
-                            <h4>Preview</h4>
-                            <div class="section-preview" id="branding-preview">
-                                <!-- Branding preview will be shown here -->
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- About Section Editor -->
-                    <div class="section-editor" data-section="about">
-                        <h3>About Section</h3>
-                        <div class="form-group">
-                            <label for="about-heading">Section Heading</label>
-                            <input type="text" id="about-heading" class="field-element" placeholder="e.g., About Our Company">
-                        </div>
-                        <div class="form-group">
-                            <label for="about-content">Content</label>
-                            <textarea id="about-content" class="field-element" rows="5" placeholder="Enter about section content..."></textarea>
-                        </div>
-                        <div class="preview-container">
-                            <h4>Preview</h4>
-                            <div class="section-preview" id="about-preview">
-                                <!-- About preview will be shown here -->
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Services Section Editor -->
-                    <div class="section-editor" data-section="services">
-                        <h3>Services Section</h3>
-                        <div class="form-group">
-                            <label for="services-heading">Section Heading</label>
-                            <input type="text" id="services-heading" class="field-element" placeholder="e.g., Our Services">
-                        </div>
-                        
-                        <div class="services-container">
-                            <!-- Service items will be loaded here -->
-                        </div>
-                        
-                        <button id="add-service-btn" class="btn" style="width: auto; margin-top: 1rem; background: var(--success-color);">Add New Service</button>
-                        
-                        <div class="preview-container">
-                            <h4>Preview</h4>
-                            <div class="section-preview" id="services-preview">
-                                <!-- Services preview will be shown here -->
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Contact Section Editor -->
-                    <div class="section-editor" data-section="contact">
-                        <h3>Contact Section</h3>
-                        <div class="form-group">
-                            <label for="contact-heading">Section Heading</label>
-                            <input type="text" id="contact-heading" class="field-element" placeholder="e.g., Ready to Start Your Project?">
-                        </div>
-                        <div class="form-group">
-                            <label for="contact-subtext">Descriptive Text</label>
-                            <textarea id="contact-subtext" class="field-element" rows="3" placeholder="Enter contact section description..."></textarea>
-                        </div>
-                        <div class="form-group">
-                            <label for="contact-email">Contact Email</label>
-                            <input type="email" id="contact-email" class="field-element" placeholder="e.g., copernan@yahoo.com">
-                        </div>
-                        <div class="form-group">
-                            <label for="contact-phone">Contact Phone</label>
-                            <input type="text" id="contact-phone" class="field-element" placeholder="e.g., (734) 777-8158">
-                        </div>
-                        <div class="preview-container">
-                            <h4>Preview</h4>
-                            <div class="section-preview" id="contact-preview">
-                                <!-- Contact preview will be shown here -->
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Footer Section Editor -->
-                    <div class="section-editor" data-section="footer">
-                        <h3>Footer Section</h3>
-                        <div class="form-group">
-                            <label for="footer-text">Footer Text</label>
-                            <input type="text" id="footer-text" class="field-element" placeholder="e.g., © 2025 Cusumano Home Improvements. All Rights Reserved.">
-                        </div>
-                        <div class="preview-container">
-                            <h4>Preview</h4>
-                            <div class="section-preview" id="footer-preview">
-                                <!-- Footer preview will be shown here -->
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <button id="save-site-settings" class="btn" style="margin-top: 2rem;">Save Website Changes</button>
-                <div class="spinner" id="site-spinner" aria-label="Saving" style="display: none;"></div>
-                <div id="site-save-status" class="save-status"></div>
-            </div>
-        </main>
-        
-        <div class="site-return-float">
-            <a href="index.html" title="Return to Main Site">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
-            </a>
         </div>
     </div>
-    <div class="toast" id="toast" role="status" aria-live="polite"></div>
-
-    <script type="module">
-        // --- Firebase Imports ---
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-auth.js";
-        import { getFirestore, collection, addDoc, deleteDoc, doc, onSnapshot, getDocs, updateDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-firestore.js";
-        import { getStorage, ref, uploadBytesResumable, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-storage.js";
-
-        // --- Your Firebase Configuration ---
-        const firebaseConfig = {
-            apiKey: "AIzaSyBVtq6dAEuybJNmTTv8dXBxTVUgw1t0ZMk",
-            authDomain: "cusumano-website.firebaseapp.com",
-            projectId: "cusumano-website",
-            storageBucket: "cusumano-website.firebasestorage.app",
-            messagingSenderId: "20051552210",
-            appId: "1:20051552210:web:7eb3b22baa3fec184e4a0b"
-        };
-        // ----------------------------------------------------
-
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-        const storage = getStorage(app);
-
-        const loginScreen = document.getElementById('login-screen');
-        const adminDashboard = document.getElementById('admin-dashboard');
-        const loginBtn = document.getElementById('login-btn');
-        const logoutBtn = document.getElementById('logout-btn');
-        const loginError = document.getElementById('login-error');
-        const galleryContainer = document.getElementById('image-gallery-container');
-        const imageUploadInput = document.getElementById('image-upload-input');
-        const uploadBtn = document.getElementById('upload-btn');
-        const uploadProgress = document.getElementById('upload-progress');
-        const loginSpinner = document.getElementById('login-spinner');
-        const uploadSpinner = document.getElementById('upload-spinner');
-        const toastContainer = document.getElementById('toast');
-        const previewContainer = document.getElementById('preview-container');
-        const uploadArea = document.getElementById('upload-area');
-
-        // --- Accessibility: Focus error on login fail ---
-        function showLoginError(message) {
-            loginError.textContent = message;
-            loginError.style.display = 'block';
-            loginError.setAttribute('tabindex', '-1');
-            loginError.focus && loginError.focus();
-        }
-        function hideLoginError() {
-            loginError.style.display = 'none';
-            loginError.removeAttribute('tabindex');
-        }
-
-        // --- Toast Notification ---
-        function showToast(message, type = 'success') {
-            toastContainer.textContent = message;
-            toastContainer.className = `toast show ${type}`;
-            toastContainer.setAttribute('aria-live', type === 'error' ? 'assertive' : 'polite');
-            setTimeout(() => {
-                toastContainer.classList.remove('show');
-            }, 3000);
-        }
-
-        // --- Loading Spinner ---
-        function showSpinner(spinner) { spinner.style.display = 'block'; }
-        function hideSpinner(spinner) { spinner.style.display = 'none'; }
-
-        // --- Image Preview Before Upload ---
-        function showImagePreview(file) {
-            previewContainer.innerHTML = '';
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const img = document.createElement('img');
-                img.src = e.target.result;
-                img.alt = 'Preview of image to upload';
-                img.style.maxWidth = '180px';
-                img.style.maxHeight = '120px';
-                img.style.borderRadius = '8px';
-                img.setAttribute('aria-label', 'Image preview');
-                previewContainer.appendChild(img);
-            };
-            reader.readAsDataURL(file);
-        }
-
-        // --- Drag & Drop Upload ---
-        uploadArea.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            uploadArea.classList.add('dragover');
-        });
-        uploadArea.addEventListener('dragleave', (e) => {
-            e.preventDefault();
-            uploadArea.classList.remove('dragover');
-        });
-        uploadArea.addEventListener('drop', (e) => {
-            e.preventDefault();
-            uploadArea.classList.remove('dragover');
-            const file = e.dataTransfer.files[0];
-            if (file) {
-                imageUploadInput.files = e.dataTransfer.files;
-                showImagePreview(file);
-                imageUploadInput.dispatchEvent(new Event('change'));
-            }
-        });
-        // --- Accessibility: Keyboard for upload area ---
-        uploadArea.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' || e.key === ' ') {
-                imageUploadInput.click();
-            }
-        });
-
-        // --- Auth State ---
-        onAuthStateChanged(auth, user => {
-            if (user) {
-                loginScreen.style.display = 'none';
-                adminDashboard.style.display = 'flex';
-                setupImageListener();
-            } else {
-                adminDashboard.style.display = 'none';
-                loginScreen.style.display = 'block';
-            }
-        });
-
-        // --- Login ---
-        loginBtn.addEventListener('click', () => {
-            const email = document.getElementById('email').value;
-            const pass = document.getElementById('password').value;
-            hideLoginError();
-            showSpinner(loginSpinner);
-            loginBtn.disabled = true;
-            signInWithEmailAndPassword(auth, email, pass)
-                .then(() => {
-                    hideSpinner(loginSpinner);
-                    loginBtn.disabled = false;
-                })
-                .catch(err => {
-                    hideSpinner(loginSpinner);
-                    loginBtn.disabled = false;
-                    let msg = 'Error logging in. Check email/password.';
-                    if (err.code === 'auth/user-not-found') msg = 'No user found with this email.';
-                    if (err.code === 'auth/wrong-password') msg = 'Incorrect password.';
-                    if (err.code === 'auth/invalid-email') msg = 'Invalid email address.';
-                    showLoginError(msg);
-                });
-        });
-
-        // --- Logout ---
-        logoutBtn.addEventListener('click', () => signOut(auth));
-        uploadBtn.addEventListener('click', () => imageUploadInput.click());
-
-        // --- Image Gallery Listener ---
-        function setupImageListener() {
-            showSpinner(uploadSpinner);
-            const imagesCol = collection(db, 'sliderImages');
-            onSnapshot(imagesCol, (snapshot) => {
-                galleryContainer.innerHTML = '';
-                if (snapshot.empty) {
-                    galleryContainer.innerHTML = '<div style="text-align:center;color:var(--medium-gray);font-size:1.1rem;">No images yet. Use the upload area below to add your first slider image.</div>';
-                }
-                
-                // Sort images by order property if it exists
-                const sortedDocs = snapshot.docs.slice().sort((a, b) => {
-                    const orderA = a.data().order || 999; // Default high value for unordered items
-                    const orderB = b.data().order || 999;
-                    return orderA - orderB;
-                });
-                
-                sortedDocs.forEach((doc, index) => {
-                    const imgData = doc.data();
-                    const card = document.createElement('div');
-                    card.className = 'img-card';
-                    card.innerHTML = `<img src="${imgData.url}" alt="Slider Image" loading="lazy">
-                    <button class="delete-btn" data-id="${doc.id}" data-path="${imgData.path}" aria-label="Delete image">&times;</button>
-                    <div class="order-controls" aria-label="Image order controls">
-                        <button class="order-btn" data-id="${doc.id}" data-action="up" aria-label="Move image up">&#9650;</button>
-                        <button class="order-btn" data-id="${doc.id}" data-action="down" aria-label="Move image down">&#9660;</button>
-                    </div>
-                    <div class="order-number" aria-label="Image order number">${index + 1}</div>`;
-                    galleryContainer.appendChild(card);
-                });
-                hideSpinner(uploadSpinner);
-            });
-        }
-        
-        // --- Handle Image Order Controls ---
-        galleryContainer.addEventListener('click', async (e) => {
-            if (e.target.classList.contains('delete-btn')) {
-                // Delete functionality remains unchanged
-                const docId = e.target.dataset.id;
-                const storagePath = e.target.dataset.path;
-                if(confirm('Are you sure you want to delete this image?')){
-                    showSpinner(uploadSpinner);
-                    try {
-                        await deleteDoc(doc(db, 'sliderImages', docId));
-                        const storageRef = ref(storage, storagePath);
-                        await deleteObject(storageRef);
-                        showToast('Image deleted successfully!', 'success');
-                    } catch (error) {
-                        console.error("Error deleting image:", error);
-                        showToast('Could not delete image. See console for details.', 'error');
-                    }
-                    hideSpinner(uploadSpinner);
-                }
-            }
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add admin panel functionality here
+            const navLinks = document.querySelectorAll('.admin-nav a');
             
-            // Handle order buttons
-            if (e.target.classList.contains('order-btn')) {
-                const docId = e.target.dataset.id;
-                const action = e.target.dataset.action;
-                updateImageOrder(docId, action);
-            }
-        });
-        
-        // --- Update Image Order ---
-        async function updateImageOrder(docId, action) {
-            showSpinner(uploadSpinner);
-            try {
-                // Get all current images
-                const imagesCollection = collection(db, 'sliderImages');
-                const snapshot = await getDocs(imagesCollection);
-                if (snapshot.empty) return;
-                
-                // Sort by current order
-                let images = snapshot.docs.map(doc => ({
-                    id: doc.id,
-                    ...doc.data(),
-                    order: doc.data().order || 999
-                }));
-                
-                images.sort((a, b) => a.order - b.order);
-                
-                // Find the image we want to move
-                const currentIndex = images.findIndex(img => img.id === docId);
-                if (currentIndex === -1) return;
-                
-                // Determine new index based on action
-                let newIndex;
-                if (action === 'up' && currentIndex > 0) {
-                    newIndex = currentIndex - 1;
-                } else if (action === 'down' && currentIndex < images.length - 1) {
-                    newIndex = currentIndex + 1;
-                } else {
-                    hideSpinner(uploadSpinner);
-                    return; // Can't move further
-                }
-                
-                // Swap the orders
-                const temp = images[newIndex].order;
-                
-                // Update document at currentIndex
-                await updateDoc(doc(db, 'sliderImages', images[currentIndex].id), {
-                    order: temp
-                });
-                
-                // Update document at newIndex
-                await updateDoc(doc(db, 'sliderImages', images[newIndex].id), {
-                    order: images[currentIndex].order
-                });
-                
-                showToast('Image order updated!', 'success');
-            } catch (error) {
-                console.error("Error updating image order:", error);
-                showToast('Could not update image order. See console for details.', 'error');
-            }
-            hideSpinner(uploadSpinner);
-        }
-        
-        // --- Add Order Property on New Image Upload ---
-        imageUploadInput.addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            showImagePreview(file);
-            if (!file) return;
-            if (!['image/jpeg','image/png','image/webp'].includes(file.type)) {
-                showToast('Only JPG, PNG, or WEBP images allowed.', 'error');
-                imageUploadInput.value = '';
-                previewContainer.innerHTML = '';
-                return;
-            }
-            if (file.size > 5 * 1024 * 1024) {
-                showToast('Image must be under 5MB.', 'error');
-                imageUploadInput.value = '';
-                previewContainer.innerHTML = '';
-                return;
-            }
-            uploadBtn.disabled = true;
-            showSpinner(uploadSpinner);
-            const storagePath = `sliderImages/${Date.now()}_${file.name}`;
-            const storageRef = ref(storage, storagePath);
-            const uploadTask = uploadBytesResumable(storageRef, file);
-            uploadTask.on('state_changed',
-                (snapshot) => {
-                    const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-                    uploadProgress.style.display = 'block';
-                    uploadProgress.value = progress;
-                },
-                (error) => {
-                    hideSpinner(uploadSpinner);
-                    uploadBtn.disabled = false;
-                    showToast('Upload failed. See console for details.', 'error');
-                    console.error("Upload failed", error);
-                },
-                async () => {
-                    try {
-                        // Get the current highest order number
-                        const imagesCollection = collection(db, 'sliderImages');
-                        const snapshot = await getDocs(imagesCollection);
-                        let maxOrder = 0;
-                        
-                        if (!snapshot.empty) {
-                            snapshot.docs.forEach(doc => {
-                                const order = doc.data().order || 0;
-                                maxOrder = Math.max(maxOrder, order);
-                            });
-                        }
-                        
-                        // Add new image with the next order number
-                        const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
-                        await addDoc(collection(db, 'sliderImages'), {
-                            url: downloadURL,
-                            path: storagePath,
-                            order: maxOrder + 1, // Set order to be next in sequence
-                            createdAt: new Date()
-                        });
-                        
-                        uploadProgress.style.display = 'none';
-                        imageUploadInput.value = '';
-                        previewContainer.innerHTML = '';
-                        hideSpinner(uploadSpinner);
-                        uploadBtn.disabled = false;
-                        showToast('Image uploaded successfully!', 'success');
-                    } catch (error) {
-                        console.error("Error adding document:", error);
-                        hideSpinner(uploadSpinner);
-                        uploadBtn.disabled = false;
-                        showToast('Upload failed. See console for details.', 'error');
-                    }
-                }
-            );
-        });
-
-        // --- Facebook Settings Controls ---
-        const fbVisibilityToggle = document.getElementById('facebook-visibility-toggle');
-        const fbUrlInput = document.getElementById('facebook-url');
-        const fbHeadingInput = document.getElementById('facebook-heading');
-        const fbTextInput = document.getElementById('facebook-text');
-        const fbSaveBtn = document.getElementById('save-facebook-settings');
-        const fbSpinner = document.getElementById('facebook-spinner');
-        const fbSaveStatus = document.getElementById('facebook-save-status');
-
-        // Load Facebook settings when admin page loads
-        async function loadFacebookSettings() {
-            try {
-                const settingsDoc = await getDocs(collection(db, 'settings'));
-                let fbSettings = null;
-                
-                // Look for Facebook settings document
-                settingsDoc.forEach(doc => {
-                    if (doc.id === 'facebook') {
-                        fbSettings = doc.data();
-                    }
-                });
-                
-                // If we found settings, fill the form fields
-                if (fbSettings) {
-                    fbVisibilityToggle.checked = fbSettings.visible !== false; // Default to true if not set
-                    fbUrlInput.value = fbSettings.url || 'https://www.facebook.com/cusumanocement/';
-                    fbHeadingInput.value = fbSettings.heading || 'Connect With Us';
-                    fbTextInput.value = fbSettings.text || 'Follow our Facebook page to see our most recent work, special offers, and home improvement tips. We regularly post photos of completed projects to showcase our quality workmanship.';
-                }
-            } catch (error) {
-                console.error("Error loading Facebook settings:", error);
-                showToast('Could not load Facebook settings', 'error');
-            }
-        }
-
-        // Save Facebook settings
-        fbSaveBtn.addEventListener('click', async () => {
-            showSpinner(fbSpinner);
-            fbSaveStatus.innerHTML = '';
-            
-            try {
-                // Get current settings to check if document exists
-                const settingsCollection = collection(db, 'settings');
-                const snapshot = await getDocs(settingsCollection);
-                let fbDocId = null;
-                
-                snapshot.forEach(doc => {
-                    if (doc.id === 'facebook') {
-                        fbDocId = doc.id;
-                    }
-                });
-                
-                // Prepare data to save
-                const fbData = {
-                    visible: fbVisibilityToggle.checked,
-                    url: fbUrlInput.value,
-                    heading: fbHeadingInput.value,
-                    text: fbTextInput.value,
-                    updatedAt: new Date()
-                };
-                
-                // Update or create settings document
-                if (fbDocId) {
-                    // Update existing document
-                    await updateDoc(doc(db, 'settings', 'facebook'), fbData);
-                } else {
-                    // Create new document with custom ID
-                    await setDoc(doc(db, 'settings', 'facebook'), fbData);
-                }
-                
-                fbSaveStatus.innerHTML = '<div style="color: #2a9d8f; margin-top: 10px;">✓ Settings saved successfully</div>';
-                showToast('Facebook settings saved!', 'success');
-            } catch (error) {
-                console.error("Error saving Facebook settings:", error);
-                fbSaveStatus.innerHTML = '<div style="color: #e63946; margin-top: 10px;">✕ Error saving settings</div>';
-                showToast('Could not save Facebook settings', 'error');
-            }
-            
-            hideSpinner(fbSpinner);
-        });
-        
-        // Initialize function to load settings when user is authenticated
-        onAuthStateChanged(auth, user => {
-            if (user) {
-                loadFacebookSettings();
-                // Load visual editor settings
-                loadVisualEditorSettings();
-                initializeVisualEditor();
-            }
-        });
-        
-        // --- Security Reminder ---
-        // IMPORTANT: Restrict Firebase Storage/Firestore rules to authenticated admins only in the Firebase Console!
-        // Do NOT expose sensitive admin features to the public.
-
-        // --- Website Visual Editor ---
-        const sectionTabs = document.querySelectorAll('.section-tab');
-        const sectionEditors = document.querySelectorAll('.section-editor');
-        const saveSiteBtn = document.getElementById('save-site-settings');
-        const siteSpinner = document.getElementById('site-spinner');
-        const siteSaveStatus = document.getElementById('site-save-status');
-        const addServiceBtn = document.getElementById('add-service-btn');
-        const servicesContainer = document.querySelector('.services-container');
-        
-        // Service icons library for selection
-        const serviceIcons = [
-            '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>',
-            '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>',
-            '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>',
-            '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"></path>',
-            '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>',
-            '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>',
-            '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"></path>',
-            '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"></path>',
-            '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"></path>',
-            '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"></path>',
-            '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>'
-        ];
-        
-        // Set up tab navigation in visual editor
-        sectionTabs.forEach(tab => {
-            tab.addEventListener('click', () => {
-                // Remove active class from all tabs and editors
-                sectionTabs.forEach(t => t.classList.remove('active'));
-                sectionEditors.forEach(e => e.classList.remove('active'));
-                
-                // Add active class to clicked tab and corresponding editor
-                tab.classList.add('active');
-                const sectionName = tab.dataset.section;
-                document.querySelector(`.section-editor[data-section="${sectionName}"]`).classList.add('active');
-                
-                // Update preview for the active section
-                updateSectionPreview(sectionName);
-            });
-        });
-        
-        // Initialize visual editor with event listeners
-        function initializeVisualEditor() {
-            // Add service button click handler
-            addServiceBtn.addEventListener('click', () => addNewService());
-            
-            // Set up input change listeners for previews
-            setupPreviewListeners();
-            
-            // Save button click handler
-            saveSiteBtn.addEventListener('click', saveVisualEditorSettings);
-        }
-        
-        // Set up input change listeners for live previews
-        function setupPreviewListeners() {
-            // Hero section listeners
-            document.getElementById('hero-heading').addEventListener('input', () => updateSectionPreview('hero'));
-            document.getElementById('hero-subheading').addEventListener('input', () => updateSectionPreview('hero'));
-            document.getElementById('hero-button-text').addEventListener('input', () => updateSectionPreview('hero'));
-            document.getElementById('hero-button-link').addEventListener('input', () => updateSectionPreview('hero'));
-            
-            // Branding section listeners
-            document.getElementById('brand-logo').addEventListener('change', () => updateSectionPreview('branding'));
-            document.getElementById('brand-favicon').addEventListener('change', () => updateSectionPreview('branding'));
-            document.getElementById('brand-colors').addEventListener('input', () => updateSectionPreview('branding'));
-            document.getElementById('brand-fonts').addEventListener('input', () => updateSectionPreview('branding'));
-            
-            // About section listeners
-            document.getElementById('about-heading').addEventListener('input', () => updateSectionPreview('about'));
-            document.getElementById('about-content').addEventListener('input', () => updateSectionPreview('about'));
-            
-            // Services section listeners
-            document.getElementById('services-heading').addEventListener('input', () => updateSectionPreview('services'));
-            
-            // Contact section listeners
-            document.getElementById('contact-heading').addEventListener('input', () => updateSectionPreview('contact'));
-            document.getElementById('contact-subtext').addEventListener('input', () => updateSectionPreview('contact'));
-            document.getElementById('contact-email').addEventListener('input', () => updateSectionPreview('contact'));
-            document.getElementById('contact-phone').addEventListener('input', () => updateSectionPreview('contact'));
-            
-            // Footer section listeners
-            document.getElementById('footer-text').addEventListener('input', () => updateSectionPreview('footer'));
-        }
-        
-        // Load visual editor settings from Firebase
-        async function loadVisualEditorSettings() {
-            try {
-                const settingsCollection = collection(db, 'settings');
-                const snapshot = await getDocs(settingsCollection);
-                
-                // Process each section's settings
-                snapshot.forEach(doc => {
-                    switch(doc.id) {
-                        case 'hero':
-                            populateHeroSettings(doc.data());
-                            break;
-                        case 'branding':
-                            populateBrandingSettings(doc.data());
-                            break;
-                        case 'about':
-                            populateAboutSettings(doc.data());
-                            break;
-                        case 'services':
-                            populateServicesSettings(doc.data());
-                            break;
-                        case 'contact':
-                            populateContactSettings(doc.data());
-                            break;
-                        case 'footer':
-                            populateFooterSettings(doc.data());
-                            break;
-                    }
-                });
-                
-                // Update all previews after loading data
-                updateAllPreviews();
-                
-            } catch (error) {
-                console.error("Error loading visual editor settings:", error);
-                showToast('Could not load website settings', 'error');
-            }
-        }
-        
-        // Populate hero section settings
-        function populateHeroSettings(data) {
-            if (!data) return;
-            
-            document.getElementById('hero-heading').value = data.heading || 'Transform Your Space';
-            document.getElementById('hero-subheading').value = data.subheading || 'Quality construction and home improvement services in Monroe, MI';
-            document.getElementById('hero-button-text').value = data.buttonText || 'Call For a Free Quote';
-            document.getElementById('hero-button-link').value = data.buttonLink || 'tel:7347778158';
-        }
-        
-        // Populate branding section settings
-        function populateBrandingSettings(data) {
-            if (!data) return;
-            
-            // Logo
-            const logoInput = document.getElementById('brand-logo');
-            const logoPreview = document.getElementById('logo-preview-container');
-            logoInput.value = ''; // Clear previous value
-            logoPreview.innerHTML = ''; // Clear previous preview
-            
-            if (data.logo) {
-                const logoImg = document.createElement('img');
-                logoImg.src = data.logo;
-                logoImg.alt = 'Brand Logo';
-                logoImg.style.maxWidth = '180px';
-                logoImg.style.borderRadius = '8px';
-                logoPreview.appendChild(logoImg);
-            }
-            
-            // Favicon
-            const faviconInput = document.getElementById('brand-favicon');
-            const faviconPreview = document.getElementById('favicon-preview-container');
-            faviconInput.value = ''; // Clear previous value
-            faviconPreview.innerHTML = ''; // Clear previous preview
-            
-            if (data.favicon) {
-                const faviconImg = document.createElement('img');
-                faviconImg.src = data.favicon;
-                faviconImg.alt = 'Brand Favicon';
-                faviconImg.style.width = '32px';
-                faviconImg.style.height = '32px';
-                faviconImg.style.borderRadius = '4px';
-                faviconPreview.appendChild(faviconImg);
-            }
-            
-            document.getElementById('brand-colors').value = data.colors ? data.colors.join(', ') : '';
-            document.getElementById('brand-fonts').value = data.fonts ? data.fonts.join(', ') : '';
-        }
-        
-        // Populate about section settings
-        function populateAboutSettings(data) {
-            if (!data) return;
-            
-            document.getElementById('about-heading').value = data.heading || 'About Our Company';
-            document.getElementById('about-content').value = data.content || 'For over 20 years, Cusumano Home Improvements has been a family-owned and operated business proudly serving the Monroe, MI area. We are dedicated to delivering the highest quality of work, specializing in residential construction and convenient dumpster rentals. Our commitment is to our craft and, most importantly, to our customers\' satisfaction.';
-        }
-        
-        // Populate services section settings
-        function populateServicesSettings(data) {
-            if (!data) return;
-            
-            document.getElementById('services-heading').value = data.heading || 'Our Services';
-            
-            // Clear existing services
-            servicesContainer.innerHTML = '';
-            
-            // Add services from data
-            if (data.services && Array.isArray(data.services)) {
-                data.services.forEach((service, index) => {
-                    addServiceItem(service, index);
-                });
-            }
-        }
-        
-        // Populate contact section settings
-        function populateContactSettings(data) {
-            if (!data) return;
-            
-            document.getElementById('contact-heading').value = data.heading || 'Ready to Start Your Project?';
-            document.getElementById('contact-subtext').value = data.subtext || 'Contact us today for a free, no-obligation quote. We\'re ready to help bring your vision to life.';
-            document.getElementById('contact-email').value = data.email || 'copernan@yahoo.com';
-            document.getElementById('contact-phone').value = data.phone || '(734) 777-8158';
-        }
-        
-        // Populate footer section settings
-        function populateFooterSettings(data) {
-            if (!data) return;
-            
-            document.getElementById('footer-text').value = data.text || '© 2025 Cusumano Home Improvements. All Rights Reserved.';
-        }
-        
-        // Update section preview based on form inputs
-        function updateSectionPreview(sectionName) {
-            const previewElement = document.getElementById(`${sectionName}-preview`);
-            
-            switch(sectionName) {
-                case 'hero':
-                    const heroHeading = document.getElementById('hero-heading').value || 'Transform Your Space';
-                    const heroSubheading = document.getElementById('hero-subheading').value || 'Quality construction and home improvement services in Monroe, MI';
-                    const heroButtonText = document.getElementById('hero-button-text').value || 'Call For a Free Quote';
-                    const heroButtonLink = document.getElementById('hero-button-link').value || 'tel:7347778158';
+            navLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
                     
-                    previewElement.innerHTML = `
-                        <div style="background: linear-gradient(120deg, #0a4d68 60%, #088395 100%); color: white; padding: 1.5rem; text-align: center; border-radius: 6px;">
-                            <h2 style="margin: 0; color: white; font-size: 1.5rem;">${heroHeading}</h2>
-                            <p style="margin: 0.5rem 0 1.5rem;">${heroSubheading}</p>
-                            <a href="${heroButtonLink}" style="display: inline-block; background: #f5a623; color: white; padding: 0.6rem 1rem; border-radius: 4px; font-weight: bold; text-decoration: none;">
-                                ${heroButtonText}
-                            </a>
-                        </div>
-                    `;
-                    break;
+                    // Remove active class from all links
+                    navLinks.forEach(link => link.classList.remove('active'));
                     
-                case 'branding':
-                    const logoInput = document.getElementById('brand-logo');
-                    const logoPreview = document.getElementById('logo-preview-container');
-                    const faviconInput = document.getElementById('brand-favicon');
-                    const faviconPreview = document.getElementById('favicon-preview-container');
-                    const colorsInput = document.getElementById('brand-colors');
-                    const fontsInput = document.getElementById('brand-fonts');
+                    // Add active class to clicked link
+                    this.classList.add('active');
                     
-                    // Logo
-                    let logoHTML = '';
-                    if (logoInput.files && logoInput.files[0]) {
-                        const reader = new FileReader();
-                        reader.onload = function(e) {
-                            logoHTML = `<img src="${e.target.result}" alt="Logo Preview" style="max-width: 180px; border-radius: 8px;">`;
-                            logoPreview.innerHTML = logoHTML;
-                        };
-                        reader.readAsDataURL(logoInput.files[0]);
-                    } else {
-                        logoPreview.innerHTML = '';
-                    }
-                    
-                    // Favicon
-                    let faviconHTML = '';
-                    if (faviconInput.files && faviconInput.files[0]) {
-                        const reader = new FileReader();
-                        reader.onload = function(e) {
-                            faviconHTML = `<img src="${e.target.result}" alt="Favicon Preview" style="width: 32px; height: 32px; border-radius: 4px;">`;
-                            faviconPreview.innerHTML = faviconHTML;
-                        };
-                        reader.readAsDataURL(faviconInput.files[0]);
-                    } else {
-                        faviconPreview.innerHTML = '';
-                    }
-                    
-                    // Colors and Fonts
-                    const colors = colorsInput.value.split(',').map(c => c.trim()).filter(c => c);
-                    const fonts = fontsInput.value.split(',').map(f => f.trim()).filter(f => f);
-                    
-                    previewElement.innerHTML = `
-                        <div style="padding: 1rem; border-radius: 6px; background-color: #f1f3f5;">
-                            <h2 style="color: var(--primary-color); margin-top: 0;">Branding Preview</h2>
-                            <div style="margin-bottom: 1rem;">
-                                <strong>Logo:</strong> ${logoHTML || 'No logo uploaded.'}
-                            </div>
-                            <div style="margin-bottom: 1rem;">
-                                <strong>Favicon:</strong> ${faviconHTML || 'No favicon uploaded.'}
-                            </div>
-                            <div style="margin-bottom: 1rem;">
-                                <strong>Colors:</strong> ${colors.length > 0 ? colors.map(c => `<span style="display:inline-block; width: 20px; height: 20px; background-color:${c}; border-radius: 4px; margin-right: 0.5rem;"></span>`).join('') : 'No colors specified.'}
-                            </div>
-                            <div>
-                                <strong>Fonts:</strong> ${fonts.length > 0 ? fonts.join(', ') : 'No fonts specified.'}
-                            </div>
-                        </div>
-                    `;
-                    break;
-                    
-                case 'about':
-                    const aboutHeading = document.getElementById('about-heading').value || 'About Our Company';
-                    const aboutContent = document.getElementById('about-content').value || 'Content about your company...';
-                    
-                    previewElement.innerHTML = `
-                        <div style="text-align: center;">
-                            <h2 style="color: #0a4d68; margin-top: 0;">${aboutHeading}</h2>
-                            <p style="line-height: 1.6;">${aboutContent}</p>
-                        </div>
-                    `;
-                    break;
-                    
-                case 'services':
-                    updateServicesPreview();
-                    break;
-                    
-                case 'contact':
-                    const contactHeading = document.getElementById('contact-heading').value || 'Ready to Start Your Project?';
-                    const contactSubtext = document.getElementById('contact-subtext').value || 'Contact us today for a free quote.';
-                    const contactEmail = document.getElementById('contact-email').value || 'copernan@yahoo.com';
-                    const contactPhone = document.getElementById('contact-phone').value || '(734) 777-8158';
-                    
-                    previewElement.innerHTML = `
-                        <div style="background: linear-gradient(120deg, #0a4d68 60%, #088395 100%); color: white; padding: 1.5rem; text-align: center; border-radius: 6px;">
-                            <h2 style="margin: 0; color: white; font-size: 1.5rem;">${contactHeading}</h2>
-                            <p style="margin: 0.5rem 0 1rem;">${contactSubtext}</p>
-                            <div style="display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap;">
-                                <a href="mailto:${contactEmail}" style="display: inline-flex; align-items: center; background: #f5a623; color: white; padding: 0.6rem 1rem; border-radius: 4px; font-weight: bold; text-decoration: none;">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;">
-                                        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
-                                        <polyline points="22,6 12,13 2,6"></polyline>
-                                    </svg>
-                                    Email Us
-                                </a>
-                                <a href="tel:${contactPhone.replace(/[^0-9]/g, '')}" style="display: inline-flex; align-items: center; background: #088395; color: white; padding: 0.6rem 1rem; border-radius: 4px; font-weight: bold; text-decoration: none;">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;">
-                                        <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
-                                    </svg>
-                                    Call ${contactPhone}
-                                </a>
-                            </div>
-                        </div>
-                    `;
-                    break;
-                    
-                case 'footer':
-                    const footerText = document.getElementById('footer-text').value || '© 2025 Cusumano Home Improvements. All Rights Reserved.';
-                    
-                    previewElement.innerHTML = `
-                        <div style="background-color: #333333; color: #f9f9f9; text-align: center; padding: 1rem; border-radius: 6px;">
-                            <p style="margin: 0;">${footerText}</p>
-                        </div>
-                    `;
-                    break;
-            }
-        }
-        
-        // Update preview for services section
-        function updateServicesPreview() {
-            const servicesHeading = document.getElementById('services-heading').value || 'Our Services';
-            const previewElement = document.getElementById('services-preview');
-            
-            // Get all service items
-            const serviceItems = document.querySelectorAll('.service-item');
-            
-            // Start with the heading
-            let servicesHTML = `<h2 style="color: #0a4d68; margin-top: 0; text-align: center;">${servicesHeading}</h2>`;
-            
-            // Add the services grid
-            servicesHTML += `<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 1rem;">`;
-            
-            // Add each service card
-            serviceItems.forEach(item => {
-                const titleInput = item.querySelector('[data-field="title"]');
-                const descInput = item.querySelector('[data-field="description"]');
-                const iconIndex = item.querySelector('[data-field="icon"]')?.value || 0;
-                
-                if (titleInput && descInput) {
-                    const title = titleInput.value || 'Service';
-                    const description = descInput.value || 'Service description';
-                    
-                    servicesHTML += `
-                        <div style="background: white; border: 1px solid #e0e0e0; border-radius: 6px; padding: 1rem; text-align: center;">
-                            <div style="color: #088395; margin: 0 auto 1rem; width: 40px; height: 40px;">
-                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                    ${serviceIcons[iconIndex] || serviceIcons[0]}
-                                </svg>
-                            </div>
-                            <h3 style="margin: 0 0 0.5rem; font-size: 1.1rem;">${title}</h3>
-                            <p style="margin: 0; font-size: 0.9rem; line-height: 1.4;">${description.substring(0, 60)}${description.length > 60 ? '...' : ''}</p>
-                        </div>
-                    `;
-                }
-            });
-            
-            // Close the grid
-            servicesHTML += `</div>`;
-            
-            // Update the preview
-            previewElement.innerHTML = servicesHTML;
-        }
-        
-        // Update all previews
-        function updateAllPreviews() {
-            updateSectionPreview('hero');
-            updateSectionPreview('branding');
-            updateSectionPreview('about');
-            updateSectionPreview('services');
-            updateSectionPreview('contact');
-            updateSectionPreview('footer');
-        }
-        
-        // Add a new service item to the services editor
-        function addNewService(data = {}) {
-            const serviceItem = document.createElement('div');
-            serviceItem.className = 'service-item';
-            
-            const serviceId = `service-${Date.now()}`;
-            const iconIndex = data.iconIndex || 0;
-            
-            serviceItem.innerHTML = `
-                <div class="service-item-header">
-                    <div class="service-item-title">${data.title || 'New Service'}</div>
-                    <div class="service-item-controls">
-                        <button type="button" class="service-item-btn up-btn" aria-label="Move service up">▲</button>
-                        <button type="button" class="service-item-btn down-btn" aria-label="Move service down">▼</button>
-                        <button type="button" class="service-item-btn delete-btn" aria-label="Delete service">×</button>
-                    </div>
-                </div>
-                <button type="button" class="service-item-expand" aria-label="Expand service details">Edit Service Details</button>
-                <div class="service-item-content">
-                    <div class="form-group">
-                        <label for="${serviceId}-title">Service Title</label>
-                        <input type="text" id="${serviceId}-title" class="field-element" data-field="title" value="${data.title || 'New Service'}" placeholder="e.g., Roofing">
-                    </div>
-                    <div class="form-group">
-                        <label for="${serviceId}-description">Service Description</label>
-                        <textarea id="${serviceId}-description" class="field-element" data-field="description" rows="3" placeholder="Describe this service...">${data.description || ''}</textarea>
-                    </div>
-                    <div class="form-group">
-                        <label>Service Icon</label>
-                        <div class="icon-selector-header">
-                            <div class="icon-preview">
-                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                    ${serviceIcons[iconIndex]}
-                                </svg>
-                            </div>
-                            <span>Select an icon below:</span>
-                        </div>
-                        <div class="icon-selector">
-                            ${serviceIcons.map((icon, index) => `
-                                <div class="icon-option ${index === iconIndex ? 'selected' : ''}" data-index="${index}">
-                                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                        ${icon}
-                                    </svg>
-                                </div>
-                            `).join('')}
-                        </div>
-                        <input type="hidden" data-field="icon" value="${iconIndex}" />
-                    </div>
-                </div>
-            `;
-            
-            // Add event listeners for service item controls
-            const expandBtn = serviceItem.querySelector('.service-item-expand');
-            const content = serviceItem.querySelector('.service-item-content');
-            const deleteBtn = serviceItem.querySelector('.delete-btn');
-            const upBtn = serviceItem.querySelector('.up-btn');
-            const downBtn = serviceItem.querySelector('.down-btn');
-            const iconOptions = serviceItem.querySelectorAll('.icon-option');
-            const iconPreview = serviceItem.querySelector('.icon-preview');
-            const iconInput = serviceItem.querySelector('[data-field="icon"]');
-            
-            // Toggle expand/collapse
-            expandBtn.addEventListener('click', () => {
-                content.classList.toggle('expanded');
-                expandBtn.textContent = content.classList.contains('expanded') ? 'Hide Service Details' : 'Edit Service Details';
-
-            });
-            
-            // Delete service
-            deleteBtn.addEventListener('click', () => {
-                               if (confirm('Are you sure you want to delete this service?')) {
-                    serviceItem.remove();
-                    updateServicesPreview();
-                }
-            });
-            
-            // Move service up
-            upBtn.addEventListener('click', () => {
-                const prev = serviceItem.previousElementSibling;
-                if (prev) {
-                    servicesContainer.insertBefore(serviceItem, prev);
-                    updateServicesPreview();
-                }
-            });
-            
-            // Move service down
-            downBtn.addEventListener('click', () => {
-                const next = serviceItem.nextElementSibling;
-                if (next) {
-                    servicesContainer.insertBefore(next, serviceItem);
-                    updateServicesPreview();
-                }
-            });
-            
-            // Icon selection
-            iconOptions.forEach(option => {
-                option.addEventListener('click', () => {
-                    const selectedIndex = option.dataset.index;
-                    
-                    // Update hidden input value
-                    iconInput.value = selectedIndex;
-                    
-                    // Update visual selection
-                    iconOptions.forEach(opt => opt.classList.remove('selected'));
-                    option.classList.add('selected');
-                    
-                    // Update preview
-                    iconPreview.innerHTML = `
-                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            ${serviceIcons[selectedIndex]}
-                        </svg>
-                    `;
-                    
-                    updateServicesPreview();
+                    // In a real application, you would load the appropriate content here
+                    alert('This section is not yet implemented.');
                 });
             });
             
-            // Add input change listeners for preview updates
-            const inputs = serviceItem.querySelectorAll('.field-element');
-            inputs.forEach(input => {
-                input.addEventListener('input', updateServicesPreview);
-            });
+            // Demo action buttons
+            const actionButtons = document.querySelectorAll('.btn-view, .btn-edit, .btn-delete');
             
-            // Add to services container
-            servicesContainer.appendChild(serviceItem);
-            updateServicesPreview();
-        }
-        
-        // Save all visual editor settings
-        async function saveVisualEditorSettings() {
-            showSpinner(siteSpinner);
-            siteSaveStatus.innerHTML = '';
-            
-            try {
-                // Get data from each section
-                const heroData = {
-                    heading: document.getElementById('hero-heading').value,
-                    subheading: document.getElementById('hero-subheading').value,
-                    buttonText: document.getElementById('hero-button-text').value,
-                    buttonLink: document.getElementById('hero-button-link').value,
-                    updatedAt: new Date()
-                };
-                
-                const brandingData = {
-                    logo: document.getElementById('brand-logo').files[0] ? await uploadImage(document.getElementById('brand-logo').files[0], 'logos') : null,
-                    favicon: document.getElementById('brand-favicon').files[0] ? await uploadImage(document.getElementById('brand-favicon').files[0], 'favicons') : null,
-                    colors: document.getElementById('brand-colors').value.split(',').map(c => c.trim()).filter(c => c),
-                    fonts: document.getElementById('brand-fonts').value.split(',').map(f => f.trim()).filter(f => f),
-                    updatedAt: new Date()
-                };
-                
-                const aboutData = {
-                    heading: document.getElementById('about-heading').value,
-                    content: document.getElementById('about-content').value,
-                    updatedAt: new Date()
-                };
-                
-                // Get services data
-                const serviceItems = document.querySelectorAll('.service-item');
-                const services = [];
-                serviceItems.forEach(item => {
-                    services.push({
-                        title: item.querySelector('[data-field="title"]').value,
-                        description: item.querySelector('[data-field="description"]').value,
-                        iconIndex: parseInt(item.querySelector('[data-field="icon"]').value) || 0
-                    });
+            actionButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    alert('This action is not yet implemented.');
                 });
-                
-                const servicesData = {
-                    heading: document.getElementById('services-heading').value,
-                    services: services,
-                    updatedAt: new Date()
-                };
-                
-                const contactData = {
-                    heading: document.getElementById('contact-heading').value,
-                    subtext: document.getElementById('contact-subtext').value,
-                    email: document.getElementById('contact-email').value,
-                    phone: document.getElementById('contact-phone').value,
-                    updatedAt: new Date()
-                };
-                
-                const footerData = {
-                    text: document.getElementById('footer-text').value,
-                    updatedAt: new Date()
-                };
-                
-                // Save each section to Firebase
-                await setDoc(doc(db, 'settings', 'hero'), heroData);
-                await setDoc(doc(db, 'settings', 'branding'), brandingData);
-                await setDoc(doc(db, 'settings', 'about'), aboutData);
-                await setDoc(doc(db, 'settings', 'services'), servicesData);
-                await setDoc(doc(db, 'settings', 'contact'), contactData);
-                await setDoc(doc(db, 'settings', 'footer'), footerData);
-                
-                siteSaveStatus.innerHTML = '<div style="color: #2a9d8f; margin-top: 10px;">✓ Website settings saved successfully</div>';
-                showToast('Website settings saved!', 'success');
-            } catch (error) {
-                console.error("Error saving website settings:", error);
-                siteSaveStatus.innerHTML = '<div style="color: #e63946; margin-top: 10px;">✕ Error saving website settings</div>';
-                showToast('Could not save website settings', 'error');
-            }
-            
-            hideSpinner(siteSpinner);
-        }
-
-        // --- Helper: Upload Image to Storage ---
-        async function uploadImage(file, folder) {
-            return new Promise((resolve, reject) => {
-                const storagePath = `${folder}/${Date.now()}_${file.name}`;
-                const storageRef = ref(storage, storagePath);
-                const uploadTask = uploadBytesResumable(storageRef, file);
-                
-                uploadTask.on('state_changed',
-                    null,
-                    (error) => {
-                        console.error("Upload failed", error);
-                        reject(error);
-                    },
-                    async () => {
-                        try {
-                            const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
-                            resolve(downloadURL);
-                        } catch (error) {
-                            console.error("Error getting download URL:", error);
-                            reject(error);
-                        }
-                    }
-                );
             });
-        }
-        
-        // --- Logo Upload Button and Preview ---
-        const logoInput = document.getElementById('brand-logo');
-        const logoUploadBtn = document.getElementById('logo-upload-btn');
-        const logoPreviewContainer = document.getElementById('logo-preview-container');
-        const logoUploadArea = document.getElementById('logo-upload-area');
-        const logoUploadProgress = document.getElementById('logo-upload-progress');
-        const logoUploadSpinner = document.getElementById('logo-upload-spinner');
-
-        logoUploadBtn.addEventListener('click', () => logoInput.click());
-        
-        logoInput.addEventListener('change', async (e) => {
-            const file = e.target.files[0];
-            if (!file) return;
-            
-            // Validate file type and size
-            if (!['image/jpeg','image/png','image/webp'].includes(file.type)) {
-                showToast('Only JPG, PNG, or WEBP images allowed for logo.', 'error');
-                logoInput.value = '';
-                logoPreviewContainer.innerHTML = '';
-                return;
-            }
-            
-            if (file.size > 2 * 1024 * 1024) {
-                showToast('Logo image must be under 2MB.', 'error');
-                logoInput.value = '';
-                logoPreviewContainer.innerHTML = '';
-                return;
-            }
-            
-            // Show preview
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const img = document.createElement('img');
-                img.src = e.target.result;
-                img.alt = 'Logo Preview';
-                img.style.maxWidth = '180px';
-                img.style.borderRadius = '8px';
-                logoPreviewContainer.innerHTML = '';
-                logoPreviewContainer.appendChild(img);
-                
-                // Update the branding preview
-                updateSectionPreview('branding');
-            };
-            reader.readAsDataURL(file);
-        });
-        
-        // Logo drag and drop functionality
-        logoUploadArea.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            logoUploadArea.classList.add('dragover');
-        });
-        
-        logoUploadArea.addEventListener('dragleave', (e) => {
-            e.preventDefault();
-            logoUploadArea.classList.remove('dragover');
-        });
-        
-        logoUploadArea.addEventListener('drop', (e) => {
-            e.preventDefault();
-            logoUploadArea.classList.remove('dragover');
-            const file = e.dataTransfer.files[0];
-            if (file) {
-                logoInput.files = e.dataTransfer.files;
-                logoInput.dispatchEvent(new Event('change'));
-            }
-        });
-        
-        // --- Favicon Upload Button and Preview ---
-        const faviconInput = document.getElementById('brand-favicon');
-        const faviconUploadBtn = document.getElementById('favicon-upload-btn');
-        const faviconPreviewContainer = document.getElementById('favicon-preview-container');
-        const faviconUploadArea = document.getElementById('favicon-upload-area');
-        const faviconUploadProgress = document.getElementById('favicon-upload-progress');
-        const faviconUploadSpinner = document.getElementById('favicon-upload-spinner');
-        
-        faviconUploadBtn.addEventListener('click', () => faviconInput.click());
-        
-        faviconInput.addEventListener('change', async (e) => {
-            const file = e.target.files[0];
-            if (!file) return;
-            
-            // Validate file type and size
-            if (!['image/x-icon','image/png','image/webp'].includes(file.type)) {
-                showToast('Only ICO, PNG, or WEBP images allowed for favicon.', 'error');
-                faviconInput.value = '';
-                faviconPreviewContainer.innerHTML = '';
-                return;
-            }
-            
-            if (file.size > 512 * 1024) {
-                showToast('Favicon must be under 512KB.', 'error');
-                faviconInput.value = '';
-                faviconPreviewContainer.innerHTML = '';
-                return;
-            }
-            
-            // Show preview
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const img = document.createElement('img');
-                img.src = e.target.result;
-                img.alt = 'Favicon Preview';
-                img.style.width = '32px';
-                img.style.height = '32px';
-                img.style.borderRadius = '4px';
-                faviconPreviewContainer.innerHTML = '';
-                faviconPreviewContainer.appendChild(img);
-                
-                // Update the branding preview
-                updateSectionPreview('branding');
-            };
-            reader.readAsDataURL(file);
-        });
-        
-        // Favicon drag and drop functionality
-        faviconUploadArea.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            faviconUploadArea.classList.add('dragover');
-        });
-        
-        faviconUploadArea.addEventListener('dragleave', (e) => {
-            e.preventDefault();
-            faviconUploadArea.classList.remove('dragover');
-        });
-        
-        faviconUploadArea.addEventListener('drop', (e) => {
-            e.preventDefault();
-            faviconUploadArea.classList.remove('dragover');
-            const file = e.dataTransfer.files[0];
-            if (file) {
-                faviconInput.files = e.dataTransfer.files;
-                faviconInput.dispatchEvent(new Event('change'));
-            }
         });
     </script>
 </body>
