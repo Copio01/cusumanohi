@@ -209,26 +209,34 @@
             position: relative;
             width: 100%;
             height: 0;
-            padding-bottom: 29%; /* This creates a responsive aspect ratio for the banner */
-            background-image: url('https://i.imgur.com/KEiFAkV.jpeg');
+            padding-bottom: 18%; /* Adjusted for your banner's aspect ratio */
+            background-image: url('images/banner.png'); /* Using your local banner image */
             background-size: contain; /* Maintain image aspect ratio */
             background-position: center center;
             background-repeat: no-repeat;
-            background-color: #eef2f3;
+            background-color: #000000; /* Black background to match your banner */
             display: block;
             background-attachment: scroll;
+            max-width: 1400px;
+            margin: 0 auto;
         }
 
         /* Responsive adjustments for banner */
+        @media (max-width: 992px) {
+            .hero-banner {
+                padding-bottom: 22%; /* Slightly increase height proportion on medium screens */
+            }
+        }
+
         @media (max-width: 768px) {
             .hero-banner {
-                padding-bottom: 40%; /* Adjust aspect ratio for smaller screens */
+                padding-bottom: 30%; /* Adjust aspect ratio for smaller screens */
             }
         }
 
         @media (max-width: 480px) {
             .hero-banner {
-                padding-bottom: 50%; /* Further adjust aspect ratio for mobile */
+                padding-bottom: 40%; /* Further adjust aspect ratio for mobile */
             }
         }
 
@@ -716,7 +724,7 @@
                 <button class="nav-contact-btn" id="navContactBtn">Contact</button>
             </nav>
             <div class="company-logo">
-                <img src="https://i.imgur.com/3Ba6IZk.jpeg" alt="Company Logo">
+                <img src="images/logo.png" alt="Cusumano Home Improvements Logo">
             </div>
         </div>
     </header>
