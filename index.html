@@ -1286,19 +1286,294 @@
         document.addEventListener('DOMContentLoaded', () => {
             setupSliderListener();
             animateOnScroll();
-            loadFacebookSettings(); // Load Facebook settings
+            loadAllWebsiteSettings(); // Load all website settings including Facebook
+            
+            // Import required Firebase functions for settings
+            import('https://www.gstatic.com/firebasejs/11.9.0/firebase-firestore.js')
+                .then(module => {
+                    const { getDocs } = module;
+                    window.getDocs = getDocs; // Make getDocs available globally
+                })
+                .catch(error => {
+                    console.error("Error importing Firebase modules:", error);
+                });
         });
         
         // --- Facebook Settings Implementation ---
         const socialFeedSection = document.getElementById('social-feed');
+        
+        // --- Load All Website Settings ---
+        async function loadAllWebsiteSettings() {
+            try {
+                if (!db) return;
+                
+                loadHeroSettings();
+                loadAboutSettings();
+                loadServicesSettings();
+                loadContactSettings();
+                loadFooterSettings();
+                loadFacebookSettings();
+            } catch (error) {
+                console.error("Error loading website settings:", error);
+            }
+        }
+        
+        // --- Load Hero Section Settings ---
+        async function loadHeroSettings() {
+            try {
+                const snapshot = await getDocs(collection(db, 'settings'));
+                let heroSettings = null;
+                
+                snapshot.forEach(doc => {
+                    if (doc.id === 'hero') {
+                        heroSettings = doc.data();
+                    }
+                });
+                
+                if (heroSettings) {
+                    // Update hero content
+                    const heroContent = document.querySelector('.hero-content-section div');
+                    
+                    if (heroContent) {
+                        // Update heading if provided
+                        const heading = heroContent.querySelector('h1');
+                        if (heading && heroSettings.heading) {
+                            heading.textContent = heroSettings.heading;
+                        }
+                        
+                        // Update subheading if provided
+                        const subheading = heroContent.querySelector('p');
+                        if (subheading && heroSettings.subheading) {
+                            subheading.textContent = heroSettings.subheading;
+                        }
+                    }
+                    
+                    // Update hero CTA button if provided
+                    const ctaButton = document.querySelector('.hero-content-section .btn');
+                    if (ctaButton) {
+                        if (heroSettings.buttonText) {
+                            ctaButton.textContent = heroSettings.buttonText;
+                        }
+                        if (heroSettings.buttonLink) {
+                            ctaButton.href = heroSettings.buttonLink;
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error("Error loading hero settings:", error);
+            }
+        }
+        
+        // --- Load About Section Settings ---
+        async function loadAboutSettings() {
+            try {
+                const snapshot = await getDocs(collection(db, 'settings'));
+                let aboutSettings = null;
+                
+                snapshot.forEach(doc => {
+                    if (doc.id === 'about') {
+                        aboutSettings = doc.data();
+                    }
+                });
+                
+                if (aboutSettings) {
+                    // Update about section heading
+                    const aboutHeading = document.querySelector('#about h2.section-title');
+                    if (aboutHeading && aboutSettings.heading) {
+                        aboutHeading.textContent = aboutSettings.heading;
+                    }
+                    
+                    // Update about section content
+                    const aboutContent = document.querySelector('#about .about-content p');
+                    if (aboutContent && aboutSettings.content) {
+                        aboutContent.textContent = aboutSettings.content;
+                    }
+                }
+            } catch (error) {
+                console.error("Error loading about settings:", error);
+            }
+        }
+        
+        // --- Load Services Section Settings ---
+        async function loadServicesSettings() {
+            try {
+                const snapshot = await getDocs(collection(db, 'settings'));
+                let servicesSettings = null;
+                
+                snapshot.forEach(doc => {
+                    if (doc.id === 'services') {
+                        servicesSettings = doc.data();
+                    }
+                });
+                
+                if (servicesSettings) {
+                    // Update services section heading
+                    const servicesHeading = document.querySelector('#services h2.section-title');
+                    if (servicesHeading && servicesSettings.heading) {
+                        servicesHeading.textContent = servicesSettings.heading;
+                    }
+                    
+                    // Update services cards if services array is provided
+                    if (servicesSettings.services && Array.isArray(servicesSettings.services)) {
+                        const servicesGrid = document.querySelector('#services .services-grid');
+                        
+                        if (servicesGrid && servicesSettings.services.length > 0) {
+                            // Clear existing services
+                            servicesGrid.innerHTML = '';
+                            
+                            // Add new service cards
+                            servicesSettings.services.forEach(service => {
+                                const iconIndex = service.iconIndex || 0;
+                                const iconSvg = getServiceIconSvg(iconIndex);
+                                
+                                const serviceCard = document.createElement('article');
+                                serviceCard.className = 'service-card';
+                                serviceCard.innerHTML = `
+                                    ${iconSvg}
+                                    <h3>${service.title || 'Service'}</h3>
+                                    <p>${service.description || ''}</p>
+                                `;
+                                
+                                servicesGrid.appendChild(serviceCard);
+                            });
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error("Error loading services settings:", error);
+            }
+        }
+        
+        // Helper function to get service icon SVG based on index
+        function getServiceIconSvg(index) {
+            const icons = [
+                '<svg class="service-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>',
+                '<svg class="service-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>',
+                '<svg class="service-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>',
+                '<svg class="service-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"></path></svg>',
+                '<svg class="service-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>',
+                '<svg class="service-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 0 0 1-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>',
+                '<svg class="service-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"></path></svg>',
+                '<svg class="service-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"></path></svg>',
+                '<svg class="service-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>'
+            ];
+            
+            // Return the requested icon or the first one if index is out of bounds
+            return icons[index] || icons[0];
+        }
+        
+        // --- Load Contact Section Settings ---
+        async function loadContactSettings() {
+            try {
+                const snapshot = await getDocs(collection(db, 'settings'));
+                let contactSettings = null;
+                
+                snapshot.forEach(doc => {
+                    if (doc.id === 'contact') {
+                        contactSettings = doc.data();
+                    }
+                });
+                
+                if (contactSettings) {
+                    // Update contact section heading
+                    const contactHeading = document.querySelector('#contact h2.section-title');
+                    if (contactHeading && contactSettings.heading) {
+                        contactHeading.textContent = contactSettings.heading;
+                    }
+                    
+                    // Update contact section text
+                    const contactText = document.querySelector('#contact p');
+                    if (contactText && contactSettings.subtext) {
+                        contactText.textContent = contactSettings.subtext;
+                    }
+                    
+                    // Update email in contact info section
+                    if (contactSettings.email) {
+                        // Update email in contact-info section
+                        const emailLink = document.querySelector('#contact-info a[href^="mailto:"]');
+                        if (emailLink) {
+                            emailLink.textContent = contactSettings.email;
+                            emailLink.href = `mailto:${contactSettings.email}`;
+                        }
+                        
+                        // Also update in form section
+                        const formEmailStrong = document.querySelector('.form-group strong');
+                        if (formEmailStrong) {
+                            const emailStrong = Array.from(formEmailStrong.querySelectorAll('a')).find(el => 
+                                el.href && el.href.startsWith('mailto:'));
+                            if (emailStrong) {
+                                emailStrong.textContent = contactSettings.email;
+                                emailStrong.href = `mailto:${contactSettings.email}`;
+                            }
+                        }
+                    }
+                    
+                    // Update phone number in contact info section
+                    if (contactSettings.phone) {
+                        // Format phone number for display
+                        const phoneDisplay = contactSettings.phone;
+                        const phoneDigits = contactSettings.phone.replace(/\D/g, '');
+                        
+                        // Update phone in contact-info section
+                        const phoneLink = document.querySelector('#contact-info a[href^="tel:"]');
+                        if (phoneLink) {
+                            phoneLink.textContent = phoneDisplay;
+                            phoneLink.href = `tel:${phoneDigits}`;
+                        }
+                        
+                        // Update in header section
+                        const ctaPhoneBtn = document.querySelector('a[href^="tel:"].quote-btn');
+                        if (ctaPhoneBtn) {
+                            ctaPhoneBtn.href = `tel:${phoneDigits}`;
+                        }
+                        
+                        // Also update in form section
+                        const formPhoneStrong = document.querySelector('.form-group strong');
+                        if (formPhoneStrong) {
+                            const phoneStrong = Array.from(formPhoneStrong.querySelectorAll('a')).find(el => 
+                                el.href && el.href.startsWith('tel:'));
+                            if (phoneStrong) {
+                                phoneStrong.textContent = phoneDisplay;
+                                phoneStrong.href = `tel:${phoneDigits}`;
+                            }
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error("Error loading contact settings:", error);
+            }
+        }
+        
+        // --- Load Footer Section Settings ---
+        async function loadFooterSettings() {
+            try {
+                const snapshot = await getDocs(collection(db, 'settings'));
+                let footerSettings = null;
+                
+                snapshot.forEach(doc => {
+                    if (doc.id === 'footer') {
+                        footerSettings = doc.data();
+                    }
+                });
+                
+                if (footerSettings && footerSettings.text) {
+                    // Update footer text
+                    const footerText = document.querySelector('.main-footer p');
+                    if (footerText) {
+                        footerText.textContent = footerSettings.text;
+                    }
+                }
+            } catch (error) {
+                console.error("Error loading footer settings:", error);
+            }
+        }
         
         async function loadFacebookSettings() {
             try {
                 if (!db) return;
                 
                 // Get Facebook settings from Firebase
-                const settingsCollection = collection(db, 'settings');
-                const snapshot = await getDocs(settingsCollection);
+                const snapshot = await getDocs(collection(db, 'settings'));
                 let fbSettings = null;
                 
                 snapshot.forEach(doc => {

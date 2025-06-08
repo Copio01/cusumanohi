@@ -133,6 +133,324 @@
             height: 100%;
             object-fit: contain; /* Changed from 'contain' to ensure full image is shown */
         }
+
+        /* Website Visual Editor Styles */
+        .section-tabs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid #e9ecef;
+            padding-bottom: 1rem;
+        }
+
+        .section-tab {
+            background-color: #f1f3f5;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            padding: 0.6rem 1rem;
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--medium-gray);
+            transition: all 0.2s ease;
+        }
+
+        .section-tab:hover {
+            background-color: #e9ecef;
+            color: var(--dark-gray);
+        }
+
+        .section-tab.active {
+            background-color: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .section-editor-container {
+            background-color: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 1.5rem;
+        }
+
+        .section-editor {
+            display: none;
+        }
+
+        .section-editor.active {
+            display: block;
+        }
+
+        .section-editor h3 {
+            margin-top: 0;
+            color: var(--primary-color);
+            font-size: 1.2rem;
+            border-bottom: 2px solid #e9ecef;
+            padding-bottom: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .form-group textarea.field-element {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .preview-container {
+            margin-top: 2rem;
+            border-top: 1px dashed #dee2e6;
+            padding-top: 1rem;
+        }
+
+        .preview-container h4 {
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+
+        .section-preview {
+            background-color: white;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 1.5rem;
+            min-height: 100px;
+            position: relative;
+        }
+
+        /* Service item editor styling */
+        .service-item {
+            background-color: white;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            position: relative;
+        }
+
+        .service-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .service-item-title {
+            font-weight: 600;
+            color: var(--primary-color);
+            font-size: 1.1rem;
+        }
+
+        .service-item-controls {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .service-item-btn {
+            background-color: transparent;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.2s;
+        }
+
+        .service-item-btn.up-btn, .service-item-btn.down-btn {
+            color: var(--primary-color);
+        }
+
+        .service-item-btn.delete-btn {
+            color: var(--danger-color);
+        }
+
+        .service-item-btn:hover {
+            background-color: #f1f3f5;
+        }
+
+        .service-item-expand {
+            width: 100%;
+            text-align: center;
+            background-color: #f1f3f5;
+            border: none;
+            border-radius: 4px;
+            padding: 0.3rem;
+            margin-top: 0.5rem;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        .service-item-content {
+            display: none;
+        }
+
+        .service-item-content.expanded {
+            display: block;
+            margin-top: 1rem;
+        }
+
+        /* Field help text */
+        .field-help {
+            font-size: 0.85rem;
+            color: var(--medium-gray);
+            margin-top: 0.3rem;
+            margin-bottom: 0;
+        }
+
+        /* Save status message */
+        .save-status {
+            margin-top: 1rem;
+        }
+
+        /* Icon selector */
+        .icon-selector {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(40px, 1fr));
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+            max-height: 130px;
+            overflow-y: auto;
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 0.5rem;
+        }
+
+        .icon-option {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            cursor: pointer;
+            background-color: white;
+        }
+
+        .icon-option:hover {
+            background-color: #f1f3f5;
+        }
+
+        .icon-option.selected {
+            border-color: var(--accent-color);
+            background-color: rgba(245, 166, 35, 0.1);
+        }
+
+        .icon-preview {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            background-color: white;
+            margin-right: 1rem;
+        }
+
+        .icon-selector-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Toggle switch styling */
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 48px;
+            height: 24px;
+            margin-right: 16px;
+        }
+
+        .toggle-switch input { 
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 24px;
+        }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .toggle-slider {
+            background-color: var(--success-color);
+        }
+
+        input:focus + .toggle-slider {
+            box-shadow: 0 0 1px var(--success-color);
+        }
+
+        input:checked + .toggle-slider:before {
+            transform: translateX(24px);
+        }
+
+        .setting-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .setting-label h3 {
+            margin: 0;
+            font-size: 1rem;
+        }
+
+        .setting-label p {
+            margin: 0.3rem 0 0 0;
+            font-size: 0.9rem;
+            color: var(--medium-gray);
+        }
+
+        /* Visual Editor Responsiveness */
+        @media (max-width: 768px) {
+            .section-tabs {
+                flex-direction: column;
+                gap: 0.3rem;
+            }
+            
+            .section-tab {
+                text-align: center;
+            }
+            
+            .section-editor-container {
+                padding: 1rem;
+            }
+            
+            .service-item-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .service-item-controls {
+                margin-top: 0.5rem;
+                width: 100%;
+                justify-content: flex-end;
+            }
+        }
     </style>
 </head>
 <body>
@@ -221,6 +539,146 @@
                     <div class="spinner" id="facebook-spinner" aria-label="Saving" style="display: none;"></div>
                     <div id="facebook-save-status" class="save-status"></div>
                 </div>
+            </div>
+
+            <!-- Website Visual Editor -->
+            <div class="control-card" style="margin-top: 2rem;">
+                <h2>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 10px;">
+                        <path d="M12 19l7-7 3 3-7 7-3-3z"></path>
+                        <path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"></path>
+                        <path d="M2 2l7.586 7.586"></path>
+                        <circle cx="11" cy="11" r="2"></circle>
+                    </svg>
+                    Website Visual Editor
+                </h2>
+                <p>Customize sections of your website easily. Changes will be applied immediately.</p>
+                
+                <!-- Section Navigation -->
+                <div class="section-tabs">
+                    <button class="section-tab active" data-section="hero">Hero Section</button>
+                    <button class="section-tab" data-section="about">About Section</button>
+                    <button class="section-tab" data-section="services">Services Section</button>
+                    <button class="section-tab" data-section="contact">Contact Section</button>
+                    <button class="section-tab" data-section="footer">Footer Section</button>
+                </div>
+                
+                <!-- Section Editor Containers -->
+                <div class="section-editor-container">
+                    <!-- Hero Section Editor -->
+                    <div class="section-editor active" data-section="hero">
+                        <h3>Hero Section</h3>
+                        <div class="form-group">
+                            <label for="hero-heading">Main Heading</label>
+                            <input type="text" id="hero-heading" class="field-element" placeholder="e.g., Transform Your Space">
+                        </div>
+                        <div class="form-group">
+                            <label for="hero-subheading">Sub Heading</label>
+                            <input type="text" id="hero-subheading" class="field-element" placeholder="e.g., Quality construction and home improvement services...">
+                        </div>
+                        <div class="form-group">
+                            <label for="hero-button-text">Button Text</label>
+                            <input type="text" id="hero-button-text" class="field-element" placeholder="e.g., Call For a Free Quote">
+                        </div>
+                        <div class="form-group">
+                            <label for="hero-button-link">Button Link</label>
+                            <input type="text" id="hero-button-link" class="field-element" placeholder="e.g., tel:7347778158">
+                        </div>
+                        <div class="preview-container">
+                            <h4>Preview</h4>
+                            <div class="section-preview" id="hero-preview">
+                                <!-- Hero preview will be shown here -->
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- About Section Editor -->
+                    <div class="section-editor" data-section="about">
+                        <h3>About Section</h3>
+                        <div class="form-group">
+                            <label for="about-heading">Section Heading</label>
+                            <input type="text" id="about-heading" class="field-element" placeholder="e.g., About Our Company">
+                        </div>
+                        <div class="form-group">
+                            <label for="about-content">Content</label>
+                            <textarea id="about-content" class="field-element" rows="5" placeholder="Enter about section content..."></textarea>
+                        </div>
+                        <div class="preview-container">
+                            <h4>Preview</h4>
+                            <div class="section-preview" id="about-preview">
+                                <!-- About preview will be shown here -->
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Services Section Editor -->
+                    <div class="section-editor" data-section="services">
+                        <h3>Services Section</h3>
+                        <div class="form-group">
+                            <label for="services-heading">Section Heading</label>
+                            <input type="text" id="services-heading" class="field-element" placeholder="e.g., Our Services">
+                        </div>
+                        
+                        <div class="services-container">
+                            <!-- Service items will be loaded here -->
+                        </div>
+                        
+                        <button id="add-service-btn" class="btn" style="width: auto; margin-top: 1rem; background: var(--success-color);">Add New Service</button>
+                        
+                        <div class="preview-container">
+                            <h4>Preview</h4>
+                            <div class="section-preview" id="services-preview">
+                                <!-- Services preview will be shown here -->
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Contact Section Editor -->
+                    <div class="section-editor" data-section="contact">
+                        <h3>Contact Section</h3>
+                        <div class="form-group">
+                            <label for="contact-heading">Section Heading</label>
+                            <input type="text" id="contact-heading" class="field-element" placeholder="e.g., Ready to Start Your Project?">
+                        </div>
+                        <div class="form-group">
+                            <label for="contact-subtext">Descriptive Text</label>
+                            <textarea id="contact-subtext" class="field-element" rows="3" placeholder="Enter contact section description..."></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="contact-email">Contact Email</label>
+                            <input type="email" id="contact-email" class="field-element" placeholder="e.g., copernan@yahoo.com">
+                        </div>
+                        <div class="form-group">
+                            <label for="contact-phone">Contact Phone</label>
+                            <input type="text" id="contact-phone" class="field-element" placeholder="e.g., (734) 777-8158">
+                        </div>
+                        <div class="preview-container">
+                            <h4>Preview</h4>
+                            <div class="section-preview" id="contact-preview">
+                                <!-- Contact preview will be shown here -->
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Footer Section Editor -->
+                    <div class="section-editor" data-section="footer">
+                        <h3>Footer Section</h3>
+                        <div class="form-group">
+                            <label for="footer-text">Footer Text</label>
+                            <input type="text" id="footer-text" class="field-element" placeholder="e.g., © 2025 Cusumano Home Improvements. All Rights Reserved.">
+                        </div>
+                        <div class="preview-container">
+                            <h4>Preview</h4>
+                            <div class="section-preview" id="footer-preview">
+                                <!-- Footer preview will be shown here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <button id="save-site-settings" class="btn" style="margin-top: 2rem;">Save Website Changes</button>
+                <div class="spinner" id="site-spinner" aria-label="Saving" style="display: none;"></div>
+                <div id="site-save-status" class="save-status"></div>
             </div>
         </main>
         
@@ -654,12 +1112,508 @@
         onAuthStateChanged(auth, user => {
             if (user) {
                 loadFacebookSettings();
+                // Load visual editor settings
+                loadVisualEditorSettings();
+                initializeVisualEditor();
             }
         });
         
         // --- Security Reminder ---
         // IMPORTANT: Restrict Firebase Storage/Firestore rules to authenticated admins only in the Firebase Console!
         // Do NOT expose sensitive admin features to the public.
+
+        // --- Website Visual Editor ---
+        const sectionTabs = document.querySelectorAll('.section-tab');
+        const sectionEditors = document.querySelectorAll('.section-editor');
+        const saveSiteBtn = document.getElementById('save-site-settings');
+        const siteSpinner = document.getElementById('site-spinner');
+        const siteSaveStatus = document.getElementById('site-save-status');
+        const addServiceBtn = document.getElementById('add-service-btn');
+        const servicesContainer = document.querySelector('.services-container');
+        
+        // Service icons library for selection
+        const serviceIcons = [
+            '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>',
+            '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>',
+            '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>',
+            '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"></path>',
+            '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>',
+            '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>',
+            '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"></path>',
+            '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"></path>',
+            '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>'
+        ];
+        
+        // Set up tab navigation in visual editor
+        sectionTabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                // Remove active class from all tabs and editors
+                sectionTabs.forEach(t => t.classList.remove('active'));
+                sectionEditors.forEach(e => e.classList.remove('active'));
+                
+                // Add active class to clicked tab and corresponding editor
+                tab.classList.add('active');
+                const sectionName = tab.dataset.section;
+                document.querySelector(`.section-editor[data-section="${sectionName}"]`).classList.add('active');
+                
+                // Update preview for the active section
+                updateSectionPreview(sectionName);
+            });
+        });
+        
+        // Initialize visual editor with event listeners
+        function initializeVisualEditor() {
+            // Add service button click handler
+            addServiceBtn.addEventListener('click', () => addNewService());
+            
+            // Set up input change listeners for previews
+            setupPreviewListeners();
+            
+            // Save button click handler
+            saveSiteBtn.addEventListener('click', saveVisualEditorSettings);
+        }
+        
+        // Set up input change listeners for live previews
+        function setupPreviewListeners() {
+            // Hero section listeners
+            document.getElementById('hero-heading').addEventListener('input', () => updateSectionPreview('hero'));
+            document.getElementById('hero-subheading').addEventListener('input', () => updateSectionPreview('hero'));
+            document.getElementById('hero-button-text').addEventListener('input', () => updateSectionPreview('hero'));
+            document.getElementById('hero-button-link').addEventListener('input', () => updateSectionPreview('hero'));
+            
+            // About section listeners
+            document.getElementById('about-heading').addEventListener('input', () => updateSectionPreview('about'));
+            document.getElementById('about-content').addEventListener('input', () => updateSectionPreview('about'));
+            
+            // Services section listeners
+            document.getElementById('services-heading').addEventListener('input', () => updateSectionPreview('services'));
+            
+            // Contact section listeners
+            document.getElementById('contact-heading').addEventListener('input', () => updateSectionPreview('contact'));
+            document.getElementById('contact-subtext').addEventListener('input', () => updateSectionPreview('contact'));
+            document.getElementById('contact-email').addEventListener('input', () => updateSectionPreview('contact'));
+            document.getElementById('contact-phone').addEventListener('input', () => updateSectionPreview('contact'));
+            
+            // Footer section listeners
+            document.getElementById('footer-text').addEventListener('input', () => updateSectionPreview('footer'));
+        }
+        
+        // Load visual editor settings from Firebase
+        async function loadVisualEditorSettings() {
+            try {
+                const settingsCollection = collection(db, 'settings');
+                const snapshot = await getDocs(settingsCollection);
+                
+                // Process each section's settings
+                snapshot.forEach(doc => {
+                    switch(doc.id) {
+                        case 'hero':
+                            populateHeroSettings(doc.data());
+                            break;
+                        case 'about':
+                            populateAboutSettings(doc.data());
+                            break;
+                        case 'services':
+                            populateServicesSettings(doc.data());
+                            break;
+                        case 'contact':
+                            populateContactSettings(doc.data());
+                            break;
+                        case 'footer':
+                            populateFooterSettings(doc.data());
+                            break;
+                    }
+                });
+                
+                // Update all previews after loading data
+                updateAllPreviews();
+                
+            } catch (error) {
+                console.error("Error loading visual editor settings:", error);
+                showToast('Could not load website settings', 'error');
+            }
+        }
+        
+        // Populate hero section settings
+        function populateHeroSettings(data) {
+            if (!data) return;
+            
+            document.getElementById('hero-heading').value = data.heading || 'Transform Your Space';
+            document.getElementById('hero-subheading').value = data.subheading || 'Quality construction and home improvement services in Monroe, MI';
+            document.getElementById('hero-button-text').value = data.buttonText || 'Call For a Free Quote';
+            document.getElementById('hero-button-link').value = data.buttonLink || 'tel:7347778158';
+        }
+        
+        // Populate about section settings
+        function populateAboutSettings(data) {
+            if (!data) return;
+            
+            document.getElementById('about-heading').value = data.heading || 'About Our Company';
+            document.getElementById('about-content').value = data.content || 'For over 20 years, Cusumano Home Improvements has been a family-owned and operated business proudly serving the Monroe, MI area. We are dedicated to delivering the highest quality of work, specializing in residential construction and convenient dumpster rentals. Our commitment is to our craft and, most importantly, to our customers' satisfaction.';
+        }
+        
+        // Populate services section settings
+        function populateServicesSettings(data) {
+            if (!data) return;
+            
+            document.getElementById('services-heading').value = data.heading || 'Our Services';
+            
+            // Clear existing services
+            servicesContainer.innerHTML = '';
+            
+            // Add services from data
+            if (data.services && Array.isArray(data.services)) {
+                data.services.forEach((service, index) => {
+                    addServiceItem(service, index);
+                });
+            }
+        }
+        
+        // Populate contact section settings
+        function populateContactSettings(data) {
+            if (!data) return;
+            
+            document.getElementById('contact-heading').value = data.heading || 'Ready to Start Your Project?';
+            document.getElementById('contact-subtext').value = data.subtext || 'Contact us today for a free, no-obligation quote. We\'re ready to help bring your vision to life.';
+            document.getElementById('contact-email').value = data.email || 'copernan@yahoo.com';
+            document.getElementById('contact-phone').value = data.phone || '(734) 777-8158';
+        }
+        
+        // Populate footer section settings
+        function populateFooterSettings(data) {
+            if (!data) return;
+            
+            document.getElementById('footer-text').value = data.text || '© 2025 Cusumano Home Improvements. All Rights Reserved.';
+        }
+        
+        // Update section preview based on form inputs
+        function updateSectionPreview(sectionName) {
+            const previewElement = document.getElementById(`${sectionName}-preview`);
+            
+            switch(sectionName) {
+                case 'hero':
+                    const heroHeading = document.getElementById('hero-heading').value || 'Transform Your Space';
+                    const heroSubheading = document.getElementById('hero-subheading').value || 'Quality construction and home improvement services in Monroe, MI';
+                    const heroButtonText = document.getElementById('hero-button-text').value || 'Call For a Free Quote';
+                    const heroButtonLink = document.getElementById('hero-button-link').value || 'tel:7347778158';
+                    
+                    previewElement.innerHTML = `
+                        <div style="background: linear-gradient(120deg, #0a4d68 60%, #088395 100%); color: white; padding: 1.5rem; text-align: center; border-radius: 6px;">
+                            <h2 style="margin: 0; color: white; font-size: 1.5rem;">${heroHeading}</h2>
+                            <p style="margin: 0.5rem 0 1.5rem;">${heroSubheading}</p>
+                            <a href="${heroButtonLink}" style="display: inline-block; background: #f5a623; color: white; padding: 0.6rem 1rem; border-radius: 4px; font-weight: bold; text-decoration: none;">
+                                ${heroButtonText}
+                            </a>
+                        </div>
+                    `;
+                    break;
+                    
+                case 'about':
+                    const aboutHeading = document.getElementById('about-heading').value || 'About Our Company';
+                    const aboutContent = document.getElementById('about-content').value || 'Content about your company...';
+                    
+                    previewElement.innerHTML = `
+                        <div style="text-align: center;">
+                            <h2 style="color: #0a4d68; margin-top: 0;">${aboutHeading}</h2>
+                            <p style="line-height: 1.6;">${aboutContent}</p>
+                        </div>
+                    `;
+                    break;
+                    
+                case 'services':
+                    updateServicesPreview();
+                    break;
+                    
+                case 'contact':
+                    const contactHeading = document.getElementById('contact-heading').value || 'Ready to Start Your Project?';
+                    const contactSubtext = document.getElementById('contact-subtext').value || 'Contact us today for a free quote.';
+                    const contactEmail = document.getElementById('contact-email').value || 'copernan@yahoo.com';
+                    const contactPhone = document.getElementById('contact-phone').value || '(734) 777-8158';
+                    
+                    previewElement.innerHTML = `
+                        <div style="background: linear-gradient(120deg, #0a4d68 60%, #088395 100%); color: white; padding: 1.5rem; text-align: center; border-radius: 6px;">
+                            <h2 style="margin: 0; color: white; font-size: 1.5rem;">${contactHeading}</h2>
+                            <p style="margin: 0.5rem 0 1rem;">${contactSubtext}</p>
+                            <div style="display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap;">
+                                <a href="mailto:${contactEmail}" style="display: inline-flex; align-items: center; background: #f5a623; color: white; padding: 0.6rem 1rem; border-radius: 4px; font-weight: bold; text-decoration: none;">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;">
+                                        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                                        <polyline points="22,6 12,13 2,6"></polyline>
+                                    </svg>
+                                    Email Us
+                                </a>
+                                <a href="tel:${contactPhone.replace(/[^0-9]/g, '')}" style="display: inline-flex; align-items: center; background: #088395; color: white; padding: 0.6rem 1rem; border-radius: 4px; font-weight: bold; text-decoration: none;">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;">
+                                        <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                                    </svg>
+                                    Call ${contactPhone}
+                                </a>
+                            </div>
+                        </div>
+                    `;
+                    break;
+                    
+                case 'footer':
+                    const footerText = document.getElementById('footer-text').value || '© 2025 Cusumano Home Improvements. All Rights Reserved.';
+                    
+                    previewElement.innerHTML = `
+                        <div style="background-color: #333333; color: #f9f9f9; text-align: center; padding: 1rem; border-radius: 6px;">
+                            <p style="margin: 0;">${footerText}</p>
+                        </div>
+                    `;
+                    break;
+            }
+        }
+        
+        // Update preview for services section
+        function updateServicesPreview() {
+            const servicesHeading = document.getElementById('services-heading').value || 'Our Services';
+            const previewElement = document.getElementById('services-preview');
+            
+            // Get all service items
+            const serviceItems = document.querySelectorAll('.service-item');
+            
+            // Start with the heading
+            let servicesHTML = `<h2 style="color: #0a4d68; margin-top: 0; text-align: center;">${servicesHeading}</h2>`;
+            
+            // Add the services grid
+            servicesHTML += `<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 1rem;">`;
+            
+            // Add each service card
+            serviceItems.forEach(item => {
+                const titleInput = item.querySelector('[data-field="title"]');
+                const descInput = item.querySelector('[data-field="description"]');
+                const iconIndex = item.querySelector('[data-field="icon"]')?.value || 0;
+                
+                if (titleInput && descInput) {
+                    const title = titleInput.value || 'Service';
+                    const description = descInput.value || 'Service description';
+                    
+                    servicesHTML += `
+                        <div style="background: white; border: 1px solid #e0e0e0; border-radius: 6px; padding: 1rem; text-align: center;">
+                            <div style="color: #088395; margin: 0 auto 1rem; width: 40px; height: 40px;">
+                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    ${serviceIcons[iconIndex] || serviceIcons[0]}
+                                </svg>
+                            </div>
+                            <h3 style="margin: 0 0 0.5rem; font-size: 1.1rem;">${title}</h3>
+                            <p style="margin: 0; font-size: 0.9rem; line-height: 1.4;">${description.substring(0, 60)}${description.length > 60 ? '...' : ''}</p>
+                        </div>
+                    `;
+                }
+            });
+            
+            // Close the grid
+            servicesHTML += `</div>`;
+            
+            // Update the preview
+            previewElement.innerHTML = servicesHTML;
+        }
+        
+        // Update all previews
+        function updateAllPreviews() {
+            updateSectionPreview('hero');
+            updateSectionPreview('about');
+            updateSectionPreview('services');
+            updateSectionPreview('contact');
+            updateSectionPreview('footer');
+        }
+        
+        // Add a new service item to the services editor
+        function addNewService(data = {}) {
+            const serviceItem = document.createElement('div');
+            serviceItem.className = 'service-item';
+            
+            const serviceId = `service-${Date.now()}`;
+            const iconIndex = data.iconIndex || 0;
+            
+            serviceItem.innerHTML = `
+                <div class="service-item-header">
+                    <div class="service-item-title">${data.title || 'New Service'}</div>
+                    <div class="service-item-controls">
+                        <button type="button" class="service-item-btn up-btn" aria-label="Move service up">▲</button>
+                        <button type="button" class="service-item-btn down-btn" aria-label="Move service down">▼</button>
+                        <button type="button" class="service-item-btn delete-btn" aria-label="Delete service">×</button>
+                    </div>
+                </div>
+                <button type="button" class="service-item-expand" aria-label="Expand service details">Edit Service Details</button>
+                <div class="service-item-content">
+                    <div class="form-group">
+                        <label for="${serviceId}-title">Service Title</label>
+                        <input type="text" id="${serviceId}-title" class="field-element" data-field="title" value="${data.title || 'New Service'}" placeholder="e.g., Roofing">
+                    </div>
+                    <div class="form-group">
+                        <label for="${serviceId}-description">Service Description</label>
+                        <textarea id="${serviceId}-description" class="field-element" data-field="description" rows="3" placeholder="Describe this service...">${data.description || ''}</textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Service Icon</label>
+                        <div class="icon-selector-header">
+                            <div class="icon-preview">
+                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    ${serviceIcons[iconIndex]}
+                                </svg>
+                            </div>
+                            <span>Select an icon below:</span>
+                        </div>
+                        <div class="icon-selector">
+                            ${serviceIcons.map((icon, index) => `
+                                <div class="icon-option ${index === iconIndex ? 'selected' : ''}" data-index="${index}">
+                                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        ${icon}
+                                    </svg>
+                                </div>
+                            `).join('')}
+                        </div>
+                        <input type="hidden" data-field="icon" value="${iconIndex}" />
+                    </div>
+                </div>
+            `;
+            
+            // Add event listeners for service item controls
+            const expandBtn = serviceItem.querySelector('.service-item-expand');
+            const content = serviceItem.querySelector('.service-item-content');
+            const deleteBtn = serviceItem.querySelector('.delete-btn');
+            const upBtn = serviceItem.querySelector('.up-btn');
+            const downBtn = serviceItem.querySelector('.down-btn');
+            const iconOptions = serviceItem.querySelectorAll('.icon-option');
+            const iconPreview = serviceItem.querySelector('.icon-preview');
+            const iconInput = serviceItem.querySelector('[data-field="icon"]');
+            
+            // Toggle expand/collapse
+            expandBtn.addEventListener('click', () => {
+                content.classList.toggle('expanded');
+                expandBtn.textContent = content.classList.contains('expanded') ? 'Hide Service Details' : 'Edit Service Details';
+            });
+            
+            // Delete service
+            deleteBtn.addEventListener('click', () => {
+                               if (confirm('Are you sure you want to delete this service?')) {
+                    serviceItem.remove();
+                    updateServicesPreview();
+                }
+            });
+            
+            // Move service up
+            upBtn.addEventListener('click', () => {
+                const prev = serviceItem.previousElementSibling;
+                if (prev) {
+                    servicesContainer.insertBefore(serviceItem, prev);
+                    updateServicesPreview();
+                }
+            });
+            
+            // Move service down
+            downBtn.addEventListener('click', () => {
+                const next = serviceItem.nextElementSibling;
+                if (next) {
+                    servicesContainer.insertBefore(next, serviceItem);
+                    updateServicesPreview();
+                }
+            });
+            
+            // Icon selection
+            iconOptions.forEach(option => {
+                option.addEventListener('click', () => {
+                    const selectedIndex = option.dataset.index;
+                    
+                    // Update hidden input value
+                    iconInput.value = selectedIndex;
+                    
+                    // Update visual selection
+                    iconOptions.forEach(opt => opt.classList.remove('selected'));
+                    option.classList.add('selected');
+                    
+                    // Update preview
+                    iconPreview.innerHTML = `
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            ${serviceIcons[selectedIndex]}
+                        </svg>
+                    `;
+                    
+                    updateServicesPreview();
+                });
+            });
+            
+            // Add input change listeners for preview updates
+            const inputs = serviceItem.querySelectorAll('.field-element');
+            inputs.forEach(input => {
+                input.addEventListener('input', updateServicesPreview);
+            });
+            
+            // Add to services container
+            servicesContainer.appendChild(serviceItem);
+            updateServicesPreview();
+        }
+        
+        // Save all visual editor settings
+        async function saveVisualEditorSettings() {
+            showSpinner(siteSpinner);
+            siteSaveStatus.innerHTML = '';
+            
+            try {
+                // Get data from each section
+                const heroData = {
+                    heading: document.getElementById('hero-heading').value,
+                    subheading: document.getElementById('hero-subheading').value,
+                    buttonText: document.getElementById('hero-button-text').value,
+                    buttonLink: document.getElementById('hero-button-link').value,
+                    updatedAt: new Date()
+                };
+                
+                const aboutData = {
+                    heading: document.getElementById('about-heading').value,
+                    content: document.getElementById('about-content').value,
+                    updatedAt: new Date()
+                };
+                
+                // Get services data
+                const serviceItems = document.querySelectorAll('.service-item');
+                const services = [];
+                serviceItems.forEach(item => {
+                    services.push({
+                        title: item.querySelector('[data-field="title"]').value,
+                        description: item.querySelector('[data-field="description"]').value,
+                        iconIndex: parseInt(item.querySelector('[data-field="icon"]').value) || 0
+                    });
+                });
+                
+                const servicesData = {
+                    heading: document.getElementById('services-heading').value,
+                    services: services,
+                    updatedAt: new Date()
+                };
+                
+                const contactData = {
+                    heading: document.getElementById('contact-heading').value,
+                    subtext: document.getElementById('contact-subtext').value,
+                    email: document.getElementById('contact-email').value,
+                    phone: document.getElementById('contact-phone').value,
+                    updatedAt: new Date()
+                };
+                
+                const footerData = {
+                    text: document.getElementById('footer-text').value,
+                    updatedAt: new Date()
+                };
+                
+                // Save each section to Firebase
+                await setDoc(doc(db, 'settings', 'hero'), heroData);
+                await setDoc(doc(db, 'settings', 'about'), aboutData);
+                await setDoc(doc(db, 'settings', 'services'), servicesData);
+                await setDoc(doc(db, 'settings', 'contact'), contactData);
+                await setDoc(doc(db, 'settings', 'footer'), footerData);
+                
+                siteSaveStatus.innerHTML = '<div style="color: #2a9d8f; margin-top: 10px;">✓ Website settings saved successfully</div>';
+                showToast('Website settings saved!', 'success');
+            } catch (error) {
+                console.error("Error saving website settings:", error);
+                siteSaveStatus.innerHTML = '<div style="color: #e63946; margin-top: 10px;">✕ Error saving website settings</div>';
+                showToast('Could not save website settings', 'error');
+            }
+            
+            hideSpinner(siteSpinner);
+        }
     </script>
 </body>
 </html>
