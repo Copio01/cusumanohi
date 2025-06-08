@@ -114,24 +114,26 @@
         .company-logo {
             position: absolute;
             top: 10px;
-            left: 20px;
-            width: 80px; /* Increased width from 50px */
-            height: 50px; /* Maintained height */
-            border-radius: 4px; /* Changed from circle to slight rounded corners */
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 50px;
+            border-radius: 4px;
             overflow: hidden;
             box-shadow: 0 3px 10px rgba(0,0,0,0.15);
             border: 2px solid var(--accent-color);
             transition: transform 0.3s ease;
+            z-index: 10;
         }
 
         .company-logo:hover {
-            transform: scale(1.1);
+            transform: translateX(-50%) scale(1.1);
         }
 
         .company-logo img {
             width: 100%;
             height: 100%;
-            object-fit: contain; /* Changed from 'contain' to ensure full image is shown */
+            object-fit: contain;
         }
 
         /* Website Visual Editor Styles */
@@ -475,9 +477,9 @@
         <header class="admin-header">
             <h1>Dashboard</h1>
             <button id="logout-btn" class="logout-btn">Logout</button>
-            <div class="company-logo" aria-label="Company Logo">
+            <a href="index.html" class="company-logo" aria-label="Return to Home Page">
                 <img src="images/logo.png" alt="Cusumano Home Improvements">
-            </div>
+            </a>
         </header>
 
         <main class="admin-main">
@@ -557,6 +559,7 @@
                 <!-- Section Navigation -->
                 <div class="section-tabs">
                     <button class="section-tab active" data-section="hero">Hero Section</button>
+                    <button class="section-tab" data-section="branding">Branding</button>
                     <button class="section-tab" data-section="about">About Section</button>
                     <button class="section-tab" data-section="services">Services Section</button>
                     <button class="section-tab" data-section="contact">Contact Section</button>
@@ -588,6 +591,53 @@
                             <h4>Preview</h4>
                             <div class="section-preview" id="hero-preview">
                                 <!-- Hero preview will be shown here -->
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Branding Section Editor -->
+                    <div class="section-editor" data-section="branding">
+                        <h3>Branding</h3>
+                        <div class="form-group">
+                            <label for="brand-logo">Logo Upload</label>
+                            <div class="upload-area" id="logo-upload-area" tabindex="0" aria-label="Logo upload area">
+                                <p>Click or drag file to this area to upload your logo</p>
+                                <input type="file" id="brand-logo" accept="image/jpeg, image/png, image/webp" hidden aria-label="Choose logo image">
+                                <button id="logo-upload-btn" class="btn" style="width: auto; background: var(--success-color);" aria-label="Choose Logo">Choose Logo</button>
+                                <div id="logo-preview-container" style="margin:1rem 0;"></div>
+                                <progress id="logo-upload-progress" value="0" max="100"></progress>
+                                <div class="spinner" id="logo-upload-spinner" aria-label="Uploading"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="brand-favicon">Favicon Upload</label>
+                            <div class="upload-area" id="favicon-upload-area" tabindex="0" aria-label="Favicon upload area">
+                                <p>Click or drag file to this area to upload your favicon</p>
+                                <input type="file" id="brand-favicon" accept="image/x-icon, image/png" hidden aria-label="Choose favicon image">
+                                <button id="favicon-upload-btn" class="btn" style="width: auto; background: var(--success-color);" aria-label="Choose Favicon">Choose Favicon</button>
+                                <div id="favicon-preview-container" style="margin:1rem 0;"></div>
+                                <progress id="favicon-upload-progress" value="0" max="100"></progress>
+                                <div class="spinner" id="favicon-upload-spinner" aria-label="Uploading"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="brand-colors">Brand Colors</label>
+                            <input type="text" id="brand-colors" class="field-element" placeholder="e.g., #0a4d68, #088395, #f5a623">
+                            <p class="field-help">Enter your brand colors as HEX codes, separated by commas.</p>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="brand-fonts">Brand Fonts</label>
+                            <input type="text" id="brand-fonts" class="field-element" placeholder="e.g., Poppins, Roboto">
+                            <p class="field-help">Enter your brand fonts, separated by commas.</p>
+                        </div>
+                        
+                        <div class="preview-container">
+                            <h4>Preview</h4>
+                            <div class="section-preview" id="branding-preview">
+                                <!-- Branding preview will be shown here -->
                             </div>
                         </div>
                     </div>
@@ -1141,6 +1191,8 @@
             '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>',
             '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"></path>',
             '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"></path>',
+            '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"></path>',
+            '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"></path>',
             '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>'
         ];
         
@@ -1181,6 +1233,12 @@
             document.getElementById('hero-button-text').addEventListener('input', () => updateSectionPreview('hero'));
             document.getElementById('hero-button-link').addEventListener('input', () => updateSectionPreview('hero'));
             
+            // Branding section listeners
+            document.getElementById('brand-logo').addEventListener('change', () => updateSectionPreview('branding'));
+            document.getElementById('brand-favicon').addEventListener('change', () => updateSectionPreview('branding'));
+            document.getElementById('brand-colors').addEventListener('input', () => updateSectionPreview('branding'));
+            document.getElementById('brand-fonts').addEventListener('input', () => updateSectionPreview('branding'));
+            
             // About section listeners
             document.getElementById('about-heading').addEventListener('input', () => updateSectionPreview('about'));
             document.getElementById('about-content').addEventListener('input', () => updateSectionPreview('about'));
@@ -1209,6 +1267,9 @@
                     switch(doc.id) {
                         case 'hero':
                             populateHeroSettings(doc.data());
+                            break;
+                        case 'branding':
+                            populateBrandingSettings(doc.data());
                             break;
                         case 'about':
                             populateAboutSettings(doc.data());
@@ -1242,6 +1303,45 @@
             document.getElementById('hero-subheading').value = data.subheading || 'Quality construction and home improvement services in Monroe, MI';
             document.getElementById('hero-button-text').value = data.buttonText || 'Call For a Free Quote';
             document.getElementById('hero-button-link').value = data.buttonLink || 'tel:7347778158';
+        }
+        
+        // Populate branding section settings
+        function populateBrandingSettings(data) {
+            if (!data) return;
+            
+            // Logo
+            const logoInput = document.getElementById('brand-logo');
+            const logoPreview = document.getElementById('logo-preview-container');
+            logoInput.value = ''; // Clear previous value
+            logoPreview.innerHTML = ''; // Clear previous preview
+            
+            if (data.logo) {
+                const logoImg = document.createElement('img');
+                logoImg.src = data.logo;
+                logoImg.alt = 'Brand Logo';
+                logoImg.style.maxWidth = '180px';
+                logoImg.style.borderRadius = '8px';
+                logoPreview.appendChild(logoImg);
+            }
+            
+            // Favicon
+            const faviconInput = document.getElementById('brand-favicon');
+            const faviconPreview = document.getElementById('favicon-preview-container');
+            faviconInput.value = ''; // Clear previous value
+            faviconPreview.innerHTML = ''; // Clear previous preview
+            
+            if (data.favicon) {
+                const faviconImg = document.createElement('img');
+                faviconImg.src = data.favicon;
+                faviconImg.alt = 'Brand Favicon';
+                faviconImg.style.width = '32px';
+                faviconImg.style.height = '32px';
+                faviconImg.style.borderRadius = '4px';
+                faviconPreview.appendChild(faviconImg);
+            }
+            
+            document.getElementById('brand-colors').value = data.colors ? data.colors.join(', ') : '';
+            document.getElementById('brand-fonts').value = data.fonts ? data.fonts.join(', ') : '';
         }
         
         // Populate about section settings
@@ -1308,6 +1408,63 @@
                     `;
                     break;
                     
+                case 'branding':
+                    const logoInput = document.getElementById('brand-logo');
+                    const logoPreview = document.getElementById('logo-preview-container');
+                    const faviconInput = document.getElementById('brand-favicon');
+                    const faviconPreview = document.getElementById('favicon-preview-container');
+                    const colorsInput = document.getElementById('brand-colors');
+                    const fontsInput = document.getElementById('brand-fonts');
+                    
+                    // Logo
+                    let logoHTML = '';
+                    if (logoInput.files && logoInput.files[0]) {
+                        const reader = new FileReader();
+                        reader.onload = function(e) {
+                            logoHTML = `<img src="${e.target.result}" alt="Logo Preview" style="max-width: 180px; border-radius: 8px;">`;
+                            logoPreview.innerHTML = logoHTML;
+                        };
+                        reader.readAsDataURL(logoInput.files[0]);
+                    } else {
+                        logoPreview.innerHTML = '';
+                    }
+                    
+                    // Favicon
+                    let faviconHTML = '';
+                    if (faviconInput.files && faviconInput.files[0]) {
+                        const reader = new FileReader();
+                        reader.onload = function(e) {
+                            faviconHTML = `<img src="${e.target.result}" alt="Favicon Preview" style="width: 32px; height: 32px; border-radius: 4px;">`;
+                            faviconPreview.innerHTML = faviconHTML;
+                        };
+                        reader.readAsDataURL(faviconInput.files[0]);
+                    } else {
+                        faviconPreview.innerHTML = '';
+                    }
+                    
+                    // Colors and Fonts
+                    const colors = colorsInput.value.split(',').map(c => c.trim()).filter(c => c);
+                    const fonts = fontsInput.value.split(',').map(f => f.trim()).filter(f => f);
+                    
+                    previewElement.innerHTML = `
+                        <div style="padding: 1rem; border-radius: 6px; background-color: #f1f3f5;">
+                            <h2 style="color: var(--primary-color); margin-top: 0;">Branding Preview</h2>
+                            <div style="margin-bottom: 1rem;">
+                                <strong>Logo:</strong> ${logoHTML || 'No logo uploaded.'}
+                            </div>
+                            <div style="margin-bottom: 1rem;">
+                                <strong>Favicon:</strong> ${faviconHTML || 'No favicon uploaded.'}
+                            </div>
+                            <div style="margin-bottom: 1rem;">
+                                <strong>Colors:</strong> ${colors.length > 0 ? colors.map(c => `<span style="display:inline-block; width: 20px; height: 20px; background-color:${c}; border-radius: 4px; margin-right: 0.5rem;"></span>`).join('') : 'No colors specified.'}
+                            </div>
+                            <div>
+                                <strong>Fonts:</strong> ${fonts.length > 0 ? fonts.join(', ') : 'No fonts specified.'}
+                            </div>
+                        </div>
+                    `;
+                    break;
+                    
                 case 'about':
                     const aboutHeading = document.getElementById('about-heading').value || 'About Our Company';
                     const aboutContent = document.getElementById('about-content').value || 'Content about your company...';
@@ -1343,7 +1500,7 @@
                                     Email Us
                                 </a>
                                 <a href="tel:${contactPhone.replace(/[^0-9]/g, '')}" style="display: inline-flex; align-items: center; background: #088395; color: white; padding: 0.6rem 1rem; border-radius: 4px; font-weight: bold; text-decoration: none;">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;">
                                         <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
                                     </svg>
                                     Call ${contactPhone}
@@ -1413,6 +1570,7 @@
         // Update all previews
         function updateAllPreviews() {
             updateSectionPreview('hero');
+            updateSectionPreview('branding');
             updateSectionPreview('about');
             updateSectionPreview('services');
             updateSectionPreview('contact');
@@ -1484,6 +1642,7 @@
             expandBtn.addEventListener('click', () => {
                 content.classList.toggle('expanded');
                 expandBtn.textContent = content.classList.contains('expanded') ? 'Hide Service Details' : 'Edit Service Details';
+
             });
             
             // Delete service
@@ -1561,6 +1720,14 @@
                     updatedAt: new Date()
                 };
                 
+                const brandingData = {
+                    logo: document.getElementById('brand-logo').files[0] ? await uploadImage(document.getElementById('brand-logo').files[0], 'logos') : null,
+                    favicon: document.getElementById('brand-favicon').files[0] ? await uploadImage(document.getElementById('brand-favicon').files[0], 'favicons') : null,
+                    colors: document.getElementById('brand-colors').value.split(',').map(c => c.trim()).filter(c => c),
+                    fonts: document.getElementById('brand-fonts').value.split(',').map(f => f.trim()).filter(f => f),
+                    updatedAt: new Date()
+                };
+                
                 const aboutData = {
                     heading: document.getElementById('about-heading').value,
                     content: document.getElementById('about-content').value,
@@ -1599,6 +1766,7 @@
                 
                 // Save each section to Firebase
                 await setDoc(doc(db, 'settings', 'hero'), heroData);
+                await setDoc(doc(db, 'settings', 'branding'), brandingData);
                 await setDoc(doc(db, 'settings', 'about'), aboutData);
                 await setDoc(doc(db, 'settings', 'services'), servicesData);
                 await setDoc(doc(db, 'settings', 'contact'), contactData);
@@ -1614,6 +1782,167 @@
             
             hideSpinner(siteSpinner);
         }
+
+        // --- Helper: Upload Image to Storage ---
+        async function uploadImage(file, folder) {
+            return new Promise((resolve, reject) => {
+                const storagePath = `${folder}/${Date.now()}_${file.name}`;
+                const storageRef = ref(storage, storagePath);
+                const uploadTask = uploadBytesResumable(storageRef, file);
+                
+                uploadTask.on('state_changed',
+                    null,
+                    (error) => {
+                        console.error("Upload failed", error);
+                        reject(error);
+                    },
+                    async () => {
+                        try {
+                            const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+                            resolve(downloadURL);
+                        } catch (error) {
+                            console.error("Error getting download URL:", error);
+                            reject(error);
+                        }
+                    }
+                );
+            });
+        }
+        
+        // --- Logo Upload Button and Preview ---
+        const logoInput = document.getElementById('brand-logo');
+        const logoUploadBtn = document.getElementById('logo-upload-btn');
+        const logoPreviewContainer = document.getElementById('logo-preview-container');
+        const logoUploadArea = document.getElementById('logo-upload-area');
+        const logoUploadProgress = document.getElementById('logo-upload-progress');
+        const logoUploadSpinner = document.getElementById('logo-upload-spinner');
+
+        logoUploadBtn.addEventListener('click', () => logoInput.click());
+        
+        logoInput.addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            // Validate file type and size
+            if (!['image/jpeg','image/png','image/webp'].includes(file.type)) {
+                showToast('Only JPG, PNG, or WEBP images allowed for logo.', 'error');
+                logoInput.value = '';
+                logoPreviewContainer.innerHTML = '';
+                return;
+            }
+            
+            if (file.size > 2 * 1024 * 1024) {
+                showToast('Logo image must be under 2MB.', 'error');
+                logoInput.value = '';
+                logoPreviewContainer.innerHTML = '';
+                return;
+            }
+            
+            // Show preview
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = document.createElement('img');
+                img.src = e.target.result;
+                img.alt = 'Logo Preview';
+                img.style.maxWidth = '180px';
+                img.style.borderRadius = '8px';
+                logoPreviewContainer.innerHTML = '';
+                logoPreviewContainer.appendChild(img);
+                
+                // Update the branding preview
+                updateSectionPreview('branding');
+            };
+            reader.readAsDataURL(file);
+        });
+        
+        // Logo drag and drop functionality
+        logoUploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            logoUploadArea.classList.add('dragover');
+        });
+        
+        logoUploadArea.addEventListener('dragleave', (e) => {
+            e.preventDefault();
+            logoUploadArea.classList.remove('dragover');
+        });
+        
+        logoUploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            logoUploadArea.classList.remove('dragover');
+            const file = e.dataTransfer.files[0];
+            if (file) {
+                logoInput.files = e.dataTransfer.files;
+                logoInput.dispatchEvent(new Event('change'));
+            }
+        });
+        
+        // --- Favicon Upload Button and Preview ---
+        const faviconInput = document.getElementById('brand-favicon');
+        const faviconUploadBtn = document.getElementById('favicon-upload-btn');
+        const faviconPreviewContainer = document.getElementById('favicon-preview-container');
+        const faviconUploadArea = document.getElementById('favicon-upload-area');
+        const faviconUploadProgress = document.getElementById('favicon-upload-progress');
+        const faviconUploadSpinner = document.getElementById('favicon-upload-spinner');
+        
+        faviconUploadBtn.addEventListener('click', () => faviconInput.click());
+        
+        faviconInput.addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            // Validate file type and size
+            if (!['image/x-icon','image/png','image/webp'].includes(file.type)) {
+                showToast('Only ICO, PNG, or WEBP images allowed for favicon.', 'error');
+                faviconInput.value = '';
+                faviconPreviewContainer.innerHTML = '';
+                return;
+            }
+            
+            if (file.size > 512 * 1024) {
+                showToast('Favicon must be under 512KB.', 'error');
+                faviconInput.value = '';
+                faviconPreviewContainer.innerHTML = '';
+                return;
+            }
+            
+            // Show preview
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = document.createElement('img');
+                img.src = e.target.result;
+                img.alt = 'Favicon Preview';
+                img.style.width = '32px';
+                img.style.height = '32px';
+                img.style.borderRadius = '4px';
+                faviconPreviewContainer.innerHTML = '';
+                faviconPreviewContainer.appendChild(img);
+                
+                // Update the branding preview
+                updateSectionPreview('branding');
+            };
+            reader.readAsDataURL(file);
+        });
+        
+        // Favicon drag and drop functionality
+        faviconUploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            faviconUploadArea.classList.add('dragover');
+        });
+        
+        faviconUploadArea.addEventListener('dragleave', (e) => {
+            e.preventDefault();
+            faviconUploadArea.classList.remove('dragover');
+        });
+        
+        faviconUploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            faviconUploadArea.classList.remove('dragover');
+            const file = e.dataTransfer.files[0];
+            if (file) {
+                faviconInput.files = e.dataTransfer.files;
+                faviconInput.dispatchEvent(new Event('change'));
+            }
+        });
     </script>
 </body>
 </html>
