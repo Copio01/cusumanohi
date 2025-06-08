@@ -204,46 +204,52 @@
         .main-nav a::after, .main-nav .nav-contact-btn::after { content: ''; position: absolute; bottom: 0; left: 0; width: 0; height: 2px; background-color: var(--accent-color); transition: width 0.3s ease; }
         .main-nav a:hover::after, .main-nav .nav-contact-btn:hover::after { width: 100%; }
 
-        /* Static Hero Banner - IMPROVED VERSION */
+        /* Static Hero Banner - COMPLETE FIX FOR ALL SIDES */
         .hero-banner {
             position: relative;
             width: 100%;
-            height: auto;
-            min-height: 180px; /* Minimum height for smaller screens */
-            background-image: url('images/banner.png'); /* Using your local banner image */
-            background-size: contain; /* Maintain image aspect ratio without cropping */
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #000000; /* Black background to match your banner */
+        }
+
+        .hero-banner::before {
+            content: "";
+            display: block;
+            width: 100%;
+            height: 0;
+            padding-top: calc(300 / 1400 * 100%); /* Use the actual aspect ratio of your banner */
+        }
+
+        .hero-banner::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: url('images/banner.png');
+            background-size: contain;
             background-position: center center;
             background-repeat: no-repeat;
-            background-color: #000000; /* Black background to match your banner */
-            display: block;
-            background-attachment: scroll;
-            margin: 0 auto;
-            padding-top: 16%; /* This creates a responsive height based on width */
         }
 
         /* Responsive adjustments for banner */
-        @media (max-width: 1200px) {
-            .hero-banner {
-                padding-top: 20%; /* Slightly increase height proportion */
-            }
-        }
-
-        @media (max-width: 992px) {
-            .hero-banner {
-                padding-top: 22%; /* Further adjust for medium screens */
-            }
-        }
-
         @media (max-width: 768px) {
-            .hero-banner {
-                padding-top: 26%; /* Adjust aspect ratio for smaller screens */
+            .hero-banner::before {
+                padding-top: calc(300 / 1400 * 120%); /* Increase height proportion slightly for mobile */
             }
         }
 
-        @media (max-width: 480px) {
-            .hero-banner {
-                padding-top: 40%; /* Further adjust aspect ratio for mobile */
-            }
+        /* Remove conflicting styles */
+        .hero-banner {
+            background-image: none !important;
+            background-attachment: scroll !important;
+            background-size: auto !important;
+            padding-top: 0 !important;
         }
 
         /* Hero content section that will be placed below banner */
@@ -255,15 +261,6 @@
             position: relative;
         }
 
-        /* Remove overlay styles as we're not using it anymore */
-        .hero-overlay {
-            display: none;
-        }
-
-        /* Remove conflicting parallax styles */
-        .hero-banner {
-            background-attachment: scroll !important;
-        }
         /* --- Wavy SVG Section Divider --- */
         .section-divider {
             display: block;
