@@ -31,7 +31,7 @@
         #upload-btn:hover { background-color: #238b80 !important; }
         #login-error { color: var(--danger-color); background-color: rgba(230, 57, 70, 0.1); margin-top: 1.5rem; padding: 0.8rem; border-radius: 8px; display: none; }
         #admin-dashboard { width: 100%; height: 100vh; display: none; flex-direction: column; background-color: var(--light-bg); }
-        .admin-header { background-color: var(--white); padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e9ecef; }
+        .admin-header { background-color: var(--white); padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e9ecef; position: relative; }
         .admin-header h1 { font-size: 1.5rem; color: var(--primary-color); }
         .logout-btn { background-color: transparent; color: var(--danger-color); border: 2px solid var(--danger-color); padding: 0.5rem 1rem; border-radius: 8px; cursor: pointer; font-weight: 700; }
         .admin-main { padding: 2.5rem; flex-grow: 1; overflow-y: auto; }
@@ -71,6 +71,30 @@
             .control-card { padding: 1rem; }
             #login-screen { padding: 1.5rem; }
         }
+
+        /* Company Logo in Header */
+        .company-logo {
+            position: absolute;
+            top: 10px;
+            left: 20px;
+            width: 50px;
+            height: 50px;
+            border-radius: 0; /* Removed border-radius to make it square */
+            overflow: hidden;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.15);
+            border: 2px solid var(--accent-color);
+            transition: transform 0.3s ease;
+        }
+
+        .company-logo:hover {
+            transform: scale(1.1);
+        }
+
+        .company-logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain; /* Changed to 'contain' to ensure full image is shown */
+        }
     </style>
 </head>
 <body>
@@ -95,6 +119,9 @@
         <header class="admin-header">
             <h1>Dashboard</h1>
             <button id="logout-btn" class="logout-btn">Logout</button>
+            <div class="company-logo" aria-label="Company Logo">
+                <img src="https://i.imgur.com/3Ba6IZk.jpeg" alt="Cusumano Home Improvements">
+            </div>
         </header>
 
         <main class="admin-main">

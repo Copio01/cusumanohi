@@ -209,110 +209,147 @@
         .main-nav a::after, .main-nav .nav-contact-btn::after { content: ''; position: absolute; bottom: 0; left: 0; width: 0; height: 2px; background-color: var(--accent-color); transition: width 0.3s ease; }
         .main-nav a:hover::after, .main-nav .nav-contact-btn:hover::after { width: 100%; }
 
-        /* Static Hero Banner */
+        /* Static Hero Banner - FIXED VERSION */
         .hero-banner {
             position: relative;
             width: 100%;
-            height: 70vh; 
-            max-height: 750px;
-            background-image: url('https://i.imgur.com/3Ba6IZk.jpeg');
-            background-size: cover; /* Changed from 'contain' to 'cover' for better appearance */
-            background-position: center top; /* Changed to 'center top' to ensure the main content is always visible */
+            height: auto;
+            min-height: 60vh;
+            max-height: 75vh;
+            background-image: url('https://i.imgur.com/KEiFAkV.jpeg');
+            background-size: cover;
+            background-position: center center;
             background-repeat: no-repeat;
             background-color: #eef2f3;
             display: flex;
             align-items: center;
             justify-content: center;
-            background-attachment: fixed;
+            background-attachment: scroll; /* Better mobile compatibility */
+            padding: 4rem 1rem;
         }
-        .hero-overlay {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(10, 77, 104, 0.6); /* Slightly darker overlay to make text more readable */
-            display: flex; flex-direction: column; 
-            justify-content: center; /* Changed from 'space-around' to 'center' to avoid blocking visual elements */
-            align-items: center; text-align: center; color: var(--white); 
-            padding: 3rem 1rem; 
-        }
-        .hero-overlay h1 { font-size: 3.5rem; margin-bottom: 1rem; color: var(--white); text-shadow: 1px 1px 3px rgba(0,0,0,0.4); }
-        .hero-overlay p { font-size: 1.2rem; max-width: 600px; margin: 0 auto 2rem; text-shadow: 1px 1px 3px rgba(0,0,0,0.4); }
 
-        /* Image Slider Section */
-        #gallery-slider-section {
-            display: none; /* Hidden by default, shown by JS */
-            padding-top: 4rem;
-        }
-        .slider-container { position: relative; width: 100%; height: 50vh; max-height: 600px; overflow: hidden; background-color: #e0e0e0; border-radius: 8px; }
-        .slider-progress-bar {
+        /* Company Logo in Header - IMPROVED RESPONSIVE VERSION */
+        .company-logo {
             position: absolute;
-            left: 0; right: 0; bottom: 0;
-            height: 5px;
-            background: rgba(0,0,0,0.1);
-            z-index: 12;
+            top: 10px;
+            left: 20px;
+            width: 60px;
+            height: 60px;
+            border-radius: 8px; /* Slight rounding for better appearance */
+            overflow: hidden;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.15);
+            border: 2px solid var(--accent-color);
+            transition: transform 0.3s ease;
+            z-index: 10;
         }
-        .slider-progress {
+
+        .company-logo:hover {
+            transform: scale(1.05);
+        }
+
+        .company-logo img {
+            width: 100%;
             height: 100%;
-            width: 0%;
-            background-color: var(--accent-color);
-            border-radius: 3px;
-            transition: width 0.5s cubic-bezier(.4,0,.2,1);
+            object-fit: cover; /* Changed to cover for better visual appearance */
         }
-        .slide { flex: 0 0 100%; width: 100%; height: 100%; position: relative; }
-        .slide img { width: 100%; height: 100%; object-fit: cover; border-radius: 8px; }
-        .slider-arrow { position: absolute; top: 50%; transform: translateY(-50%); background-color: rgba(255, 255, 255, 0.7); border: none; border-radius: 50%; width: 50px; height: 50px; cursor: pointer; z-index: 10; font-size: 1.5rem; transition: background-color 0.2s; }
-        .slider-arrow:hover { background-color: var(--white); }
-        .slider-arrow.prev { left: 15px; }
-        .slider-arrow.next { right: 15px; }
-        .slider-dots { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); display: flex; gap: 10px; z-index: 10; }
-        .dot { width: 12px; height: 12px; border-radius: 50%; background-color: rgba(255, 255, 255, 0.5); cursor: pointer; transition: background-color 0.3s; }
-        .dot.active { background-color: var(--white); }
-        /* Loading spinner for slider */
-        .slider-loading-spinner { display: none; margin: 2rem auto; border: 4px solid #f3f3f3; border-top: 4px solid var(--primary-color); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
-        @keyframes spin { 100% { transform: rotate(360deg); } }
 
-        /* Admin Login Button */
-        .admin-login-float { position: fixed; bottom: 20px; right: 20px; z-index: 1001; }
-        .admin-login-float a { display: flex; align-items: center; justify-content: center; width: 50px; height: 50px; background-color: var(--primary-color); color: var(--white); border-radius: 50%; text-decoration: none; box-shadow: 0 4px 12px rgba(0,0,0,0.2); transition: transform 0.2s; }
-        .admin-login-float a:hover { transform: scale(1.1); }
-        
-        /* Other Sections... */
-        .btn { display: inline-block; padding: 1rem 2rem; border-radius: 5px; text-decoration: none; font-weight: 700; transition: transform 0.2s ease, box-shadow 0.2s ease; cursor: pointer; border: none; }
-        .btn-primary { background-color: var(--accent-color); color: var(--white); }
-        .btn-secondary { background-color: var(--secondary-color); color: var(--white); }
-        .btn:hover { transform: translateY(-3px); box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
-        #about { background-color: var(--light-gray); }
-        .about-content { text-align: center; max-width: 800px; margin: 0 auto; font-size: 1.1rem; }
-        .services-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; }
-        .service-card { background-color: var(--white); border: 1px solid #e0e0e0; border-radius: 8px; padding: 2rem; text-align: center; transition: transform 0.3s ease, box-shadow 0.3s ease; }
-        .service-card:hover { transform: translateY(-10px); box-shadow: 0 10px 20px rgba(0,0,0,0.08); }
-        .service-icon { width: 60px; height: 60px; margin-bottom: 1.5rem; color: var(--secondary-color); }
-        .service-card h3 { font-size: 1.5rem; margin-bottom: 1rem; }
-        #contact { background-color: var(--primary-color); color: var(--white); text-align: center; }
-        #contact h2 { color: var(--white); }
-        #contact p { font-size: 1.1rem; margin-bottom: 2rem; }
-        .main-footer { background-color: var(--dark-gray); color: var(--light-gray); text-align: center; padding: 2rem 1rem; }
-        
-        /* Modal Styles ... */
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.6); display: none; justify-content: center; align-items: center; z-index: 2000; opacity: 0; transition: opacity 0.3s ease; }
-        .modal-overlay.active { display: flex; opacity: 1; }
-        .modal-content { background-color: var(--white); padding: 2rem 2.5rem; border-radius: 8px; box-shadow: 0 5px 25px rgba(0,0,0,0.2); width: 90%; max-width: 500px; position: relative; transform: translateY(-50px); transition: transform 0.3s ease; }
-        .modal-overlay.active .modal-content { transform: translateY(0); }
-        .modal-close-btn { position: absolute; top: 15px; right: 15px; background: none; border: none; font-size: 2rem; color: #aaa; cursor: pointer; line-height: 1; }
-        .modal-content h2 { margin-bottom: 1.5rem; text-align: center; }
-        .contact-form .form-group { margin-bottom: 1rem; }
-        .contact-form label { display: block; margin-bottom: 0.5rem; font-weight: 700; }
-        .contact-form .field-element { width: 100%; padding: 0.75rem; border: 1px solid #ccc; border-radius: 5px; font-size: 1rem; }
-        .form-actions { margin-top: 1.5rem; }
-        .form-actions .btn { width: 100%; }
-        .separator-text { text-align: center; margin: 1rem 0; font-weight: 700; color: #aaa; text-transform: uppercase; }
-        
-        /* Accessibility: Add focus styles for interactive elements */
-        .main-nav a:focus, .main-nav .nav-contact-btn:focus, .slider-arrow:focus, .dot:focus, .modal-close-btn:focus, .btn:focus {
-            outline: 2px solid var(--accent-color);
-            outline-offset: 2px;
+        /* Header Content - Improved Layout */
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+            position: relative;
+            min-height: 70px; /* Ensure enough space for logo */
         }
-        /* Visually hidden class for screen readers */
-        .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); border: 0; }
+
+        /* Logo positioning adjustment to avoid overlap */
+        .logo {
+            font-family: var(--font-heading);
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--primary-color);
+            text-decoration: none;
+            padding-bottom: 0.2em;
+            margin-left: 80px; /* Space for the logo */
+        }
+
+        /* Enhanced responsive design */
+        @media (max-width: 768px) {
+            .company-logo {
+                width: 45px;
+                height: 45px;
+                top: 8px;
+                left: 15px;
+            }
+            
+            .logo {
+                font-size: 1.2rem;
+                margin-left: 65px; /* Adjusted for smaller logo */
+            }
+            
+            .header-content {
+                flex-direction: column;
+                padding: 0.5rem 0;
+            }
+            
+            .main-nav {
+                margin-top: 0.5rem;
+            }
+            
+            .main-nav a, .main-nav .nav-contact-btn {
+                margin-left: 1rem;
+                margin-right: 1rem;
+            }
+            
+            .hero-banner {
+                min-height: 50vh;
+                padding: 2rem 1rem;
+            }
+            
+            .hero-overlay h1 {
+                font-size: 2.2rem !important;
+            }
+            
+            .hero-overlay p {
+                font-size: 1.1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .company-logo {
+                width: 40px;
+                height: 40px;
+                top: 5px;
+                left: 10px;
+            }
+            
+            .logo {
+                font-size: 1rem;
+                margin-left: 55px;
+            }
+            
+            .hero-banner {
+                min-height: 45vh;
+                padding: 1.5rem 0.5rem;
+            }
+            
+            .hero-overlay h1 {
+                font-size: 1.8rem !important;
+            }
+            
+            .hero-overlay p {
+                font-size: 1rem;
+            }
+            
+            .main-nav a, .main-nav .nav-contact-btn {
+                font-size: 0.9rem;
+                margin-left: 0.5rem;
+                margin-right: 0.5rem;
+            }
+        }
 
         /* --- Wavy SVG Section Divider --- */
         .section-divider {
@@ -392,6 +429,12 @@
         }
 
         @media (max-width: 768px) {
+            .company-logo {
+                width: 45px;
+                height: 45px;
+                top: 8px;
+                right: 15px;
+            }
             .header-content { flex-direction: column; }
             .main-nav { margin-top: 1rem; }
             .hero-overlay h1, .slide-overlay h1 { font-size: 2.5rem; }
@@ -509,6 +552,142 @@
             .slider-container { height: 220px; min-height: 180px; }
             .slide img { object-fit: cover; }
         }
+
+        /* Image Slider Section */
+        #gallery-slider-section {
+            display: none; /* Hidden by default, shown by JS */
+            padding-top: 4rem;
+        }
+        .slider-container { 
+            position: relative; 
+            width: 100%; 
+            height: 50vh; 
+            max-height: 600px; 
+            overflow: hidden; 
+            background-color: #e0e0e0; 
+            border-radius: 8px; 
+        }
+        .slider { 
+            display: flex; 
+            transition: transform 0.5s ease; 
+            height: 100%; 
+        }
+        .slide { 
+            flex: 0 0 100%; 
+            width: 100%; 
+            height: 100%; 
+            position: relative; 
+        }
+        .slide img { 
+            width: 100%; 
+            height: 100%; 
+            object-fit: cover; 
+            border-radius: 8px; 
+        }
+        .slider-arrow { 
+            position: absolute; 
+            top: 50%; 
+            transform: translateY(-50%); 
+            background-color: rgba(255, 255, 255, 0.7); 
+            border: none; 
+            border-radius: 50%; 
+            width: 50px; 
+            height: 50px; 
+            cursor: pointer; 
+            z-index: 10; 
+            font-size: 1.5rem; 
+            transition: background-color 0.2s; 
+        }
+        .slider-arrow:hover { 
+            background-color: var(--white); 
+        }
+        .slider-arrow.left { 
+            left: 15px; 
+        }
+        .slider-arrow.right { 
+            right: 15px; 
+        }
+        .slider-dots { 
+            position: absolute; 
+            bottom: 20px; 
+            left: 50%; 
+            transform: translateX(-50%); 
+            display: flex; 
+            gap: 10px; 
+            z-index: 10; 
+        }
+        .dot { 
+            width: 12px; 
+            height: 12px; 
+            border-radius: 50%; 
+            background-color: rgba(255, 255, 255, 0.5); 
+            cursor: pointer; 
+            transition: background-color 0.3s; 
+        }
+        .dot.active { 
+            background-color: var(--white); 
+        }
+        
+        /* Loading spinner for slider */
+        .slider-loading-spinner { 
+            display: none; 
+            margin: 2rem auto; 
+            border: 4px solid #f3f3f3; 
+            border-top: 4px solid var(--primary-color); 
+            border-radius: 50%; 
+            width: 40px; 
+            height: 40px; 
+            animation: spin 1s linear infinite; 
+        }
+        @keyframes spin { 
+            100% { transform: rotate(360deg); } 
+        }
+
+        /* Other Sections... */
+        .btn { display: inline-block; padding: 1rem 2rem; border-radius: 5px; text-decoration: none; font-weight: 700; transition: transform 0.2s ease, box-shadow 0.2s ease; cursor: pointer; border: none; font-family: var(--font-body); }
+        .btn-primary { background-color: var(--accent-color); color: var(--white); }
+        .btn-secondary { background-color: var(--secondary-color); color: var(--white); }
+        .btn:hover { transform: translateY(-3px); box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
+        
+        #about { background-color: var(--light-gray); }
+        .about-content { text-align: center; max-width: 800px; margin: 0 auto; font-size: 1.1rem; }
+        
+        .services-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; }
+        .service-card { background-color: var(--white); border: 1px solid #e0e0e0; border-radius: 8px; padding: 2rem; text-align: center; transition: transform 0.3s ease, box-shadow 0.3s ease; }
+        .service-card:hover { transform: translateY(-10px); box-shadow: 0 10px 20px rgba(0,0,0,0.08); }
+        .service-icon { width: 60px; height: 60px; margin-bottom: 1.5rem; color: var(--secondary-color); }
+        .service-card h3 { font-size: 1.5rem; margin-bottom: 1rem; }
+        
+        #contact { background-color: var(--primary-color); color: var(--white); text-align: center; }
+        #contact h2 { color: var(--white); }
+        #contact p { font-size: 1.1rem; margin-bottom: 2rem; }
+        
+        .main-footer { background-color: var(--dark-gray); color: var(--light-gray); text-align: center; padding: 2rem 1rem; }
+        
+        /* Modal Styles */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.6); display: none; justify-content: center; align-items: center; z-index: 2000; opacity: 0; transition: opacity 0.3s ease; }
+        .modal-overlay.active { display: flex; opacity: 1; }
+        .modal-content { background-color: var(--white); padding: 2rem 2.5rem; border-radius: 8px; box-shadow: 0 5px 25px rgba(0,0,0,0.2); width: 90%; max-width: 500px; position: relative; transform: translateY(-50px); transition: transform 0.3s ease; }
+        .modal-overlay.active .modal-content { transform: translateY(0); }
+        .modal-close-btn { position: absolute; top: 15px; right: 15px; background: none; border: none; font-size: 2rem; color: #aaa; cursor: pointer; line-height: 1; }
+        .modal-content h2 { margin-bottom: 1.5rem; text-align: center; }
+        
+        .contact-form .form-group { margin-bottom: 1rem; }
+        .contact-form label { display: block; margin-bottom: 0.5rem; font-weight: 700; }
+        .contact-form .field-element { width: 100%; padding: 0.75rem; border: 1px solid #ccc; border-radius: 5px; font-size: 1rem; box-sizing: border-box; }
+        .contact-form textarea.field-element { min-height: 100px; resize: vertical; }
+        .form-actions { margin-top: 1.5rem; }
+        .form-actions .btn { width: 100%; }
+        .separator-text { text-align: center; margin: 1rem 0; font-weight: 700; color: #aaa; text-transform: uppercase; }
+        
+        /* Accessibility: Add focus styles for interactive elements */
+        .main-nav a:focus, .main-nav .nav-contact-btn:focus, .slider-arrow:focus, .dot:focus, .modal-close-btn:focus, .btn:focus {
+            outline: 2px solid var(--accent-color);
+            outline-offset: 2px;
+        }
+        
+        /* Visually hidden class for screen readers */
+        .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); border: 0; }
     </style>
 </head>
 <body>
@@ -520,6 +699,9 @@
                 <a href="#services">Services</a>
                 <button class="nav-contact-btn" id="navContactBtn">Contact</button>
             </nav>
+            <div class="company-logo">
+                <img src="https://i.imgur.com/3Ba6IZk.jpeg" alt="Company Logo">
+            </div>
         </div>
     </header>
 
@@ -536,7 +718,7 @@
                     <h1>Transform Your Space</h1>
                     <p>Quality construction and home improvement services in Monroe, MI</p>
                 </div>
-                <a href="tel:7342416805" class="btn btn-primary btn-hero-pulse">Call For a Free Quote</a>
+                <a href="tel:7347778158" class="btn btn-primary btn-hero-pulse">Call For a Free Quote</a>
             </div>
         </section>
         <svg class="section-divider" viewBox="0 0 1440 60" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M0,30 C360,60 1080,0 1440,30 L1440,60 L0,60 Z" fill="#f7f8fc"/></svg>
@@ -628,7 +810,7 @@
                 <div class="name-fields" style="display:flex; gap: 1rem;"><div class="form-group" style="width:50%"><label for="contact-fname">First Name</label><input type="text" id="contact-fname" name="fname" required class="field-element"></div><div class="form-group" style="width:50%"><label for="contact-lname">Last Name</label><input type="text" id="contact-lname" name="lname" required class="field-element"></div></div>
                 <div class="form-group"><label for="contact-email">Email</label><input type="email" id="contact-email" name="email" required class="field-element"></div>
                 <div class="form-group"><label for="contact-phone">Phone (Optional)</label><input type="tel" id="contact-phone" name="phone" class="field-element"></div>
-                <div class="form-actions"><button type="submit" class="btn btn-primary">Submit Form</button><p class="separator-text">or</p><a href="tel:7342416805" class="btn btn-secondary">Call Us Directly</a></div>
+                <div class="form-actions"><button type="submit" class="btn btn-primary">Submit Form</button><p class="separator-text">or</p><a href="tel:7347778158" class="btn btn-secondary">Call Us Directly</a></div>
             </form>
         </div>
     </div>
@@ -647,7 +829,6 @@
             messagingSenderId: "20051552210",
             appId: "1:20051552210:web:7eb3b22baa3fec184e4a0b"
         };
-        // ----------------------------------------------------
 
         let app, db;
         try {
@@ -657,184 +838,205 @@
             console.error("Firebase initialization failed. Please check your config.", error);
         }
 
+        // --- Slider Variables ---
         const gallerySliderSection = document.getElementById('gallery-slider-section');
-        const sliderTrack = gallerySliderSection.querySelector('.slider-track');
-        const dotsContainer = gallerySliderSection.querySelector('#dots-container');
-        const prevBtn = gallerySliderSection.querySelector('#prevBtn');
-        const nextBtn = gallerySliderSection.querySelector('#nextBtn');
-        const sliderLoadingSpinner = document.getElementById('slider-loading-spinner');
+        const slider = document.getElementById('gallery-slider');
+        const dotsContainer = document.getElementById('slider-dots');
+        const progressBar = document.getElementById('slider-progress');
+        const leftArrow = document.querySelector('.slider-arrow.left');
+        const rightArrow = document.querySelector('.slider-arrow.right');
+        
         let slides = [];
         let currentIndex = 0;
-        let intervalId;
+        let autoSlideTimer;
+        let isAutoSliding = true;
 
+        // --- Setup Slider from Firebase ---
         async function setupSliderListener() {
             try {
                 if (!db) throw new Error("Firebase not initialized.");
-                sliderLoadingSpinner.style.display = 'block';
+                
                 const imagesCol = collection(db, 'sliderImages');
                 onSnapshot(imagesCol, (snapshot) => {
-                    sliderLoadingSpinner.style.display = 'none';
                     if (snapshot.empty) {
-                        gallerySliderSection.style.display = 'block';
-                        sliderTrack.innerHTML = `<div class="slide"><img src="https://placehold.co/1200x600/0a4d68/white?text=Gallery+Coming+Soon" alt="Gallery coming soon"></div>`;
-                        prevBtn.style.display = 'none';
-                        nextBtn.style.display = 'none';
-                        dotsContainer.style.display = 'none';
+                        gallerySliderSection.style.display = 'none';
                         return;
                     }
-                    prevBtn.style.display = 'block';
-                    nextBtn.style.display = 'block';
-                    dotsContainer.style.display = 'flex';
+                    
                     gallerySliderSection.style.display = 'block';
                     const imageUrls = snapshot.docs.map(doc => doc.data().url);
-                    buildSliderDOM(imageUrls);
+                    buildSlider(imageUrls);
                 }, (error) => {
-                    sliderLoadingSpinner.style.display = 'none';
-                    console.error("Error fetching slider images. This is likely a Firestore security rule issue.", error);
+                    console.error("Error fetching slider images:", error);
                     gallerySliderSection.style.display = 'none';
                 });
             } catch (error) {
-                sliderLoadingSpinner.style.display = 'none';
                 console.error("Could not set up slider listener:", error);
                 gallerySliderSection.style.display = 'none';
             }
         }
-        
-        function buildSliderDOM(imageUrls) {
-            const currentImage = slides[currentIndex] ? slides[currentIndex].querySelector('img').src : null;
-            const newImageAtCurrentIndex = imageUrls[currentIndex];
 
-            if (sliderTrack.children.length === imageUrls.length && currentImage === newImageAtCurrentIndex) {
-                return;
-            }
-
-            sliderTrack.innerHTML = '';
+        function buildSlider(imageUrls) {
+            // Clear existing content
+            slider.innerHTML = '';
             dotsContainer.innerHTML = '';
-
+            
+            // Build slides
             imageUrls.forEach((url, index) => {
                 const slide = document.createElement('div');
                 slide.className = 'slide';
-                slide.innerHTML = `<img src="${url}" alt="Homepage Slider Image ${index + 1}" onerror="this.onerror=null;this.src='https://placehold.co/1920x1080/ccc/333?text=Image+Not+Found';">`;
-                sliderTrack.appendChild(slide);
+                slide.innerHTML = `<img src="${url}" alt="Project Image ${index + 1}" loading="lazy">`;
+                slider.appendChild(slide);
 
-                const dot = document.createElement('div');
+                const dot = document.createElement('button');
                 dot.className = 'dot';
-                dot.addEventListener('click', () => { goToSlide(index); resetInterval(); });
+                dot.setAttribute('aria-label', `Go to slide ${index + 1}`);
+                dot.addEventListener('click', () => goToSlide(index));
                 dotsContainer.appendChild(dot);
             });
 
-            slides = Array.from(sliderTrack.children);
-            if (slides.length > 0) {
-                 if (currentIndex >= slides.length) currentIndex = 0;
-                 updateSlider();
-                 resetInterval();
-            }
+            slides = Array.from(slider.children);
+            currentIndex = 0;
+            updateSlider();
+            startAutoSlide();
         }
 
-        // --- Enhance slider transitions and add fade effect ---
         function updateSlider() {
             if (slides.length === 0) return;
-            sliderTrack.style.transition = 'transform 0.7s cubic-bezier(.4,0,.2,1)';
-            sliderTrack.style.transform = `translateX(-${currentIndex * 100}%)`;
-            document.querySelectorAll('.dot').forEach((dot, index) => dot.classList.toggle('active', index === currentIndex));
-            slides.forEach((slide, idx) => {
-                slide.style.opacity = idx === currentIndex ? '1' : '0.5';
-                slide.style.transition = 'opacity 0.7s cubic-bezier(.4,0,.2,1)';
+            
+            // Update slider position
+            slider.style.transform = `translateX(-${currentIndex * 100}%)`;
+            
+            // Update dots
+            dotsContainer.querySelectorAll('.dot').forEach((dot, index) => {
+                dot.classList.toggle('active', index === currentIndex);
             });
+            
+            // Update progress bar
+            const progress = ((currentIndex + 1) / slides.length) * 100;
+            progressBar.style.width = `${progress}%`;
         }
-        
+
         function goToSlide(index) {
-            if (slides.length === 0) return;
             currentIndex = (index + slides.length) % slides.length;
             updateSlider();
-        }
-        
-        function nextSlide() { goToSlide(currentIndex + 1); }
-        function prevSlide() { goToSlide(currentIndex - 1); }
-        
-        function startInterval() {
-            clearInterval(intervalId);
-            if(slides.length > 1) intervalId = setInterval(nextSlide, 5000);
-        }
-        
-        function resetInterval() {
-            startInterval();
+            resetAutoSlide();
         }
 
-        nextBtn.addEventListener('click', () => { nextSlide(); resetInterval(); });
-        prevBtn.addEventListener('click', () => { prevSlide(); resetInterval(); });
+        function nextSlide() {
+            goToSlide(currentIndex + 1);
+        }
 
-        document.addEventListener('DOMContentLoaded', setupSliderListener);
-        
-        // Modal script
+        function prevSlide() {
+            goToSlide(currentIndex - 1);
+        }
+
+        function startAutoSlide() {
+            if (!isAutoSliding || slides.length <= 1) return;
+            clearTimeout(autoSlideTimer);
+            autoSlideTimer = setTimeout(nextSlide, 5000);
+        }
+
+        function resetAutoSlide() {
+            clearTimeout(autoSlideTimer);
+            startAutoSlide();
+        }
+
+        // --- Event Listeners ---
+        leftArrow.addEventListener('click', () => {
+            prevSlide();
+            resetAutoSlide();
+        });
+
+        rightArrow.addEventListener('click', () => {
+            nextSlide();
+            resetAutoSlide();
+        });
+
+        // Pause auto-slide on hover
+        gallerySliderSection.addEventListener('mouseenter', () => {
+            isAutoSliding = false;
+            clearTimeout(autoSlideTimer);
+        });
+
+        gallerySliderSection.addEventListener('mouseleave', () => {
+            isAutoSliding = true;
+            startAutoSlide();
+        });
+
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (gallerySliderSection.style.display === 'none') return;
+            
+            if (e.key === 'ArrowLeft') {
+                prevSlide();
+                resetAutoSlide();
+            } else if (e.key === 'ArrowRight') {
+                nextSlide();
+                resetAutoSlide();
+            }
+        });
+
+        // Touch/swipe support
+        let touchStartX = null;
+        slider.addEventListener('touchstart', (e) => {
+            touchStartX = e.touches[0].clientX;
+        });
+
+        slider.addEventListener('touchend', (e) => {
+            if (touchStartX === null) return;
+            
+            const touchEndX = e.changedTouches[0].clientX;
+            const diff = touchStartX - touchEndX;
+            
+            if (Math.abs(diff) > 50) {
+                if (diff > 0) {
+                    nextSlide();
+                } else {
+                    prevSlide();
+                }
+                resetAutoSlide();
+            }
+            
+            touchStartX = null;
+        });
+
+        // --- Modal Functionality ---
         const contactModal = document.getElementById('contactModal');
         const navContactBtn = document.getElementById('navContactBtn');
         const ctaContactBtn = document.getElementById('ctaContactBtn');
         const modalCloseBtn = document.getElementById('modalCloseBtn');
-        // Accessibility: trap focus in modal
-        function trapFocus(element) {
-            const focusableEls = element.querySelectorAll('a, button, textarea, input, select, [tabindex]:not([tabindex="-1"])');
-            const firstFocusableEl = focusableEls[0];
-            const lastFocusableEl = focusableEls[focusableEls.length - 1];
-            element.addEventListener('keydown', function(e) {
-                if (e.key === 'Tab') {
-                    if (e.shiftKey) { // shift + tab
-                        if (document.activeElement === firstFocusableEl) {
-                            e.preventDefault();
-                            lastFocusableEl.focus();
-                        }
-                    } else { // tab
-                        if (document.activeElement === lastFocusableEl) {
-                            e.preventDefault();
-                            firstFocusableEl.focus();
-                        }
-                    }
-                }
-                if (e.key === 'Escape') closeModal();
-            });
-        }
-        const openModal = () => {
+
+        function openModal() {
             contactModal.classList.add('active');
             setTimeout(() => {
-                const firstInput = contactModal.querySelector('input, textarea, button');
+                const firstInput = contactModal.querySelector('input, textarea');
                 if (firstInput) firstInput.focus();
             }, 100);
-            trapFocus(contactModal);
-        };
-        const closeModal = () => contactModal.classList.remove('active');
+        }
+
+        function closeModal() {
+            contactModal.classList.remove('active');
+        }
+
         navContactBtn.addEventListener('click', openModal);
         ctaContactBtn.addEventListener('click', openModal);
         modalCloseBtn.addEventListener('click', closeModal);
-        contactModal.addEventListener('click', e => { if(e.target === contactModal) closeModal(); });
-
-        // --- Animate service cards on scroll ---
-        function animateOnScroll() {
-            const cards = document.querySelectorAll('.service-card');
-            const observer = new window.IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        entry.target.style.transform = 'translateY(0) scale(1.03)';
-                        entry.target.style.opacity = '1';
-                        entry.target.style.transition = 'all 0.7s cubic-bezier(.4,0,.2,1)';
-                    } else {
-                        entry.target.style.transform = 'translateY(40px) scale(0.98)';
-                        entry.target.style.opacity = '0.5';
-                    }
-                });
-            }, { threshold: 0.2 });
-            cards.forEach(card => {
-                card.style.opacity = '0.5';
-                card.style.transform = 'translateY(40px) scale(0.98)';
-                observer.observe(card);
-            });
-        }
-        document.addEventListener('DOMContentLoaded', () => {
-            setupSliderListener();
-            animateOnScroll();
+        
+        contactModal.addEventListener('click', (e) => {
+            if (e.target === contactModal) closeModal();
         });
 
-        // --- Scroll-to-Top Button Logic ---
+        // Close modal with Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && contactModal.classList.contains('active')) {
+                closeModal();
+            }
+        });
+
+        // --- Scroll-to-Top Button ---
         const scrollTopBtn = document.getElementById('scrollTopBtn');
+        
         window.addEventListener('scroll', () => {
             if (window.scrollY > 300) {
                 scrollTopBtn.classList.add('show');
@@ -842,92 +1044,30 @@
                 scrollTopBtn.classList.remove('show');
             }
         });
+
         scrollTopBtn.addEventListener('click', () => {
             window.scrollTo({ top: 0, behavior: 'smooth' });
         });
 
-        // SLIDER LOGIC + PROGRESS BAR + SWIPE SUPPORT
-        (function() {
-            const slider = document.getElementById('gallery-slider');
-            const slides = slider.querySelectorAll('.slide');
-            const dots = document.getElementById('slider-dots');
-            const progress = document.getElementById('slider-progress');
-            let current = 0;
-            let autoSlide = true;
-            let timer;
-            // Create dots
-            dots.innerHTML = '';
-            slides.forEach((_, i) => {
-                const dot = document.createElement('button');
-                dot.className = 'dot';
-                dot.setAttribute('aria-label', `Go to slide ${i+1}`);
-                dot.tabIndex = 0;
-                dot.addEventListener('click', () => goTo(i));
-                dots.appendChild(dot);
-            });
-            function update() {
-                slides.forEach((s, i) => {
-                    s.classList.toggle('active', i === current);
-                    s.setAttribute('aria-hidden', i !== current);
-                });
-                dots.childNodes.forEach((d, i) => d.classList.toggle('active', i === current));
-                // Progress bar
-                progress.style.width = `${((current+1)/slides.length)*100}%`;
-            }
-            function goTo(idx) {
-                current = (idx + slides.length) % slides.length;
-                update();
-                resetTimer();
-            }
-            function next() { goTo(current+1); }
-            function prev() { goTo(current-1); }
-            document.querySelector('.slider-arrow.left').onclick = prev;
-            document.querySelector('.slider-arrow.right').onclick = next;
-            // Keyboard support
-            document.querySelector('.slider-container').addEventListener('keydown', e => {
-                if (e.key === 'ArrowLeft') prev();
-                if (e.key === 'ArrowRight') next();
-            });
-            // Auto slide
-            function resetTimer() {
-                if (!autoSlide) return;
-                clearTimeout(timer);
-                timer = setTimeout(next, 6000);
-            }
-            // Swipe support
-            let startX = null;
-            slider.addEventListener('touchstart', e => {
-                if (e.touches.length === 1) startX = e.touches[0].clientX;
-            });
-            slider.addEventListener('touchmove', e => {
-                if (!startX) return;
-                let dx = e.touches[0].clientX - startX;
-                if (Math.abs(dx) > 40) {
-                    if (dx > 0) prev(); else next();
-                    startX = null;
-                }
-            });
-            slider.addEventListener('touchend', () => { startX = null; });
-            // Init
-            update();
-            resetTimer();
-            slider.addEventListener('mouseenter', () => autoSlide = false);
-            slider.addEventListener('mouseleave', () => { autoSlide = true; resetTimer(); });
-        })();
-        // SECTION TITLE ANIMATION ON SCROLL
-        (function() {
+        // --- Animate section titles on scroll ---
+        function animateOnScroll() {
             const titles = document.querySelectorAll('.section-title');
-            function onScroll() {
-                titles.forEach(title => {
-                    const rect = title.getBoundingClientRect();
-                    if (rect.top < window.innerHeight - 80) {
-                        title.classList.add('visible');
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
                     }
                 });
-            }
-            window.addEventListener('scroll', onScroll, {passive:true});
-            window.addEventListener('DOMContentLoaded', onScroll);
-        })();
+            }, { threshold: 0.1 });
+
+            titles.forEach(title => observer.observe(title));
+        }
+
+        // --- Initialize everything when DOM is loaded ---
+        document.addEventListener('DOMContentLoaded', () => {
+            setupSliderListener();
+            animateOnScroll();
+        });
     </script>
 </body>
 </html>
