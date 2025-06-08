@@ -209,146 +209,75 @@
             position: relative;
             width: 100%;
             height: auto;
-            min-height: 60vh;
-            max-height: 75vh;
+            min-height: auto;
+            max-height: none;
             background-image: url('https://i.imgur.com/KEiFAkV.jpeg');
-            background-size: cover;
+            background-size: contain;
             background-position: center center;
             background-repeat: no-repeat;
             background-color: #eef2f3;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background-attachment: scroll; /* Better mobile compatibility */
-            padding: 4rem 1rem;
+            display: block;
+            background-attachment: scroll;
+            padding: 0;
         }
 
-        /* Company Logo in Header - IMPROVED RESPONSIVE VERSION */
-        .company-logo {
-            position: absolute;
-            top: 8px;
-            left: 15px;
-            width: 65px;
-            height: 50px; /* Made more rectangular */
-            border-radius: 6px; /* Reduced rounding slightly */
-            overflow: hidden;
-            box-shadow: 0 3px 10px rgba(0,0,0,0.15);
-            border: 2px solid var(--accent-color);
-            transition: transform 0.3s ease;
-            z-index: 10;
-        }
-
-        .company-logo:hover {
-            transform: scale(1.05);
-        }
-
-        .company-logo img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover; /* Changed to cover for better visual appearance */
-        }
-
-        /* Header Content - Improved Layout */
-        .header-content {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            width: 90%;
-            max-width: 1200px;
-            margin: 0 auto;
+        /* Hero content section that will be placed below banner */
+        .hero-content-section {
+            background: linear-gradient(120deg, var(--primary-color) 60%, var(--secondary-color) 100%);
+            color: var(--white);
+            text-align: center;
+            padding: 4rem 2rem;
             position: relative;
-            min-height: 75px; /* Increased to accommodate larger logo */
-            padding: 0.5rem 0; /* Added padding for better spacing */
         }
 
-        /* Logo positioning adjustment to avoid overlap */
-        .logo {
-            font-family: var(--font-heading);
-            font-size: 1.5rem;
-            font-weight: 600;
-            color: var(--primary-color);
-            text-decoration: none;
-            padding-bottom: 0.2em;
-            margin-left: 85px; /* Increased space for the larger logo */
+        .hero-content-section h1 {
+            font-size: 3.8rem;
+            letter-spacing: 1px;
+            font-weight: 700;
+            color: var(--white);
+            text-shadow: 0 2px 12px rgba(10,77,104,0.18);
+            margin-bottom: 1.2rem;
         }
 
-        /* Enhanced responsive design */
+        .hero-content-section p {
+            font-size: 1.3rem;
+            color: #e0f7fa;
+            margin-bottom: 2.2rem;
+        }
+
+        /* Remove overlay styles as we're not using it anymore */
+        .hero-overlay {
+            display: none;
+        }
+
+        /* Responsive adjustments */
         @media (max-width: 768px) {
-            .company-logo {
-                width: 50px;
-                height: 38px; /* Proportionally smaller but still rectangular */
-                top: 6px;
-                left: 12px;
+            .hero-content-section h1 {
+                font-size: 2.2rem;
             }
             
-            .logo {
-                font-size: 1.2rem;
-                margin-left: 70px; /* Adjusted for smaller logo */
-            }
-            
-            .header-content {
-                flex-direction: column;
-                padding: 0.5rem 0;
-                min-height: 65px;
-            }
-            
-            .main-nav {
-                margin-top: 0.5rem;
-            }
-            
-            .main-nav a, .main-nav .nav-contact-btn {
-                margin-left: 1rem;
-                margin-right: 1rem;
-            }
-            
-            .hero-banner {
-                min-height: 50vh;
-                padding: 2rem 1rem;
-            }
-            
-            .hero-overlay h1 {
-                font-size: 2.2rem !important;
-            }
-            
-            .hero-overlay p {
-                font-size: 1.1rem;
+            .hero-content-section {
+                padding: 3rem 1rem;
             }
         }
 
         @media (max-width: 480px) {
-            .company-logo {
-                width: 45px;
-                height: 34px; /* Kept rectangular proportions */
-                top: 5px;
-                left: 10px;
+            .hero-content-section h1 {
+                font-size: 1.8rem;
             }
             
-            .logo {
-                font-size: 1rem;
-                margin-left: 60px; /* Adjusted spacing */
+            .hero-content-section {
+                padding: 2.5rem 1rem;
             }
-            
-            .header-content {
-                min-height: 60px;
-            }
-            
+        }
+
+        /* Remove parallax styles that were causing zooming issues */
+        .hero-banner {
+            background-attachment: scroll;
+        }
+        @media (max-width: 900px) {
             .hero-banner {
-                min-height: 45vh;
-                padding: 1.5rem 0.5rem;
-            }
-            
-            .hero-overlay h1 {
-                font-size: 1.8rem !important;
-            }
-            
-            .hero-overlay p {
-                font-size: 1rem;
-            }
-            
-            .main-nav a, .main-nav .nav-contact-btn {
-                font-size: 0.9rem;
-                margin-left: 0.5rem;
-                margin-right: 0.5rem;
+                background-attachment: scroll;
             }
         }
 
@@ -708,19 +637,19 @@
 
     <main>
         <section class="hero-banner">
-            <div class="hero-overlay">
-                <div class="hero-floating-icons">
-                    <svg class="icon1" viewBox="0 0 32 32" fill="none"><circle cx="16" cy="16" r="14" stroke="#f5a623" stroke-width="3"/></svg>
-                    <svg class="icon2" viewBox="0 0 32 32" fill="none"><rect x="6" y="6" width="20" height="20" rx="5" stroke="#088395" stroke-width="3"/></svg>
-                    <svg class="icon3" viewBox="0 0 32 32" fill="none"><polygon points="16,4 28,28 4,28" stroke="#0a4d68" stroke-width="3" fill="none"/></svg>
-                    <svg class="icon4" viewBox="0 0 32 32" fill="none"><path d="M8 24L16 8L24 24Z" stroke="#f5a623" stroke-width="3" fill="none"/></svg>
-                </div>
-                <div>
-                    <h1>Transform Your Space</h1>
-                    <p>Quality construction and home improvement services in Monroe, MI</p>
-                </div>
-                <a href="tel:7347778158" class="btn btn-primary btn-hero-pulse">Call For a Free Quote</a>
+        </section>
+        <section class="hero-content-section">
+            <div class="hero-floating-icons">
+                <svg class="icon1" viewBox="0 0 32 32" fill="none"><circle cx="16" cy="16" r="14" stroke="#f5a623" stroke-width="3"/></svg>
+                <svg class="icon2" viewBox="0 0 32 32" fill="none"><rect x="6" y="6" width="20" height="20" rx="5" stroke="#088395" stroke-width="3"/></svg>
+                <svg class="icon3" viewBox="0 0 32 32" fill="none"><polygon points="16,4 28,28 4,28" stroke="#0a4d68" stroke-width="3" fill="none"/></svg>
+                <svg class="icon4" viewBox="0 0 32 32" fill="none"><path d="M8 24L16 8L24 24Z" stroke="#f5a623" stroke-width="3" fill="none"/></svg>
             </div>
+            <div>
+                <h1>Transform Your Space</h1>
+                <p>Quality construction and home improvement services in Monroe, MI</p>
+            </div>
+            <a href="tel:7347778158" class="btn btn-primary btn-hero-pulse">Call For a Free Quote</a>
         </section>
         <svg class="section-divider" viewBox="0 0 1440 60" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M0,30 C360,60 1080,0 1440,30 L1440,60 L0,60 Z" fill="#f7f8fc"/></svg>
 
