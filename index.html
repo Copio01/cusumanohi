@@ -68,6 +68,7 @@
             background-size: cover;
             background-position: center;
             animation: heroFadeIn 1.2s cubic-bezier(.4,0,.2,1);
+            background-attachment: fixed;
         }
         @keyframes heroFadeIn {
             from { opacity: 0; transform: scale(1.04); }
@@ -191,6 +192,10 @@
         @media (max-width: 600px) {
             .service-card { padding: 1rem; }
             .hero-overlay { padding: 1.5rem 0.5rem; }
+            .slider-container { height: 220px; min-height: 180px; }
+            .slide img { border-radius: 6px; }
+            .slider-arrow { width: 36px; height: 36px; font-size: 1.1rem; }
+            .slider-dots { bottom: 10px; }
         }
         @media (max-width: 400px) {
             .hero-overlay h1 { font-size: 1.3rem; }
@@ -218,6 +223,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            background-attachment: fixed;
         }
         .hero-overlay {
             position: absolute;
@@ -237,7 +243,20 @@
             padding-top: 4rem;
         }
         .slider-container { position: relative; width: 100%; height: 50vh; max-height: 600px; overflow: hidden; background-color: #e0e0e0; border-radius: 8px; }
-        .slider-track { display: flex; height: 100%; transition: transform 0.5s ease-in-out; }
+        .slider-progress-bar {
+            position: absolute;
+            left: 0; right: 0; bottom: 0;
+            height: 5px;
+            background: rgba(245,166,35,0.18);
+            z-index: 12;
+        }
+        .slider-progress {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--accent-color), var(--secondary-color));
+            border-radius: 3px;
+            transition: width 0.5s cubic-bezier(.4,0,.2,1);
+        }
         .slide { flex: 0 0 100%; width: 100%; height: 100%; position: relative; }
         .slide img { width: 100%; height: 100%; object-fit: cover; border-radius: 8px; }
         .slider-arrow { position: absolute; top: 50%; transform: translateY(-50%); background-color: rgba(255, 255, 255, 0.7); border: none; border-radius: 50%; width: 50px; height: 50px; cursor: pointer; z-index: 10; font-size: 1.5rem; transition: background-color 0.2s; }
@@ -295,12 +314,201 @@
         /* Visually hidden class for screen readers */
         .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); border: 0; }
 
+        /* --- Wavy SVG Section Divider --- */
+        .section-divider {
+            display: block;
+            width: 100%;
+            height: 60px;
+            margin: 0;
+            padding: 0;
+            line-height: 0;
+            background: none;
+        }
+        /* --- Hero CTA Pulse Animation --- */
+        .btn-hero-pulse {
+            position: relative;
+            z-index: 1;
+            animation: pulseGlow 2.2s infinite;
+        }
+        @keyframes pulseGlow {
+            0% { box-shadow: 0 0 0 0 rgba(245,166,35,0.25); }
+            70% { box-shadow: 0 0 0 16px rgba(245,166,35,0); }
+            100% { box-shadow: 0 0 0 0 rgba(245,166,35,0); }
+        }
+        /* --- Scroll-to-Top Button --- */
+        .scroll-top-btn {
+            position: fixed;
+            right: 24px;
+            bottom: 90px;
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, var(--accent-color), var(--primary-color));
+            color: var(--white);
+            border: none;
+            border-radius: 50%;
+            box-shadow: 0 4px 18px rgba(10,77,104,0.13);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            cursor: pointer;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.4s, transform 0.4s;
+            z-index: 1200;
+        }
+        .scroll-top-btn.show {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateY(0);
+        }
+        .scroll-top-btn:focus {
+            outline: 2px solid var(--accent-color);
+        }
+        /* --- Modal Backdrop Blur --- */
+        .modal-overlay.active {
+            backdrop-filter: blur(4px);
+            background-color: rgba(0,0,0,0.55);
+        }
+        /* --- Floating Hero Icons --- */
+        .hero-floating-icons {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+        .hero-floating-icons svg {
+            position: absolute;
+            opacity: 0.13;
+            animation: floatIcon 7s ease-in-out infinite alternate;
+        }
+        .hero-floating-icons .icon1 { left: 8%; top: 18%; width: 48px; animation-delay: 0s; }
+        .hero-floating-icons .icon2 { right: 12%; top: 30%; width: 38px; animation-delay: 1.5s; }
+        .hero-floating-icons .icon3 { left: 20%; bottom: 10%; width: 36px; animation-delay: 2.5s; }
+        .hero-floating-icons .icon4 { right: 18%; bottom: 18%; width: 44px; animation-delay: 3.5s; }
+        @keyframes floatIcon {
+            0% { transform: translateY(0) scale(1); }
+            100% { transform: translateY(-18px) scale(1.08); }
+        }
+
         @media (max-width: 768px) {
             .header-content { flex-direction: column; }
             .main-nav { margin-top: 1rem; }
             .hero-overlay h1, .slide-overlay h1 { font-size: 2.5rem; }
         }
 
+        /* --- Parallax Hero Section --- */
+        .hero-banner {
+            /* ...existing code... */
+            background-attachment: fixed;
+            background-size: cover;
+        }
+        @media (max-width: 900px) {
+            .hero-banner {
+                background-attachment: scroll;
+            }
+        }
+
+        /* --- Animated Section Headings --- */
+        .section-title {
+            opacity: 0;
+            transform: translateY(40px);
+            transition: opacity 0.7s cubic-bezier(.4,0,.2,1), transform 0.7s cubic-bezier(.4,0,.2,1);
+        }
+        .section-title.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* --- Button Micro-Interactions --- */
+        .btn, .btn-primary, .btn-secondary {
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.18s cubic-bezier(.4,0,.2,1), box-shadow 0.18s cubic-bezier(.4,0,.2,1);
+        }
+        .btn:active, .btn-primary:active, .btn-secondary:active {
+            transform: scale(0.97);
+        }
+        .btn::after {
+            content: '';
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(245,166,35,0.18);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.4s cubic-bezier(.4,0,.2,1), height 0.4s cubic-bezier(.4,0,.2,1), opacity 0.4s;
+            opacity: 0;
+            pointer-events: none;
+            z-index: 0;
+        }
+        .btn:active::after {
+            width: 180px;
+            height: 180px;
+            opacity: 1;
+            transition: 0s;
+        }
+
+        /* --- Service Card Icon Animation on Hover --- */
+        .service-card:hover .service-icon {
+            animation: icon-bounce 0.7s cubic-bezier(.4,0,.2,1);
+            color: var(--accent-color);
+            filter: drop-shadow(0 4px 16px rgba(245,166,35,0.18));
+        }
+        @keyframes icon-bounce {
+            0% { transform: scale(1) translateY(0); }
+            30% { transform: scale(1.18) translateY(-10px); }
+            60% { transform: scale(0.95) translateY(2px); }
+            100% { transform: scale(1) translateY(0); }
+        }
+
+        /* --- Slider Progress Bar --- */
+        .slider-progress-bar {
+            position: absolute;
+            left: 0; right: 0; bottom: 0;
+            height: 5px;
+            background: rgba(245,166,35,0.18);
+            z-index: 12;
+        }
+        .slider-progress {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--accent-color), var(--secondary-color));
+            border-radius: 3px;
+            transition: width 0.5s cubic-bezier(.4,0,.2,1);
+        }
+
+        /* --- Accessibility: Skip to Content Link --- */
+        .skip-to-content {
+            position: absolute;
+            top: 0;
+            left: 0;
+            background: var(--accent-color);
+            color: var(--white);
+            padding: 0.75rem 1.5rem;
+            z-index: 2000;
+            transform: translateY(-120%);
+            transition: transform 0.3s;
+            border-radius: 0 0 8px 8px;
+            font-weight: bold;
+            outline: none;
+        }
+        .skip-to-content:focus {
+            transform: translateY(0);
+        }
+
+        /* --- Reduced Motion Support --- */
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { transition: none !important; animation: none !important; }
+        }
+
+        /* --- Mobile Gallery Slider Tweaks --- */
+        @media (max-width: 600px) {
+            .slider-container { height: 220px; min-height: 180px; }
+            .slide img { object-fit: cover; }
+        }
     </style>
 </head>
 <body>
@@ -318,30 +526,82 @@
     <main>
         <section class="hero-banner">
             <div class="hero-overlay">
+                <div class="hero-floating-icons">
+                    <svg class="icon1" viewBox="0 0 32 32" fill="none"><circle cx="16" cy="16" r="14" stroke="#f5a623" stroke-width="3"/></svg>
+                    <svg class="icon2" viewBox="0 0 32 32" fill="none"><rect x="6" y="6" width="20" height="20" rx="5" stroke="#088395" stroke-width="3"/></svg>
+                    <svg class="icon3" viewBox="0 0 32 32" fill="none"><polygon points="16,4 28,28 4,28" stroke="#0a4d68" stroke-width="3" fill="none"/></svg>
+                    <svg class="icon4" viewBox="0 0 32 32" fill="none"><path d="M8 24L16 8L24 24Z" stroke="#f5a623" stroke-width="3" fill="none"/></svg>
+                </div>
                 <div>
                     <h1>Transform Your Space</h1>
                     <p>Quality construction and home improvement services in Monroe, MI</p>
                 </div>
-                <a href="tel:7342416805" class="btn btn-primary">Call For a Free Quote</a>
+                <a href="tel:7342416805" class="btn btn-primary btn-hero-pulse">Call For a Free Quote</a>
             </div>
         </section>
+        <svg class="section-divider" viewBox="0 0 1440 60" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M0,30 C360,60 1080,0 1440,30 L1440,60 L0,60 Z" fill="#f7f8fc"/></svg>
 
         <section id="gallery-slider-section" class="container" aria-label="Gallery slider section">
             <h2 class="section-title">Our Work</h2>
-            <div class="slider-container" role="region" aria-label="Image slider">
-                <div class="slider-loading-spinner" id="slider-loading-spinner" aria-label="Loading images"></div>
-                <div class="slider-track">
+            <div class="slider-container" aria-label="Image slider">
+                <div class="slider" id="gallery-slider">
                     <!-- Slides will be dynamically inserted here by JavaScript -->
                 </div>
-                <button class="slider-arrow prev" id="prevBtn" aria-label="Previous slide">&#10094;</button>
-                <button class="slider-arrow next" id="nextBtn" aria-label="Next slide">&#10095;</button>
-                <div class="slider-dots" id="dots-container" aria-label="Slider navigation dots"></div>
+                <button class="slider-arrow left" aria-label="Previous slide" tabindex="0">&#8592;</button>
+                <button class="slider-arrow right" aria-label="Next slide" tabindex="0">&#8594;</button>
+                <div class="slider-dots" id="slider-dots"></div>
+                <div class="slider-progress-bar">
+                    <div class="slider-progress" id="slider-progress"></div>
+                </div>
             </div>
         </section>
 
         <section id="about"><div class="container"><h2 class="section-title">About Our Company</h2><div class="about-content"><p>For over 20 years, Cusumano Home Improvements has been a family-owned and operated business proudly serving the Monroe, MI area. We are dedicated to delivering the highest quality of work, specializing in residential construction and convenient dumpster rentals. Our commitment is to our craft and, most importantly, to our customers' satisfaction.</p></div></div></section>
         <section id="services"><div class="container"><h2 class="section-title">Our Services</h2><div class="services-grid"><article class="service-card"><svg class="service-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg><h3>Roofing</h3><p>Complete roofing solutions including new construction, re-roofs, and leak repairs using only high-quality, durable materials.</p></article><article class="service-card"><svg class="service-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg><h3>Siding</h3><p>Enhance your home's curb appeal and protection with our wide variety of siding options, including vinyl, wood, and fiber cement.</p></article><article class="service-card"><svg class="service-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg><h3>Windows</h3><p>Professional installation of energy-efficient windows. We offer many styles like double-hung and casement for a perfect fit.</p></article><article class="service-card"><svg class="service-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"></path></svg><h3>Decks</h3><p>We design and build custom decks or repair existing ones, creating beautiful and lasting outdoor living spaces for you to enjoy.</p></article><article class="service-card"><svg class="service-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg><h3>Dumpster Rentals</h3><p>Convenient and competitively priced dumpster rentals for your project needs, with various sizes and flexible scheduling.</p></article></div></div></section>
         <section id="contact"><div class="container"><h2 class="section-title">Ready to Start Your Project?</h2><p>Contact us today for a free, no-obligation quote. We're ready to help bring your vision to life.</p><button id="ctaContactBtn" class="btn btn-primary">Get a Quote by Email</button></div></section>
+        <section id="contact-info" class="container" style="padding-top:2rem;">
+            <h2 class="section-title">Contact Us</h2>
+            <div style="display: flex; flex-wrap: wrap; gap: 2.5rem; align-items: flex-start; justify-content: center;">
+                <div style="flex:1 1 320px; min-width:260px; max-width:420px;">
+                    <p>Let us know what work you need done. Small or large projects welcome! We will reach out to you as soon as possible.</p>
+                    <ul style="list-style:none; padding:0; margin:1.5rem 0 2rem 0; font-size:1.1rem;">
+                        <li><strong>Email:</strong> <a href="mailto:copernan@yahoo.com">copernan@yahoo.com</a></li>
+                        <li><strong>Phone:</strong> <a href="tel:7347778158">(734) 777-8158</a></li>
+                    </ul>
+                    <div style="margin-bottom:1.5rem;">
+                        <strong>Cusumano Home Improvements</strong><br>
+                        A family owned company.
+                    </div>
+                </div>
+                <div style="flex:1 1 320px; min-width:260px; max-width:480px;">
+                    <form class="contact-form" action="#" method="POST" aria-label="Contact form">
+                        <div class="form-group"><label for="contact-name">Name <span aria-hidden="true" style="color:var(--accent-color);">*</span></label>
+                            <div style="display:flex; gap:0.5rem;">
+                                <input type="text" id="contact-fname" name="fname" required placeholder="First Name" class="field-element" style="flex:1;">
+                                <input type="text" id="contact-lname" name="lname" required placeholder="Last Name" class="field-element" style="flex:1;">
+                            </div>
+                        </div>
+                        <div class="form-group"><label for="contact-phone">Phone</label>
+                            <input type="tel" id="contact-phone" name="phone" placeholder="(xxx) xxx-xxxx" class="field-element">
+                        </div>
+                        <div class="form-group"><label for="contact-email">Email <span aria-hidden="true" style="color:var(--accent-color);">*</span></label>
+                            <input type="email" id="contact-email" name="email" required placeholder="you@email.com" class="field-element">
+                        </div>
+                        <div class="form-group"><label for="contact-message">Message <span aria-hidden="true" style="color:var(--accent-color);">*</span></label>
+                            <textarea id="contact-message" name="message" required placeholder="How can we help?" class="field-element"></textarea>
+                        </div>
+                        <div class="form-actions"><button type="submit" class="btn btn-primary">Submit</button></div>
+                    </form>
+                </div>
+                <div style="flex:1 1 320px; min-width:260px; max-width:480px;">
+                    <div style="border-radius:12px; overflow:hidden; box-shadow:0 2px 16px rgba(10,77,104,0.10); margin-bottom:1rem;">
+                        <iframe title="Service Area Map" width="100%" height="260" frameborder="0" style="border:0; min-width:220px; min-height:180px;" allowfullscreen loading="lazy"
+                            src="https://www.openstreetmap.org/export/embed.html?bbox=-84.5%2C41.2%2C-81.5%2C42.6&amp;layer=mapnik&amp;marker=41.9%2C-83.4"></iframe>
+                    </div>
+                    <div style="font-size:0.95rem; color:#666; text-align:center;">Serving Monroe, Detroit, Ann Arbor, Cleveland, and surrounding cities.</div>
+                </div>
+            </div>
+        </section>
     </main>
 
     <footer class="main-footer">
@@ -353,6 +613,7 @@
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h7"/><polyline points="15 12 19 12 19 8 15 8 15 12"/><path d="M17 16v-4h-2V8a3 3 0 0 1 3-3h0a3 3 0 0 1 3 3v4h-2v4Z"/></svg>
         </a>
     </div>
+    <button class="scroll-top-btn" id="scrollTopBtn" aria-label="Scroll to top" title="Back to top">&#8679;</button>
 
     <div class="modal-overlay" id="contactModal" role="dialog" aria-modal="true" aria-labelledby="contactModalTitle">
         <div class="modal-content">
@@ -567,6 +828,102 @@
             setupSliderListener();
             animateOnScroll();
         });
+
+        // --- Scroll-to-Top Button Logic ---
+        const scrollTopBtn = document.getElementById('scrollTopBtn');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 300) {
+                scrollTopBtn.classList.add('show');
+            } else {
+                scrollTopBtn.classList.remove('show');
+            }
+        });
+        scrollTopBtn.addEventListener('click', () => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+
+        // SLIDER LOGIC + PROGRESS BAR + SWIPE SUPPORT
+        (function() {
+            const slider = document.getElementById('gallery-slider');
+            const slides = slider.querySelectorAll('.slide');
+            const dots = document.getElementById('slider-dots');
+            const progress = document.getElementById('slider-progress');
+            let current = 0;
+            let autoSlide = true;
+            let timer;
+            // Create dots
+            dots.innerHTML = '';
+            slides.forEach((_, i) => {
+                const dot = document.createElement('button');
+                dot.className = 'dot';
+                dot.setAttribute('aria-label', `Go to slide ${i+1}`);
+                dot.tabIndex = 0;
+                dot.addEventListener('click', () => goTo(i));
+                dots.appendChild(dot);
+            });
+            function update() {
+                slides.forEach((s, i) => {
+                    s.classList.toggle('active', i === current);
+                    s.setAttribute('aria-hidden', i !== current);
+                });
+                dots.childNodes.forEach((d, i) => d.classList.toggle('active', i === current));
+                // Progress bar
+                progress.style.width = `${((current+1)/slides.length)*100}%`;
+            }
+            function goTo(idx) {
+                current = (idx + slides.length) % slides.length;
+                update();
+                resetTimer();
+            }
+            function next() { goTo(current+1); }
+            function prev() { goTo(current-1); }
+            document.querySelector('.slider-arrow.left').onclick = prev;
+            document.querySelector('.slider-arrow.right').onclick = next;
+            // Keyboard support
+            document.querySelector('.slider-container').addEventListener('keydown', e => {
+                if (e.key === 'ArrowLeft') prev();
+                if (e.key === 'ArrowRight') next();
+            });
+            // Auto slide
+            function resetTimer() {
+                if (!autoSlide) return;
+                clearTimeout(timer);
+                timer = setTimeout(next, 6000);
+            }
+            // Swipe support
+            let startX = null;
+            slider.addEventListener('touchstart', e => {
+                if (e.touches.length === 1) startX = e.touches[0].clientX;
+            });
+            slider.addEventListener('touchmove', e => {
+                if (!startX) return;
+                let dx = e.touches[0].clientX - startX;
+                if (Math.abs(dx) > 40) {
+                    if (dx > 0) prev(); else next();
+                    startX = null;
+                }
+            });
+            slider.addEventListener('touchend', () => { startX = null; });
+            // Init
+            update();
+            resetTimer();
+            slider.addEventListener('mouseenter', () => autoSlide = false);
+            slider.addEventListener('mouseleave', () => { autoSlide = true; resetTimer(); });
+        })();
+        // SECTION TITLE ANIMATION ON SCROLL
+        (function() {
+            const titles = document.querySelectorAll('.section-title');
+            function onScroll() {
+                titles.forEach(title => {
+                    const rect = title.getBoundingClientRect();
+                    if (rect.top < window.innerHeight - 80) {
+                        title.classList.add('visible');
+                    }
+                });
+            }
+            window.addEventListener('scroll', onScroll, {passive:true});
+            window.addEventListener('DOMContentLoaded', onScroll);
+        })();
     </script>
 </body>
 </html>
