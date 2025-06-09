@@ -3,121 +3,35 @@
  */
 
 document.addEventListener('DOMContentLoaded', () => {
-    // Initialize Firebase for contact form
-    try {
-        // Load Firebase modules dynamically
-        import('https://www.gstatic.com/firebasejs/11.9.0/firebase-app.js')
-            .then(firebaseApp => {
-                import('https://www.gstatic.com/firebasejs/11.9.0/firebase-firestore.js')
-                    .then(firebaseFirestore => {
-                        // Firebase configuration
-                        const firebaseConfig = {
-                            apiKey: "AIzaSyBVtq6dAEuybJNmTTv8dXBxTVUgw1t0ZMk",
-                            authDomain: "cusumano-website.firebaseapp.com",
-                            projectId: "cusumano-website",
-                            storageBucket: "cusumano-website.appspot.com",
-                            messagingSenderId: "20051552210",
-                            appId: "1:20051552210:web:7eb3b22baa3fec184e4a0b"
-                        };
-                        
-                        // Initialize Firebase
-                        const app = firebaseApp.initializeApp(firebaseConfig);
-                        const db = firebaseFirestore.getFirestore(app);
-                        
-                        // Now we can use Firebase in our main code
-                        setupContactForm(db, firebaseFirestore);
-                    })
-                    .catch(error => console.error("Error loading Firebase Firestore:", error));
-            })
-            .catch(error => console.error("Error loading Firebase App:", error));
-    } catch (error) {
-        console.error("Error setting up Firebase:", error);
-        // Continue with non-Firebase functionality
-    }
-    
-    // Set up non-Firebase functionality
+    // Set up core functionality
     setupModalFunctionality();
     setupScrollBehavior();
     setupAdminButton();
+    setupContactForm();
 });
 
-// Contact form with Firebase
-function setupContactForm(db, firebaseFirestore) {
+// Contact form with client-side email
+function setupContactForm() {
     const contactForm = document.getElementById('contact-form');
     
     if (contactForm) {
-        contactForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
+        // The form is already set up with mailto: action, but we can enhance the user experience
+        contactForm.addEventListener('submit', (e) => {
+            // Allow the default form submission which will open the user's email client
             
-            // Get form values
-            const name = document.getElementById('name').value;
-            const email = document.getElementById('email').value;
-            const phone = document.getElementById('phone').value;
-            const message = document.getElementById('message').value;
+            // Set the subject line
+            const subject = "Cusumano Home Improvements - Website Inquiry";
+            contactForm.action = `mailto:copernan@yahoo.com?subject=${encodeURIComponent(subject)}`;
             
-            try {
-                // Add to Firebase
-                await firebaseFirestore.addDoc(firebaseFirestore.collection(db, 'inquiries'), {
-                    name,
-                    email,
-                    phone,
-                    message,
-                    date: new Date(),
-                    status: 'New'
-                });
-                
-                // Show success message
-                alert('Thank you for your message! We will contact you shortly.');
-                
-                // Reset form
-                contactForm.reset();
-                
+            // Show a confirmation message after a small delay to ensure the email client opens
+            setTimeout(() => {
                 // Close modal
                 const modal = document.getElementById('contact-modal');
                 if (modal) {
                     modal.classList.remove('active');
                     document.body.classList.remove('modal-open');
                 }
-            } catch (error) {
-                console.error("Error submitting form:", error);
-                alert('There was a problem submitting your message. Please try again later.');
-            }
-        });
-    } else {
-        // Fallback for when the form isn't found or Firebase isn't available
-        setupNonFirebaseContactForm();
-    }
-}
-
-// Non-Firebase contact form fallback
-function setupNonFirebaseContactForm() {
-    const contactForm = document.getElementById('contact-form');
-    
-    if (contactForm) {
-        contactForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            
-            // Get form values
-            const name = document.getElementById('name').value;
-            const email = document.getElementById('email').value;
-            const phone = document.getElementById('phone').value;
-            const message = document.getElementById('message').value;
-            
-            // Log form submission (in a real app, this would send to a server)
-            console.log('Form submitted:', { name, email, phone, message });
-            
-            // Show submission success message
-            alert('Thank you for your message! We will contact you shortly.');
-            
-            // Reset form
-            contactForm.reset();
-            
-            // Close modal
-            const modal = document.getElementById('contact-modal');
-            if (modal) {
-                modal.classList.remove('active');
-                document.body.classList.remove('modal-open');
-            }
+            }, 500);
         });
     }
 }

@@ -3,12 +3,12 @@
  */
 
 document.addEventListener('DOMContentLoaded', () => {
-    // Sample images for the slider - update these with your actual image paths
+    // Sample images for the slider as fallback if Firebase fails
     const slidesData = [
-        { src: 'images/siding-project1.jpg', alt: 'Siding Project', caption: 'Siding Installation' },
-        { src: 'images/window-project1.jpg', alt: 'Window Project', caption: 'Window Replacement' },
-        { src: 'images/deck-project1.jpg', alt: 'Deck Project', caption: 'Custom Deck' },
-        { src: 'images/dumpster-rental.jpg', alt: 'Dumpster Rental', caption: 'Dumpster Rental' }
+        { src: 'images/siding-project1.jpg', alt: 'Siding Project' },
+        { src: 'images/window-project1.jpg', alt: 'Window Project' },
+        { src: 'images/deck-project1.jpg', alt: 'Deck Project' },
+        { src: 'images/dumpster-rental.jpg', alt: 'Dumpster Rental' }
     ];
     
     // Slider elements
@@ -28,14 +28,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const slideInterval = 5000; // 5 seconds per slide
     let autoSlideTimer;
     
-    // Initialize slider with images
+    // Initialize slider with images (fallback option)
     function initSlider() {
         // If slider is empty, create slides
         if (slider.children.length === 0) {
-            // Sample images for the slider - update these with your actual image paths
-            // Or generate placeholders if images don't exist
+            // Sample images for the slider - use placeholder colors if images don't exist
             const placeholderColors = ['#0a4d68', '#088395', '#f5a623', '#2a9d8f'];
-            const placeholderText = ['Siding Installation', 'Window Replacement', 'Custom Deck', 'Dumpster Rental'];
             
             slidesData.forEach((slide, index) => {
                 const slideElement = document.createElement('div');
@@ -48,19 +46,16 @@ document.addEventListener('DOMContentLoaded', () => {
                     slideElement.innerHTML = `
                         <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background-color: ${placeholderColors[index % placeholderColors.length]}; color: white; font-size: 1.5rem; text-align: center; padding: 1rem;">
                             <div>
-                                <h3>${slide.caption || placeholderText[index % placeholderText.length]}</h3>
-                                <p>Quality work by Cusumano Home Improvements</p>
+                                <h3>Project ${index + 1}</h3>
                             </div>
                         </div>
-                        <div class="slide-caption">${slide.caption}</div>
                     `;
                 };
                 
                 img.onload = () => {
-                    // Image loaded successfully, use it
+                    // Image loaded successfully, use it without caption
                     slideElement.innerHTML = `
                         <img src="${slide.src}" alt="${slide.alt}">
-                        <div class="slide-caption">${slide.caption}</div>
                     `;
                 };
                 
@@ -87,13 +82,6 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // --- Firebase Slider Integration ---
     function loadFirebaseSlides() {
-        // Check if Firebase is available
-        if (typeof firebase === 'undefined') {
-            console.log("Firebase not available, using static slides");
-            initSlider();
-            return;
-        }
-        
         try {
             // Import Firebase modules
             import('https://www.gstatic.com/firebasejs/11.9.0/firebase-app.js').then(firebaseApp => {
@@ -131,9 +119,10 @@ document.addEventListener('DOMContentLoaded', () => {
                                 const imgData = doc.data();
                                 const slideElement = document.createElement('div');
                                 slideElement.className = 'slide';
+                                
+                                // Create slide with image only (no caption)
                                 slideElement.innerHTML = `
                                     <img src="${imgData.url}" alt="Project Image ${index + 1}">
-                                    <div class="slide-caption">Project ${index + 1}</div>
                                 `;
                                 slider.appendChild(slideElement);
                                 
@@ -240,10 +229,5 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     
     // Try to load Firebase slides, fall back to static slides
-    try {
-        loadFirebaseSlides();
-    } catch (error) {
-        console.log("Using static slides due to error:", error);
-        initSlider();
-    }
+    loadFirebaseSlides();
 });
