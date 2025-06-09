@@ -181,6 +181,126 @@
         const ADMIN_USERNAME = 'admin';
         const ADMIN_PASSWORD = 'cusumano2025';
         
+        // IndexedDB setup - for larger storage capacity (up to 50MB-several GB)
+        const DB_NAME = 'cusumanoGallery';
+        const DB_VERSION = 1;
+        const STORE_NAME = 'images';
+        let db;
+
+        // Initialize IndexedDB
+        function initIndexedDB() {
+            return new Promise((resolve, reject) => {
+                const request = indexedDB.open(DB_NAME, DB_VERSION);
+                
+                request.onerror = (event) => {
+                    console.error("IndexedDB error:", event.target.error);
+                    reject("Could not open IndexedDB");
+                };
+                
+                request.onsuccess = (event) => {
+                    db = event.target.result;
+                    console.log("IndexedDB opened successfully");
+                    resolve(db);
+                };
+                
+                request.onupgradeneeded = (event) => {
+                    const db = event.target.result;
+                    if (!db.objectStoreNames.contains(STORE_NAME)) {
+                        db.createObjectStore(STORE_NAME, { keyPath: 'id', autoIncrement: true });
+                        console.log("IndexedDB store created");
+                    }
+                };
+            });
+        }
+        
+        // Save gallery images to IndexedDB
+        function saveToIndexedDB(images) {
+            return new Promise((resolve, reject) => {
+                if (!db) {
+                    reject("IndexedDB not initialized");
+                    return;
+                }
+                
+                const transaction = db.transaction([STORE_NAME], 'readwrite');
+                const store = transaction.objectStore(STORE_NAME);
+                
+                // Clear existing data
+                const clearRequest = store.clear();
+                
+                clearRequest.onsuccess = () => {
+                    console.log("Cleared existing images from IndexedDB");
+                    
+                    // Use small localStorage object as a reference to images in IndexedDB
+                    const imageRefs = images.map((img, index) => ({
+                        id: index + 1,
+                        category: img.category,
+                        alt: img.alt
+                    }));
+                    localStorage.setItem('galleryImageRefs', JSON.stringify(imageRefs));
+                    
+                    // Add all images one by one
+                    let completed = 0;
+                    images.forEach((img, index) => {
+                        const imageData = {
+                            id: index + 1,
+                            dataUrl: img.dataUrl,
+                            alt: img.alt || '',
+                            category: img.category || 'other'
+                        };
+                        
+                        const addRequest = store.put(imageData);
+                        
+                        addRequest.onsuccess = () => {
+                            completed++;
+                            if (completed === images.length) {
+                                resolve();
+                            }
+                        };
+                        
+                        addRequest.onerror = (event) => {
+                            console.error("Error adding image to IndexedDB:", event.target.error);
+                            reject(event.target.error);
+                        };
+                    });
+                };
+                
+                clearRequest.onerror = (event) => {
+                    console.error("Error clearing IndexedDB:", event.target.error);
+                    reject(event.target.error);
+                };
+                
+                transaction.oncomplete = () => {
+                    console.log("All images saved to IndexedDB");
+                    resolve();
+                };
+            });
+        }
+        
+        // Load gallery images from IndexedDB
+        function loadFromIndexedDB() {
+            return new Promise((resolve, reject) => {
+                if (!db) {
+                    reject("IndexedDB not initialized");
+                    return;
+                }
+                
+                const transaction = db.transaction([STORE_NAME], 'readonly');
+                const store = transaction.objectStore(STORE_NAME);
+                const request = store.getAll();
+                
+                request.onsuccess = (event) => {
+                    const images = event.target.result;
+                    console.log("Loaded from IndexedDB:", images.length, "images");
+                    resolve(images);
+                };
+                
+                request.onerror = (event) => {
+                    console.error("Error loading from IndexedDB:", event.target.error);
+                    reject(event.target.error);
+                };
+            });
+        }
+        
         // Session management
         function checkLoginStatus() {
             const isLoggedIn = sessionStorage.getItem('adminLoggedIn') === 'true';
@@ -195,8 +315,20 @@
             }
         }
         
-        // Check login status on page load
-        checkLoginStatus();
+        // Initialize app - start with IndexedDB
+        async function initApp() {
+            try {
+                await initIndexedDB();
+                checkLoginStatus();
+            } catch (error) {
+                console.error("Error initializing app:", error);
+                // Fall back to localStorage if IndexedDB fails
+                checkLoginStatus();
+            }
+        }
+        
+        // Call initApp instead of checkLoginStatus directly
+        initApp();
         
         // Login button click
         loginBtn.addEventListener('click', () => {
@@ -240,22 +372,39 @@
             });
         });
 
-        // Load gallery images from localStorage
-        function loadGalleryImages() {
+        // Load gallery images - modified to use IndexedDB first, then fallback to localStorage
+        async function loadGalleryImages() {
             showStatus('Loading gallery images...', 'info');
             
             try {
+                // Try IndexedDB first
+                if (db) {
+                    const images = await loadFromIndexedDB();
+                    if (images && images.length > 0) {
+                        galleryImages = images;
+                        console.log('Loaded gallery images from IndexedDB:', galleryImages.length);
+                        renderGalleryImages();
+                        showStatus('Gallery images loaded successfully!', 'success');
+                        return;
+                    }
+                }
+                
+                // Fallback to localStorage
                 const storedImages = localStorage.getItem('galleryImages');
                 
                 if (storedImages) {
                     galleryImages = JSON.parse(storedImages);
-                    console.log('Loaded gallery images:', galleryImages.length);
+                    console.log('Loaded gallery images from localStorage:', galleryImages.length);
                     renderGalleryImages();
                     showStatus('Gallery images loaded successfully!', 'success');
+                    
+                    // Transfer to IndexedDB for future use if available
+                    if (db) {
+                        await saveToIndexedDB(galleryImages);
+                    }
                 } else {
                     console.log('No gallery images found, creating empty array');
                     galleryImages = [];
-                    localStorage.setItem('galleryImages', JSON.stringify(galleryImages));
                     showStatus('No images found. Add some images to get started.', 'info');
                 }
             } catch (error) {
@@ -298,7 +447,7 @@
             const file = e.target.files[0];
             if (!file) return;
             
-            const maxSizeMB = 1.5;
+            const maxSizeMB = db ? 5 : 1.5; // Allow larger images if IndexedDB is available
             const fileSizeMB = file.size / (1024 * 1024);
             
             if (fileSizeMB > maxSizeMB) {
@@ -316,13 +465,16 @@
             reader.onload = function(event) {
                 uploadProgress.value = 70;
                 
-                // Check if adding this image would exceed storage
-                const dataSize = event.target.result.length * 2 / 1024 / 1024; // Approx MB
-                const currentUsage = calculateLocalStorageUsage().usedMB;
-                if (currentUsage + dataSize > 4.5) {
-                    uploadProgress.style.display = 'none';
-                    showStatus(`Adding this image would exceed storage limit. Please remove some images first. (Current: ${currentUsage.toFixed(2)}MB, This image: ${dataSize.toFixed(2)}MB)`, 'error');
-                    return;
+                // Skip storage check if using IndexedDB (much larger limits)
+                if (!db) {
+                    // Check if adding this image would exceed localStorage limit
+                    const dataSize = event.target.result.length * 2 / 1024 / 1024; // Approx MB
+                    const currentUsage = calculateLocalStorageUsage().usedMB;
+                    if (currentUsage + dataSize > 4.5) {
+                        uploadProgress.style.display = 'none';
+                        showStatus(`Adding this image would exceed storage limit. Please remove some images first. (Current: ${currentUsage.toFixed(2)}MB, This image: ${dataSize.toFixed(2)}MB)`, 'error');
+                        return;
+                    }
                 }
                 
                 uploadProgress.value = 90;
@@ -353,19 +505,45 @@
             reader.readAsDataURL(file);
         });
         
-        // Save gallery changes
-        saveGalleryBtn.addEventListener('click', () => {
+        // Save gallery changes - modified to use IndexedDB if available
+        saveGalleryBtn.addEventListener('click', async () => {
             showStatus('Saving gallery images...', 'info');
             
             try {
-                localStorage.setItem('galleryImages', JSON.stringify(galleryImages));
-                updateStorageMeter();
-                showStatus('Gallery saved successfully!', 'success');
+                // Save to IndexedDB if available (primary storage)
+                if (db) {
+                    await saveToIndexedDB(galleryImages);
+                    
+                    // Create lightweight gallery references for main site
+                    const imageRefs = galleryImages.map((img, index) => ({
+                        id: index + 1,
+                        category: img.category,
+                        alt: img.alt
+                    }));
+                    
+                    // Still save to localStorage for backwards compatibility
+                    try {
+                        localStorage.setItem('galleryImages', JSON.stringify(galleryImages));
+                    } catch (localStorageError) {
+                        console.warn("Could not save to localStorage (likely exceeded size limit). Using IndexedDB only.", localStorageError);
+                        
+                        // Save just the references to localStorage
+                        localStorage.setItem('galleryImageRefs', JSON.stringify(imageRefs));
+                    }
+                    
+                    updateStorageMeter();
+                    showStatus('Gallery saved successfully to IndexedDB!', 'success');
+                } else {
+                    // Fallback to localStorage only
+                    localStorage.setItem('galleryImages', JSON.stringify(galleryImages));
+                    updateStorageMeter();
+                    showStatus('Gallery saved successfully to localStorage!', 'success');
+                }
             } catch (error) {
                 console.error('Error saving gallery:', error);
                 
                 if (error.name === 'QuotaExceededError') {
-                    showStatus('Error: Storage quota exceeded! Try removing some images.', 'error');
+                    showStatus('Error: Storage quota exceeded! Try removing some images or use a different browser.', 'error');
                 } else {
                     showStatus('Error saving gallery. Try again.', 'error');
                 }
@@ -466,15 +644,23 @@
             const usage = calculateLocalStorageUsage();
             
             storageMeterFill.style.width = `${usage.percentUsed}%`;
-            storageUsageText.textContent = `${usage.usedMB.toFixed(2)}MB used (${usage.galleryMB.toFixed(2)}MB gallery)`;
             
-            // Change color based on usage
-            if (usage.percentUsed > 80) {
-                storageMeterFill.style.backgroundColor = 'var(--danger-color)';
-            } else if (usage.percentUsed > 60) {
-                storageMeterFill.style.backgroundColor = 'var(--accent-color)';
-            } else {
+            if (db) {
+                // If IndexedDB is available, show different storage info
+                storageUsageText.textContent = `${usage.usedMB.toFixed(2)}MB localStorage + IndexedDB storage`;
                 storageMeterFill.style.backgroundColor = 'var(--success-color)';
+            } else {
+                // Regular localStorage display
+                storageUsageText.textContent = `${usage.usedMB.toFixed(2)}MB used (${usage.galleryMB.toFixed(2)}MB gallery)`;
+                
+                // Change color based on usage
+                if (usage.percentUsed > 80) {
+                    storageMeterFill.style.backgroundColor = 'var(--danger-color)';
+                } else if (usage.percentUsed > 60) {
+                    storageMeterFill.style.backgroundColor = 'var(--accent-color)';
+                } else {
+                    storageMeterFill.style.backgroundColor = 'var(--success-color)';
+                }
             }
         }
         
