@@ -10,8 +10,9 @@ document.addEventListener('DOMContentLoaded', () => {
     setupHeaderEffects();
     setupAdminButton();
     setupContactForm();
-    setupFacebookSDK(); 
+    setupFacebookPlugin(); 
     setupServiceCardEffects();
+    initializeSliders();
 });
 
 // Apply header effects on scroll
@@ -65,6 +66,87 @@ function setupMobileNavigation() {
     }
 }
 
+// Simple image slider functionality
+function initializeSliders() {
+    const sliderContainer = document.querySelector('.slider-container');
+    
+    if (sliderContainer) {
+        const slides = sliderContainer.querySelectorAll('.slide');
+        const prevBtn = sliderContainer.querySelector('.slider-arrow.left');
+        const nextBtn = sliderContainer.querySelector('.slider-arrow.right');
+        const dots = sliderContainer.querySelectorAll('.dot');
+        
+        let currentSlide = 0;
+        
+        // Function to show a specific slide
+        function showSlide(index) {
+            // Hide all slides
+            slides.forEach(slide => {
+                slide.classList.remove('active');
+            });
+            
+            // Deactivate all dots
+            dots.forEach(dot => {
+                dot.classList.remove('active');
+            });
+            
+            // Show the current slide
+            slides[index].classList.add('active');
+            dots[index].classList.add('active');
+            currentSlide = index;
+        }
+        
+        // Next slide function
+        function nextSlide() {
+            currentSlide = (currentSlide + 1) % slides.length;
+            showSlide(currentSlide);
+        }
+        
+        // Previous slide function
+        function prevSlide() {
+            currentSlide = (currentSlide - 1 + slides.length) % slides.length;
+            showSlide(currentSlide);
+        }
+        
+        // Event listeners for arrows
+        if (prevBtn) prevBtn.addEventListener('click', prevSlide);
+        if (nextBtn) nextBtn.addEventListener('click', nextSlide);
+        
+        // Event listeners for dots
+        dots.forEach((dot, index) => {
+            dot.addEventListener('click', () => {
+                showSlide(index);
+            });
+        });
+        
+        // Touch swipe functionality
+        let touchStartX = 0;
+        let touchEndX = 0;
+        
+        sliderContainer.addEventListener('touchstart', (e) => {
+            touchStartX = e.changedTouches[0].screenX;
+        });
+        
+        sliderContainer.addEventListener('touchend', (e) => {
+            touchEndX = e.changedTouches[0].screenX;
+            handleSwipe();
+        });
+        
+        function handleSwipe() {
+            const swipeThreshold = 50;
+            if (touchEndX < touchStartX - swipeThreshold) {
+                nextSlide();
+            }
+            if (touchEndX > touchStartX + swipeThreshold) {
+                prevSlide();
+            }
+        }
+        
+        // Auto advance slides every 5 seconds
+        setInterval(nextSlide, 5000);
+    }
+}
+
 // Add visual effects to service cards
 function setupServiceCardEffects() {
     const serviceCards = document.querySelectorAll('.service-card');
@@ -91,6 +173,60 @@ function setupServiceCardEffects() {
             });
         });
     }
+}
+
+// Setup Facebook plugin with proper error handling
+function setupFacebookPlugin() {
+    // First check if the Facebook SDK is already loaded
+    if (typeof FB !== 'undefined') {
+        try {
+            FB.XFBML.parse();
+        } catch (e) {
+            console.log('Error parsing Facebook XFBML:', e);
+        }
+        return;
+    }
+    
+    // Add Facebook SDK
+    window.fbAsyncInit = function() {
+        FB.init({
+            xfbml: true,
+            version: 'v18.0'
+        });
+    };
+    
+    (function(d, s, id) {
+        var js, fjs = d.getElementsByTagName(s)[0];
+        if (d.getElementById(id)) return;
+        js = d.createElement(s);
+        js.id = id;
+        js.src = "https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v18.0";
+        js.defer = true;
+        js.async = true;
+        js.crossOrigin = "anonymous";
+        fjs.parentNode.insertBefore(js, fjs);
+    }(document, 'script', 'facebook-jssdk'));
+    
+    // Fallback if Facebook plugin fails to load
+    setTimeout(() => {
+        const fbContainer = document.querySelector('.fb-page');
+        if (fbContainer && !fbContainer.innerHTML.trim()) {
+            const fbFeed = document.querySelector('.facebook-feed');
+            if (fbFeed) {
+                fbFeed.innerHTML = `
+                    <div class="fb-fallback">
+                        <p>Our Facebook feed cannot be displayed right now. Please visit our page directly:</p>
+                        <a href="https://www.facebook.com/cusumanocement/" target="_blank" rel="noopener noreferrer" class="btn-facebook">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M9 8h-3v4h3v12h5v-12h3.642l.358-4h-4v-1.667c0-.955.192-1.333 1.115-1.333h2.885v-5h-3.808c-3.596 0-5.192 1.583-5.192 4.615v3.385z"/>
+                            </svg>
+                            Visit Our Facebook Page
+                        </a>
+                    </div>
+                `;
+            }
+        }
+    }, 5000);
 }
 
 // Contact form with secure form handling
@@ -264,23 +400,5 @@ function setupAdminButton() {
             // Redirect to admin panel
             window.location.href = 'admin.html';
         });
-    }
-}
-
-// Simple Facebook setup without SDK dependencies
-function setupFacebookSDK() {
-    const fbContainer = document.querySelector('.facebook-feed');
-    if (fbContainer) {
-        fbContainer.innerHTML = `
-            <div class="fb-fallback">
-                <p>View our latest projects and updates on our Facebook page!</p>
-                <a href="https://www.facebook.com/cusumanocement/" target="_blank" rel="noopener noreferrer" class="btn-facebook">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M9 8h-3v4h3v12h5v-12h3.642l.358-4h-4v-1.667c0-.955.192-1.333 1.115-1.333h2.885v-5h-3.808c-3.596 0-5.192 1.583-5.192 4.615v3.385z"/>
-                    </svg>
-                    Visit Our Facebook Page
-                </a>
-            </div>
-        `;
     }
 }
