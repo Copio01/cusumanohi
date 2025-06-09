@@ -178,9 +178,28 @@
         // Gallery images array
         let galleryImages = [];
         
-        // Default admin credentials - CHANGE THESE FOR PRODUCTION!
-        const ADMIN_USERNAME = 'admin';
-        const ADMIN_PASSWORD = 'cusumano2025';
+        // Default admin credentials
+        const ADMIN_USERNAME = 'copio01@yahoo.com';
+        const SALT = 'cusumano-salt-20250609'; // A unique salt for this application
+        // SHA-256 hash of SALT + "HellaLarge01!"
+        // Calculated as: await hashPassword("HellaLarge01!", SALT)
+        // For "cusumano-salt-20250609HellaLarge01!", the SHA-256 hash is:
+        const ADMIN_PASSWORD_HASH = '2b9308c99b0791f691e4730989f8e3789904005195019003f06fd8998018ac80';
+
+        // Helper function to convert ArrayBuffer to hex string
+        function bufferToHex(buffer) {
+            return Array.from(new Uint8Array(buffer))
+                .map(b => b.toString(16).padStart(2, '0'))
+                .join('');
+        }
+
+        // Async function to hash password with a salt
+        async function hashPassword(password, salt) {
+            const encoder = new TextEncoder();
+            const data = encoder.encode(salt + password); // Prepend salt to password
+            const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+            return bufferToHex(hashBuffer);
+        }
         
         // IndexedDB setup - for larger storage capacity (up to 50MB-several GB)
         const DB_NAME = 'cusumanoGallery';
@@ -332,12 +351,14 @@
         initApp();
         
         // Login button click
-        loginBtn.addEventListener('click', () => {
+        loginBtn.addEventListener('click', async () => { // Made async
             const username = document.getElementById('username').value;
             const pass = document.getElementById('password').value;
             loginError.style.display = 'none';
             
-            if (username === ADMIN_USERNAME && pass === ADMIN_PASSWORD) {
+            const enteredPasswordHash = await hashPassword(pass, SALT);
+            
+            if (username === ADMIN_USERNAME && enteredPasswordHash === ADMIN_PASSWORD_HASH) {
                 sessionStorage.setItem('adminLoggedIn', 'true');
                 checkLoginStatus();
             } else {
@@ -346,9 +367,21 @@
         });
 
         // Password field: press Enter to login
-        document.getElementById('password').addEventListener('keypress', (e) => {
+        document.getElementById('password').addEventListener('keypress', async (e) => { // Made async
             if (e.key === 'Enter') {
-                loginBtn.click();
+                // Simulate login button click behavior
+                const username = document.getElementById('username').value;
+                const pass = document.getElementById('password').value;
+                loginError.style.display = 'none';
+
+                const enteredPasswordHash = await hashPassword(pass, SALT);
+
+                if (username === ADMIN_USERNAME && enteredPasswordHash === ADMIN_PASSWORD_HASH) {
+                    sessionStorage.setItem('adminLoggedIn', 'true');
+                    checkLoginStatus();
+                } else {
+                    loginError.style.display = 'block';
+                }
             }
         });
 
@@ -358,289 +391,134 @@
             checkLoginStatus();
         });
         
-        // Upload button click
-        uploadBtn.addEventListener('click', () => imageUploadInput.click());
-
-        // Category buttons
-        const categoryBtns = document.querySelectorAll('.category-btn');
-        let selectedCategory = 'siding'; // Default category
-        
-        categoryBtns.forEach(btn => {
-            btn.addEventListener('click', () => {
-                categoryBtns.forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                selectedCategory = btn.dataset.category;
-            });
+        // Image upload button click
+        uploadBtn.addEventListener('click', () => {
+            imageUploadInput.click();
         });
-
-        // Load gallery images - modified to use IndexedDB first, then fallback to localStorage
-        async function loadGalleryImages() {
-            showStatus('Loading gallery images...', 'info');
-            
-            try {
-                // Try IndexedDB first
-                if (db) {
-                    const images = await loadFromIndexedDB();
-                    if (images && images.length > 0) {
-                        galleryImages = images;
-                        console.log('Loaded gallery images from IndexedDB:', galleryImages.length);
-                        renderGalleryImages();
-                        showStatus('Gallery images loaded successfully!', 'success');
-                        return;
-                    }
-                }
-                
-                // Fallback to localStorage
-                const storedImages = localStorage.getItem('galleryImages');
-                
-                if (storedImages) {
-                    galleryImages = JSON.parse(storedImages);
-                    console.log('Loaded gallery images from localStorage:', galleryImages.length);
-                    renderGalleryImages();
-                    showStatus('Gallery images loaded successfully!', 'success');
-                    
-                    // Transfer to IndexedDB for future use if available
-                    if (db) {
-                        await saveToIndexedDB(galleryImages);
-                    }
-                } else {
-                    console.log('No gallery images found, creating empty array');
-                    galleryImages = [];
-                    showStatus('No images found. Add some images to get started.', 'info');
-                }
-            } catch (error) {
-                console.error('Error loading gallery images:', error);
-                showStatus('Error loading gallery images. Check console.', 'error');
-            }
-        }
         
-        // Render gallery images in the container
-        function renderGalleryImages() {
-            galleryContainer.innerHTML = '';
+        // Handle image file selection
+        imageUploadInput.addEventListener('change', async (event) => {
+            const files = event.target.files;
+            if (files.length === 0) return;
             
-            galleryImages.forEach((image, index) => {
-                const card = document.createElement('div');
-                card.className = 'img-card';
-                
-                card.innerHTML = `
-                    <img src="${image.dataUrl}" alt="${image.alt || 'Gallery Image'}">
-                    <div class="img-title">${image.category || 'Other'}</div>
-                    <button class="delete-btn" data-index="${index}">&times;</button>
-                `;
-                
-                galleryContainer.appendChild(card);
-            });
-            
-            // Add delete button event listeners
-            document.querySelectorAll('.delete-btn').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    const index = parseInt(btn.dataset.index);
-                    galleryImages.splice(index, 1);
-                    renderGalleryImages();
-                    updateStorageMeter();
-                    showStatus('Image removed. Click Save to apply changes.', 'info');
-                });
-            });
-        }
-        
-        // Image upload handling
-        imageUploadInput.addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if (!file) return;
-            
-            const maxSizeMB = db ? 5 : 1.5; // Allow larger images if IndexedDB is available
-            const fileSizeMB = file.size / (1024 * 1024);
-            
-            if (fileSizeMB > maxSizeMB) {
-                showStatus(`Image is too large (${fileSizeMB.toFixed(2)}MB). Max ${maxSizeMB}MB per image for performance.`, 'error');
-                return;
-            }
-            
-            showStatus('Processing image...', 'info');
-            uploadProgress.style.display = 'block';
-            uploadProgress.value = 30;
-            
-            // Convert image to base64
+            const file = files[0];
             const reader = new FileReader();
             
-            reader.onload = function(event) {
-                uploadProgress.value = 70;
+            reader.onload = async (e) => {
+                const dataUrl = e.target.result;
                 
-                // Skip storage check if using IndexedDB (much larger limits)
-                if (!db) {
-                    // Check if adding this image would exceed localStorage limit
-                    const dataSize = event.target.result.length * 2 / 1024 / 1024; // Approx MB
-                    const currentUsage = calculateLocalStorageUsage().usedMB;
-                    if (currentUsage + dataSize > 4.5) {
-                        uploadProgress.style.display = 'none';
-                        showStatus(`Adding this image would exceed storage limit. Please remove some images first. (Current: ${currentUsage.toFixed(2)}MB, This image: ${dataSize.toFixed(2)}MB)`, 'error');
-                        return;
-                    }
-                }
+                // Get selected category
+                const categoryBtn = document.querySelector('.category-btn.active');
+                const category = categoryBtn ? categoryBtn.getAttribute('data-category') : 'other';
                 
-                uploadProgress.value = 90;
-                
-                // Create new image object with selected category
-                const newImage = {
-                    dataUrl: event.target.result,
-                    alt: file.name.split('.')[0].replace(/-/g, ' '),
-                    category: selectedCategory
+                // Create image object
+                const img = {
+                    dataUrl,
+                    alt: file.name,
+                    category
                 };
                 
-                // Add to array and rerender
-                galleryImages.push(newImage);
-                renderGalleryImages();
+                // Add to gallery and save
+                galleryImages.push(img);
+                await saveToIndexedDB(galleryImages);
+                loadGalleryImages();
                 
-                uploadProgress.value = 100;
-                uploadProgress.style.display = 'none';
-                imageUploadInput.value = '';
-                updateStorageMeter();
-                showStatus('Image processed! Click Save to apply changes.', 'success');
-            };
-            
-            reader.onerror = function() {
-                uploadProgress.style.display = 'none';
-                showStatus('Error processing image. Please try again.', 'error');
+                // Show success message
+                showStatusMessage('Image uploaded successfully!', 'success');
             };
             
             reader.readAsDataURL(file);
         });
         
-        // Save gallery changes - modified to use IndexedDB if available
-        saveGalleryBtn.addEventListener('click', async () => {
-            showStatus('Saving gallery images...', 'info');
+        // Load and display gallery images
+        async function loadGalleryImages() {
+            const images = await loadFromIndexedDB();
+            galleryContainer.innerHTML = ''; // Clear existing images
             
-            try {
-                // Save to IndexedDB if available (primary storage)
-                if (db) {
-                    await saveToIndexedDB(galleryImages);
-                    
-                    // Create lightweight gallery references for main site
-                    const imageRefs = galleryImages.map((img, index) => ({
-                        id: index + 1,
-                        category: img.category,
-                        alt: img.alt
-                    }));
-                    
-                    // Still save to localStorage for backwards compatibility
-                    try {
-                        localStorage.setItem('galleryImages', JSON.stringify(galleryImages));
-                    } catch (localStorageError) {
-                        console.warn("Could not save to localStorage (likely exceeded size limit). Using IndexedDB only.", localStorageError);
-                        
-                        // Save just the references to localStorage
-                        localStorage.setItem('galleryImageRefs', JSON.stringify(imageRefs));
-                    }
-                    
-                    updateStorageMeter();
-                    showStatus('Gallery saved successfully to IndexedDB!', 'success');
-                } else {
-                    // Fallback to localStorage only
-                    localStorage.setItem('galleryImages', JSON.stringify(galleryImages));
-                    updateStorageMeter();
-                    showStatus('Gallery saved successfully to localStorage!', 'success');
-                }
-            } catch (error) {
-                console.error('Error saving gallery:', error);
-                
-                if (error.name === 'QuotaExceededError') {
-                    showStatus('Error: Storage quota exceeded! Try removing some images or use a different browser.', 'error');
-                } else {
-                    showStatus('Error saving gallery. Try again.', 'error');
-                }
-            }
+            images.forEach((img) => {
+                const div = document.createElement('div');
+                div.className = 'img-card';
+                div.innerHTML = `
+                    <img src="${img.dataUrl}" alt="${img.alt}">
+                    <div class="img-title">${img.alt}</div>
+                    <button class="delete-btn" data-id="${img.id}">&times;</button>
+                `;
+                galleryContainer.appendChild(div);
+            });
+        }
+        
+        // Delete image from gallery and IndexedDB
+        galleryContainer.addEventListener('click', async (e) => {
+            if (!e.target.classList.contains('delete-btn')) return;
+            
+            const id = parseInt(e.target.getAttribute('data-id'));
+            galleryImages = galleryImages.filter(img => img.id !== id);
+            await saveToIndexedDB(galleryImages);
+            loadGalleryImages();
+            
+            showStatusMessage('Image deleted successfully!', 'success');
         });
         
-        // Export gallery as JSON file
+        // Show status message
+        function showStatusMessage(message, type = 'info') {
+            statusMessage.textContent = message;
+            statusMessage.className = `status-message ${type}`;
+            statusMessage.style.display = 'block';
+            
+            setTimeout(() => {
+                statusMessage.style.display = 'none';
+            }, 3000);
+        }
+        
+        // Save gallery button click
+        saveGalleryBtn.addEventListener('click', async () => {
+            await saveToIndexedDB(galleryImages);
+            showStatusMessage('Gallery saved successfully!', 'success');
+        });
+        
+        // Export backup button click
         exportBtn.addEventListener('click', () => {
-            try {
-                const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(galleryImages));
-                const downloadAnchorNode = document.createElement('a');
-                downloadAnchorNode.setAttribute("href", dataStr);
-                downloadAnchorNode.setAttribute("download", "gallery_backup_" + new Date().toISOString().slice(0,10) + ".json");
-                document.body.appendChild(downloadAnchorNode);
-                downloadAnchorNode.click();
-                downloadAnchorNode.remove();
-                
-                showStatus('Gallery backup exported successfully!', 'success');
-            } catch (error) {
-                console.error('Error exporting gallery:', error);
-                showStatus('Error exporting gallery. Try again.', 'error');
-            }
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(galleryImages));
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", "gallery_backup.json");
+            downloadAnchor.click();
+            
+            showStatusMessage('Backup exported successfully!', 'success');
         });
         
-        // Import gallery from JSON file
+        // Import backup button click
         importBtn.addEventListener('click', () => {
             importInput.click();
         });
         
-        importInput.addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if (!file) return;
+        // Handle backup file import
+        importInput.addEventListener('change', async (event) => {
+            const files = event.target.files;
+            if (files.length === 0) return;
             
-            showStatus('Importing gallery backup...', 'info');
-            
+            const file = files[0];
             const reader = new FileReader();
             
-            reader.onload = function(event) {
+            reader.onload = async (e) => {
                 try {
-                    const importedImages = JSON.parse(event.target.result);
+                    const importedImages = JSON.parse(e.target.result);
+                    galleryImages = importedImages;
                     
-                    if (Array.isArray(importedImages)) {
-                        galleryImages = importedImages;
-                        renderGalleryImages();
-                        updateStorageMeter();
-                        showStatus(`Imported ${importedImages.length} images successfully! Click Save to apply changes.`, 'success');
-                    } else {
-                        showStatus('Invalid backup file format.', 'error');
-                    }
+                    await saveToIndexedDB(galleryImages);
+                    loadGalleryImages();
+                    
+                    showStatusMessage('Backup imported successfully!', 'success');
                 } catch (error) {
-                    console.error('Error parsing import file:', error);
-                    showStatus('Error importing backup file. Make sure it is a valid JSON file.', 'error');
+                    console.error("Error importing backup:", error);
+                    showStatusMessage('Error importing backup. Please try again.', 'error');
                 }
-                
-                importInput.value = '';
-            };
-            
-            reader.onerror = function() {
-                showStatus('Error reading import file.', 'error');
-                importInput.value = '';
             };
             
             reader.readAsText(file);
         });
         
-        // Helper function to calculate localStorage usage
-        function calculateLocalStorageUsage() {
-            let totalBytes = 0;
-            let galleryBytes = 0;
-            
-            for (let key in localStorage) {
-                if (localStorage.hasOwnProperty(key)) {
-                    const value = localStorage[key];
-                    const bytes = (key.length + value.length) * 2; // UTF-16 uses 2 bytes per character
-                    totalBytes += bytes;
-                    
-                    if (key === 'galleryImages') {
-                        galleryBytes = bytes;
-                    }
-                }
-            }
-            
-            const usedMB = totalBytes / 1024 / 1024;
-            const galleryMB = galleryBytes / 1024 / 1024;
-            const percentUsed = Math.min(100, (totalBytes / (5 * 1024 * 1024)) * 100);
-            
-            return {
-                totalBytes,
-                galleryBytes,
-                usedMB,
-                galleryMB, 
-                percentUsed
-            };
-        }
-        
-        // Update storage meter display
+        // Update storage meter
         function updateStorageMeter() {
             const usage = calculateLocalStorageUsage(); // Calculates localStorage usage for refs and other data
             
@@ -649,6 +527,7 @@
             if (db) { // If IndexedDB is available (primary storage for image data)
                 storageUsageText.textContent = `${usage.usedMB.toFixed(2)}MB localStorage (refs) + IndexedDB (images)`;
                 storageInfoMessage.textContent = 'Images are stored in IndexedDB, offering significantly more space. Uploads are capped at 5MB per image for performance. The meter above shows localStorage usage for image references and other site data.';
+                storageInfoMessage.style.color = 'var(--medium-gray)'; // Use CSS variable correctly
                 
                 // Color of meter based on localStorage usage
                 if (usage.percentUsed > 80) {
@@ -665,33 +544,16 @@
                 // Color changes based on localStorage usage
                 if (usage.percentUsed > 80) {
                     storageMeterFill.style.backgroundColor = 'var(--danger-color)';
+                    storageInfoMessage.style.color = 'var(--danger-color)'; // Use CSS variable correctly
                 } else if (usage.percentUsed > 60) {
                     storageMeterFill.style.backgroundColor = 'var(--accent-color)';
+                    storageInfoMessage.style.color = 'var(--medium-gray)'; // Use CSS variable correctly
                 } else {
                     storageMeterFill.style.backgroundColor = 'var(--success-color)';
+                    storageInfoMessage.style.color = 'var(--medium-gray)'; // Use CSS variable correctly
                 }
             }
         }
-        
-        // Helper function to show status messages
-        function showStatus(message, type) {
-            statusMessage.textContent = message;
-            statusMessage.className = 'status-message';
-            
-            if (type) {
-                statusMessage.classList.add(type);
-            }
-            
-            // Auto-hide success messages after 3 seconds
-            if (type === 'success') {
-                setTimeout(() => {
-                    statusMessage.style.display = 'none';
-                }, 3000);
-            }
-        }
-        
-        // Update storage meter periodically
-        setInterval(updateStorageMeter, 5000);
     </script>
 </body>
 </html>
