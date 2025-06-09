@@ -21,17 +21,22 @@
     <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
-    <!-- Banner image that doesn't scroll -->
-    <div class="hero-banner">
-        <!-- Banner image is set as background in CSS -->
-    </div>
-
     <!-- Header with navigation that will be sticky -->
     <header class="main-header">
         <div class="header-container">
             <div class="header-content">
-                <a href="#" class="logo">Cusumano Home Improvements</a>
-                <nav class="main-nav">
+                <a href="#" class="logo">
+                    <img src="images/logo.png" alt="Cusumano Home Improvements Logo" class="header-logo">
+                    <span>Cusumano Home Improvements</span>
+                </a>
+                <button class="mobile-toggle" id="mobile-toggle" aria-label="Toggle Menu">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="3" y1="12" x2="21" y2="12"></line>
+                        <line x1="3" y1="6" x2="21" y2="6"></line>
+                        <line x1="3" y1="18" x2="21" y2="18"></line>
+                    </svg>
+                </button>
+                <nav class="main-nav" id="main-nav">
                     <a href="#about">About</a>
                     <a href="#services">Services</a>
                     <a href="#gallery">Gallery</a>

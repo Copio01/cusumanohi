@@ -6,10 +6,92 @@ document.addEventListener('DOMContentLoaded', () => {
     // Set up core functionality
     setupModalFunctionality();
     setupScrollBehavior();
+    setupMobileNavigation();
+    setupHeaderEffects();
     setupAdminButton();
     setupContactForm();
-    setupFacebookSDK(); // Add Facebook SDK setup
+    setupFacebookSDK(); 
+    setupServiceCardEffects();
 });
+
+// Apply header effects on scroll
+function setupHeaderEffects() {
+    const header = document.querySelector('.main-header');
+    
+    if (header) {
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 50) {
+                header.classList.add('scrolled');
+            } else {
+                header.classList.remove('scrolled');
+            }
+        });
+    }
+}
+
+// Set up mobile navigation toggle
+function setupMobileNavigation() {
+    const mobileToggle = document.getElementById('mobile-toggle');
+    const mainNav = document.getElementById('main-nav');
+    
+    if (mobileToggle && mainNav) {
+        mobileToggle.addEventListener('click', () => {
+            mainNav.classList.toggle('open');
+            mobileToggle.setAttribute('aria-expanded', 
+                mainNav.classList.contains('open') ? 'true' : 'false');
+        });
+        
+        // Close menu when clicking a link
+        const navLinks = mainNav.querySelectorAll('a');
+        navLinks.forEach(link => {
+            link.addEventListener('click', () => {
+                if (window.innerWidth <= 768) {
+                    mainNav.classList.remove('open');
+                    mobileToggle.setAttribute('aria-expanded', 'false');
+                }
+            });
+        });
+        
+        // Close menu when clicking outside
+        document.addEventListener('click', (event) => {
+            if (window.innerWidth <= 768 && 
+                !mainNav.contains(event.target) && 
+                !mobileToggle.contains(event.target) && 
+                mainNav.classList.contains('open')) {
+                mainNav.classList.remove('open');
+                mobileToggle.setAttribute('aria-expanded', 'false');
+            }
+        });
+    }
+}
+
+// Add visual effects to service cards
+function setupServiceCardEffects() {
+    const serviceCards = document.querySelectorAll('.service-card');
+    
+    if (serviceCards.length) {
+        // Add entrance animation
+        serviceCards.forEach((card, index) => {
+            // Delayed appearance for staggered effect
+            setTimeout(() => {
+                card.classList.add('visible');
+            }, 100 * index);
+            
+            // Add hover interaction to cards
+            card.addEventListener('mouseenter', () => {
+                // Remove active class from all other cards
+                serviceCards.forEach(otherCard => {
+                    if (otherCard !== card) {
+                        otherCard.classList.remove('active');
+                    }
+                });
+                
+                // Add active class to current card
+                card.classList.add('active');
+            });
+        });
+    }
+}
 
 // Contact form with secure form handling
 function setupContactForm() {
@@ -127,6 +209,47 @@ function setupScrollBehavior() {
             }
         });
     });
+    
+    // Highlight sections in viewport
+    const sections = document.querySelectorAll('section[id]');
+    
+    function highlightNavLink() {
+        let scrollPosition = window.scrollY;
+        
+        sections.forEach(section => {
+            const sectionTop = section.offsetTop - 100; // Adjust for header
+            const sectionHeight = section.offsetHeight;
+            const sectionId = section.getAttribute('id');
+            
+            if (scrollPosition >= sectionTop && scrollPosition < sectionTop + sectionHeight) {
+                document.querySelector(`.main-nav a[href="#${sectionId}"]`)?.classList.add('active');
+            } else {
+                document.querySelector(`.main-nav a[href="#${sectionId}"]`)?.classList.remove('active');
+            }
+        });
+    }
+    
+    // Call once on load and then on scroll
+    highlightNavLink();
+    window.addEventListener('scroll', highlightNavLink);
+    
+    // Add reveal animations for sections
+    const revealElements = document.querySelectorAll('.container');
+    
+    function revealOnScroll() {
+        revealElements.forEach(element => {
+            const elementTop = element.getBoundingClientRect().top;
+            const elementVisible = 150;
+            
+            if (elementTop < window.innerHeight - elementVisible) {
+                element.classList.add('revealed');
+            }
+        });
+    }
+    
+    // Call once on load and then on scroll
+    window.addEventListener('scroll', revealOnScroll);
+    revealOnScroll();
 }
 
 // Admin login button functionality
