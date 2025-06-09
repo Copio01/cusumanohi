@@ -139,11 +139,6 @@ body {
 }
 
 .hero-overlay {
-    background: linear-gradient(120deg, rgba(10,77,104,0.85) 40%, rgba(8,131,149,0.75) 100%);
-    box-shadow: 0 8px 32px rgba(10,77,104,0.08);
-    position: absolute;
-    top: 0;
-    left: 0;
     width: 100%;
     height: 100%;
     display: flex;
@@ -152,6 +147,7 @@ body {
     justify-content: center;
     padding: 2rem;
     text-align: center;
+    /* Removed background gradient to show clean banner */
 }
 
 .hero-overlay h1 {
@@ -159,13 +155,14 @@ body {
     letter-spacing: 1px;
     font-weight: 700;
     color: var(--white);
-    text-shadow: 0 2px 12px rgba(10,77,104,0.18);
+    text-shadow: 0 2px 8px rgba(0,0,0,0.5); /* Enhanced text shadow for visibility on any background */
     margin-bottom: 1.2rem;
 }
 
 .hero-overlay p {
     font-size: 1.5rem; /* Increased from 1.3rem */
-    color: #e0f7fa;
+    color: var(--white);
+    text-shadow: 0 2px 8px rgba(0,0,0,0.5); /* Enhanced text shadow for visibility */
     margin-bottom: 2.5rem; /* Increased from 2.2rem */
 }
 
