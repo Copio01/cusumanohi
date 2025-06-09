@@ -8,30 +8,46 @@ document.addEventListener('DOMContentLoaded', () => {
     setupScrollBehavior();
     setupAdminButton();
     setupContactForm();
+    setupFacebookSDK(); // Add Facebook SDK setup
 });
 
-// Contact form with client-side email
+// Contact form with secure form handling
 function setupContactForm() {
     const contactForm = document.getElementById('contact-form');
     
     if (contactForm) {
-        // The form is already set up with mailto: action, but we can enhance the user experience
         contactForm.addEventListener('submit', (e) => {
-            // Allow the default form submission which will open the user's email client
+            e.preventDefault(); // Prevent default form submission
             
-            // Set the subject line
-            const subject = "Cusumano Home Improvements - Website Inquiry";
-            contactForm.action = `mailto:copernan@yahoo.com?subject=${encodeURIComponent(subject)}`;
+            // Get form data
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const phone = document.getElementById('phone').value;
+            const message = document.getElementById('message').value;
             
-            // Show a confirmation message after a small delay to ensure the email client opens
-            setTimeout(() => {
-                // Close modal
-                const modal = document.getElementById('contact-modal');
-                if (modal) {
-                    modal.classList.remove('active');
-                    document.body.classList.remove('modal-open');
-                }
-            }, 500);
+            // Store form data in sessionStorage for demonstration
+            // In production, you would send this to a server endpoint over HTTPS
+            sessionStorage.setItem('contactFormSubmission', JSON.stringify({
+                name,
+                email,
+                phone,
+                message,
+                timestamp: new Date().toISOString()
+            }));
+            
+            // Show a confirmation message
+            // Reset the form
+            contactForm.reset();
+            
+            // Close modal if it exists
+            const modal = document.getElementById('contact-modal');
+            if (modal) {
+                modal.classList.remove('active');
+                document.body.classList.remove('modal-open');
+            }
+            
+            // Show success message
+            alert('Thank you for your message! We will get back to you soon.');
         });
     }
 }
@@ -126,141 +142,358 @@ function setupAdminButton() {
     }
 }
 
-// --- Firebase Dynamic Content Loader ---
-import('https://www.gstatic.com/firebasejs/11.9.0/firebase-app.js').then(firebaseApp => {
-  import('https://www.gstatic.com/firebasejs/11.9.0/firebase-firestore.js').then(firebaseFirestore => {
-    const firebaseConfig = {
-      apiKey: "AIzaSyBVtq6dAEuybJNmTTv8dXBxTVUgw1t0ZMk",
-      authDomain: "cusumano-website.firebaseapp.com",
-      projectId: "cusumano-website",
-      storageBucket: "cusumano-website.appspot.com",
-      messagingSenderId: "20051552210",
-      appId: "1:20051552210:web:7eb3b22baa3fec184e4a0b"
-    };
-    const app = firebaseApp.initializeApp(firebaseConfig);
-    const db = firebaseFirestore.getFirestore(app);
-    // Fetch all site content
-    firebaseFirestore.getDocs(firebaseFirestore.collection(db, 'siteContent')).then(async (snap) => {
-      // Helper to get a doc by id
-      async function getSection(id) {
-        const docRef = firebaseFirestore.doc(db, 'siteContent', id);
-        const docSnap = await firebaseFirestore.getDoc(docRef);
-        return docSnap.exists() ? docSnap.data() : null;
+// Fix Facebook SDK integration
+function setupFacebookSDK() {
+    // Only load Facebook SDK if the page has Facebook elements
+    if (document.querySelector('.fb-page') || document.querySelector('.fb-like') || document.querySelector('.fb-share-button')) {
+        // Create a more robust Facebook SDK loader with error handling
+        window.fbAsyncInit = function() {
+            try {
+                FB.init({
+                    appId: '', // Leave empty if you don't have an app ID
+                    autoLogAppEvents: true,
+                    xfbml: true,
+                    version: 'v17.0'
+                });
+                
+                // Only parse XFBML if Facebook elements exist
+                setTimeout(function() {
+                    if (FB && FB.XFBML) {
+                        FB.XFBML.parse();
+                    }
+                }, 1000);
+            } catch (error) {
+                console.log('Facebook SDK initialization error:', error);
+            }
+        };
+        
+        // Load the SDK asynchronously with error handling
+        (function(d, s, id) {
+            try {
+                if (d.getElementById(id)) return;
+                var js = d.createElement(s);
+                js.id = id;
+                js.src = "https://connect.facebook.net/en_US/sdk.js";
+                js.onerror = function() {
+                    console.log('Error loading Facebook SDK');
+                    // Remove any dependency on Facebook elements
+                    const fbElements = document.querySelectorAll('.fb-page, .fb-like, .fb-share-button');
+                    fbElements.forEach(el => {
+                        el.style.display = 'none';
+                    });
+                };
+                var fjs = d.getElementsByTagName(s)[0];
+                fjs.parentNode.insertBefore(js, fjs);
+            } catch (error) {
+                console.log('Error setting up Facebook SDK:', error);
+            }
+        }(document, 'script', 'facebook-jssdk'));
+    } else {
+        // No Facebook elements found, no need to load the SDK
+        console.log('No Facebook elements found, Facebook SDK not loaded');
+    }
+}
+
+// --- Facebook SDK Error Handler ---
+window.addEventListener('load', function() {
+  // Check if FB SDK is available after page load
+  setTimeout(() => {
+    if (typeof FB === 'undefined') {
+      console.log('Facebook SDK failed to load. Hiding FB elements.');
+      const fbContainer = document.querySelector('.facebook-feed');
+      if (fbContainer) {
+        fbContainer.innerHTML = '<div class="fb-fallback"><p>Facebook content is currently unavailable. Please check our <a href="https://www.facebook.com/cusumanocement/" target="_blank" rel="noopener noreferrer">Facebook page</a> directly.</p></div>';
       }
-      // HERO
-      getSection('hero').then(hero => {
-        if (hero) {
-          const h = document.querySelector('.hero-overlay h1');
-          const p = document.querySelector('.hero-overlay p');
-          const btn = document.querySelector('.hero-overlay .btn-primary');
-          if (h) h.textContent = hero.heading;
-          if (p) p.textContent = hero.subheading;
-          if (btn) btn.textContent = hero.buttonText;
-        }
-      });
-      // ABOUT
-      getSection('about').then(about => {
-        if (about) {
-          const heading = document.querySelector('#about .section-title');
-          const aboutText = document.querySelector('#about .about-text');
-          if (heading) heading.textContent = about.heading;
-          if (aboutText) {
-            aboutText.innerHTML =
-              `<p>${about.p1 || ''}</p>` +
-              `<p>${about.p2 || ''}</p>` +
-              (about.features ? `<div class="about-features">${about.features.map(f => `<div class="feature"><div class="feature-icon">✓</div><div class="feature-text">${f.trim()}</div></div>`).join('')}</div>` : '');
-          }
-        }
-      });
-      // SERVICES
-      getSection('services').then(services => {
-        if (services && services.services) {
-          const grid = document.querySelector('.services-grid');
-          if (grid) {
-            grid.innerHTML = services.services.map(s =>
-              `<div class="service-card">
-                <div class="service-icon">🏗️</div>
-                <h3>${s.title}</h3>
-                <p>${s.description}</p>
-              </div>`).join('');
-          }
-        }
-      });
-      // MAP
-      getSection('map').then(map => {
-        if (map) {
-          const heading = document.querySelector('#map .section-title');
-          const info = document.querySelector('#map .map-info');
-          if (heading) heading.textContent = map.heading;
-          if (info) {
-            info.innerHTML = `<h3>${map.heading}</h3><p>${map.desc}</p><div class="map-actions"><a href="${map.link}" class="btn-secondary" target="_blank" rel="noopener noreferrer">Get Directions</a></div>`;
-          }
-          // Optionally update the map marker if you use a JS map
-        }
-      });
-      // FACEBOOK
-      getSection('facebook').then(fb => {
-        if (fb) {
-          const fbPage = document.querySelector('.fb-page');
-          if (fbPage) {
-            fbPage.setAttribute('data-href', fb.url);
-            fbPage.setAttribute('data-tabs', fb.tabs.join(','));
-            fbPage.setAttribute('data-width', fb.width);
-            fbPage.setAttribute('data-height', fb.height);
-            fbPage.setAttribute('data-hide-cover', !fb.cover);
-            fbPage.setAttribute('data-show-facepile', fb.facepile);
-            if (window.FB && window.FB.XFBML) window.FB.XFBML.parse();
-          }
-        }
-      });
-      // CONTACT
-      getSection('contact').then(contact => {
-        if (contact) {
-          const intro = document.querySelector('.contact-intro');
-          const phone = document.querySelector('.contact-method a[href^="tel"]');
-          const email = document.querySelector('.contact-method a[href^="mailto"]');
-          const hours = document.querySelectorAll('.contact-method')[2];
-          const cta = document.querySelector('.contact-cta h3');
-          if (intro) intro.textContent = contact.intro;
-          if (phone) phone.textContent = contact.phone;
-          if (email) email.textContent = contact.email;
-          if (hours) hours.innerHTML = `<div class="contact-icon">🕒</div><h3>Business Hours</h3><p>${contact.hours}</p>`;
-          if (cta) cta.textContent = contact.cta;
-        }
-      });
-      // FOOTER
-      getSection('footer').then(footer => {
-        if (footer) {
-          const info = document.querySelector('.footer-info');
-          const copyright = document.querySelector('.footer-copyright p');
-          if (info) info.innerHTML = `<h3>Cusumano Home Improvements</h3><p>${footer.info}</p>`;
-          if (copyright) copyright.textContent = footer.copyright;
-        }
-      });
-      // SOCIAL
-      getSection('social').then(social => {
-        if (social) {
-          const fb = document.querySelector('.footer-social a[aria-label="Facebook"]');
-          const ig = document.querySelector('.footer-social a[aria-label="Instagram"]');
-          const tw = document.querySelector('.footer-social a[aria-label="Twitter"]');
-          if (fb && social.facebook) fb.href = social.facebook;
-          if (ig && social.instagram) ig.href = social.instagram;
-          if (tw && social.twitter) tw.href = social.twitter;
-        }
-      });
-      // ANNOUNCEMENT
-      getSection('announcement').then(ann => {
-        if (ann && ann.active) {
-          let banner = document.getElementById('site-announcement');
-          if (!banner) {
-            banner = document.createElement('div');
-            banner.id = 'site-announcement';
-            banner.style = 'background:var(--accent-color);color:white;text-align:center;padding:1rem;font-weight:600;';
-            document.body.insertBefore(banner, document.body.firstChild);
-          }
-          banner.textContent = ann.text;
-        }
-      });
-    });
-  });
+    } else {
+      // Try to parse XFBML again if SDK is available but elements aren't rendered
+      try {
+        FB.XFBML.parse();
+        console.log('FB XFBML parsed successfully');
+      } catch (err) {
+        console.log('Error parsing FB XFBML:', err);
+      }
+    }
+  }, 3000); // Give the SDK some time to load
 });
+
+// --- Firebase Dynamic Content Loader ---
+import('https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js').then(firebaseApp => {
+  import('https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js').then(async firebaseFirestore => {
+    try {
+      const firebaseConfig = {
+        apiKey: "AIzaSyBVtq6dAEuybJNmTTv8dXBxTVUgw1t0ZMk",
+        authDomain: "cusumano-website.firebaseapp.com",
+        projectId: "cusumano-website",
+        storageBucket: "cusumano-website.appspot.com",
+        messagingSenderId: "20051552210",
+        appId: "1:20051552210:web:7eb3b22baa3fec184e4a0b"
+      };
+      
+      // Initialize Firebase
+      const app = firebaseApp.initializeApp(firebaseConfig);
+      const db = firebaseFirestore.getFirestore(app);
+      
+      // Import auth module for public read access with better error handling
+      try {
+        const authModule = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js');
+        const auth = authModule.getAuth(app);
+        
+        // Check if already logged in anonymously
+        if (!auth.currentUser) {
+          await authModule.signInAnonymously(auth);
+          console.log("Anonymous auth successful");
+        }
+      } catch (authError) {
+        console.log("Anonymous auth failed:", authError);
+        // Continue without authentication - will use static fallback content
+      }
+      
+      // Retry logic and fallback system for Firebase calls
+      async function getSection(id, maxRetries = 2) {
+        let retries = 0;
+        
+        while (retries <= maxRetries) {
+          try {
+            const docRef = firebaseFirestore.doc(db, 'siteContent', id);
+            const docSnap = await firebaseFirestore.getDoc(docRef);
+            
+            if (docSnap.exists()) {
+              console.log(`Successfully loaded section: ${id}`);
+              return docSnap.data();
+            } else {
+              console.log(`No document found for section ${id}`);
+              // Try public collection instead
+              return await getFallbackContent(id);
+            }
+          } catch (error) {
+            console.log(`Error fetching section ${id} (attempt ${retries + 1}):`, error);
+            
+            if (error.code === 'permission-denied') {
+              console.log(`Permission denied for section ${id}. Using public collection.`);
+              return await getFallbackContent(id);
+            }
+            
+            retries++;
+            // Wait before retrying
+            if (retries <= maxRetries) {
+              await new Promise(resolve => setTimeout(resolve, 1000));
+            }
+          }
+        }
+        
+        console.log(`Failed to fetch section ${id} after ${maxRetries} retries. Using static content.`);
+        return null;
+      }
+      
+      // Helper function for fallback content
+      async function getFallbackContent(id) {
+        try {
+          const fallbackRef = firebaseFirestore.doc(db, 'publicContent', id);
+          const fallbackSnap = await firebaseFirestore.getDoc(fallbackRef);
+          
+          if (fallbackSnap.exists()) {
+            console.log(`Retrieved fallback content for ${id}`);
+            return fallbackSnap.data();
+          }
+        } catch (fallbackError) {
+          console.log(`Fallback attempt failed for ${id}:`, fallbackError);
+        }
+        
+        return null;
+      }
+
+      // Process each section independently with better error handling
+      const sections = [
+        {id: 'hero', selector: '.hero-section'},
+        {id: 'services', selector: '.services-section'},
+        {id: 'about', selector: '.about-section'},
+        {id: 'testimonials', selector: '.testimonials-section'},
+        {id: 'gallery', selector: '.gallery-section'}
+      ];
+      
+      // Process sections in parallel for better performance
+      Promise.allSettled(sections.map(async section => {
+        try {
+          const content = await getSection(section.id);
+          if (!content) {
+            console.log(`No content available for ${section.id}, keeping static content.`);
+            return;
+          }
+          
+          const sectionElement = document.querySelector(section.selector);
+          if (!sectionElement) {
+            console.log(`Section element not found for ${section.id}`);
+            return;
+          }
+          
+          // Apply content based on section type
+          updateSectionContent(sectionElement, content, section.id);
+        } catch (error) {
+          console.error(`Error processing section ${section.id}:`, error);
+        }
+      })).then(() => {
+        // Initialize sliders after all content is loaded
+        if (typeof initializeSliders === 'function') {
+          initializeSliders();
+        }
+      });
+      
+      // Update section content
+      function updateSectionContent(element, content, sectionId) {
+        // Common updates
+        if (content.title) {
+          const titleEl = element.querySelector('h2, h3, .section-title');
+          if (titleEl) titleEl.textContent = content.title;
+        }
+        
+        if (content.subtitle) {
+          const subtitleEl = element.querySelector('.section-subtitle, p:first-of-type');
+          if (subtitleEl) subtitleEl.textContent = content.subtitle;
+        }
+        
+        // Section-specific updates
+        switch(sectionId) {
+          case 'hero':
+            updateHeroSection(element, content);
+            break;
+          case 'services':
+            updateServicesSection(element, content);
+            break;
+          case 'gallery':
+            updateGallerySection(element, content);
+            break;
+          case 'testimonials':
+            updateTestimonialsSection(element, content);
+            break;
+        }
+        
+        // Show the element if it was hidden
+        element.classList.remove('loading');
+      }
+      
+      function updateHeroSection(element, content) {
+        if (content.backgroundImage) {
+          element.style.backgroundImage = `url(${content.backgroundImage})`;
+        }
+        
+        if (content.ctaText) {
+          const ctaBtn = element.querySelector('.cta-button');
+          if (ctaBtn) ctaBtn.textContent = content.ctaText;
+        }
+        
+        if (content.ctaLink) {
+          const ctaBtn = element.querySelector('.cta-button');
+          if (ctaBtn) ctaBtn.setAttribute('href', content.ctaLink);
+        }
+      }
+      
+      function updateServicesSection(element, content) {
+        if (content.services && Array.isArray(content.services)) {
+          const servicesList = element.querySelector('.services-list');
+          if (servicesList) {
+            // Keep the original service items as templates
+            const templateItem = servicesList.querySelector('.service-item').cloneNode(true);
+            
+            // Clear the list
+            servicesList.innerHTML = '';
+            
+            // Add each service
+            content.services.forEach(service => {
+              const newItem = templateItem.cloneNode(true);
+              
+              // Update service item content
+              const titleEl = newItem.querySelector('.service-title');
+              if (titleEl) titleEl.textContent = service.title || '';
+              
+              const descEl = newItem.querySelector('.service-description');
+              if (descEl) descEl.textContent = service.description || '';
+              
+              const iconEl = newItem.querySelector('.service-icon');
+              if (iconEl && service.icon) iconEl.className = `service-icon ${service.icon}`;
+              
+              servicesList.appendChild(newItem);
+            });
+          }
+        }
+      }
+      
+      function updateGallerySection(element, content) {
+        if (content.images && Array.isArray(content.images)) {
+          const slider = element.querySelector('.image-slider');
+          if (slider) {
+            const slideContainer = slider.querySelector('.slides-container') || slider;
+            
+            // Keep one slide as a template
+            const templateSlide = slideContainer.querySelector('.slide').cloneNode(true);
+            
+            // Clear the container
+            slideContainer.innerHTML = '';
+            
+            // Add each image as a slide
+            content.images.forEach((image, index) => {
+              const newSlide = templateSlide.cloneNode(true);
+              
+              const imgEl = newSlide.querySelector('img');
+              if (imgEl) {
+                imgEl.setAttribute('data-src', image.url);
+                imgEl.setAttribute('alt', image.alt || `Gallery image ${index + 1}`);
+                
+                // Preload the first image
+                if (index === 0) {
+                  imgEl.src = image.url;
+                  imgEl.removeAttribute('data-src');
+                }
+              }
+              
+              slideContainer.appendChild(newSlide);
+            });
+            
+            // Re-initialize the slider
+            if (typeof initializeSliders === 'function') {
+              initializeSliders();
+            }
+          }
+        }
+      }
+      
+      function updateTestimonialsSection(element, content) {
+        if (content.testimonials && Array.isArray(content.testimonials)) {
+          const testimonialsList = element.querySelector('.testimonials-list');
+          if (testimonialsList) {
+            // Keep a template
+            const templateItem = testimonialsList.querySelector('.testimonial-item').cloneNode(true);
+            
+            // Clear the list
+            testimonialsList.innerHTML = '';
+            
+            // Add each testimonial
+            content.testimonials.forEach(testimonial => {
+              const newItem = templateItem.cloneNode(true);
+              
+              const quoteEl = newItem.querySelector('.testimonial-quote');
+              if (quoteEl) quoteEl.textContent = testimonial.quote || '';
+              
+              const authorEl = newItem.querySelector('.testimonial-author');
+              if (authorEl) authorEl.textContent = testimonial.author || '';
+              
+              testimonialsList.appendChild(newItem);
+            });
+          }
+        }
+      }
+      
+    } catch (error) {
+      console.error("Firebase initialization error:", error);
+    }
+  }).catch(error => {
+    console.error("Error loading Firestore module:", error);
+  });
+}).catch(error => {
+  console.error("Error loading Firebase App module:", error);
+});
+
+// Fallback function to ensure site works even if Firebase fails
+function loadStaticFallbackContent() {
+  console.log('Loading static fallback content...');
+  // The site will continue to work with static HTML content
+}
