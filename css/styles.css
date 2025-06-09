@@ -134,8 +134,7 @@ body {
     justify-content: center;
     background-image: url('../images/banner.png');
     background-color: #0a4d68; /* Fallback color matching your brand */
-    margin-top: -80px; /* Pull up to cover the header area */
-    padding-top: 80px; /* Compensate for the header height */
+    /* Removed margin-top and padding-top to prevent cut-off */
 }
 
 .hero-overlay {

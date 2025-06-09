@@ -8,6 +8,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/png" href="images/logo.png">
 
     <style>
         :root {
@@ -803,7 +804,7 @@
         }
 
         // --- Hero Section Save ---
-        heroForm.addEventListener('submit', async (e) => {
+        if (heroForm) heroForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             showSpinner(uploadSpinner);
             const heading = document.getElementById('hero-heading').value;
@@ -825,7 +826,7 @@
         });
 
         // --- About Section Save ---
-        aboutForm.addEventListener('submit', async (e) => {
+        if (aboutForm) aboutForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             showSpinner(uploadSpinner);
             const heading = document.getElementById('about-heading').value;
@@ -849,7 +850,7 @@
         });
 
         // --- Services Section Save ---
-        servicesForm.addEventListener('submit', async (e) => {
+        if (servicesForm) servicesForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             showSpinner(uploadSpinner);
             const services = [];
@@ -872,7 +873,7 @@
         });
 
         // --- Map Section Save ---
-        mapForm.addEventListener('submit', async (e) => {
+        if (mapForm) mapForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             showSpinner(uploadSpinner);
             const heading = document.getElementById('map-heading').value;
@@ -898,7 +899,7 @@
         });
 
         // --- Facebook Section Save ---
-        facebookForm.addEventListener('submit', async (e) => {
+        if (facebookForm) facebookForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             showSpinner(uploadSpinner);
             const url = document.getElementById('fb-url').value;
@@ -926,7 +927,7 @@
         });
 
         // --- Contact Section Save ---
-        contactFormAdmin.addEventListener('submit', async (e) => {
+        if (contactFormAdmin) contactFormAdmin.addEventListener('submit', async (e) => {
             e.preventDefault();
             showSpinner(uploadSpinner);
             const intro = document.getElementById('contact-intro').value;
@@ -952,7 +953,7 @@
         });
 
         // --- Footer Section Save ---
-        footerForm.addEventListener('submit', async (e) => {
+        if (footerForm) footerForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             showSpinner(uploadSpinner);
             const info = document.getElementById('footer-info').value;
@@ -972,7 +973,7 @@
         });
 
         // --- Social Section Save ---
-        socialForm.addEventListener('submit', async (e) => {
+        if (socialForm) socialForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             showSpinner(uploadSpinner);
             const facebook = document.getElementById('social-facebook').value;
@@ -994,7 +995,7 @@
         });
 
         // --- Announcement Section Save ---
-        announcementForm.addEventListener('submit', async (e) => {
+        if (announcementForm) announcementForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             showSpinner(uploadSpinner);
             const text = document.getElementById('announcement-text').value;
