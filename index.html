@@ -83,12 +83,31 @@
         <h2 class="section-title">Our Work</h2>
         <div class="slider-container">
             <div class="slider">
-                <!-- Slides will be populated via JavaScript -->
+                <!-- Example slides -->
+                <div class="slide active">
+                    <img src="images/siding-example.jpg" alt="Siding Installation Project" onerror="this.src='https://placehold.co/800x400/0a4d68/white?text=Siding+Installation';">
+                    <div class="slide-caption">Vinyl Siding Installation in Monroe</div>
+                </div>
+                <div class="slide">
+                    <img src="images/window-example.jpg" alt="Window Replacement Project" onerror="this.src='https://placehold.co/800x400/088395/white?text=Window+Replacement';">
+                    <div class="slide-caption">Energy Efficient Window Installation</div>
+                </div>
+                <div class="slide">
+                    <img src="images/deck-example.jpg" alt="Custom Deck Project" onerror="this.src='https://placehold.co/800x400/0a4d68/white?text=Custom+Deck+Building';">
+                    <div class="slide-caption">Custom Deck Construction</div>
+                </div>
+                <div class="slide">
+                    <img src="images/dumpster-example.jpg" alt="Dumpster Rental" onerror="this.src='https://placehold.co/800x400/088395/white?text=Dumpster+Rental';">
+                    <div class="slide-caption">10-Yard Dumpster Rental Service</div>
+                </div>
             </div>
             <button class="slider-arrow left">&lt;</button>
             <button class="slider-arrow right">&gt;</button>
             <div class="slider-dots">
-                <!-- Dots will be populated via JavaScript -->
+                <button class="dot active" aria-label="Slide 1"></button>
+                <button class="dot" aria-label="Slide 2"></button>
+                <button class="dot" aria-label="Slide 3"></button>
+                <button class="dot" aria-label="Slide 4"></button>
             </div>
             <div class="slider-progress-bar">
                 <div class="slider-progress"></div>
@@ -101,7 +120,7 @@
         <h2 class="section-title">Find Us</h2>
         <div class="map-container">
             <div id="open-map" class="open-map">
-                <!-- OpenStreetMap will be loaded here -->
+                <!-- Updated OpenStreetMap with zoomed-in state view -->
                 <iframe 
                     width="100%" 
                     height="100%" 
@@ -109,7 +128,7 @@
                     scrolling="no" 
                     marginheight="0" 
                     marginwidth="0" 
-                    src="https://www.openstreetmap.org/export/embed.html?bbox=-83.39984416961671%2C41.91352888809094%2C-83.38250637054443%2C41.9221459317958&amp;layer=mapnik&amp;marker=41.9165%2C-83.3925" 
+                    src="https://www.openstreetmap.org/export/embed.html?bbox=-84.5,41.5,-82.5,43.0&amp;layer=mapnik&amp;marker=41.9165,-83.3925" 
                     style="border: 1px solid #ddd;">
                 </iframe>
             </div>
@@ -118,7 +137,7 @@
                 <p>We provide home improvement services throughout Monroe County and surrounding areas.</p>
                 <p>Based in Monroe, Michigan</p>
                 <div class="map-actions">
-                    <a href="https://www.openstreetmap.org/?mlat=41.9165&mlon=-83.3977#map=13/41.9165/-83.3977" class="btn-secondary" target="_blank" rel="noopener noreferrer">Get Directions</a>
+                    <a href="https://www.openstreetmap.org/?mlat=41.9165&mlon=-83.3925#map=10/41.9165/-83.3925" class="btn-secondary" target="_blank" rel="noopener noreferrer">Get Directions</a>
                 </div>
             </div>
         </div>
@@ -141,7 +160,34 @@
                 </div>
             </div>
             <div class="facebook-feed">
-                <!-- Static Facebook content instead of problematic SDK -->
+                <div class="fb-preview">
+                    <div class="fb-post">
+                        <div class="fb-post-header">
+                            <img src="images/logo.png" alt="Cusumano Home Improvements" class="fb-post-logo">
+                            <div class="fb-post-info">
+                                <h4>Cusumano Home Improvements</h4>
+                                <p>Yesterday at 3:45 PM</p>
+                            </div>
+                        </div>
+                        <div class="fb-post-content">
+                            <p>Just completed this beautiful deck project in Monroe! Our team did an amazing job with the cedar wood finish and custom railings. Contact us for your own dream deck!</p>
+                        </div>
+                        <img src="images/deck-example.jpg" alt="Deck Project" class="fb-post-image" onerror="this.src='https://placehold.co/600x300/088395/white?text=Custom+Deck+Project';">
+                    </div>
+                    
+                    <div class="fb-post">
+                        <div class="fb-post-header">
+                            <img src="images/logo.png" alt="Cusumano Home Improvements" class="fb-post-logo">
+                            <div class="fb-post-info">
+                                <h4>Cusumano Home Improvements</h4>
+                                <p>June 5 at 10:15 AM</p>
+                            </div>
+                        </div>
+                        <div class="fb-post-content">
+                            <p>Summer special! 15% off all window replacements booked this month. Energy efficient options available. Call us today for a free estimate!</p>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
