@@ -133,9 +133,165 @@
             height: 100%;
             object-fit: contain; /* Changed from 'contain' to ensure full image is shown */
         }
-        
-        /* More styles... */
-        /* Visual Editor Styles and other styles omitted for brevity */
+
+        /* Admin Sidebar */
+        .admin-sidebar {
+            background-color: var(--white);
+            padding: 2rem;
+            width: 250px;
+            border-right: 1px solid #e9ecef;
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            overflow-y: auto;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+        }
+
+        .admin-sidebar h2 {
+            font-size: 1.2rem;
+            color: var(--primary-color);
+            margin-bottom: 1.5rem;
+            position: relative;
+        }
+
+        .admin-sidebar h2:after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 2px;
+            background: var(--accent-color);
+            bottom: -5px;
+            left: 0;
+        }
+
+        .admin-nav-link {
+            display: block;
+            padding: 0.8rem 1.2rem;
+            margin-bottom: 0.5rem;
+            border-radius: 8px;
+            color: var(--dark-gray);
+            text-decoration: none;
+            font-weight: 500;
+            transition: background-color 0.2s;
+        }
+
+        .admin-nav-link:hover {
+            background-color: rgba(8, 131, 149, 0.1);
+        }
+
+        .admin-section {
+            margin-left: 270px;
+            padding: 2.5rem;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .admin-section h2 {
+            font-size: 1.5rem;
+            color: var(--primary-color);
+            margin-bottom: 1.5rem;
+        }
+
+        .admin-section label {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        .admin-section input[type="text"],
+        .admin-section input[type="email"],
+        .admin-section input[type="url"],
+        .admin-section input[type="number"],
+        .admin-section textarea {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid #ced4da;
+            border-radius: 8px;
+            font-size: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .admin-section button[type="submit"] {
+            background-color: var(--primary-color);
+            color: var(--white);
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .admin-section button[type="submit"]:hover {
+            background-color: #088395;
+        }
+
+        /* Loading Spinner for section saves */
+        .section-spinner {
+            display: none;
+            margin: 1rem 0;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--primary-color);
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+        }
+
+        /* Toast Notification for section saves */
+        .section-toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--primary-color);
+            color: #fff;
+            padding: 0.8rem 1.5rem;
+            border-radius: 8px;
+            box-shadow: var(--shadow-md);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+            z-index: 2000;
+        }
+
+        .section-toast.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        /* Responsive adjustments for admin sidebar and sections */
+        @media (max-width: 768px) {
+            .admin-sidebar {
+                position: static;
+                width: 100%;
+                padding: 1rem;
+                border-right: none;
+                border-bottom: 1px solid #e9ecef;
+            }
+
+            .admin-main {
+                padding: 1rem;
+            }
+
+            .admin-section {
+                margin-left: 0;
+                padding: 1.5rem 0;
+                border-bottom: 1px solid #e9ecef;
+            }
+
+            .admin-nav-link {
+                padding: 0.8rem;
+                font-size: 0.9rem;
+            }
+        }
+
+        /* Hide sections by default, except for the first one (Hero) */
+        .admin-section {
+            display: none;
+        }
+
+        .admin-section#hero-section {
+            display: block;
+        }
     </style>
 </head>
 <body>
@@ -157,32 +313,125 @@
     </div>
 
     <div id="admin-dashboard">
-        <header class="admin-header">
-            <h1>Dashboard</h1>
-            <button id="logout-btn" class="logout-btn">Logout</button>
-            <div class="company-logo" aria-label="Company Logo">
-                <img src="images/logo.png" alt="Cusumano Home Improvements">
-            </div>
-        </header>
-
+        <aside class="admin-sidebar">
+            <nav>
+                <ul>
+                    <li><a href="#hero-section" class="admin-nav-link">Hero</a></li>
+                    <li><a href="#about-section" class="admin-nav-link">About</a></li>
+                    <li><a href="#services-section" class="admin-nav-link">Services</a></li>
+                    <li><a href="#gallery-section" class="admin-nav-link">Gallery</a></li>
+                    <li><a href="#map-section" class="admin-nav-link">Map</a></li>
+                    <li><a href="#facebook-section" class="admin-nav-link">Facebook</a></li>
+                    <li><a href="#contact-section" class="admin-nav-link">Contact</a></li>
+                    <li><a href="#footer-section" class="admin-nav-link">Footer</a></li>
+                    <li><a href="#social-section" class="admin-nav-link">Social</a></li>
+                    <li><a href="#announcement-section" class="admin-nav-link">Announcement</a></li>
+                </ul>
+            </nav>
+        </aside>
         <main class="admin-main">
-            <div class="control-card">
-                <h2>Homepage Slider</h2>
-                <p>Add or remove photos from the main image slider. Changes will appear on the live site instantly.</p>
-                <div class="image-gallery" id="image-gallery-container" aria-live="polite">
-                    <!-- Images from Firebase will be loaded here -->
+            <section id="hero-section" class="admin-section">
+                <h2>Hero Section</h2>
+                <form id="hero-form">
+                    <label>Heading <input type="text" id="hero-heading"></label>
+                    <label>Subheading <input type="text" id="hero-subheading"></label>
+                    <label>Button Text <input type="text" id="hero-button-text"></label>
+                    <button type="submit">Save</button>
+                </form>
+            </section>
+            <section id="about-section" class="admin-section">
+                <h2>About Section</h2>
+                <form id="about-form">
+                    <label>Heading <input type="text" id="about-heading"></label>
+                    <label>Paragraph 1 <textarea id="about-p1"></textarea></label>
+                    <label>Paragraph 2 <textarea id="about-p2"></textarea></label>
+                    <label>Features (comma separated) <input type="text" id="about-features"></label>
+                    <button type="submit">Save</button>
+                </form>
+            </section>
+            <section id="services-section" class="admin-section">
+                <h2>Services Section</h2>
+                <form id="services-form">
+                    <div id="services-list"></div>
+                    <button type="button" id="add-service">Add Service</button>
+                    <button type="submit">Save</button>
+                </form>
+            </section>
+            <section id="gallery-section" class="admin-section">
+                <h2>Gallery Section</h2>
+                <!-- Existing gallery/image management UI here -->
+                <div class="control-card">
+                    <h3>Homepage Slider</h3>
+                    <div class="image-gallery" id="image-gallery-container" aria-live="polite"></div>
+                    <div class="upload-area" id="upload-area" tabindex="0" aria-label="Image upload area">
+                        <p>Click or drag file to this area to upload</p>
+                        <input type="file" id="image-upload-input" accept="image/jpeg, image/png, image/webp" hidden aria-label="Choose image to upload">
+                        <button id="upload-btn" class="btn" style="width: auto; background: var(--success-color);" aria-label="Choose Image">Choose Image</button>
+                        <div id="preview-container" style="margin:1rem 0;"></div>
+                        <progress id="upload-progress" value="0" max="100"></progress>
+                        <div class="spinner" id="upload-spinner" aria-label="Uploading"></div>
+                    </div>
                 </div>
-                <div class="upload-area" id="upload-area" tabindex="0" aria-label="Image upload area">
-                    <p>Click or drag file to this area to upload</p>
-                    <input type="file" id="image-upload-input" accept="image/jpeg, image/png, image/webp" hidden aria-label="Choose image to upload">
-                    <button id="upload-btn" class="btn" style="width: auto; background: var(--success-color);" aria-label="Choose Image">Choose Image</button>
-                    <div id="preview-container" style="margin:1rem 0;"></div>
-                    <progress id="upload-progress" value="0" max="100"></progress>
-                    <div class="spinner" id="upload-spinner" aria-label="Uploading"></div>
-                </div>
-            </div>
-
-            <!-- Additional admin sections omitted for brevity -->
+            </section>
+            <section id="map-section" class="admin-section">
+                <h2>Map Section</h2>
+                <form id="map-form">
+                    <label>Heading <input type="text" id="map-heading"></label>
+                    <label>Description <textarea id="map-desc"></textarea></label>
+                    <label>Directions Link <input type="url" id="map-link"></label>
+                    <label>Latitude <input type="number" id="map-lat" step="any"></label>
+                    <label>Longitude <input type="number" id="map-lng" step="any"></label>
+                    <button type="submit">Save</button>
+                </form>
+            </section>
+            <section id="facebook-section" class="admin-section">
+                <h2>Facebook Plugin</h2>
+                <form id="facebook-form">
+                    <label>Page URL <input type="url" id="fb-url"></label>
+                    <label>Tabs <input type="text" id="fb-tabs" placeholder="timeline,events,messages"></label>
+                    <label>Width <input type="number" id="fb-width"></label>
+                    <label>Height <input type="number" id="fb-height"></label>
+                    <label>Show Cover <input type="checkbox" id="fb-cover"></label>
+                    <label>Show Facepile <input type="checkbox" id="fb-facepile"></label>
+                    <button type="submit">Save</button>
+                </form>
+            </section>
+            <section id="contact-section" class="admin-section">
+                <h2>Contact Section</h2>
+                <form id="contact-form-admin">
+                    <label>Intro <input type="text" id="contact-intro"></label>
+                    <label>Phone <input type="text" id="contact-phone"></label>
+                    <label>Email <input type="email" id="contact-email"></label>
+                    <label>Business Hours <input type="text" id="contact-hours"></label>
+                    <label>CTA <input type="text" id="contact-cta"></label>
+                    <button type="submit">Save</button>
+                </form>
+            </section>
+            <section id="footer-section" class="admin-section">
+                <h2>Footer Section</h2>
+                <form id="footer-form">
+                    <label>Info <textarea id="footer-info"></textarea></label>
+                    <label>Copyright <input type="text" id="footer-copyright"></label>
+                    <button type="submit">Save</button>
+                </form>
+            </section>
+            <section id="social-section" class="admin-section">
+                <h2>Social Links</h2>
+                <form id="social-form">
+                    <label>Facebook <input type="url" id="social-facebook"></label>
+                    <label>Instagram <input type="url" id="social-instagram"></label>
+                    <label>Twitter <input type="url" id="social-twitter"></label>
+                    <button type="submit">Save</button>
+                </form>
+            </section>
+            <section id="announcement-section" class="admin-section">
+                <h2>Announcement Banner</h2>
+                <form id="announcement-form">
+                    <label>Announcement Text <input type="text" id="announcement-text"></label>
+                    <label>Active <input type="checkbox" id="announcement-active"></label>
+                    <button type="submit">Save</button>
+                </form>
+            </section>
         </main>
         
         <div class="site-return-float">
@@ -529,7 +778,252 @@
             );
         });
 
-        // Additional JavaScript for other functionality omitted for brevity
+        // --- Section Forms Handling ---
+        const heroForm = document.getElementById('hero-form');
+        const aboutForm = document.getElementById('about-form');
+        const servicesForm = document.getElementById('services-form');
+        const mapForm = document.getElementById('map-form');
+        const facebookForm = document.getElementById('facebook-form');
+        const contactFormAdmin = document.getElementById('contact-form-admin');
+        const footerForm = document.getElementById('footer-form');
+        const socialForm = document.getElementById('social-form');
+        const announcementForm = document.getElementById('announcement-form');
+
+        // --- Show specific section and hide others ---
+        function showSection(sectionId) {
+            const sections = document.querySelectorAll('.admin-section');
+            sections.forEach(section => {
+                if (section.id === sectionId) {
+                    section.style.display = 'block';
+                    section.scrollIntoView({ behavior: 'smooth' });
+                } else {
+                    section.style.display = 'none';
+                }
+            });
+        }
+
+        // --- Hero Section Save ---
+        heroForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            showSpinner(uploadSpinner);
+            const heading = document.getElementById('hero-heading').value;
+            const subheading = document.getElementById('hero-subheading').value;
+            const buttonText = document.getElementById('hero-button-text').value;
+            try {
+                await setDoc(doc(db, 'siteContent', 'hero'), {
+                    heading,
+                    subheading,
+                    buttonText,
+                    updatedAt: new Date()
+                });
+                showToast('Hero section updated!', 'success');
+            } catch (error) {
+                console.error("Error updating hero section:", error);
+                showToast('Could not update hero section. See console for details.', 'error');
+            }
+            hideSpinner(uploadSpinner);
+        });
+
+        // --- About Section Save ---
+        aboutForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            showSpinner(uploadSpinner);
+            const heading = document.getElementById('about-heading').value;
+            const p1 = document.getElementById('about-p1').value;
+            const p2 = document.getElementById('about-p2').value;
+            const features = document.getElementById('about-features').value.split(',');
+            try {
+                await setDoc(doc(db, 'siteContent', 'about'), {
+                    heading,
+                    p1,
+                    p2,
+                    features,
+                    updatedAt: new Date()
+                });
+                showToast('About section updated!', 'success');
+            } catch (error) {
+                console.error("Error updating about section:", error);
+                showToast('Could not update about section. See console for details.', 'error');
+            }
+            hideSpinner(uploadSpinner);
+        });
+
+        // --- Services Section Save ---
+        servicesForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            showSpinner(uploadSpinner);
+            const services = [];
+            document.querySelectorAll('.service-item').forEach(item => {
+                const title = item.querySelector('input[name="service-title"]').value;
+                const description = item.querySelector('textarea[name="service-desc"]').value;
+                services.push({ title, description });
+            });
+            try {
+                await setDoc(doc(db, 'siteContent', 'services'), {
+                    services,
+                    updatedAt: new Date()
+                });
+                showToast('Services section updated!', 'success');
+            } catch (error) {
+                console.error("Error updating services section:", error);
+                showToast('Could not update services section. See console for details.', 'error');
+            }
+            hideSpinner(uploadSpinner);
+        });
+
+        // --- Map Section Save ---
+        mapForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            showSpinner(uploadSpinner);
+            const heading = document.getElementById('map-heading').value;
+            const desc = document.getElementById('map-desc').value;
+            const link = document.getElementById('map-link').value;
+            const lat = parseFloat(document.getElementById('map-lat').value);
+            const lng = parseFloat(document.getElementById('map-lng').value);
+            try {
+                await setDoc(doc(db, 'siteContent', 'map'), {
+                    heading,
+                    desc,
+                    link,
+                    lat,
+                    lng,
+                    updatedAt: new Date()
+                });
+                showToast('Map section updated!', 'success');
+            } catch (error) {
+                console.error("Error updating map section:", error);
+                showToast('Could not update map section. See console for details.', 'error');
+            }
+            hideSpinner(uploadSpinner);
+        });
+
+        // --- Facebook Section Save ---
+        facebookForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            showSpinner(uploadSpinner);
+            const url = document.getElementById('fb-url').value;
+            const tabs = document.getElementById('fb-tabs').value.split(',');
+            const width = parseInt(document.getElementById('fb-width').value);
+            const height = parseInt(document.getElementById('fb-height').value);
+            const cover = document.getElementById('fb-cover').checked;
+            const facepile = document.getElementById('fb-facepile').checked;
+            try {
+                await setDoc(doc(db, 'siteContent', 'facebook'), {
+                    url,
+                    tabs,
+                    width,
+                    height,
+                    cover,
+                    facepile,
+                    updatedAt: new Date()
+                });
+                showToast('Facebook section updated!', 'success');
+            } catch (error) {
+                console.error("Error updating facebook section:", error);
+                showToast('Could not update facebook section. See console for details.', 'error');
+            }
+            hideSpinner(uploadSpinner);
+        });
+
+        // --- Contact Section Save ---
+        contactFormAdmin.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            showSpinner(uploadSpinner);
+            const intro = document.getElementById('contact-intro').value;
+            const phone = document.getElementById('contact-phone').value;
+            const email = document.getElementById('contact-email').value;
+            const hours = document.getElementById('contact-hours').value;
+            const cta = document.getElementById('contact-cta').value;
+            try {
+                await setDoc(doc(db, 'siteContent', 'contact'), {
+                    intro,
+                    phone,
+                    email,
+                    hours,
+                    cta,
+                    updatedAt: new Date()
+                });
+                showToast('Contact section updated!', 'success');
+            } catch (error) {
+                console.error("Error updating contact section:", error);
+                showToast('Could not update contact section. See console for details.', 'error');
+            }
+            hideSpinner(uploadSpinner);
+        });
+
+        // --- Footer Section Save ---
+        footerForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            showSpinner(uploadSpinner);
+            const info = document.getElementById('footer-info').value;
+            const copyright = document.getElementById('footer-copyright').value;
+            try {
+                await setDoc(doc(db, 'siteContent', 'footer'), {
+                    info,
+                    copyright,
+                    updatedAt: new Date()
+                });
+                showToast('Footer section updated!', 'success');
+            } catch (error) {
+                console.error("Error updating footer section:", error);
+                showToast('Could not update footer section. See console for details.', 'error');
+            }
+            hideSpinner(uploadSpinner);
+        });
+
+        // --- Social Section Save ---
+        socialForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            showSpinner(uploadSpinner);
+            const facebook = document.getElementById('social-facebook').value;
+            const instagram = document.getElementById('social-instagram').value;
+            const twitter = document.getElementById('social-twitter').value;
+            try {
+                await setDoc(doc(db, 'siteContent', 'social'), {
+                    facebook,
+                    instagram,
+                    twitter,
+                    updatedAt: new Date()
+                });
+                showToast('Social links updated!', 'success');
+            } catch (error) {
+                console.error("Error updating social links:", error);
+                showToast('Could not update social links. See console for details.', 'error');
+            }
+            hideSpinner(uploadSpinner);
+        });
+
+        // --- Announcement Section Save ---
+        announcementForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            showSpinner(uploadSpinner);
+            const text = document.getElementById('announcement-text').value;
+            const active = document.getElementById('announcement-active').checked;
+            try {
+                await setDoc(doc(db, 'siteContent', 'announcement'), {
+                    text,
+                    active,
+                    updatedAt: new Date()
+                });
+                showToast('Announcement banner updated!', 'success');
+            } catch (error) {
+                console.error("Error updating announcement banner:", error);
+                showToast('Could not update announcement banner. See console for details.', 'error');
+            }
+            hideSpinner(uploadSpinner);
+        });
+
+        // --- Initial setup: Show hero section on load ---
+        showSection('hero-section');
+
+        // --- Smooth scroll to section on nav link click ---
+        document.querySelectorAll('.admin-nav-link').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const targetId = link.getAttribute('href').substring(1);
+                showSection(targetId);
+            });
+        });
     </script>
 </body>
 </html>
