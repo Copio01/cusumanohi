@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
     loadGalleryImages(); // Load images from Firestore/localStorage
 });
 
-// Load gallery images from localStorage (set by admin panel)
+// Load gallery images from Firestore or localStorage
 function loadGalleryImages() {
     const slider = document.querySelector('.slider');
     const dotsContainer = document.querySelector('.slider-dots');
@@ -26,22 +26,69 @@ function loadGalleryImages() {
     slider.innerHTML = '';
     dotsContainer.innerHTML = '';
     
-    // Attempt to fetch the images from local storage first (set by admin panel)
-    let galleryImages = [];
-    try {
-        const storedImages = localStorage.getItem('galleryImages');
-        if (storedImages) {
-            galleryImages = JSON.parse(storedImages);
-            console.log('Loaded gallery images from localStorage:', galleryImages.length);
-        }
-    } catch (error) {
-        console.error('Error loading images from local storage:', error);
+    // Initialize Firebase variables - use existing initialized Firebase if available
+    let db = null;
+    
+    if (typeof firebase !== 'undefined' && firebase.firestore) {
+        db = firebase.firestore();
+        console.log('Firebase Firestore is available');
+    } else {
+        console.warn('Firebase Firestore is not available, falling back to localStorage');
     }
     
-    // If no images found in local storage, use default images
-    if (!galleryImages || galleryImages.length === 0) {
-        console.log('No gallery images found in localStorage, using defaults');
-        galleryImages = [
+    // Try to load from Firestore first
+    if (db) {
+        console.log('Attempting to load gallery images from Firestore');
+        
+        db.collection('siteContent').doc('gallery').get()
+            .then((doc) => {
+                if (doc.exists && doc.data().images && doc.data().images.length > 0) {
+                    const galleryImages = doc.data().images;
+                    console.log('Successfully loaded gallery images from Firestore:', galleryImages.length);
+                    
+                    // Save to localStorage as backup
+                    try {
+                        localStorage.setItem('galleryImages', JSON.stringify(galleryImages));
+                    } catch (e) {
+                        console.warn('Could not save gallery images to localStorage:', e);
+                    }
+                    
+                    // Render the slides
+                    renderGallerySlides(galleryImages, slider, dotsContainer);
+                } else {
+                    console.log('No gallery images found in Firestore, falling back to localStorage');
+                    loadFromLocalStorage();
+                }
+            })
+            .catch((error) => {
+                console.error('Error loading gallery images from Firestore:', error);
+                loadFromLocalStorage();
+            });
+    } else {
+        loadFromLocalStorage();
+    }
+    
+    // Fallback to localStorage if Firestore fails or isn't available
+    function loadFromLocalStorage() {
+        try {
+            const storedImages = localStorage.getItem('galleryImages');
+            if (storedImages) {
+                const galleryImages = JSON.parse(storedImages);
+                console.log('Loaded gallery images from localStorage:', galleryImages.length);
+                renderGallerySlides(galleryImages, slider, dotsContainer);
+            } else {
+                console.log('No gallery images found in localStorage, using defaults');
+                useDefaultImages();
+            }
+        } catch (error) {
+            console.error('Error loading images from local storage:', error);
+            useDefaultImages();
+        }
+    }
+    
+    // Final fallback to default images
+    function useDefaultImages() {
+        const galleryImages = [
             { 
                 dataUrl: 'images/siding-example.jpg', 
                 alt: 'Siding Installation', 
@@ -63,8 +110,13 @@ function loadGalleryImages() {
                 category: 'dumpsters' 
             }
         ];
+        
+        renderGallerySlides(galleryImages, slider, dotsContainer);
     }
-    
+}
+
+// Render gallery slides with the provided images
+function renderGallerySlides(galleryImages, slider, dotsContainer) {
     // Set up slider with proper classes for slider.js
     slider.className = 'slider slides-container';
     slider.closest('.slider-container').classList.add('image-slider');
