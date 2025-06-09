@@ -370,67 +370,106 @@ document.addEventListener('DOMContentLoaded', function() {
           try {
             const file = files[0];
             
-            // Convert image to base64 to avoid CORS issues
-            const reader = new FileReader();
-            reader.onload = function(event) {
-              const dataUrl = event.target.result;
-              
-              const imagesList = document.getElementById('gallery-images-list');
-              if (imagesList) {
-                const idx = imagesList.children.length;
-                const div = document.createElement('div');
-                div.className = 'gallery-image-item';
+            // Compress and convert image to base64 to avoid CORS issues
+            const compressAndConvertToBase64 = (file) => {
+              return new Promise((resolve, reject) => {
+                // Create an image element to load the file
+                const img = new Image();
+                const reader = new FileReader();
                 
-                // Get image category from the file name if possible
-                let category = 'other';
-                const fileName = file.name.toLowerCase();
-                if (fileName.includes('siding')) category = 'siding';
-                else if (fileName.includes('window')) category = 'windows';
-                else if (fileName.includes('deck')) category = 'decks';
-                else if (fileName.includes('dumpster')) category = 'dumpsters';
+                reader.onload = function(e) {
+                  img.src = e.target.result;
+                  
+                  img.onload = function() {
+                    // Create a canvas to compress the image
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    
+                    // Calculate new dimensions (max 1200px width/height while preserving aspect ratio)
+                    let width = img.width;
+                    let height = img.height;
+                    const maxSize = 1200;
+                    
+                    if (width > height && width > maxSize) {
+                      height = Math.round(height * maxSize / width);
+                      width = maxSize;
+                    } else if (height > maxSize) {
+                      width = Math.round(width * maxSize / height);
+                      height = maxSize;
+                    }
+                    
+                    // Resize the image
+                    canvas.width = width;
+                    canvas.height = height;
+                    ctx.drawImage(img, 0, 0, width, height);
+                    
+                    // Convert to base64 with reduced quality
+                    const dataUrl = canvas.toDataURL('image/jpeg', 0.7); // 70% quality JPEG
+                    resolve(dataUrl);
+                  };
+                  
+                  img.onerror = reject;
+                };
                 
-                // Get file name without extension
-                const nameWithoutExtension = file.name.split('.').slice(0, -1).join('.');
-                
-                div.innerHTML = `
-                  <div class="image-preview">
-                    <img src="${dataUrl}" alt="${nameWithoutExtension}">
-                  </div>
-                  <div class="image-details">
-                    <label>Image Name: <input type="text" value="${nameWithoutExtension}" data-idx="${idx}" data-field="alt"></label>
-                    <label>Category: 
-                      <select data-idx="${idx}" data-field="category">
-                        <option value="siding" ${category === 'siding' ? 'selected' : ''}>Siding</option>
-                        <option value="windows" ${category === 'windows' ? 'selected' : ''}>Windows</option>
-                        <option value="decks" ${category === 'decks' ? 'selected' : ''}>Decks</option>
-                        <option value="dumpsters" ${category === 'dumpsters' ? 'selected' : ''}>Dumpsters</option>
-                        <option value="other" ${category === 'other' ? 'selected' : ''}>Other</option>
-                      </select>
-                    </label>
-                    <input type="hidden" value="${dataUrl}" data-idx="${idx}" data-field="dataUrl">
-                  </div>
-                  <button type="button" class="remove-image" data-idx="${idx}">Remove</button>
-                  <hr>`;
-                imagesList.appendChild(div);
-                
-                // Add event listener for the new remove button
-                div.querySelector('.remove-image').addEventListener('click', function() {
-                  this.closest('.gallery-image-item').remove();
-                });
-                
-                showToast('gallery-toast', 'Image processed successfully!', 'success');
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+              });
+            };
+            
+            compressAndConvertToBase64(file)
+              .then(dataUrl => {
+                const imagesList = document.getElementById('gallery-images-list');
+                if (imagesList) {
+                  const idx = imagesList.children.length;
+                  const div = document.createElement('div');
+                  div.className = 'gallery-image-item';
+                  
+                  // Get image category from the file name if possible
+                  let category = 'other';
+                  const fileName = file.name.toLowerCase();
+                  if (fileName.includes('siding')) category = 'siding';
+                  else if (fileName.includes('window')) category = 'windows';
+                  else if (fileName.includes('deck')) category = 'decks';
+                  else if (fileName.includes('dumpster')) category = 'dumpsters';
+                  
+                  // Get file name without extension
+                  const nameWithoutExtension = file.name.split('.').slice(0, -1).join('.');
+                  
+                  div.innerHTML = `
+                    <div class="image-preview">
+                      <img src="${dataUrl}" alt="${nameWithoutExtension}">
+                    </div>
+                    <div class="image-details">
+                      <label>Image Name: <input type="text" value="${nameWithoutExtension}" data-idx="${idx}" data-field="alt"></label>
+                      <label>Category: 
+                        <select data-idx="${idx}" data-field="category">
+                          <option value="siding" ${category === 'siding' ? 'selected' : ''}>Siding</option>
+                          <option value="windows" ${category === 'windows' ? 'selected' : ''}>Windows</option>
+                          <option value="decks" ${category === 'decks' ? 'selected' : ''}>Decks</option>
+                          <option value="dumpsters" ${category === 'dumpsters' ? 'selected' : ''}>Dumpsters</option>
+                          <option value="other" ${category === 'other' ? 'selected' : ''}>Other</option>
+                        </select>
+                      </label>
+                      <input type="hidden" value="${dataUrl}" data-idx="${idx}" data-field="dataUrl">
+                    </div>
+                    <button type="button" class="remove-image" data-idx="${idx}">Remove</button>
+                    <hr>`;
+                  imagesList.appendChild(div);
+                  
+                  // Add event listener for the new remove button
+                  div.querySelector('.remove-image').addEventListener('click', function() {
+                    this.closest('.gallery-image-item').remove();
+                  });
+                  
+                  showToast('gallery-toast', 'Image processed successfully!', 'success');
+                  showSpinner('gallery-spinner', false);
+                }
+              })
+              .catch(error => {
+                console.error('Error processing image:', error);
+                showToast('gallery-toast', 'Error processing image. Please try again.', 'error');
                 showSpinner('gallery-spinner', false);
-              }
-            };
-            
-            reader.onerror = function() {
-              console.error('Error reading file');
-              showToast('gallery-toast', 'Error processing image. Please try again.', 'error');
-              showSpinner('gallery-spinner', false);
-            };
-            
-            // Read the file as a data URL (base64)
-            reader.readAsDataURL(file);
+              });
           } catch (e) {
             console.error('Error processing image:', e);
             showToast('gallery-toast', 'Error processing image. Check console.', 'error');
