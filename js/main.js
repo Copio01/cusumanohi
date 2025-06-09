@@ -12,10 +12,10 @@ document.addEventListener('DOMContentLoaded', () => {
     setupContactForm();
     setupFacebookPlugin(); 
     setupServiceCardEffects();
-    loadGalleryImages(); // Load images from Firestore/localStorage
+    loadGalleryImages(); // Load images from localStorage
 });
 
-// Load gallery images from Firebase Storage, Firestore, or localStorage
+// Load gallery images from localStorage
 function loadGalleryImages() {
     const slider = document.querySelector('.slider');
     const dotsContainer = document.querySelector('.slider-dots');
@@ -26,64 +26,11 @@ function loadGalleryImages() {
     slider.innerHTML = '';
     dotsContainer.innerHTML = '';
     
-    // Initialize Firebase variables
-    let db = null;
-    let storage = null;
+    // Use localStorage as the only data source
+    loadImagesFromLocalStorage();
     
-    if (typeof firebase !== 'undefined') {
-        if (firebase.firestore) {
-            db = firebase.firestore();
-            console.log('Firebase Firestore is available');
-        }
-        
-        if (firebase.storage) {
-            storage = firebase.storage();
-            console.log('Firebase Storage is available');
-        }
-    } else {
-        console.warn('Firebase is not available');
-    }
-    
-    // Skip Firebase Storage attempts on the live site to avoid CORS issues
-    // and go straight to Firestore for image data
-    loadFromFirestore();
-    
-    // Try to load from Firestore
-    function loadFromFirestore() {
-        if (db) {
-            console.log('Attempting to load gallery images from Firestore');
-            
-            db.collection('siteContent').doc('gallery').get()
-                .then((doc) => {
-                    if (doc.exists && doc.data().images && doc.data().images.length > 0) {
-                        const galleryImages = doc.data().images;
-                        console.log('Successfully loaded gallery images from Firestore:', galleryImages.length);
-                        
-                        // Save to localStorage as backup
-                        try {
-                            localStorage.setItem('galleryImages', JSON.stringify(galleryImages));
-                        } catch (e) {
-                            console.warn('Could not save gallery images to localStorage:', e);
-                        }
-                        
-                        // Render the slides
-                        renderGallerySlides(galleryImages, slider, dotsContainer);
-                    } else {
-                        console.log('No gallery images found in Firestore, falling back to localStorage');
-                        loadFromLocalStorage();
-                    }
-                })
-                .catch((error) => {
-                    console.error('Error loading gallery images from Firestore:', error);
-                    loadFromLocalStorage();
-                });
-        } else {
-            loadFromLocalStorage();
-        }
-    }
-    
-    // Fallback to localStorage if Firebase fails or isn't available
-    function loadFromLocalStorage() {
+    // Function to load from localStorage
+    function loadImagesFromLocalStorage() {
         try {
             const storedImages = localStorage.getItem('galleryImages');
             if (storedImages) {

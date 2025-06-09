@@ -309,34 +309,30 @@
     </div>
 
     <!-- Facebook SDK -->
-    <script async defer crossorigin="anonymous" src="https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v18.0" nonce="pJrJA0iY"></script>
+    <script>
+        window.fbAsyncInit = function() {
+            FB.init({
+                appId: '304349152600495', // Using a common FB app ID for embedding
+                xfbml: true,
+                version: 'v18.0'
+            });
+        };
+        
+        (function(d, s, id) {
+            var js, fjs = d.getElementsByTagName(s)[0];
+            if (d.getElementById(id)) return;
+            js = d.createElement(s);
+            js.id = id;
+            js.src = "https://connect.facebook.net/en_US/sdk.js";
+            js.defer = true;
+            js.async = true;
+            js.crossOrigin = "anonymous";
+            fjs.parentNode.insertBefore(js, fjs);
+        }(document, 'script', 'facebook-jssdk'));
+    </script>
     
     <!-- JavaScript Files -->
     <script src="js/main.js"></script>
     <script src="js/slider.js"></script>
-
-    <!-- Firebase App (the core Firebase SDK) is always required and must be listed first -->
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-
-    <!-- Add Firebase products that you want to use -->
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-analytics.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
-
-    <!-- Your web app's Firebase configuration -->
-    <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyBVtq6dAEuybJNmTTv8dXBxTVUgw1t0ZMk",
-            authDomain: "cusumano-website.firebaseapp.com",
-            projectId: "cusumano-website",
-            storageBucket: "cusumano-website.appspot.com",
-            messagingSenderId: "20051552210",
-            appId: "1:20051552210:web:7eb3b22baa3fec184e4a0b"
-        };
-
-        // Initialize Firebase
-        firebase.initializeApp(firebaseConfig);
-    </script>
 </body>
 </html>
