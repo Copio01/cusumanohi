@@ -117,6 +117,78 @@
         .form-actions .btn { width: 100%; }
         .separator-text { text-align: center; margin: 1rem 0; font-weight: 700; color: #aaa; text-transform: uppercase; }
         
+        /* Contact Section Custom Styles */
+        #contact .container {
+            background: linear-gradient(120deg, var(--primary-color) 60%, var(--secondary-color) 100%);
+            color: var(--white);
+            border-radius: 16px;
+            box-shadow: 0 4px 24px rgba(10,77,104,0.10);
+            padding: 3rem 2rem;
+            margin-bottom: 3rem;
+        }
+        #contact h2.section-title {
+            color: var(--accent-color);
+            margin-bottom: 1.5rem;
+        }
+        #contact ul {
+            color: var(--white);
+        }
+        #contact a {
+            color: var(--accent-color);
+            text-decoration: underline;
+        }
+        #contact .contact-form {
+            background: var(--white);
+            color: var(--primary-color);
+            border-radius: 10px;
+            box-shadow: 0 2px 12px rgba(10,77,104,0.08);
+            padding: 2rem 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        #contact .contact-form label {
+            color: var(--primary-color);
+        }
+        #contact .contact-form input,
+        #contact .contact-form textarea {
+            background: #f7f8fc;
+            border: 1px solid #e0e0e0;
+            color: var(--dark-gray);
+        }
+        #contact .contact-form input:focus,
+        #contact .contact-form textarea:focus {
+            border-color: var(--accent-color);
+            outline: none;
+        }
+        #contact .form-actions .btn {
+            width: 100%;
+            margin-top: 1rem;
+        }
+        #contact iframe {
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 2px 12px rgba(10,77,104,0.08);
+        }
+        #contact .map-caption {
+            font-size: 0.95rem;
+            color: #e0e0e0;
+            text-align: center;
+            margin-top: 0.5rem;
+        }
+        @media (max-width: 900px) {
+            #contact .container {
+                padding: 2rem 0.5rem;
+            }
+        }
+        @media (max-width: 600px) {
+            #contact .container {
+                flex-direction: column;
+                padding: 1.2rem 0.2rem;
+            }
+            #contact .contact-form {
+                padding: 1rem 0.5rem;
+            }
+        }
+
         @media (max-width: 768px) {
             .header-content { flex-direction: column; }
             .main-nav { margin-top: 1rem; }
@@ -162,7 +234,50 @@
 
         <section id="about"><div class="container"><h2 class="section-title">About Our Company</h2><div class="about-content"><p>For over 20 years, Cusumano Home Improvements has been a family-owned and operated business proudly serving the Monroe, MI area. We are dedicated to delivering the highest quality of work, specializing in residential construction and convenient dumpster rentals. Our commitment is to our craft and, most importantly, to our customers' satisfaction.</p></div></div></section>
         <section id="services"><div class="container"><h2 class="section-title">Our Services</h2><div class="services-grid"><article class="service-card"><svg class="service-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg><h3>Siding</h3><p>Enhance your home's curb appeal and protection with our wide variety of siding options, including vinyl, wood, and fiber cement.</p></article><article class="service-card"><svg class="service-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"></path></svg><h3>Decks</h3><p>We design and build custom decks or repair existing ones, creating beautiful and lasting outdoor living spaces for you to enjoy.</p></article><article class="service-card"><svg class="service-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg><h3>Dumpster Rentals</h3><p>Convenient and competitively priced dumpster rentals for your project needs, with various sizes and flexible scheduling.</p></article></div></div></section>
-        <section id="contact"><div class="container"><h2 class="section-title">Ready to Start Your Project?</h2><p>Contact us today for a free, no-obligation quote. We're ready to help bring your vision to life.</p><button id="ctaContactBtn" class="btn btn-primary">Get a Quote by Email</button></div></section>
+        <section id="contact"><div class="container">
+            <h2 class="section-title">Ready to Start Your Project?</h2>
+            <p>Contact us today for a free, no-obligation quote. We're ready to help bring your vision to life.</p>
+            <div style="display: flex; flex-wrap: wrap; gap: 2.5rem; align-items: flex-start; justify-content: center;">
+                <div style="flex:1 1 320px; min-width:260px; max-width:420px;">
+                    <ul style="list-style:none; padding:0; margin:1.5rem 0 2rem 0; font-size:1.1rem;">
+                        <li><strong>Phone:</strong> <a href="tel:734-777-8158" style="color:var(--secondary-color);text-decoration:underline;">734-777-8158</a></li>
+                        <li><strong>Email:</strong> <a href="mailto:contact@cusumanohome.com" style="color:var(--secondary-color);text-decoration:underline;">contact@cusumanohome.com</a></li>
+                    </ul>
+                    <div style="margin-bottom:1.5rem;">
+                        <strong>Cusumano Home Improvements</strong><br>
+                        Monroe, MI<br>
+                        A family owned company.
+                    </div>
+                </div>
+                <div style="flex:1 1 320px; min-width:260px; max-width:480px;">
+                    <form class="contact-form" action="#" method="POST" aria-label="Contact form">
+                        <div class="form-group"><label for="contact-name">Name <span aria-hidden="true" style="color:var(--accent-color);">*</span></label>
+                            <div style="display:flex; gap:0.5rem;">
+                                <input type="text" id="contact-fname" name="fname" required placeholder="First Name" class="field-element" style="flex:1;">
+                                <input type="text" id="contact-lname" name="lname" required placeholder="Last Name" class="field-element" style="flex:1;">
+                            </div>
+                        </div>
+                        <div class="form-group"><label for="contact-phone">Phone</label>
+                            <input type="tel" id="contact-phone" name="phone" placeholder="(xxx) xxx-xxxx" class="field-element">
+                        </div>
+                        <div class="form-group"><label for="contact-email">Email <span aria-hidden="true" style="color:var(--accent-color);">*</span></label>
+                            <input type="email" id="contact-email" name="email" required placeholder="you@email.com" class="field-element">
+                        </div>
+                        <div class="form-group"><label for="contact-message">Message <span aria-hidden="true" style="color:var(--accent-color);">*</span></label>
+                            <textarea id="contact-message" name="message" required placeholder="How can we help?" class="field-element"></textarea>
+                        </div>
+                        <div class="form-actions"><button type="submit" class="btn btn-primary">Submit</button></div>
+                    </form>
+                </div>
+                <div style="flex:1 1 320px; min-width:260px; max-width:480px;">
+                    <div style="border-radius:12px; overflow:hidden; box-shadow:0 2px 16px rgba(10,77,104,0.10); margin-bottom:1rem;">
+                        <iframe title="Monroe Michigan Map" width="100%" height="260" frameborder="0" style="border:0; min-width:220px; min-height:180px;" allowfullscreen loading="lazy"
+                            src="https://www.openstreetmap.org/export/embed.html?bbox=-83.442%2C41.887%2C-83.322%2C41.963&amp;layer=mapnik&amp;marker=41.916%2C-83.397"></iframe>
+                    </div>
+                    <div style="font-size:0.95rem; color:#666; text-align:center;">Monroe, Michigan and surrounding areas highlighted.</div>
+                </div>
+            </div>
+        </div></section>
     </main>
 
     <footer class="main-footer">
