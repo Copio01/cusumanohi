@@ -44,83 +44,11 @@ function loadGalleryImages() {
         console.warn('Firebase is not available');
     }
     
-    // Try to load images from Firebase Storage first
-    if (storage) {
-        console.log('Attempting to load gallery images from Firebase Storage');
-        
-        // Reference to the storage folder containing images
-        const imagesRef = storage.ref('gallery');
-        
-        // List all items in the gallery folder
-        imagesRef.listAll()
-            .then((result) => {
-                const imagePromises = [];
-                
-                // Create an array of promises that will resolve with the image URLs and metadata
-                result.items.forEach((imageRef) => {
-                    const imagePromise = Promise.all([
-                        imageRef.getDownloadURL(),
-                        imageRef.getMetadata()
-                    ]).then(([url, metadata]) => {
-                        // Parse category from file path or metadata
-                        let category = 'other';
-                        const fileName = imageRef.name.toLowerCase();
-                        
-                        // Try to determine category from filename
-                        if (fileName.includes('siding')) category = 'siding';
-                        else if (fileName.includes('window')) category = 'windows';
-                        else if (fileName.includes('deck')) category = 'decks';
-                        else if (fileName.includes('dumpster')) category = 'dumpsters';
-                        
-                        // Use custom metadata if available
-                        if (metadata.customMetadata && metadata.customMetadata.category) {
-                            category = metadata.customMetadata.category;
-                        }
-                        
-                        // Get name without extension for alt text
-                        const alt = imageRef.name.split('.')[0].replace(/-/g, ' ');
-                        
-                        return {
-                            dataUrl: url,
-                            alt: alt,
-                            category: category,
-                            name: imageRef.name
-                        };
-                    });
-                    
-                    imagePromises.push(imagePromise);
-                });
-                
-                // Once all image promises are resolved
-                return Promise.all(imagePromises);
-            })
-            .then((galleryImages) => {
-                if (galleryImages && galleryImages.length > 0) {
-                    console.log('Successfully loaded gallery images from Firebase Storage:', galleryImages.length);
-                    
-                    // Save to localStorage as backup
-                    try {
-                        localStorage.setItem('galleryImages', JSON.stringify(galleryImages));
-                    } catch (e) {
-                        console.warn('Could not save gallery images to localStorage:', e);
-                    }
-                    
-                    // Render the slides
-                    renderGallerySlides(galleryImages, slider, dotsContainer);
-                } else {
-                    console.log('No gallery images found in Firebase Storage, trying Firestore');
-                    loadFromFirestore();
-                }
-            })
-            .catch((error) => {
-                console.error('Error loading gallery images from Firebase Storage:', error);
-                loadFromFirestore();
-            });
-    } else {
-        loadFromFirestore();
-    }
+    // Skip Firebase Storage attempts on the live site to avoid CORS issues
+    // and go straight to Firestore for image data
+    loadFromFirestore();
     
-    // Try to load from Firestore if Storage fails
+    // Try to load from Firestore
     function loadFromFirestore() {
         if (db) {
             console.log('Attempting to load gallery images from Firestore');
@@ -442,30 +370,22 @@ function setupServiceCardEffects() {
 
 // Setup Facebook plugin with proper error handling
 function setupFacebookPlugin() {
-    // First check if the Facebook SDK is already loaded
-    if (typeof FB !== 'undefined') {
-        try {
-            FB.XFBML.parse();
-        } catch (e) {
-            console.log('Error parsing Facebook XFBML:', e);
-        }
-        return;
-    }
-    
-    // Add Facebook SDK
+    // Initialize Facebook SDK with appId
     window.fbAsyncInit = function() {
         FB.init({
+            appId: '304349152600495', // Using a common FB app ID for embedding
             xfbml: true,
             version: 'v18.0'
         });
     };
     
+    // Dynamically load the Facebook SDK
     (function(d, s, id) {
         var js, fjs = d.getElementsByTagName(s)[0];
         if (d.getElementById(id)) return;
         js = d.createElement(s);
         js.id = id;
-        js.src = "https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v18.0";
+        js.src = "https://connect.facebook.net/en_US/sdk.js";
         js.defer = true;
         js.async = true;
         js.crossOrigin = "anonymous";
@@ -475,13 +395,13 @@ function setupFacebookPlugin() {
     // Fallback if Facebook plugin fails to load
     setTimeout(() => {
         const fbContainer = document.querySelector('.fb-page');
-        if (fbContainer && !fbContainer.innerHTML.trim()) {
+        if (fbContainer && (!fbContainer.innerHTML.trim() || !document.querySelector('iframe[title="fb:page Facebook Social Plugin"]'))) {
             const fbFeed = document.querySelector('.facebook-feed');
             if (fbFeed) {
                 fbFeed.innerHTML = `
-                    <div class="fb-fallback">
+                    <div class="fb-fallback" style="text-align: center; padding: 2rem;">
                         <p>Our Facebook feed cannot be displayed right now. Please visit our page directly:</p>
-                        <a href="https://www.facebook.com/cusumanocement/" target="_blank" rel="noopener noreferrer" class="btn-facebook">
+                        <a href="https://www.facebook.com/cusumanocement/" target="_blank" rel="noopener noreferrer" class="btn-facebook" style="display: inline-flex; align-items: center; gap: 8px; background-color: #1877f2; color: white; text-decoration: none; padding: 10px 16px; border-radius: 6px; margin-top: 10px; font-weight: bold;">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
                                 <path d="M9 8h-3v4h3v12h5v-12h3.642l.358-4h-4v-1.667c0-.955.192-1.333 1.115-1.333h2.885v-5h-3.808c-3.596 0-5.192 1.583-5.192 4.615v3.385z"/>
                             </svg>
