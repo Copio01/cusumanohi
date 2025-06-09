@@ -455,20 +455,21 @@ body {
     text-align: right;
 }
 
-/* Contact section */
+/* Contact section - professional redesign */
 #contact {
-    background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
-    color: var(--white);
+    background: var(--white); /* Changed to white background for professional look */
+    color: var(--dark-gray); /* Changed text color to dark gray for better readability */
     padding-bottom: 5rem;
     position: relative;
 }
 
 .contact-wrapper {
-    background-color: rgba(255, 255, 255, 0.05);
+    background-color: var(--white);
     border-radius: 12px;
     padding: 2.5rem;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
     position: relative;
+    border: 1px solid #e0e0e0;
 }
 
 .contact-content {
@@ -481,6 +482,7 @@ body {
     text-align: center;
     margin-bottom: 3rem;
     line-height: 1.6;
+    color: var(--dark-gray); /* Ensure intro text is clearly visible */
 }
 
 .contact-info {
@@ -491,35 +493,36 @@ body {
 }
 
 .contact-method {
-    background-color: rgba(255, 255, 255, 0.1);
+    background-color: #f7f8fc; /* Light background for cards */
     border-radius: 10px;
     padding: 1.75rem;
     text-align: center;
-    transition: transform 0.3s, background-color 0.3s;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: transform 0.3s, box-shadow 0.3s;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    border: 1px solid #e0e0e0;
 }
 
 .contact-method:hover {
     transform: translateY(-8px);
-    background-color: rgba(255, 255, 255, 0.15);
+    box-shadow: 0 8px 24px rgba(10, 77, 104, 0.1);
 }
 
 .contact-icon {
     font-size: 2.5rem;
     margin-bottom: 1rem;
     display: inline-block;
-    filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.2));
+    filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.1));
+    color: var(--primary-color); /* Changed icon color to match brand */
 }
 
 .contact-method h3 {
-    color: var(--accent-color);
+    color: var(--primary-color); /* Changed heading color to primary brand color */
     margin: 0 0 0.75rem 0;
     font-weight: 600;
 }
 
 .contact-method a {
-    color: white;
+    color: var(--secondary-color); /* Changed link color for better visibility */
     font-size: 1.2rem;
     text-decoration: none;
     font-weight: 500;
@@ -529,27 +532,28 @@ body {
 }
 
 .contact-method a:hover {
-    color: var(--accent-color);
+    color: var(--primary-color);
+    text-decoration: underline;
 }
 
 .contact-desc {
     font-size: 0.9rem;
-    opacity: 0.8;
+    color: var(--dark-gray); /* Ensure description text is clearly visible */
     margin-top: 0.75rem;
     margin-bottom: 0;
 }
 
 .contact-cta {
-    background: rgba(255, 255, 255, 0.1);
+    background: #f7f8fc; /* Light background for CTA section */
     border-radius: 12px;
     padding: 2rem;
     text-align: center;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e0e0e0;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
 .contact-cta h3 {
-    color: var(--accent-color);
+    color: var(--primary-color);
     font-size: 1.5rem;
     margin-top: 0;
     margin-bottom: 1.5rem;
@@ -909,7 +913,7 @@ textarea.field-element {
 
 /* Facebook Feed section styles */
 #social {
-    background-color: #f0f2f5;
+    background-color: #f7f8fc; /* Lighter background */
     padding: 4rem 0;
 }
 
@@ -936,12 +940,29 @@ textarea.field-element {
     min-width: 340px;
     display: flex;
     justify-content: center;
+    align-items: center;
     background-color: var(--white);
     padding: 1rem;
     border-radius: 10px;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    height: 650px; /* Ensure consistent height */
+    overflow: hidden; /* Prevent overflow */
 }
 
+/* Make Facebook plugin responsive */
+.fb-page {
+    width: 100% !important;
+    height: 100% !important;
+}
+
+.fb-page span, 
+.fb-page iframe {
+    width: 100% !important;
+    height: 100% !important;
+    max-width: 100% !important;
+}
+
+/* Other Facebook styles remain the same */
 .facebook-intro h3 {
     color: #1877f2; /* Facebook blue */
     margin-top: 0;
