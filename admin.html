@@ -95,8 +95,8 @@
 
         <main class="admin-main">
             <div class="control-card">
-                <h2>Homepage Slider</h2>
-                <p>Add or remove photos from the main image slider. Changes will appear on the live site when you click save.</p>
+                <h2>"Our Work" Gallery Slider</h2>
+                <p>Add or remove photos from the "Our Work" image slider on the homepage. Changes will appear on the live site when you click save.</p>
                 
                 <div class="image-gallery" id="image-gallery-container">
                     <!-- Images will be loaded here -->
@@ -136,7 +136,7 @@
                     <div class="storage-meter">
                         <div id="storage-meter-fill" class="storage-meter-fill"></div>
                     </div>
-                    <p class="storage-info">LocalStorage has a ~5MB limit. Large images may cause you to hit this limit.</p>
+                    <p class="storage-info" id="storage-info-message">LocalStorage has a ~5MB limit. Large images may cause you to hit this limit.</p>
                 </div>
                 
                 <div class="action-btn-group">
@@ -173,6 +173,7 @@
         const importInput = document.getElementById('import-input');
         const storageMeterFill = document.getElementById('storage-meter-fill');
         const storageUsageText = document.getElementById('storage-usage-text');
+        const storageInfoMessage = document.getElementById('storage-info-message');
         
         // Gallery images array
         let galleryImages = [];
@@ -451,7 +452,7 @@
             const fileSizeMB = file.size / (1024 * 1024);
             
             if (fileSizeMB > maxSizeMB) {
-                showStatus(`Image is too large (${fileSizeMB.toFixed(2)}MB). Please use an image smaller than ${maxSizeMB}MB.`, 'error');
+                showStatus(`Image is too large (${fileSizeMB.toFixed(2)}MB). Max ${maxSizeMB}MB per image for performance.`, 'error');
                 return;
             }
             
@@ -641,19 +642,27 @@
         
         // Update storage meter display
         function updateStorageMeter() {
-            const usage = calculateLocalStorageUsage();
+            const usage = calculateLocalStorageUsage(); // Calculates localStorage usage for refs and other data
             
-            storageMeterFill.style.width = `${usage.percentUsed}%`;
+            storageMeterFill.style.width = `${usage.percentUsed}%`; // Meter reflects localStorage usage
             
-            if (db) {
-                // If IndexedDB is available, show different storage info
-                storageUsageText.textContent = `${usage.usedMB.toFixed(2)}MB localStorage + IndexedDB storage`;
-                storageMeterFill.style.backgroundColor = 'var(--success-color)';
-            } else {
-                // Regular localStorage display
-                storageUsageText.textContent = `${usage.usedMB.toFixed(2)}MB used (${usage.galleryMB.toFixed(2)}MB gallery)`;
+            if (db) { // If IndexedDB is available (primary storage for image data)
+                storageUsageText.textContent = `${usage.usedMB.toFixed(2)}MB localStorage (refs) + IndexedDB (images)`;
+                storageInfoMessage.textContent = 'Images are stored in IndexedDB, offering significantly more space. Uploads are capped at 5MB per image for performance. The meter above shows localStorage usage for image references and other site data.';
                 
-                // Change color based on usage
+                // Color of meter based on localStorage usage
+                if (usage.percentUsed > 80) {
+                    storageMeterFill.style.backgroundColor = 'var(--danger-color)';
+                } else if (usage.percentUsed > 60) {
+                    storageMeterFill.style.backgroundColor = 'var(--accent-color)';
+                } else {
+                    storageMeterFill.style.backgroundColor = 'var(--success-color)';
+                }
+            } else { // Fallback to localStorage only for images
+                storageUsageText.textContent = `${usage.usedMB.toFixed(2)}MB used (${usage.galleryMB.toFixed(2)}MB gallery)`;
+                storageInfoMessage.textContent = 'Images are stored in localStorage, which has a ~5MB limit. Large images may cause issues.';
+                
+                // Color changes based on localStorage usage
                 if (usage.percentUsed > 80) {
                     storageMeterFill.style.backgroundColor = 'var(--danger-color)';
                 } else if (usage.percentUsed > 60) {
