@@ -4,254 +4,532 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Panel | Cusumano Home Improvements</title>
-    <meta name="robots" content="noindex, nofollow">
     
-    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Poppins:wght@600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
 
-    <!-- CSS Styles -->
-    <link rel="stylesheet" href="css/normalize.css">
-    <link rel="stylesheet" href="css/styles.css">
     <style>
-        /* Admin-specific styles */
-        .admin-header {
-            background: var(--primary-color);
-            color: white;
-            padding: 1rem 2rem;
+        :root {
+            --primary-color: #0a4d68; --secondary-color: #088395; --accent-color: #f5a623;
+            --light-bg: #f7f8fc; --dark-gray: #333333; --medium-gray: #6c757d;
+            --white: #ffffff; --danger-color: #e63946; --success-color: #2a9d8f;
+            --font-heading: 'Poppins', sans-serif; --font-body: 'Roboto', sans-serif;
+            --shadow-md: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        body { margin: 0; font-family: var(--font-body); background-color: #f7f8fc; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        #login-screen { background-color: var(--white); padding: 3rem; border-radius: 12px; box-shadow: var(--shadow-md); width: 100%; max-width: 420px; text-align: center; border: 1px solid #e9ecef; }
+        .login-logo { font-family: var(--font-heading); font-weight: 700; font-size: 1.8rem; color: var(--primary-color); margin-bottom: 0.5rem; }
+        .form-group { margin-bottom: 1.5rem; text-align: left; position: relative; }
+        .form-group label { display: block; margin-bottom: 0.5rem; font-weight: 700; font-size: 0.9rem; }
+        .form-group input { width: 100%; padding: 0.8rem 1rem; border: 1px solid #ced4da; border-radius: 8px; font-size: 1rem; }
+        .btn { display: inline-block; width: 100%; padding: 0.9rem 1.5rem; border-radius: 8px; font-weight: 700; cursor: pointer; border: none; font-size: 1.1rem; font-family: var(--font-heading); background-color: var(--primary-color); color: var(--white); transition: background-color 0.2s, transform 0.2s; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
+        .btn:hover { background-color: #088395; transform: translateY(-3px); }
+        .logout-btn { background-color: transparent; color: var(--danger-color); border: 2px solid var(--danger-color); padding: 0.5rem 1rem; border-radius: 8px; cursor: pointer; font-weight: 700; }
+        .logout-btn:hover { background-color: rgba(230, 57, 70, 0.1); }
+        #upload-btn { background-color: var(--success-color); }
+        #upload-btn:hover { background-color: #238b80 !important; }
+        #login-error { color: var(--danger-color); background-color: rgba(230, 57, 70, 0.1); margin-top: 1.5rem; padding: 0.8rem; border-radius: 8px; display: none; }
+        #admin-dashboard { width: 100%; height: 100vh; display: none; flex-direction: column; background-color: var(--light-bg); }
+        .admin-header { background-color: var(--white); padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e9ecef; position: relative; }
+        .admin-header h1 { font-size: 1.5rem; color: var(--primary-color); }
+        .logout-btn { background-color: transparent; color: var(--danger-color); border: 2px solid var(--danger-color); padding: 0.5rem 1rem; border-radius: 8px; cursor: pointer; font-weight: 700; }
+        .admin-main { padding: 2.5rem; flex-grow: 1; overflow-y: auto; }
+        .control-card { background-color: var(--white); padding: 2rem; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); border: 1px solid #e9ecef; }
+        .control-card h2 { display: flex; align-items: center; gap: 0.75rem; margin-top: 0; font-size: 1.3rem; }
+        
+        .image-gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
+        .img-card { position: relative; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .img-card img { width: 100%; height: 150px; object-fit: cover; display: block; }
+        .img-card .delete-btn { position: absolute; top: 8px; right: 8px; background-color: rgba(230, 57, 70, 0.8); color: white; border: none; border-radius: 50%; width: 30px; height: 30px; cursor: pointer; font-size: 1rem; line-height: 30px; text-align: center; }
+        .img-card .order-controls {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
             display: flex;
-            justify-content: space-between;
+            gap: 5px;
+        }
+
+        .img-card .order-btn {
+            background-color: rgba(255, 255, 255, 0.8);
+            color: var(--primary-color);
+            border: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 0.8rem;
+            display: flex;
             align-items: center;
-        }
-        
-        .admin-header h1 {
-            color: white;
-            margin: 0;
-            font-size: 1.5rem;
-        }
-        
-        .admin-container {
-            width: 90%;
-            max-width: 1200px;
-            margin: 2rem auto;
-        }
-        
-        .admin-panel {
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 4px 24px rgba(10,77,104,0.10);
-            overflow: hidden;
-        }
-        
-        .admin-nav {
-            background: #f0f0f0;
-            padding: 1rem;
-        }
-        
-        .admin-nav ul {
-            display: flex;
-            list-style: none;
-            padding: 0;
-            margin: 0;
-            gap: 1rem;
-        }
-        
-        .admin-nav a {
-            text-decoration: none;
-            color: var(--dark-gray);
-            font-weight: 500;
-            padding: 0.5rem 1rem;
-            border-radius: 4px;
+            justify-content: center;
             transition: background-color 0.2s;
         }
-        
-        .admin-nav a.active, .admin-nav a:hover {
+
+        .img-card .order-btn:hover {
+            background-color: rgba(255, 255, 255, 1);
+        }
+
+        .img-card .order-number {
+            position: absolute;
+            top: 10px;
+            left: 10px;
             background-color: var(--primary-color);
             color: white;
+            font-size: 0.8rem;
+            font-weight: bold;
+            padding: 2px 8px;
+            border-radius: 12px;
         }
+        .upload-area { border: 2px dashed #ced4da; border-radius: 8px; padding: 2rem; text-align: center; background-color: #f8f9fa; }
+        #upload-progress { width: 100%; margin-top: 1rem; display: none; }
         
-        .admin-content {
-            padding: 2rem;
+        /* Loading Spinner */
+        .spinner { display: none; margin: 1.5rem auto; border: 4px solid #f3f3f3; border-top: 4px solid var(--primary-color); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+        /* Toast Notification */
+        .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: var(--primary-color); color: #fff; padding: 1rem 2rem; border-radius: 8px; box-shadow: var(--shadow-md); opacity: 0; pointer-events: none; transition: opacity 0.3s; z-index: 2000; }
+        .toast.show { opacity: 1; pointer-events: auto; }
+        /* Drag & Drop Highlight */
+        .upload-area.dragover { border-color: var(--accent-color); background: #fffbe6; }
+        /* Accessibility: Focus styles for all interactive elements */
+        .btn:focus, .logout-btn:focus, .delete-btn:focus, .slider-arrow:focus, .dot:focus, #upload-btn:focus, #image-upload-input:focus {
+            outline: 2px solid var(--accent-color);
+            outline-offset: 2px;
         }
-        
-        .admin-section {
-            margin-bottom: 2rem;
+        /* Visually hidden class for screen readers */
+        .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); border: 0; }
+        /* Responsive: Make image cards and upload area more mobile-friendly */
+        @media (max-width: 400px) {
+            .img-card img { height: 100px; }
+            .upload-area { padding: 1rem; }
         }
-        
-        .admin-section h2 {
-            border-bottom: 2px solid var(--accent-color);
-            padding-bottom: 0.5rem;
-            margin-bottom: 1.5rem;
+        /* Responsive tweaks */
+        @media (max-width: 600px) {
+            .admin-main { padding: 1rem; }
+            .control-card { padding: 1rem; }
+            #login-screen { padding: 1.5rem; }
         }
-        
-        .data-table {
+
+        /* Company Logo in Header */
+        .company-logo {
+            position: absolute;
+            top: 10px;
+            left: 20px;
+            width: 80px; /* Increased width from 50px */
+            height: 50px; /* Maintained height */
+            border-radius: 4px; /* Changed from circle to slight rounded corners */
+            overflow: hidden;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.15);
+            border: 2px solid var(--accent-color);
+            transition: transform 0.3s ease;
+        }
+
+        .company-logo:hover {
+            transform: scale(1.1);
+        }
+
+        .company-logo img {
             width: 100%;
-            border-collapse: collapse;
+            height: 100%;
+            object-fit: contain; /* Changed from 'contain' to ensure full image is shown */
         }
         
-        .data-table th, .data-table td {
-            padding: 0.75rem;
-            border-bottom: 1px solid #e0e0e0;
-            text-align: left;
-        }
-        
-        .data-table th {
-            background-color: #f5f5f5;
-        }
-        
-        .data-table tr:hover {
-            background-color: #f9f9f9;
-        }
-        
-        .action-buttons {
-            display: flex;
-            gap: 0.5rem;
-        }
-        
-        .btn-edit, .btn-delete, .btn-view {
-            padding: 0.25rem 0.5rem;
-            border-radius: 4px;
-            border: none;
-            cursor: pointer;
-            font-size: 0.9rem;
-        }
-        
-        .btn-view {
-            background-color: var(--primary-color);
-            color: white;
-        }
-        
-        .btn-edit {
-            background-color: #f5a623;
-            color: white;
-        }
-        
-        .btn-delete {
-            background-color: #e53935;
-            color: white;
-        }
-        
-        .form-panel {
-            background: #f9f9f9;
-            padding: 1.5rem;
-            border-radius: 8px;
-            margin-bottom: 1.5rem;
-        }
+        /* More styles... */
+        /* Visual Editor Styles and other styles omitted for brevity */
     </style>
 </head>
 <body>
-    <header class="admin-header">
-        <h1>Cusumano Home Improvements - Admin Panel</h1>
-        <a href="index.html" class="btn-primary">View Site</a>
-    </header>
-    
-    <div class="admin-container">
-        <div class="admin-panel">
-            <nav class="admin-nav">
-                <ul>
-                    <li><a href="#" class="active">Dashboard</a></li>
-                    <li><a href="#">Inquiries</a></li>
-                    <li><a href="#">Portfolio</a></li>
-                    <li><a href="#">Services</a></li>
-                    <li><a href="#">Settings</a></li>
-                </ul>
-            </nav>
-            
-            <div class="admin-content">
-                <section class="admin-section">
-                    <h2>Recent Inquiries</h2>
-                    <table class="data-table">
-                        <thead>
-                            <tr>
-                                <th>Date</th>
-                                <th>Name</th>
-                                <th>Email</th>
-                                <th>Phone</th>
-                                <th>Status</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>June 7, 2025</td>
-                                <td>John Smith</td>
-                                <td>john@example.com</td>
-                                <td>(555) 123-4567</td>
-                                <td>New</td>
-                                <td class="action-buttons">
-                                    <button class="btn-view">View</button>
-                                    <button class="btn-edit">Respond</button>
-                                    <button class="btn-delete">Delete</button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>June 5, 2025</td>
-                                <td>Sarah Johnson</td>
-                                <td>sarah@example.com</td>
-                                <td>(555) 987-6543</td>
-                                <td>Responded</td>
-                                <td class="action-buttons">
-                                    <button class="btn-view">View</button>
-                                    <button class="btn-edit">Respond</button>
-                                    <button class="btn-delete">Delete</button>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </section>
-                
-                <section class="admin-section">
-                    <h2>Website Analytics</h2>
-                    <div class="form-panel">
-                        <p>Analytics data will be displayed here.</p>
-                        <p><strong>Page Views (Last 7 Days):</strong> 324</p>
-                        <p><strong>Inquiries (Last 7 Days):</strong> 8</p>
-                        <p><strong>Most Viewed Service:</strong> Siding Installation</p>
-                    </div>
-                </section>
-                
-                <section class="admin-section">
-                    <h2>Quick Actions</h2>
-                    <div class="form-panel">
-                        <button class="btn-primary">Add New Portfolio Item</button>
-                        <button class="btn-primary">Update Service Pricing</button>
-                        <button class="btn-primary">Edit Contact Information</button>
-                    </div>
-                </section>
+
+    <div id="login-screen">
+        <h1 class="login-logo">Cusumano</h1>
+        <p>Admin Panel</p>
+        <div class="form-group">
+            <label for="email">Email</label>
+            <input type="email" id="email" placeholder="Enter your email" aria-label="Email" autocomplete="username">
+        </div>
+        <div class="form-group">
+            <label for="password">Password</label>
+            <input type="password" id="password" placeholder="Enter your password" aria-label="Password" autocomplete="current-password">
+        </div>
+        <button id="login-btn" class="btn" aria-label="Login">Login</button>
+        <p id="login-error" role="alert">Error logging in. Check email/password.</p>
+        <div class="spinner" id="login-spinner" aria-label="Loading"></div>
+    </div>
+
+    <div id="admin-dashboard">
+        <header class="admin-header">
+            <h1>Dashboard</h1>
+            <button id="logout-btn" class="logout-btn">Logout</button>
+            <div class="company-logo" aria-label="Company Logo">
+                <img src="images/logo.png" alt="Cusumano Home Improvements">
             </div>
+        </header>
+
+        <main class="admin-main">
+            <div class="control-card">
+                <h2>Homepage Slider</h2>
+                <p>Add or remove photos from the main image slider. Changes will appear on the live site instantly.</p>
+                <div class="image-gallery" id="image-gallery-container" aria-live="polite">
+                    <!-- Images from Firebase will be loaded here -->
+                </div>
+                <div class="upload-area" id="upload-area" tabindex="0" aria-label="Image upload area">
+                    <p>Click or drag file to this area to upload</p>
+                    <input type="file" id="image-upload-input" accept="image/jpeg, image/png, image/webp" hidden aria-label="Choose image to upload">
+                    <button id="upload-btn" class="btn" style="width: auto; background: var(--success-color);" aria-label="Choose Image">Choose Image</button>
+                    <div id="preview-container" style="margin:1rem 0;"></div>
+                    <progress id="upload-progress" value="0" max="100"></progress>
+                    <div class="spinner" id="upload-spinner" aria-label="Uploading"></div>
+                </div>
+            </div>
+
+            <!-- Additional admin sections omitted for brevity -->
+        </main>
+        
+        <div class="site-return-float">
+            <a href="index.html" title="Return to Main Site">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+            </a>
         </div>
     </div>
-    
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Add admin panel functionality here
-            const navLinks = document.querySelectorAll('.admin-nav a');
-            
-            navLinks.forEach(link => {
-                link.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    
-                    // Remove active class from all links
-                    navLinks.forEach(link => link.classList.remove('active'));
-                    
-                    // Add active class to clicked link
-                    this.classList.add('active');
-                    
-                    // In a real application, you would load the appropriate content here
-                    alert('This section is not yet implemented.');
-                });
-            });
-            
-            // Demo action buttons
-            const actionButtons = document.querySelectorAll('.btn-view, .btn-edit, .btn-delete');
-            
-            actionButtons.forEach(button => {
-                button.addEventListener('click', function() {
-                    alert('This action is not yet implemented.');
-                });
-            });
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+    <script type="module">
+        // --- Firebase Imports ---
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-auth.js";
+        import { getFirestore, collection, addDoc, deleteDoc, doc, onSnapshot, getDocs, updateDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-firestore.js";
+        import { getStorage, ref, uploadBytesResumable, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-storage.js";
+
+        // --- Your Firebase Configuration ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyBVtq6dAEuybJNmTTv8dXBxTVUgw1t0ZMk",
+            authDomain: "cusumano-website.firebaseapp.com",
+            projectId: "cusumano-website",
+            storageBucket: "cusumano-website.appspot.com",
+            messagingSenderId: "20051552210",
+            appId: "1:20051552210:web:7eb3b22baa3fec184e4a0b"
+        };
+        // ----------------------------------------------------
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const storage = getStorage(app);
+
+        const loginScreen = document.getElementById('login-screen');
+        const adminDashboard = document.getElementById('admin-dashboard');
+        const loginBtn = document.getElementById('login-btn');
+        const logoutBtn = document.getElementById('logout-btn');
+        const loginError = document.getElementById('login-error');
+        const galleryContainer = document.getElementById('image-gallery-container');
+        const imageUploadInput = document.getElementById('image-upload-input');
+        const uploadBtn = document.getElementById('upload-btn');
+        const uploadProgress = document.getElementById('upload-progress');
+        const loginSpinner = document.getElementById('login-spinner');
+        const uploadSpinner = document.getElementById('upload-spinner');
+        const toastContainer = document.getElementById('toast');
+        const previewContainer = document.getElementById('preview-container');
+        const uploadArea = document.getElementById('upload-area');
+
+        // --- Accessibility: Focus error on login fail ---
+        function showLoginError(message) {
+            loginError.textContent = message;
+            loginError.style.display = 'block';
+            loginError.setAttribute('tabindex', '-1');
+            loginError.focus && loginError.focus();
+        }
+        function hideLoginError() {
+            loginError.style.display = 'none';
+            loginError.removeAttribute('tabindex');
+        }
+
+        // --- Toast Notification ---
+        function showToast(message, type = 'success') {
+            toastContainer.textContent = message;
+            toastContainer.className = `toast show ${type}`;
+            toastContainer.setAttribute('aria-live', type === 'error' ? 'assertive' : 'polite');
+            setTimeout(() => {
+                toastContainer.classList.remove('show');
+            }, 3000);
+        }
+
+        // --- Loading Spinner ---
+        function showSpinner(spinner) { spinner.style.display = 'block'; }
+        function hideSpinner(spinner) { spinner.style.display = 'none'; }
+
+        // --- Image Preview Before Upload ---
+        function showImagePreview(file) {
+            previewContainer.innerHTML = '';
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = document.createElement('img');
+                img.src = e.target.result;
+                img.alt = 'Preview of image to upload';
+                img.style.maxWidth = '180px';
+                img.style.maxHeight = '120px';
+                img.style.borderRadius = '8px';
+                img.setAttribute('aria-label', 'Image preview');
+                previewContainer.appendChild(img);
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // --- Drag & Drop Upload ---
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
         });
+        uploadArea.addEventListener('dragleave', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+        });
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            const file = e.dataTransfer.files[0];
+            if (file) {
+                imageUploadInput.files = e.dataTransfer.files;
+                showImagePreview(file);
+                imageUploadInput.dispatchEvent(new Event('change'));
+            }
+        });
+        // --- Accessibility: Keyboard for upload area ---
+        uploadArea.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                imageUploadInput.click();
+            }
+        });
+
+        // --- Auth State ---
+        onAuthStateChanged(auth, user => {
+            if (user) {
+                loginScreen.style.display = 'none';
+                adminDashboard.style.display = 'flex';
+                setupImageListener();
+            } else {
+                adminDashboard.style.display = 'none';
+                loginScreen.style.display = 'block';
+            }
+        });
+
+        // --- Login ---
+        loginBtn.addEventListener('click', () => {
+            const email = document.getElementById('email').value;
+            const pass = document.getElementById('password').value;
+            hideLoginError();
+            showSpinner(loginSpinner);
+            loginBtn.disabled = true;
+            signInWithEmailAndPassword(auth, email, pass)
+                .then(() => {
+                    hideSpinner(loginSpinner);
+                    loginBtn.disabled = false;
+                })
+                .catch(err => {
+                    hideSpinner(loginSpinner);
+                    loginBtn.disabled = false;
+                    let msg = 'Error logging in. Check email/password.';
+                    if (err.code === 'auth/user-not-found') msg = 'No user found with this email.';
+                    if (err.code === 'auth/wrong-password') msg = 'Incorrect password.';
+                    if (err.code === 'auth/invalid-email') msg = 'Invalid email address.';
+                    showLoginError(msg);
+                });
+        });
+
+        // --- Logout ---
+        logoutBtn.addEventListener('click', () => signOut(auth));
+        uploadBtn.addEventListener('click', () => imageUploadInput.click());
+
+        // --- Image Gallery Listener ---
+        function setupImageListener() {
+            showSpinner(uploadSpinner);
+            const imagesCol = collection(db, 'sliderImages');
+            onSnapshot(imagesCol, (snapshot) => {
+                galleryContainer.innerHTML = '';
+                if (snapshot.empty) {
+                    galleryContainer.innerHTML = '<div style="text-align:center;color:var(--medium-gray);font-size:1.1rem;">No images yet. Use the upload area below to add your first slider image.</div>';
+                }
+                
+                // Sort images by order property if it exists
+                const sortedDocs = snapshot.docs.slice().sort((a, b) => {
+                    const orderA = a.data().order || 999; // Default high value for unordered items
+                    const orderB = b.data().order || 999;
+                    return orderA - orderB;
+                });
+                
+                sortedDocs.forEach((doc, index) => {
+                    const imgData = doc.data();
+                    const card = document.createElement('div');
+                    card.className = 'img-card';
+                    card.innerHTML = `<img src="${imgData.url}" alt="Slider Image" loading="lazy">
+                    <button class="delete-btn" data-id="${doc.id}" data-path="${imgData.path}" aria-label="Delete image">&times;</button>
+                    <div class="order-controls" aria-label="Image order controls">
+                        <button class="order-btn" data-id="${doc.id}" data-action="up" aria-label="Move image up">&#9650;</button>
+                        <button class="order-btn" data-id="${doc.id}" data-action="down" aria-label="Move image down">&#9660;</button>
+                    </div>
+                    <div class="order-number" aria-label="Image order number">${index + 1}</div>`;
+                    galleryContainer.appendChild(card);
+                });
+                hideSpinner(uploadSpinner);
+            });
+        }
+        
+        // --- Handle Image Order Controls ---
+        galleryContainer.addEventListener('click', async (e) => {
+            if (e.target.classList.contains('delete-btn')) {
+                const docId = e.target.dataset.id;
+                const storagePath = e.target.dataset.path;
+                if(confirm('Are you sure you want to delete this image?')){
+                    showSpinner(uploadSpinner);
+                    try {
+                        await deleteDoc(doc(db, 'sliderImages', docId));
+                        const storageRef = ref(storage, storagePath);
+                        await deleteObject(storageRef);
+                        showToast('Image deleted successfully!', 'success');
+                    } catch (error) {
+                        console.error("Error deleting image:", error);
+                        showToast('Could not delete image. See console for details.', 'error');
+                    }
+                    hideSpinner(uploadSpinner);
+                }
+            }
+            
+            // Handle order buttons
+            if (e.target.classList.contains('order-btn')) {
+                const docId = e.target.dataset.id;
+                const action = e.target.dataset.action;
+                updateImageOrder(docId, action);
+            }
+        });
+        
+        // --- Update Image Order ---
+        async function updateImageOrder(docId, action) {
+            showSpinner(uploadSpinner);
+            try {
+                // Get all current images
+                const imagesCollection = collection(db, 'sliderImages');
+                const snapshot = await getDocs(imagesCollection);
+                if (snapshot.empty) return;
+                
+                // Sort by current order
+                let images = snapshot.docs.map(doc => ({
+                    id: doc.id,
+                    ...doc.data(),
+                    order: doc.data().order || 999
+                }));
+                
+                images.sort((a, b) => a.order - b.order);
+                
+                // Find the image we want to move
+                const currentIndex = images.findIndex(img => img.id === docId);
+                if (currentIndex === -1) return;
+                
+                // Determine new index based on action
+                let newIndex;
+                if (action === 'up' && currentIndex > 0) {
+                    newIndex = currentIndex - 1;
+                } else if (action === 'down' && currentIndex < images.length - 1) {
+                    newIndex = currentIndex + 1;
+                } else {
+                    hideSpinner(uploadSpinner);
+                    return; // Can't move further
+                }
+                
+                // Swap the orders
+                const temp = images[newIndex].order;
+                
+                // Update document at currentIndex
+                await updateDoc(doc(db, 'sliderImages', images[currentIndex].id), {
+                    order: temp
+                });
+                
+                // Update document at newIndex
+                await updateDoc(doc(db, 'sliderImages', images[newIndex].id), {
+                    order: images[currentIndex].order
+                });
+                
+                showToast('Image order updated!', 'success');
+            } catch (error) {
+                console.error("Error updating image order:", error);
+                showToast('Could not update image order. See console for details.', 'error');
+            }
+            hideSpinner(uploadSpinner);
+        }
+        
+        // --- Add Order Property on New Image Upload ---
+        imageUploadInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            showImagePreview(file);
+            if (!file) return;
+            if (!['image/jpeg','image/png','image/webp'].includes(file.type)) {
+                showToast('Only JPG, PNG, or WEBP images allowed.', 'error');
+                imageUploadInput.value = '';
+                previewContainer.innerHTML = '';
+                return;
+            }
+            if (file.size > 5 * 1024 * 1024) {
+                showToast('Image must be under 5MB.', 'error');
+                imageUploadInput.value = '';
+                previewContainer.innerHTML = '';
+                return;
+            }
+            uploadBtn.disabled = true;
+            showSpinner(uploadSpinner);
+            const storagePath = `sliderImages/${Date.now()}_${file.name}`;
+            const storageRef = ref(storage, storagePath);
+            const uploadTask = uploadBytesResumable(storageRef, file);
+            uploadTask.on('state_changed',
+                (snapshot) => {
+                    const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                    uploadProgress.style.display = 'block';
+                    uploadProgress.value = progress;
+                },
+                (error) => {
+                    hideSpinner(uploadSpinner);
+                    uploadBtn.disabled = false;
+                    showToast('Upload failed. See console for details.', 'error');
+                    console.error("Upload failed", error);
+                },
+                async () => {
+                    try {
+                        // Get the current highest order number
+                        const imagesCollection = collection(db, 'sliderImages');
+                        const snapshot = await getDocs(imagesCollection);
+                        let maxOrder = 0;
+                        
+                        if (!snapshot.empty) {
+                            snapshot.docs.forEach(doc => {
+                                const order = doc.data().order || 0;
+                                maxOrder = Math.max(maxOrder, order);
+                            });
+                        }
+                        
+                        // Add new image with the next order number
+                        const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+                        await addDoc(collection(db, 'sliderImages'), {
+                            url: downloadURL,
+                            path: storagePath,
+                            order: maxOrder + 1, // Set order to be next in sequence
+                            createdAt: new Date()
+                        });
+                        
+                        uploadProgress.style.display = 'none';
+                        imageUploadInput.value = '';
+                        previewContainer.innerHTML = '';
+                        hideSpinner(uploadSpinner);
+                        uploadBtn.disabled = false;
+                        showToast('Image uploaded successfully!', 'success');
+                    } catch (error) {
+                        console.error("Error adding document:", error);
+                        hideSpinner(uploadSpinner);
+                        uploadBtn.disabled = false;
+                        showToast('Upload failed. See console for details.', 'error');
+                    }
+                }
+            );
+        });
+
+        // Additional JavaScript for other functionality omitted for brevity
     </script>
 </body>
 </html>

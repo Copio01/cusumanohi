@@ -5,10 +5,10 @@
 document.addEventListener('DOMContentLoaded', () => {
     // Sample images for the slider - update these with your actual image paths
     const slidesData = [
-        { src: '../images/siding-project1.jpg', alt: 'Siding Project', caption: 'Siding Installation' },
-        { src: '../images/window-project1.jpg', alt: 'Window Project', caption: 'Window Replacement' },
-        { src: '../images/deck-project1.jpg', alt: 'Deck Project', caption: 'Custom Deck' },
-        { src: '../images/dumpster-rental.jpg', alt: 'Dumpster Rental', caption: 'Dumpster Rental' }
+        { src: 'images/siding-project1.jpg', alt: 'Siding Project', caption: 'Siding Installation' },
+        { src: 'images/window-project1.jpg', alt: 'Window Project', caption: 'Window Replacement' },
+        { src: 'images/deck-project1.jpg', alt: 'Deck Project', caption: 'Custom Deck' },
+        { src: 'images/dumpster-rental.jpg', alt: 'Dumpster Rental', caption: 'Dumpster Rental' }
     ];
     
     // Slider elements
@@ -30,29 +30,146 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Initialize slider with images
     function initSlider() {
-        // Create slides
-        slidesData.forEach((slide, index) => {
-            const slideElement = document.createElement('div');
-            slideElement.className = 'slide';
-            slideElement.innerHTML = `
-                <img src="${slide.src}" alt="${slide.alt}">
-                <div class="slide-caption">${slide.caption}</div>
-            `;
-            slider.appendChild(slideElement);
+        // If slider is empty, create slides
+        if (slider.children.length === 0) {
+            // Sample images for the slider - update these with your actual image paths
+            // Or generate placeholders if images don't exist
+            const placeholderColors = ['#0a4d68', '#088395', '#f5a623', '#2a9d8f'];
+            const placeholderText = ['Siding Installation', 'Window Replacement', 'Custom Deck', 'Dumpster Rental'];
             
-            // Create dot for this slide
-            const dot = document.createElement('div');
-            dot.className = 'dot';
-            dot.dataset.slideIndex = index;
-            dot.addEventListener('click', () => goToSlide(index));
-            dotsContainer.appendChild(dot);
-        });
+            slidesData.forEach((slide, index) => {
+                const slideElement = document.createElement('div');
+                slideElement.className = 'slide';
+                
+                // Try to load the image, fall back to placeholder
+                const img = new Image();
+                img.onerror = () => {
+                    // Image failed to load, use placeholder
+                    slideElement.innerHTML = `
+                        <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background-color: ${placeholderColors[index % placeholderColors.length]}; color: white; font-size: 1.5rem; text-align: center; padding: 1rem;">
+                            <div>
+                                <h3>${slide.caption || placeholderText[index % placeholderText.length]}</h3>
+                                <p>Quality work by Cusumano Home Improvements</p>
+                            </div>
+                        </div>
+                        <div class="slide-caption">${slide.caption}</div>
+                    `;
+                };
+                
+                img.onload = () => {
+                    // Image loaded successfully, use it
+                    slideElement.innerHTML = `
+                        <img src="${slide.src}" alt="${slide.alt}">
+                        <div class="slide-caption">${slide.caption}</div>
+                    `;
+                };
+                
+                // Start loading the image
+                img.src = slide.src;
+                
+                slider.appendChild(slideElement);
+                
+                // Create dot for this slide
+                const dot = document.createElement('div');
+                dot.className = 'dot';
+                dot.dataset.slideIndex = index;
+                dot.addEventListener('click', () => goToSlide(index));
+                dotsContainer.appendChild(dot);
+            });
+        }
         
         // Show first slide
         updateSlider();
         
         // Start auto-slide
         startAutoSlide();
+    }
+    
+    // --- Firebase Slider Integration ---
+    function loadFirebaseSlides() {
+        // Check if Firebase is available
+        if (typeof firebase === 'undefined') {
+            console.log("Firebase not available, using static slides");
+            initSlider();
+            return;
+        }
+        
+        try {
+            // Import Firebase modules
+            import('https://www.gstatic.com/firebasejs/11.9.0/firebase-app.js').then(firebaseApp => {
+                import('https://www.gstatic.com/firebasejs/11.9.0/firebase-firestore.js').then(firebaseFirestore => {
+                    // Firebase configuration
+                    const firebaseConfig = {
+                        apiKey: "AIzaSyBVtq6dAEuybJNmTTv8dXBxTVUgw1t0ZMk",
+                        authDomain: "cusumano-website.firebaseapp.com",
+                        projectId: "cusumano-website",
+                        storageBucket: "cusumano-website.appspot.com",
+                        messagingSenderId: "20051552210",
+                        appId: "1:20051552210:web:7eb3b22baa3fec184e4a0b"
+                    };
+                    
+                    // Initialize Firebase
+                    const app = firebaseApp.initializeApp(firebaseConfig);
+                    const db = firebaseFirestore.getFirestore(app);
+                    const imagesCol = firebaseFirestore.collection(db, 'sliderImages');
+                    
+                    firebaseFirestore.onSnapshot(imagesCol, (snapshot) => {
+                        if (!snapshot.empty) {
+                            // Clear existing slides
+                            slider.innerHTML = '';
+                            dotsContainer.innerHTML = '';
+                            
+                            // Sort by order
+                            const sortedDocs = snapshot.docs.slice().sort((a, b) => {
+                                const orderA = a.data().order || 999;
+                                const orderB = b.data().order || 999;
+                                return orderA - orderB;
+                            });
+                            
+                            // Create slides from Firebase data
+                            sortedDocs.forEach((doc, index) => {
+                                const imgData = doc.data();
+                                const slideElement = document.createElement('div');
+                                slideElement.className = 'slide';
+                                slideElement.innerHTML = `
+                                    <img src="${imgData.url}" alt="Project Image ${index + 1}">
+                                    <div class="slide-caption">Project ${index + 1}</div>
+                                `;
+                                slider.appendChild(slideElement);
+                                
+                                // Create dot
+                                const dot = document.createElement('div');
+                                dot.className = 'dot';
+                                dot.dataset.slideIndex = index;
+                                dot.addEventListener('click', () => goToSlide(index));
+                                dotsContainer.appendChild(dot);
+                            });
+                            
+                            // Show first slide
+                            currentSlide = 0;
+                            updateSlider();
+                            startAutoSlide();
+                        } else {
+                            // No images in Firebase, use default images
+                            console.log("No images found in Firebase, using static slides");
+                            initSlider();
+                        }
+                    }, (error) => {
+                        console.error("Error loading Firebase images:", error);
+                        initSlider();
+                    });
+                }).catch(error => {
+                    console.error("Error loading Firebase Firestore:", error);
+                    initSlider();
+                });
+            }).catch(error => {
+                console.error("Error loading Firebase App:", error);
+                initSlider();
+            });
+        } catch (error) {
+            console.error("Error with Firebase setup:", error);
+            initSlider();
+        }
     }
     
     // Update slider state
@@ -70,15 +187,17 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         
         // Update progress bar
-        const progressPercentage = ((currentSlide + 1) / slidesData.length) * 100;
+        const totalSlides = document.querySelectorAll('.slide').length;
+        const progressPercentage = ((currentSlide + 1) / totalSlides) * 100;
         progressBar.style.width = `${progressPercentage}%`;
     }
     
     // Go to specific slide
     function goToSlide(index) {
+        const totalSlides = document.querySelectorAll('.slide').length;
         currentSlide = index;
-        if (currentSlide < 0) currentSlide = slidesData.length - 1;
-        if (currentSlide >= slidesData.length) currentSlide = 0;
+        if (currentSlide < 0) currentSlide = totalSlides - 1;
+        if (currentSlide >= totalSlides) currentSlide = 0;
         updateSlider();
         
         // Reset auto-slide timer
@@ -120,6 +239,11 @@ document.addEventListener('DOMContentLoaded', () => {
         if (e.key === 'ArrowRight') nextSlide();
     });
     
-    // Initialize the slider
-    initSlider();
+    // Try to load Firebase slides, fall back to static slides
+    try {
+        loadFirebaseSlides();
+    } catch (error) {
+        console.log("Using static slides due to error:", error);
+        initSlider();
+    }
 });
