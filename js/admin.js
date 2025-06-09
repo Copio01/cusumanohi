@@ -284,7 +284,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
       }
       
-      // --- Gallery Image Management ---
+      // --- Gallery Image Management - Updated with base64 encoding to avoid CORS issues ---
       async function loadGalleryImages() {
         try {
           console.log('Loading gallery images data...');
@@ -298,22 +298,24 @@ document.addEventListener('DOMContentLoaded', function() {
             imagesList.innerHTML = '';
             
             if (docSnap.exists && Array.isArray(docSnap.data().images)) {
-              console.log('Gallery images data found:', docSnap.data().images);
+              console.log('Gallery images data found:', docSnap.data().images.length);
               
               // Store images in localStorage for the frontend to use
-              localStorage.setItem('filebaseGalleryImages', JSON.stringify(docSnap.data().images));
+              localStorage.setItem('galleryImages', JSON.stringify(docSnap.data().images));
               
               docSnap.data().images.forEach((img, idx) => {
                 const div = document.createElement('div');
                 div.className = 'gallery-image-item';
+                
+                const imageUrl = img.dataUrl || img.url || '';
+                
                 div.innerHTML = `
                   <div class="image-preview">
-                    <img src="${img.url}" alt="${img.alt || 'Gallery image'}" 
+                    <img src="${imageUrl}" alt="${img.alt || 'Gallery image'}" 
                          onerror="this.src='https://placehold.co/300x200/0a4d68/white?text=${img.category || 'Image'}'">
                   </div>
                   <div class="image-details">
-                    <label>Image URL: <input type="text" value="${img.url || ''}" data-idx="${idx}" data-field="url"></label>
-                    <label>Alt Text: <input type="text" value="${img.alt || ''}" data-idx="${idx}" data-field="alt"></label>
+                    <label>Image Name: <input type="text" value="${img.alt || ''}" data-idx="${idx}" data-field="alt"></label>
                     <label>Category: 
                       <select data-idx="${idx}" data-field="category">
                         <option value="siding" ${img.category === 'siding' ? 'selected' : ''}>Siding</option>
@@ -323,6 +325,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         <option value="other" ${img.category === 'other' ? 'selected' : ''}>Other</option>
                       </select>
                     </label>
+                    <input type="hidden" value="${imageUrl}" data-idx="${idx}" data-field="dataUrl">
                   </div>
                   <button type="button" class="remove-image" data-idx="${idx}">Remove</button>
                   <hr>`;
@@ -353,9 +356,8 @@ document.addEventListener('DOMContentLoaded', function() {
       
       loadGalleryImages();
       
-      // File upload functionality for gallery images
+      // File upload functionality for gallery images - Updated to use base64 encoding to avoid CORS issues
       const fileUploadInput = document.getElementById('gallery-image-upload');
-      const storageRef = firebase.storage().ref();
       
       if (fileUploadInput) {
         fileUploadInput.addEventListener('change', async (e) => {
@@ -363,130 +365,84 @@ document.addEventListener('DOMContentLoaded', function() {
           if (!files.length) return;
           
           showSpinner('gallery-spinner', true);
-          showToast('gallery-toast', 'Uploading image...', 'info');
+          showToast('gallery-toast', 'Processing image...', 'info');
           
           try {
             const file = files[0];
-            const fileExtension = file.name.split('.').pop();
-            const fileName = `gallery_${Date.now()}.${fileExtension}`;
-            const fileRef = storageRef.child(`gallery/${fileName}`);
             
-            // Upload the file to Firebase Storage
-            const uploadTask = fileRef.put(file);
-            
-            // Monitor upload progress
-            uploadTask.on('state_changed', 
-              (snapshot) => {
-                const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-                console.log('Upload is ' + progress + '% done');
-              }, 
-              (error) => {
-                console.error('Error during upload:', error);
-                showToast('gallery-toast', 'Error uploading image. Please try again.', 'error');
-              }, 
-              async () => {
-                // Get the download URL and add to the gallery list
-                const downloadURL = await uploadTask.snapshot.ref.getDownloadURL();
+            // Convert image to base64 to avoid CORS issues
+            const reader = new FileReader();
+            reader.onload = function(event) {
+              const dataUrl = event.target.result;
+              
+              const imagesList = document.getElementById('gallery-images-list');
+              if (imagesList) {
+                const idx = imagesList.children.length;
+                const div = document.createElement('div');
+                div.className = 'gallery-image-item';
                 
-                const imagesList = document.getElementById('gallery-images-list');
-                if (imagesList) {
-                  const idx = imagesList.children.length;
-                  const div = document.createElement('div');
-                  div.className = 'gallery-image-item';
-                  
-                  // Get image category from the file name if possible
-                  let category = 'other';
-                  if (file.name.toLowerCase().includes('siding')) category = 'siding';
-                  else if (file.name.toLowerCase().includes('window')) category = 'windows';
-                  else if (file.name.toLowerCase().includes('deck')) category = 'decks';
-                  else if (file.name.toLowerCase().includes('dumpster')) category = 'dumpsters';
-                  
-                  div.innerHTML = `
-                    <div class="image-preview">
-                      <img src="${downloadURL}" alt="Gallery image">
-                    </div>
-                    <div class="image-details">
-                      <label>Image URL: <input type="text" value="${downloadURL}" data-idx="${idx}" data-field="url"></label>
-                      <label>Alt Text: <input type="text" value="${file.name.split('.')[0]}" data-idx="${idx}" data-field="alt"></label>
-                      <label>Category: 
-                        <select data-idx="${idx}" data-field="category">
-                          <option value="siding" ${category === 'siding' ? 'selected' : ''}>Siding</option>
-                          <option value="windows" ${category === 'windows' ? 'selected' : ''}>Windows</option>
-                          <option value="decks" ${category === 'decks' ? 'selected' : ''}>Decks</option>
-                          <option value="dumpsters" ${category === 'dumpsters' ? 'selected' : ''}>Dumpsters</option>
-                          <option value="other" ${category === 'other' ? 'selected' : ''}>Other</option>
-                        </select>
-                      </label>
-                    </div>
-                    <button type="button" class="remove-image" data-idx="${idx}">Remove</button>
-                    <hr>`;
-                  imagesList.appendChild(div);
-                  
-                  // Add event listener for the new remove button
-                  div.querySelector('.remove-image').addEventListener('click', function() {
-                    this.closest('.gallery-image-item').remove();
-                  });
-                }
+                // Get image category from the file name if possible
+                let category = 'other';
+                const fileName = file.name.toLowerCase();
+                if (fileName.includes('siding')) category = 'siding';
+                else if (fileName.includes('window')) category = 'windows';
+                else if (fileName.includes('deck')) category = 'decks';
+                else if (fileName.includes('dumpster')) category = 'dumpsters';
                 
-                showToast('gallery-toast', 'Image uploaded successfully!', 'success');
+                // Get file name without extension
+                const nameWithoutExtension = file.name.split('.').slice(0, -1).join('.');
+                
+                div.innerHTML = `
+                  <div class="image-preview">
+                    <img src="${dataUrl}" alt="${nameWithoutExtension}">
+                  </div>
+                  <div class="image-details">
+                    <label>Image Name: <input type="text" value="${nameWithoutExtension}" data-idx="${idx}" data-field="alt"></label>
+                    <label>Category: 
+                      <select data-idx="${idx}" data-field="category">
+                        <option value="siding" ${category === 'siding' ? 'selected' : ''}>Siding</option>
+                        <option value="windows" ${category === 'windows' ? 'selected' : ''}>Windows</option>
+                        <option value="decks" ${category === 'decks' ? 'selected' : ''}>Decks</option>
+                        <option value="dumpsters" ${category === 'dumpsters' ? 'selected' : ''}>Dumpsters</option>
+                        <option value="other" ${category === 'other' ? 'selected' : ''}>Other</option>
+                      </select>
+                    </label>
+                    <input type="hidden" value="${dataUrl}" data-idx="${idx}" data-field="dataUrl">
+                  </div>
+                  <button type="button" class="remove-image" data-idx="${idx}">Remove</button>
+                  <hr>`;
+                imagesList.appendChild(div);
+                
+                // Add event listener for the new remove button
+                div.querySelector('.remove-image').addEventListener('click', function() {
+                  this.closest('.gallery-image-item').remove();
+                });
+                
+                showToast('gallery-toast', 'Image processed successfully!', 'success');
+                showSpinner('gallery-spinner', false);
               }
-            );
+            };
+            
+            reader.onerror = function() {
+              console.error('Error reading file');
+              showToast('gallery-toast', 'Error processing image. Please try again.', 'error');
+              showSpinner('gallery-spinner', false);
+            };
+            
+            // Read the file as a data URL (base64)
+            reader.readAsDataURL(file);
           } catch (e) {
-            console.error('Error uploading image:', e);
-            showToast('gallery-toast', 'Error uploading image. Check console.', 'error');
-          } finally {
+            console.error('Error processing image:', e);
+            showToast('gallery-toast', 'Error processing image. Check console.', 'error');
             showSpinner('gallery-spinner', false);
+          } finally {
             // Clear the file input for future uploads
             fileUploadInput.value = '';
           }
         });
       }
       
-      // Add gallery image button (for direct URL entry)
-      const addGalleryImageBtn = document.getElementById('add-gallery-image');
-      if (addGalleryImageBtn) {
-        addGalleryImageBtn.addEventListener('click', () => {
-          const imagesList = document.getElementById('gallery-images-list');
-          if (imagesList) {
-            const idx = imagesList.children.length;
-            const div = document.createElement('div');
-            div.className = 'gallery-image-item';
-            div.innerHTML = `
-              <div class="image-preview">
-                <img src="https://placehold.co/300x200/0a4d68/white?text=New+Image" alt="New gallery image">
-              </div>
-              <div class="image-details">
-                <label>Image URL: <input type="text" value="" data-idx="${idx}" data-field="url"></label>
-                <label>Alt Text: <input type="text" value="" data-idx="${idx}" data-field="alt"></label>
-                <label>Category: 
-                  <select data-idx="${idx}" data-field="category">
-                    <option value="siding">Siding</option>
-                    <option value="windows">Windows</option>
-                    <option value="decks">Decks</option>
-                    <option value="dumpsters">Dumpsters</option>
-                    <option value="other" selected>Other</option>
-                  </select>
-                </label>
-              </div>
-              <button type="button" class="remove-image" data-idx="${idx}">Remove</button>
-              <hr>`;
-            imagesList.appendChild(div);
-            
-            // Add event listener for the new remove button
-            div.querySelector('.remove-image').addEventListener('click', function() {
-              this.closest('.gallery-image-item').remove();
-            });
-
-            // Add change listener to update preview image
-            const urlInput = div.querySelector('input[data-field="url"]');
-            const previewImg = div.querySelector('.image-preview img');
-            
-            urlInput.addEventListener('change', function() {
-              previewImg.src = this.value || 'https://placehold.co/300x200/0a4d68/white?text=New+Image';
-            });
-          }
-        });
-      }
+      // Add gallery image button (for direct URL entry) - removed to simplify the interface
       
       // Gallery save form
       const galleryForm = document.getElementById('gallery-form');
@@ -502,19 +458,19 @@ document.addEventListener('DOMContentLoaded', function() {
             if (imagesList) {
               const divs = imagesList.querySelectorAll('.gallery-image-item');
               divs.forEach(div => {
-                const url = div.querySelector('input[data-field="url"]')?.value || '';
+                const dataUrl = div.querySelector('input[data-field="dataUrl"]')?.value || '';
                 const alt = div.querySelector('input[data-field="alt"]')?.value || '';
                 const category = div.querySelector('select[data-field="category"]')?.value || 'other';
                 
-                if (url) {
-                  images.push({ url, alt, category });
+                if (dataUrl) {
+                  images.push({ dataUrl, alt, category });
                 }
               });
               
               await db.collection('siteContent').doc('gallery').set({ images }, { merge: true });
               
-              // Store images in localStorage for the frontend to use
-              localStorage.setItem('filebaseGalleryImages', JSON.stringify(images));
+              // Store images in localStorage for the frontend to use immediately
+              localStorage.setItem('galleryImages', JSON.stringify(images));
               
               showToast('gallery-toast', 'Gallery images saved successfully!', 'success');
             }

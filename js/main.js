@@ -12,11 +12,11 @@ document.addEventListener('DOMContentLoaded', () => {
     setupContactForm();
     setupFacebookPlugin(); 
     setupServiceCardEffects();
-    loadFilebaseImages(); // Load images from Filebase
+    loadGalleryImages(); // Load images from Firestore/localStorage
 });
 
-// Load images from Filebase admin system
-function loadFilebaseImages() {
+// Load gallery images from localStorage (set by admin panel)
+function loadGalleryImages() {
     const slider = document.querySelector('.slider');
     const dotsContainer = document.querySelector('.slider-dots');
     
@@ -29,71 +29,196 @@ function loadFilebaseImages() {
     // Attempt to fetch the images from local storage first (set by admin panel)
     let galleryImages = [];
     try {
-        const storedImages = localStorage.getItem('filebaseGalleryImages');
+        const storedImages = localStorage.getItem('galleryImages');
         if (storedImages) {
             galleryImages = JSON.parse(storedImages);
+            console.log('Loaded gallery images from localStorage:', galleryImages.length);
         }
     } catch (error) {
         console.error('Error loading images from local storage:', error);
     }
     
-    // If no images found in local storage, try to fetch from admin API
+    // If no images found in local storage, use default images
     if (!galleryImages || galleryImages.length === 0) {
-        // Fallback to default images with category names matching your admin panel structure
+        console.log('No gallery images found in localStorage, using defaults');
         galleryImages = [
-            { url: 'images/siding-example.jpg', alt: 'Siding Installation', category: 'siding' },
-            { url: 'images/window-example.jpg', alt: 'Window Replacement', category: 'windows' },
-            { url: 'images/deck-example.jpg', alt: 'Custom Deck', category: 'decks' },
-            { url: 'images/dumpster-example.jpg', alt: 'Dumpster Rental', category: 'dumpsters' }
+            { 
+                dataUrl: 'images/siding-example.jpg', 
+                alt: 'Siding Installation', 
+                category: 'siding' 
+            },
+            { 
+                dataUrl: 'images/window-example.jpg', 
+                alt: 'Window Replacement', 
+                category: 'windows' 
+            },
+            { 
+                dataUrl: 'images/deck-example.jpg', 
+                alt: 'Custom Deck', 
+                category: 'decks' 
+            },
+            { 
+                dataUrl: 'images/dumpster-example.jpg', 
+                alt: 'Dumpster Rental', 
+                category: 'dumpsters' 
+            }
         ];
-        
-        // Make API call to your admin backend if needed
-        fetch('/api/gallery-images')
-            .then(response => response.json())
-            .then(data => {
-                if (data && data.images && data.images.length > 0) {
-                    createSlides(data.images);
-                    localStorage.setItem('filebaseGalleryImages', JSON.stringify(data.images));
-                }
-            })
-            .catch(error => {
-                console.log('Could not load admin images, using defaults:', error);
-            });
     }
     
+    // Set up slider with proper classes for slider.js
+    slider.className = 'slider slides-container';
+    slider.closest('.slider-container').classList.add('image-slider');
+    slider.closest('.slider-container').id = 'gallery-slider';
+    
     // Create slides with the available images
-    createSlides(galleryImages);
+    galleryImages.forEach((image, index) => {
+        // Create slide
+        const slide = document.createElement('div');
+        slide.className = 'slide' + (index === 0 ? ' active' : '');
+        
+        // Create image element
+        const img = document.createElement('img');
+        
+        // Handle both base64 data URLs and regular file paths
+        img.src = image.dataUrl; // From admin panel (base64)
+        img.alt = image.alt || `${image.category || 'Project'} Image`;
+        
+        // Error handling for images that fail to load
+        img.onerror = function() {
+            this.src = `https://placehold.co/800x400/0a4d68/white?text=${image.category || 'Home Improvement'}`;
+            console.log(`Fallback image used for ${image.alt || 'image'}`);
+        };
+        
+        // Add image to slide
+        slide.appendChild(img);
+        
+        // Add slide to slider
+        slider.appendChild(slide);
+        
+        // Create corresponding dot
+        const dot = document.createElement('button');
+        dot.className = 'dot' + (index === 0 ? ' active' : '');
+        dot.setAttribute('aria-label', `Slide ${index + 1}`);
+        dotsContainer.appendChild(dot);
+    });
     
-    // Initialize the slider functionality
-    initializeSliders();
+    // Use the more robust slider.js initialization
+    if (typeof initializeSliders === 'function') {
+        // Call the robust slider initialization from slider.js
+        initializeSliders();
+    } else {
+        // Fallback to the simpler initialization
+        initializeSliderControls();
+    }
+}
+
+// Initialize slider controls
+function initializeSliderControls() {
+    const sliderContainer = document.querySelector('.slider-container');
     
-    // Function to create slides from image data
-    function createSlides(images) {
-        images.forEach((image, index) => {
-            // Create slide
-            const slide = document.createElement('div');
-            slide.className = 'slide' + (index === 0 ? ' active' : '');
+    if (sliderContainer) {
+        const slides = sliderContainer.querySelectorAll('.slide');
+        const prevBtn = sliderContainer.querySelector('.slider-arrow.left');
+        const nextBtn = sliderContainer.querySelector('.slider-arrow.right');
+        const dots = sliderContainer.querySelectorAll('.dot');
+        
+        if (slides.length === 0) return;
+        
+        let currentSlide = 0;
+        let autoplayTimer = null;
+        
+        // Function to show a specific slide
+        function showSlide(index) {
+            // Hide all slides
+            slides.forEach(slide => {
+                slide.classList.remove('active');
+            });
             
-            // Create image element with fallback
-            const img = document.createElement('img');
-            img.src = image.url;
-            img.alt = image.alt || `Project Image ${index + 1}`;
-            img.onerror = function() {
-                // If image fails to load, use a placeholder with the category name
-                this.src = `https://placehold.co/800x400/0a4d68/white?text=${image.category || 'Home Improvement'}`;
-            };
+            // Deactivate all dots
+            dots.forEach(dot => {
+                dot.classList.remove('active');
+            });
             
-            // Add image to slide
-            slide.appendChild(img);
-            
-            // Add slide to slider
-            slider.appendChild(slide);
-            
-            // Create corresponding dot
-            const dot = document.createElement('button');
-            dot.className = 'dot' + (index === 0 ? ' active' : '');
-            dot.setAttribute('aria-label', `Slide ${index + 1}`);
-            dotsContainer.appendChild(dot);
+            // Show the current slide
+            slides[index].classList.add('active');
+            dots[index].classList.add('active');
+            currentSlide = index;
+        }
+        
+        // Next slide function
+        function nextSlide() {
+            currentSlide = (currentSlide + 1) % slides.length;
+            showSlide(currentSlide);
+        }
+        
+        // Previous slide function
+        function prevSlide() {
+            currentSlide = (currentSlide - 1 + slides.length) % slides.length;
+            showSlide(currentSlide);
+        }
+        
+        // Event listeners for arrows
+        if (prevBtn) prevBtn.addEventListener('click', prevSlide);
+        if (nextBtn) nextBtn.addEventListener('click', nextSlide);
+        
+        // Event listeners for dots
+        dots.forEach((dot, index) => {
+            dot.addEventListener('click', () => {
+                showSlide(index);
+                resetAutoplay();
+            });
+        });
+        
+        // Touch swipe functionality
+        let touchStartX = 0;
+        let touchEndX = 0;
+        
+        sliderContainer.addEventListener('touchstart', (e) => {
+            touchStartX = e.changedTouches[0].screenX;
+        }, { passive: true });
+        
+        sliderContainer.addEventListener('touchend', (e) => {
+            touchEndX = e.changedTouches[0].screenX;
+            handleSwipe();
+        }, { passive: true });
+        
+        function handleSwipe() {
+            const swipeThreshold = 50;
+            if (touchEndX < touchStartX - swipeThreshold) {
+                nextSlide();
+                resetAutoplay();
+            }
+            if (touchEndX > touchStartX + swipeThreshold) {
+                prevSlide();
+                resetAutoplay();
+            }
+        }
+        
+        // Start autoplay
+        function startAutoplay() {
+            autoplayTimer = setInterval(nextSlide, 5000);
+        }
+        
+        // Reset autoplay timer
+        function resetAutoplay() {
+            if (autoplayTimer) {
+                clearInterval(autoplayTimer);
+            }
+            startAutoplay();
+        }
+        
+        // Start autoplay
+        startAutoplay();
+        
+        // Handle visibility changes
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                if (autoplayTimer) {
+                    clearInterval(autoplayTimer);
+                }
+            } else {
+                startAutoplay();
+            }
         });
     }
 }
@@ -146,87 +271,6 @@ function setupMobileNavigation() {
                 mobileToggle.setAttribute('aria-expanded', 'false');
             }
         });
-    }
-}
-
-// Simple image slider functionality
-function initializeSliders() {
-    const sliderContainer = document.querySelector('.slider-container');
-    
-    if (sliderContainer) {
-        const slides = sliderContainer.querySelectorAll('.slide');
-        const prevBtn = sliderContainer.querySelector('.slider-arrow.left');
-        const nextBtn = sliderContainer.querySelector('.slider-arrow.right');
-        const dots = sliderContainer.querySelectorAll('.dot');
-        
-        let currentSlide = 0;
-        
-        // Function to show a specific slide
-        function showSlide(index) {
-            // Hide all slides
-            slides.forEach(slide => {
-                slide.classList.remove('active');
-            });
-            
-            // Deactivate all dots
-            dots.forEach(dot => {
-                dot.classList.remove('active');
-            });
-            
-            // Show the current slide
-            slides[index].classList.add('active');
-            dots[index].classList.add('active');
-            currentSlide = index;
-        }
-        
-        // Next slide function
-        function nextSlide() {
-            currentSlide = (currentSlide + 1) % slides.length;
-            showSlide(currentSlide);
-        }
-        
-        // Previous slide function
-        function prevSlide() {
-            currentSlide = (currentSlide - 1 + slides.length) % slides.length;
-            showSlide(currentSlide);
-        }
-        
-        // Event listeners for arrows
-        if (prevBtn) prevBtn.addEventListener('click', prevSlide);
-        if (nextBtn) nextBtn.addEventListener('click', nextSlide);
-        
-        // Event listeners for dots
-        dots.forEach((dot, index) => {
-            dot.addEventListener('click', () => {
-                showSlide(index);
-            });
-        });
-        
-        // Touch swipe functionality
-        let touchStartX = 0;
-        let touchEndX = 0;
-        
-        sliderContainer.addEventListener('touchstart', (e) => {
-            touchStartX = e.changedTouches[0].screenX;
-        });
-        
-        sliderContainer.addEventListener('touchend', (e) => {
-            touchEndX = e.changedTouches[0].screenX;
-            handleSwipe();
-        });
-        
-        function handleSwipe() {
-            const swipeThreshold = 50;
-            if (touchEndX < touchStartX - swipeThreshold) {
-                nextSlide();
-            }
-            if (touchEndX > touchStartX + swipeThreshold) {
-                prevSlide();
-            }
-        }
-        
-        // Auto advance slides every 5 seconds
-        setInterval(nextSlide, 5000);
     }
 }
 
