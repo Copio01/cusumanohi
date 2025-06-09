@@ -104,18 +104,19 @@
         .main-footer { background-color: var(--dark-gray); color: var(--light-gray); text-align: center; padding: 2rem 1rem; }
         
         /* Modal Styles ... */
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.6); display: none; justify-content: center; align-items: center; z-index: 2000; opacity: 0; transition: opacity 0.3s ease; }
-        .modal-overlay.active { display: flex; opacity: 1; }
-        .modal-content { background-color: var(--white); padding: 2rem 2.5rem; border-radius: 8px; box-shadow: 0 5px 25px rgba(0,0,0,0.2); width: 90%; max-width: 500px; position: relative; transform: translateY(-50px); transition: transform 0.3s ease; }
-        .modal-overlay.active .modal-content { transform: translateY(0); }
-        .modal-close-btn { position: absolute; top: 15px; right: 15px; background: none; border: none; font-size: 2rem; color: #aaa; cursor: pointer; line-height: 1; }
-        .modal-content h2 { margin-bottom: 1.5rem; text-align: center; }
-        .contact-form .form-group { margin-bottom: 1rem; }
-        .contact-form label { display: block; margin-bottom: 0.5rem; font-weight: 700; }
-        .contact-form .field-element { width: 100%; padding: 0.75rem; border: 1px solid #ccc; border-radius: 5px; font-size: 1rem; }
-        .form-actions { margin-top: 1.5rem; }
-        .form-actions .btn { width: 100%; }
-        .separator-text { text-align: center; margin: 1rem 0; font-weight: 700; color: #aaa; text-transform: uppercase; }
+        /* Modal styles will be removed as the modal is being removed. */
+        /* .modal-overlay { ... } */
+        /* .modal-overlay.active { ... } */
+        /* .modal-content { ... } */
+        /* .modal-overlay.active .modal-content { ... } */
+        /* .modal-close-btn { ... } */
+        /* .modal-content h2 { ... } */
+        /* .contact-form .form-group { ... } */ /* Styles will be adapted for the embedded form */
+        /* .contact-form label { ... } */ /* Styles will be adapted */
+        /* .contact-form .field-element { ... } */ /* Styles will be adapted */
+        /* .form-actions { ... } */ /* Styles will be adapted */
+        /* .form-actions .btn { ... } */ /* Styles will be adapted */
+        /* .separator-text { ... } */ /* Styles will be adapted if used, otherwise removed */
         
         /* Contact Section Custom Styles */
         #contact .container {
@@ -133,66 +134,92 @@
         #contact ul {
             color: var(--white);
         }
-        #contact a {
+        #contact a { /* This applies to links within the contact section text, not necessarily form buttons */
             color: var(--accent-color);
             text-decoration: underline;
         }
+
+        /* Styles for the new embedded contact form */
         #contact .contact-form {
             background: var(--white);
             color: var(--primary-color);
             border-radius: 10px;
             box-shadow: 0 2px 12px rgba(10,77,104,0.08);
             padding: 2rem 1.5rem;
+            width: 100%; /* Ensure it takes the width of its container */
+            box-sizing: border-box;
+        }
+        #contact .contact-form h3 {
+            text-align: center;
+            color: var(--primary-color);
+            font-family: var(--font-heading);
+            margin-top: 0;
             margin-bottom: 1.5rem;
+            font-size: 1.8rem;
+        }
+        #contact .contact-form .form-group {
+            margin-bottom: 1rem;
         }
         #contact .contact-form label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 700;
             color: var(--primary-color);
         }
-        #contact .contact-form input,
-        #contact .contact-form textarea {
-            background: #f7f8fc;
+        #contact .contact-form .field-element {
+            width: 100%;
+            padding: 0.75rem;
             border: 1px solid #e0e0e0;
+            border-radius: 5px;
+            font-size: 1rem;
+            background: #f7f8fc;
             color: var(--dark-gray);
+            box-sizing: border-box;
+            font-family: var(--font-body);
         }
-        #contact .contact-form input:focus,
-        #contact .contact-form textarea:focus {
+        #contact .contact-form .field-element:focus {
             border-color: var(--accent-color);
             outline: none;
+            box-shadow: 0 0 0 2px rgba(245, 166, 35, 0.2); /* accent-color with alpha */
         }
-        #contact .form-actions .btn {
-            width: 100%;
-            margin-top: 1rem;
-        }
-        #contact iframe {
-            border: none;
-            border-radius: 10px;
-            box-shadow: 0 2px 12px rgba(10,77,104,0.08);
-        }
-        #contact .map-caption {
-            font-size: 0.95rem;
-            color: #e0e0e0;
+        #contact .contact-form .form-actions {
+            margin-top: 1.5rem;
             text-align: center;
-            margin-top: 0.5rem;
         }
-        @media (max-width: 900px) {
-            #contact .container {
-                padding: 2rem 0.5rem;
-            }
-        }
-        @media (max-width: 600px) {
-            #contact .container {
-                flex-direction: column;
-                padding: 1.2rem 0.2rem;
-            }
-            #contact .contact-form {
-                padding: 1rem 0.5rem;
-            }
+        #contact .contact-form .form-actions .btn {
+            width: auto; /* Auto width based on content and padding */
+            min-width: 200px; /* Minimum width for better appearance */
+            padding: 0.75rem 1.5rem; /* Slightly adjusted padding for form button */
         }
 
+        /* Enhancements for contact section buttons for better visibility */
+        #contact .contact-details-column .btn-secondary { /* "Call Us Now" button */
+            background-color: var(--accent-color); /* Changed to orange for high contrast */
+            color: var(--white);
+            width: 100%; /* Moved from inline style */
+            max-width: 300px; /* Moved from inline style */
+            font-size: 1.1rem; /* Moved from inline style */
+            text-align: center; /* Moved from inline style */
+            /* display: inline-block; is inherited from .btn class */
+            /* padding is inherited from .btn or can be customized here if needed */
+        }
+
+        #contact .contact-details-column .btn-secondary:hover,
+        #contact .contact-form .form-actions .btn-primary:hover {
+            background-color: #e09110; /* Darker orange for hover */
+            box-shadow: 0 6px 18px rgba(0,0,0,0.25); /* Enhanced shadow on hover */
+            /* transform: translateY will be inherited from general .btn:hover */
+        }
+        /* Note: .btn-primary in the form already uses var(--accent-color) by default. */
+        
+        @media (max-width: 900px) {
+            /* ...existing code... */
+        }
+        @media (max-width: 600px) {
+            /* ...existing code... */
+        }
         @media (max-width: 768px) {
-            .header-content { flex-direction: column; }
-            .main-nav { margin-top: 1rem; }
-            .hero-overlay h1, .slide-overlay h1 { font-size: 2.5rem; }
+            /* ...existing code... */
         }
 
     </style>
@@ -204,7 +231,7 @@
             <nav class="main-nav">
                 <a href="#about">About</a>
                 <a href="#services">Services</a>
-                <button class="nav-contact-btn" id="navContactBtn">Contact</button>
+                <a href="#contact">Contact</a> {/* Changed from button to link */}
             </nav>
         </div>
     </header>
@@ -236,29 +263,57 @@
         <section id="services"><div class="container"><h2 class="section-title">Our Services</h2><div class="services-grid"><article class="service-card"><svg class="service-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg><h3>Siding</h3><p>Enhance your home's curb appeal and protection with our wide variety of siding options, including vinyl, wood, and fiber cement.</p></article><article class="service-card"><svg class="service-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"></path></svg><h3>Decks</h3><p>We design and build custom decks or repair existing ones, creating beautiful and lasting outdoor living spaces for you to enjoy.</p></article><article class="service-card"><svg class="service-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg><h3>Dumpster Rentals</h3><p>Convenient and competitively priced dumpster rentals for your project needs, with various sizes and flexible scheduling.</p></article></div></div></section>
         <section id="contact"><div class="container">
             <h2 class="section-title">Ready to Start Your Project?</h2>
-            <p>Contact us today for a free, no-obligation quote. We're ready to help bring your vision to life.</p>
-            <div style="display: flex; flex-wrap: wrap; gap: 2.5rem; align-items: flex-start; justify-content: center;">
-                <div style="flex:1 1 320px; min-width:260px; max-width:420px;">
-                    <ul style="list-style:none; padding:0; margin:1.5rem 0 2rem 0; font-size:1.1rem;">
-                        <li><strong>Phone:</strong> <a href="tel:734-777-8158" style="color:var(--secondary-color);text-decoration:underline;">734-777-8158</a></li>
-                        <li><strong>Email:</strong> <a href="mailto:copernan@yahoo.com" style="color:var(--secondary-color);text-decoration:underline;">copernan@yahoo.com</a></li>
+            <p>Contact us today for a free, no-obligation quote. We're ready to help bring your vision to life. You can reach out via the form below, or call us directly!</p>
+            <div style="display: flex; flex-wrap: wrap; gap: 2.5rem; align-items: flex-start; justify-content: space-between;">
+                
+                <div style="flex:1 1 300px; min-width:280px; max-width:400px;" class="contact-details-column"> {/* Added class "contact-details-column" */
+                    <h3 style="font-family: var(--font-heading); color: var(--white); margin-top:0; margin-bottom:1rem;">Contact Directly</h3>
+                    <ul style="list-style:none; padding:0; margin:0 0 1.5rem 0; font-size:1.1rem; color: var(--white);">
+                        <li style="margin-bottom: 0.5rem;"><strong>Phone:</strong> <a href="tel:734-777-8158" style="color:var(--accent-color);text-decoration:underline;">734-777-8158</a></li>
+                        <li><strong>Email:</strong> <a href="mailto:copernan@yahoo.com" style="color:var(--accent-color);text-decoration:underline;">copernan@yahoo.com</a></li>
                     </ul>
-                    <div style="margin-bottom:1.5rem;">
+                    <div style="font-size:1.1rem; color: var(--white); margin-bottom:1.5rem;">
                         <strong>Cusumano Home Improvements</strong><br>
                         Monroe, MI<br>
                         A family owned company.
                     </div>
+                     <a href="tel:734-777-8158" class="btn btn-secondary">Call Us Now</a> {/* Removed inline style */}
                 </div>
-                <div style="flex:1 1 320px; min-width:260px; max-width:480px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:1.5rem;">
-                    <a href="tel:734-777-8158" class="btn btn-primary" style="width:100%;max-width:340px;font-size:1.2rem;">Call Us</a>
-                    <a href="mailto:copernan@yahoo.com?subject=Request%20a%20Quote" class="btn btn-secondary" style="width:100%;max-width:340px;font-size:1.2rem;">Request a Quote</a>
+                
+                <div style="flex:2 1 400px; min-width:300px; max-width:550px;">
+                    <form action="https://formspree.io/f/YOUR_FORMSPREE_ID" method="POST" class="contact-form"> {/* ACTION NEEDS TO BE UPDATED BY YOU */}
+                        <h3>Send us a Message</h3>
+                        <div class="form-group">
+                            <label for="contact-name">Full Name</label>
+                            <input type="text" id="contact-name" name="name" required class="field-element">
+                        </div>
+                        <div class="form-group">
+                            <label for="contact-email">Email Address</label>
+                            <input type="email" id="contact-email" name="email" required class="field-element">
+                        </div>
+                        <div class="form-group">
+                            <label for="contact-phone">Phone Number (Optional)</label>
+                            <input type="tel" id="contact-phone" name="phone" class="field-element">
+                        </div>
+                        <div class="form-group">
+                            <label for="contact-message">How can we help you?</label>
+                            <textarea id="contact-message" name="message" required class="field-element" rows="5"></textarea>
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary">Send Message</button>
+                        </div>
+                    </form>
+                    <p style="font-size: 0.85rem; text-align: center; color: var(--light-gray); margin-top: 1rem;">
+                        <strong>Important:</strong> Remember to replace "YOUR_FORMSPREE_ID" in the form's action URL with your actual Formspree endpoint ID.
+                    </p>
                 </div>
-                <div style="flex:1 1 320px; min-width:260px; max-width:480px;">
+                
+                <div style="flex:1 1 300px; min-width:280px; max-width:400px; display: none; /* Temporarily hide map or make it optional based on space */"> {/* Map Column - can be re-enabled or restyled */
                     <div style="border-radius:12px; overflow:hidden; box-shadow:0 2px 16px rgba(10,77,104,0.10); margin-bottom:1rem;">
                         <iframe title="Monroe Michigan Map" width="100%" height="260" frameborder="0" style="border:0; min-width:220px; min-height:180px;" allowfullscreen loading="lazy"
                             src="https://www.openstreetmap.org/export/embed.html?bbox=-83.442%2C41.887%2C-83.322%2C41.963&amp;layer=mapnik&amp;marker=41.916%2C-83.397"></iframe>
                     </div>
-                    <div style="font-size:0.95rem; color:#666; text-align:center;">Monroe, Michigan and surrounding areas highlighted.</div>
+                    <div style="font-size:0.95rem; color:#e0e0e0; text-align:center;">Monroe, Michigan and surrounding areas highlighted.</div>
                 </div>
             </div>
         </div></section>
@@ -274,20 +329,6 @@
         <a href="admin.html" title="Admin Login">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h7"/><polyline points="15 12 19 12 19 8 15 8 15 12"/><path d="M17 16v-4h-2V8a3 3 0 0 1 3-3h0a3 3 0 0 1 3 3v4h-2v4Z"/></svg>
         </a>
-    </div>
-
-    <div class="modal-overlay" id="contactModal">
-        <div class="modal-content">
-            <button class="modal-close-btn" id="modalCloseBtn">&times;</button>
-            <h2>Contact Us</h2>
-            <form class="contact-form" action="#" method="POST">
-                <div class="form-group"><label for="message">How can we help?</label><textarea id="message" name="message" required class="field-element"></textarea></div>
-                <div class="name-fields" style="display:flex; gap: 1rem;"><div class="form-group" style="width:50%"><label for="fname">First Name</label><input type="text" id="fname" name="fname" required class="field-element"></div><div class="form-group" style="width:50%"><label for="lname">Last Name</label><input type="text" id="lname" name="lname" required class="field-element"></div></div>
-                <div class="form-group"><label for="email">Email</label><input type="email" id="email" name="email" required class="field-element" placeholder="copernan@yahoo.com"></div>
-                <div class="form-group"><label for="phone">Phone (Optional)</label><input type="tel" id="phone" name="phone" class="field-element"></div>
-                <div class="form-actions"><button type="submit" class="btn btn-primary">Submit Form</button><p class="separator-text">or</p><a href="tel:7342416805" class="btn btn-secondary">Call Us Directly</a></div>
-            </form>
-        </div>
     </div>
 
     <script type="module">
@@ -416,17 +457,17 @@
 
         document.addEventListener('DOMContentLoaded', setupSliderListener);
         
-        // Modal script
-        const contactModal = document.getElementById('contactModal');
-        const navContactBtn = document.getElementById('navContactBtn');
-        const ctaContactBtn = document.getElementById('ctaContactBtn');
-        const modalCloseBtn = document.getElementById('modalCloseBtn');
-        const openModal = () => contactModal.classList.add('active');
-        const closeModal = () => contactModal.classList.remove('active');
-        navContactBtn.addEventListener('click', openModal);
-        ctaContactBtn.addEventListener('click', openModal);
-        modalCloseBtn.addEventListener('click', closeModal);
-        contactModal.addEventListener('click', e => { if(e.target === contactModal) closeModal(); });
+        // Modal script removed
+        // const contactModal = document.getElementById('contactModal');
+        // const navContactBtn = document.getElementById('navContactBtn');
+        // const ctaContactBtn = document.getElementById('ctaContactBtn');
+        // const modalCloseBtn = document.getElementById('modalCloseBtn');
+        // const openModal = () => contactModal.classList.add('active');
+        // const closeModal = () => contactModal.classList.remove('active');
+        // navContactBtn.addEventListener('click', openModal);
+        // ctaContactBtn.addEventListener('click', openModal);
+        // modalCloseBtn.addEventListener('click', closeModal);
+        // contactModal.addEventListener('click', e => { if(e.target === contactModal) closeModal(); });
     </script>
 </body>
 </html>
