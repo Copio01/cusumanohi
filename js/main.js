@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
     loadGalleryImages(); // Load images from Firestore/localStorage
 });
 
-// Load gallery images from Firestore or localStorage
+// Load gallery images from Firebase Storage, Firestore, or localStorage
 function loadGalleryImages() {
     const slider = document.querySelector('.slider');
     const dotsContainer = document.querySelector('.slider-dots');
@@ -26,25 +26,77 @@ function loadGalleryImages() {
     slider.innerHTML = '';
     dotsContainer.innerHTML = '';
     
-    // Initialize Firebase variables - use existing initialized Firebase if available
+    // Initialize Firebase variables
     let db = null;
+    let storage = null;
     
-    if (typeof firebase !== 'undefined' && firebase.firestore) {
-        db = firebase.firestore();
-        console.log('Firebase Firestore is available');
+    if (typeof firebase !== 'undefined') {
+        if (firebase.firestore) {
+            db = firebase.firestore();
+            console.log('Firebase Firestore is available');
+        }
+        
+        if (firebase.storage) {
+            storage = firebase.storage();
+            console.log('Firebase Storage is available');
+        }
     } else {
-        console.warn('Firebase Firestore is not available, falling back to localStorage');
+        console.warn('Firebase is not available');
     }
     
-    // Try to load from Firestore first
-    if (db) {
-        console.log('Attempting to load gallery images from Firestore');
+    // Try to load images from Firebase Storage first
+    if (storage) {
+        console.log('Attempting to load gallery images from Firebase Storage');
         
-        db.collection('siteContent').doc('gallery').get()
-            .then((doc) => {
-                if (doc.exists && doc.data().images && doc.data().images.length > 0) {
-                    const galleryImages = doc.data().images;
-                    console.log('Successfully loaded gallery images from Firestore:', galleryImages.length);
+        // Reference to the storage folder containing images
+        const imagesRef = storage.ref('gallery');
+        
+        // List all items in the gallery folder
+        imagesRef.listAll()
+            .then((result) => {
+                const imagePromises = [];
+                
+                // Create an array of promises that will resolve with the image URLs and metadata
+                result.items.forEach((imageRef) => {
+                    const imagePromise = Promise.all([
+                        imageRef.getDownloadURL(),
+                        imageRef.getMetadata()
+                    ]).then(([url, metadata]) => {
+                        // Parse category from file path or metadata
+                        let category = 'other';
+                        const fileName = imageRef.name.toLowerCase();
+                        
+                        // Try to determine category from filename
+                        if (fileName.includes('siding')) category = 'siding';
+                        else if (fileName.includes('window')) category = 'windows';
+                        else if (fileName.includes('deck')) category = 'decks';
+                        else if (fileName.includes('dumpster')) category = 'dumpsters';
+                        
+                        // Use custom metadata if available
+                        if (metadata.customMetadata && metadata.customMetadata.category) {
+                            category = metadata.customMetadata.category;
+                        }
+                        
+                        // Get name without extension for alt text
+                        const alt = imageRef.name.split('.')[0].replace(/-/g, ' ');
+                        
+                        return {
+                            dataUrl: url,
+                            alt: alt,
+                            category: category,
+                            name: imageRef.name
+                        };
+                    });
+                    
+                    imagePromises.push(imagePromise);
+                });
+                
+                // Once all image promises are resolved
+                return Promise.all(imagePromises);
+            })
+            .then((galleryImages) => {
+                if (galleryImages && galleryImages.length > 0) {
+                    console.log('Successfully loaded gallery images from Firebase Storage:', galleryImages.length);
                     
                     // Save to localStorage as backup
                     try {
@@ -56,19 +108,53 @@ function loadGalleryImages() {
                     // Render the slides
                     renderGallerySlides(galleryImages, slider, dotsContainer);
                 } else {
-                    console.log('No gallery images found in Firestore, falling back to localStorage');
-                    loadFromLocalStorage();
+                    console.log('No gallery images found in Firebase Storage, trying Firestore');
+                    loadFromFirestore();
                 }
             })
             .catch((error) => {
-                console.error('Error loading gallery images from Firestore:', error);
-                loadFromLocalStorage();
+                console.error('Error loading gallery images from Firebase Storage:', error);
+                loadFromFirestore();
             });
     } else {
-        loadFromLocalStorage();
+        loadFromFirestore();
     }
     
-    // Fallback to localStorage if Firestore fails or isn't available
+    // Try to load from Firestore if Storage fails
+    function loadFromFirestore() {
+        if (db) {
+            console.log('Attempting to load gallery images from Firestore');
+            
+            db.collection('siteContent').doc('gallery').get()
+                .then((doc) => {
+                    if (doc.exists && doc.data().images && doc.data().images.length > 0) {
+                        const galleryImages = doc.data().images;
+                        console.log('Successfully loaded gallery images from Firestore:', galleryImages.length);
+                        
+                        // Save to localStorage as backup
+                        try {
+                            localStorage.setItem('galleryImages', JSON.stringify(galleryImages));
+                        } catch (e) {
+                            console.warn('Could not save gallery images to localStorage:', e);
+                        }
+                        
+                        // Render the slides
+                        renderGallerySlides(galleryImages, slider, dotsContainer);
+                    } else {
+                        console.log('No gallery images found in Firestore, falling back to localStorage');
+                        loadFromLocalStorage();
+                    }
+                })
+                .catch((error) => {
+                    console.error('Error loading gallery images from Firestore:', error);
+                    loadFromLocalStorage();
+                });
+        } else {
+            loadFromLocalStorage();
+        }
+    }
+    
+    // Fallback to localStorage if Firebase fails or isn't available
     function loadFromLocalStorage() {
         try {
             const storedImages = localStorage.getItem('galleryImages');
@@ -78,34 +164,34 @@ function loadGalleryImages() {
                 renderGallerySlides(galleryImages, slider, dotsContainer);
             } else {
                 console.log('No gallery images found in localStorage, using defaults');
-                useDefaultImages();
+                loadDefaultCategories();
             }
         } catch (error) {
             console.error('Error loading images from local storage:', error);
-            useDefaultImages();
+            loadDefaultCategories();
         }
     }
     
-    // Final fallback to default images
-    function useDefaultImages() {
+    // Load placeholders organized by category
+    function loadDefaultCategories() {
         const galleryImages = [
             { 
-                dataUrl: 'images/siding-example.jpg', 
+                dataUrl: 'https://placehold.co/800x400/0a4d68/white?text=Siding+Installation', 
                 alt: 'Siding Installation', 
                 category: 'siding' 
             },
             { 
-                dataUrl: 'images/window-example.jpg', 
+                dataUrl: 'https://placehold.co/800x400/088395/white?text=Window+Replacement', 
                 alt: 'Window Replacement', 
                 category: 'windows' 
             },
             { 
-                dataUrl: 'images/deck-example.jpg', 
+                dataUrl: 'https://placehold.co/800x400/0a4d68/white?text=Custom+Deck+Building', 
                 alt: 'Custom Deck', 
                 category: 'decks' 
             },
             { 
-                dataUrl: 'images/dumpster-example.jpg', 
+                dataUrl: 'https://placehold.co/800x400/088395/white?text=Dumpster+Rental', 
                 alt: 'Dumpster Rental', 
                 category: 'dumpsters' 
             }
