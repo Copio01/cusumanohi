@@ -284,6 +284,249 @@ document.addEventListener('DOMContentLoaded', function() {
         });
       }
       
+      // --- Gallery Image Management ---
+      async function loadGalleryImages() {
+        try {
+          console.log('Loading gallery images data...');
+          showSpinner('gallery-spinner', true);
+          
+          const docRef = db.collection('siteContent').doc('gallery');
+          const docSnap = await docRef.get();
+          const imagesList = document.getElementById('gallery-images-list');
+          
+          if (imagesList) {
+            imagesList.innerHTML = '';
+            
+            if (docSnap.exists && Array.isArray(docSnap.data().images)) {
+              console.log('Gallery images data found:', docSnap.data().images);
+              
+              // Store images in localStorage for the frontend to use
+              localStorage.setItem('filebaseGalleryImages', JSON.stringify(docSnap.data().images));
+              
+              docSnap.data().images.forEach((img, idx) => {
+                const div = document.createElement('div');
+                div.className = 'gallery-image-item';
+                div.innerHTML = `
+                  <div class="image-preview">
+                    <img src="${img.url}" alt="${img.alt || 'Gallery image'}" 
+                         onerror="this.src='https://placehold.co/300x200/0a4d68/white?text=${img.category || 'Image'}'">
+                  </div>
+                  <div class="image-details">
+                    <label>Image URL: <input type="text" value="${img.url || ''}" data-idx="${idx}" data-field="url"></label>
+                    <label>Alt Text: <input type="text" value="${img.alt || ''}" data-idx="${idx}" data-field="alt"></label>
+                    <label>Category: 
+                      <select data-idx="${idx}" data-field="category">
+                        <option value="siding" ${img.category === 'siding' ? 'selected' : ''}>Siding</option>
+                        <option value="windows" ${img.category === 'windows' ? 'selected' : ''}>Windows</option>
+                        <option value="decks" ${img.category === 'decks' ? 'selected' : ''}>Decks</option>
+                        <option value="dumpsters" ${img.category === 'dumpsters' ? 'selected' : ''}>Dumpsters</option>
+                        <option value="other" ${img.category === 'other' ? 'selected' : ''}>Other</option>
+                      </select>
+                    </label>
+                  </div>
+                  <button type="button" class="remove-image" data-idx="${idx}">Remove</button>
+                  <hr>`;
+                imagesList.appendChild(div);
+              });
+              
+              // Add event listeners for remove buttons
+              imagesList.querySelectorAll('.remove-image').forEach(btn => {
+                btn.addEventListener('click', function() {
+                  this.closest('.gallery-image-item').remove();
+                });
+              });
+              
+              showToast('gallery-toast', 'Gallery images loaded successfully!', 'success');
+            } else {
+              console.log('No gallery images found or invalid format - creating empty array');
+              // If no images exist yet, create an empty array
+              await docRef.set({ images: [] }, { merge: true });
+            }
+          }
+        } catch (e) {
+          console.error('Error loading gallery images:', e);
+          showToast('gallery-toast', 'Error loading gallery images. Check console.', 'error');
+        } finally {
+          showSpinner('gallery-spinner', false);
+        }
+      }
+      
+      loadGalleryImages();
+      
+      // File upload functionality for gallery images
+      const fileUploadInput = document.getElementById('gallery-image-upload');
+      const storageRef = firebase.storage().ref();
+      
+      if (fileUploadInput) {
+        fileUploadInput.addEventListener('change', async (e) => {
+          const files = e.target.files;
+          if (!files.length) return;
+          
+          showSpinner('gallery-spinner', true);
+          showToast('gallery-toast', 'Uploading image...', 'info');
+          
+          try {
+            const file = files[0];
+            const fileExtension = file.name.split('.').pop();
+            const fileName = `gallery_${Date.now()}.${fileExtension}`;
+            const fileRef = storageRef.child(`gallery/${fileName}`);
+            
+            // Upload the file to Firebase Storage
+            const uploadTask = fileRef.put(file);
+            
+            // Monitor upload progress
+            uploadTask.on('state_changed', 
+              (snapshot) => {
+                const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                console.log('Upload is ' + progress + '% done');
+              }, 
+              (error) => {
+                console.error('Error during upload:', error);
+                showToast('gallery-toast', 'Error uploading image. Please try again.', 'error');
+              }, 
+              async () => {
+                // Get the download URL and add to the gallery list
+                const downloadURL = await uploadTask.snapshot.ref.getDownloadURL();
+                
+                const imagesList = document.getElementById('gallery-images-list');
+                if (imagesList) {
+                  const idx = imagesList.children.length;
+                  const div = document.createElement('div');
+                  div.className = 'gallery-image-item';
+                  
+                  // Get image category from the file name if possible
+                  let category = 'other';
+                  if (file.name.toLowerCase().includes('siding')) category = 'siding';
+                  else if (file.name.toLowerCase().includes('window')) category = 'windows';
+                  else if (file.name.toLowerCase().includes('deck')) category = 'decks';
+                  else if (file.name.toLowerCase().includes('dumpster')) category = 'dumpsters';
+                  
+                  div.innerHTML = `
+                    <div class="image-preview">
+                      <img src="${downloadURL}" alt="Gallery image">
+                    </div>
+                    <div class="image-details">
+                      <label>Image URL: <input type="text" value="${downloadURL}" data-idx="${idx}" data-field="url"></label>
+                      <label>Alt Text: <input type="text" value="${file.name.split('.')[0]}" data-idx="${idx}" data-field="alt"></label>
+                      <label>Category: 
+                        <select data-idx="${idx}" data-field="category">
+                          <option value="siding" ${category === 'siding' ? 'selected' : ''}>Siding</option>
+                          <option value="windows" ${category === 'windows' ? 'selected' : ''}>Windows</option>
+                          <option value="decks" ${category === 'decks' ? 'selected' : ''}>Decks</option>
+                          <option value="dumpsters" ${category === 'dumpsters' ? 'selected' : ''}>Dumpsters</option>
+                          <option value="other" ${category === 'other' ? 'selected' : ''}>Other</option>
+                        </select>
+                      </label>
+                    </div>
+                    <button type="button" class="remove-image" data-idx="${idx}">Remove</button>
+                    <hr>`;
+                  imagesList.appendChild(div);
+                  
+                  // Add event listener for the new remove button
+                  div.querySelector('.remove-image').addEventListener('click', function() {
+                    this.closest('.gallery-image-item').remove();
+                  });
+                }
+                
+                showToast('gallery-toast', 'Image uploaded successfully!', 'success');
+              }
+            );
+          } catch (e) {
+            console.error('Error uploading image:', e);
+            showToast('gallery-toast', 'Error uploading image. Check console.', 'error');
+          } finally {
+            showSpinner('gallery-spinner', false);
+            // Clear the file input for future uploads
+            fileUploadInput.value = '';
+          }
+        });
+      }
+      
+      // Add gallery image button (for direct URL entry)
+      const addGalleryImageBtn = document.getElementById('add-gallery-image');
+      if (addGalleryImageBtn) {
+        addGalleryImageBtn.addEventListener('click', () => {
+          const imagesList = document.getElementById('gallery-images-list');
+          if (imagesList) {
+            const idx = imagesList.children.length;
+            const div = document.createElement('div');
+            div.className = 'gallery-image-item';
+            div.innerHTML = `
+              <div class="image-preview">
+                <img src="https://placehold.co/300x200/0a4d68/white?text=New+Image" alt="New gallery image">
+              </div>
+              <div class="image-details">
+                <label>Image URL: <input type="text" value="" data-idx="${idx}" data-field="url"></label>
+                <label>Alt Text: <input type="text" value="" data-idx="${idx}" data-field="alt"></label>
+                <label>Category: 
+                  <select data-idx="${idx}" data-field="category">
+                    <option value="siding">Siding</option>
+                    <option value="windows">Windows</option>
+                    <option value="decks">Decks</option>
+                    <option value="dumpsters">Dumpsters</option>
+                    <option value="other" selected>Other</option>
+                  </select>
+                </label>
+              </div>
+              <button type="button" class="remove-image" data-idx="${idx}">Remove</button>
+              <hr>`;
+            imagesList.appendChild(div);
+            
+            // Add event listener for the new remove button
+            div.querySelector('.remove-image').addEventListener('click', function() {
+              this.closest('.gallery-image-item').remove();
+            });
+
+            // Add change listener to update preview image
+            const urlInput = div.querySelector('input[data-field="url"]');
+            const previewImg = div.querySelector('.image-preview img');
+            
+            urlInput.addEventListener('change', function() {
+              previewImg.src = this.value || 'https://placehold.co/300x200/0a4d68/white?text=New+Image';
+            });
+          }
+        });
+      }
+      
+      // Gallery save form
+      const galleryForm = document.getElementById('gallery-form');
+      if (galleryForm) {
+        galleryForm.addEventListener('submit', async e => {
+          e.preventDefault();
+          showSpinner('gallery-spinner', true);
+          
+          try {
+            const imagesList = document.getElementById('gallery-images-list');
+            const images = [];
+            
+            if (imagesList) {
+              const divs = imagesList.querySelectorAll('.gallery-image-item');
+              divs.forEach(div => {
+                const url = div.querySelector('input[data-field="url"]')?.value || '';
+                const alt = div.querySelector('input[data-field="alt"]')?.value || '';
+                const category = div.querySelector('select[data-field="category"]')?.value || 'other';
+                
+                if (url) {
+                  images.push({ url, alt, category });
+                }
+              });
+              
+              await db.collection('siteContent').doc('gallery').set({ images }, { merge: true });
+              
+              // Store images in localStorage for the frontend to use
+              localStorage.setItem('filebaseGalleryImages', JSON.stringify(images));
+              
+              showToast('gallery-toast', 'Gallery images saved successfully!', 'success');
+            }
+          } catch (e) {
+            console.error('Error saving gallery images:', e);
+            showToast('gallery-toast', 'Error saving gallery images. Try again.', 'error');
+          } finally {
+            showSpinner('gallery-spinner', false);
+          }
+        });
+      }
+      
       // Show notification that everything is ready
       console.log('All admin components initialized successfully!');
     }, 500); // Half-second delay to ensure DOM is fully loaded

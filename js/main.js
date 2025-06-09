@@ -12,8 +12,91 @@ document.addEventListener('DOMContentLoaded', () => {
     setupContactForm();
     setupFacebookPlugin(); 
     setupServiceCardEffects();
-    initializeSliders();
+    loadFilebaseImages(); // Load images from Filebase
 });
+
+// Load images from Filebase admin system
+function loadFilebaseImages() {
+    const slider = document.querySelector('.slider');
+    const dotsContainer = document.querySelector('.slider-dots');
+    
+    if (!slider || !dotsContainer) return;
+    
+    // Clear existing slides and dots
+    slider.innerHTML = '';
+    dotsContainer.innerHTML = '';
+    
+    // Attempt to fetch the images from local storage first (set by admin panel)
+    let galleryImages = [];
+    try {
+        const storedImages = localStorage.getItem('filebaseGalleryImages');
+        if (storedImages) {
+            galleryImages = JSON.parse(storedImages);
+        }
+    } catch (error) {
+        console.error('Error loading images from local storage:', error);
+    }
+    
+    // If no images found in local storage, try to fetch from admin API
+    if (!galleryImages || galleryImages.length === 0) {
+        // Fallback to default images with category names matching your admin panel structure
+        galleryImages = [
+            { url: 'images/siding-example.jpg', alt: 'Siding Installation', category: 'siding' },
+            { url: 'images/window-example.jpg', alt: 'Window Replacement', category: 'windows' },
+            { url: 'images/deck-example.jpg', alt: 'Custom Deck', category: 'decks' },
+            { url: 'images/dumpster-example.jpg', alt: 'Dumpster Rental', category: 'dumpsters' }
+        ];
+        
+        // Make API call to your admin backend if needed
+        fetch('/api/gallery-images')
+            .then(response => response.json())
+            .then(data => {
+                if (data && data.images && data.images.length > 0) {
+                    createSlides(data.images);
+                    localStorage.setItem('filebaseGalleryImages', JSON.stringify(data.images));
+                }
+            })
+            .catch(error => {
+                console.log('Could not load admin images, using defaults:', error);
+            });
+    }
+    
+    // Create slides with the available images
+    createSlides(galleryImages);
+    
+    // Initialize the slider functionality
+    initializeSliders();
+    
+    // Function to create slides from image data
+    function createSlides(images) {
+        images.forEach((image, index) => {
+            // Create slide
+            const slide = document.createElement('div');
+            slide.className = 'slide' + (index === 0 ? ' active' : '');
+            
+            // Create image element with fallback
+            const img = document.createElement('img');
+            img.src = image.url;
+            img.alt = image.alt || `Project Image ${index + 1}`;
+            img.onerror = function() {
+                // If image fails to load, use a placeholder with the category name
+                this.src = `https://placehold.co/800x400/0a4d68/white?text=${image.category || 'Home Improvement'}`;
+            };
+            
+            // Add image to slide
+            slide.appendChild(img);
+            
+            // Add slide to slider
+            slider.appendChild(slide);
+            
+            // Create corresponding dot
+            const dot = document.createElement('button');
+            dot.className = 'dot' + (index === 0 ? ' active' : '');
+            dot.setAttribute('aria-label', `Slide ${index + 1}`);
+            dotsContainer.appendChild(dot);
+        });
+    }
+}
 
 // Apply header effects on scroll
 function setupHeaderEffects() {
