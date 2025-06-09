@@ -1,125 +1,251 @@
 /**
- * Image Slider for Cusumano Home Improvements
+ * Enhanced Image Slider with Accessibility Features
+ * Supports touch events, keyboard navigation, and lazy loading
  */
 
-document.addEventListener('DOMContentLoaded', () => {
-    // Sample images for the slider - update these with your actual image paths
-    const slidesData = [
-        { src: '../images/siding-project1.jpg', alt: 'Siding Project', caption: 'Siding Installation' },
-        { src: '../images/window-project1.jpg', alt: 'Window Project', caption: 'Window Replacement' },
-        { src: '../images/deck-project1.jpg', alt: 'Deck Project', caption: 'Custom Deck' },
-        { src: '../images/dumpster-rental.jpg', alt: 'Dumpster Rental', caption: 'Dumpster Rental' }
-    ];
+// Global function that can be called after dynamic content is loaded
+function initializeSliders() {
+  const sliders = document.querySelectorAll('.image-slider');
+  
+  sliders.forEach(slider => {
+    // Skip if already initialized
+    if (slider.dataset.initialized === 'true') return;
     
-    // Slider elements
-    const slider = document.querySelector('.slider');
-    const prevBtn = document.querySelector('.slider-arrow.left');
-    const nextBtn = document.querySelector('.slider-arrow.right');
-    const dotsContainer = document.querySelector('.slider-dots');
-    const progressBar = document.querySelector('.slider-progress');
+    const slidesContainer = slider.querySelector('.slides-container') || slider;
+    const slides = slidesContainer.querySelectorAll('.slide');
+    const totalSlides = slides.length;
     
-    // If elements don't exist, exit early
-    if (!slider || !prevBtn || !nextBtn || !dotsContainer || !progressBar) {
-        console.error('Slider elements not found');
-        return;
+    // Skip initialization if no slides
+    if (totalSlides === 0) return;
+    
+    // Create controls if they don't exist
+    if (!slider.querySelector('.slider-controls')) {
+      const controlsContainer = document.createElement('div');
+      controlsContainer.className = 'slider-controls';
+      
+      const prevButton = document.createElement('button');
+      prevButton.className = 'slider-prev';
+      prevButton.innerHTML = '<span aria-hidden="true">&#8592;</span><span class="sr-only">Previous</span>';
+      prevButton.setAttribute('aria-label', 'Previous slide');
+      
+      const nextButton = document.createElement('button');
+      nextButton.className = 'slider-next';
+      nextButton.innerHTML = '<span aria-hidden="true">&#8594;</span><span class="sr-only">Next</span>';
+      nextButton.setAttribute('aria-label', 'Next slide');
+      
+      const indicators = document.createElement('div');
+      indicators.className = 'slider-indicators';
+      indicators.setAttribute('role', 'tablist');
+      
+      // Create indicators for each slide
+      for (let i = 0; i < totalSlides; i++) {
+        const dot = document.createElement('button');
+        dot.className = 'slider-indicator';
+        dot.setAttribute('role', 'tab');
+        dot.setAttribute('aria-selected', i === 0 ? 'true' : 'false');
+        dot.setAttribute('aria-label', `Slide ${i + 1}`);
+        dot.dataset.index = i;
+        indicators.appendChild(dot);
+      }
+      
+      controlsContainer.appendChild(prevButton);
+      controlsContainer.appendChild(indicators);
+      controlsContainer.appendChild(nextButton);
+      slider.appendChild(controlsContainer);
     }
     
-    let currentSlide = 0;
-    const slideInterval = 5000; // 5 seconds per slide
-    let autoSlideTimer;
+    // Get control elements
+    const prevButton = slider.querySelector('.slider-prev');
+    const nextButton = slider.querySelector('.slider-next');
+    const indicators = slider.querySelectorAll('.slider-indicator');
     
-    // Initialize slider with images
-    function initSlider() {
-        // Create slides
-        slidesData.forEach((slide, index) => {
-            const slideElement = document.createElement('div');
-            slideElement.className = 'slide';
-            slideElement.innerHTML = `
-                <img src="${slide.src}" alt="${slide.alt}">
-                <div class="slide-caption">${slide.caption}</div>
-            `;
-            slider.appendChild(slideElement);
-            
-            // Create dot for this slide
-            const dot = document.createElement('div');
-            dot.className = 'dot';
-            dot.dataset.slideIndex = index;
-            dot.addEventListener('click', () => goToSlide(index));
-            dotsContainer.appendChild(dot);
-        });
+    // Set up state
+    let currentIndex = 0;
+    let isTransitioning = false;
+    let autoplayTimer = null;
+    let touchStartX = 0;
+    let touchEndX = 0;
+    
+    // Set ARIA attributes for accessibility
+    slidesContainer.setAttribute('aria-live', 'polite');
+    slides.forEach((slide, index) => {
+      slide.setAttribute('role', 'tabpanel');
+      slide.setAttribute('aria-hidden', index === 0 ? 'false' : 'true');
+      slide.id = `slide-${slider.id || Math.random().toString(36).substring(2, 9)}-${index}`;
+    });
+    
+    // Initialize the first slide
+    slides[0].classList.add('active');
+    
+    // Lazy load images
+    function lazyLoadImages() {
+      const visibleSlides = [
+        slides[currentIndex],
+        slides[(currentIndex + 1) % totalSlides],
+        slides[(currentIndex - 1 + totalSlides) % totalSlides]
+      ];
+      
+      visibleSlides.forEach(slide => {
+        if (!slide) return;
         
-        // Show first slide
-        updateSlider();
-        
-        // Start auto-slide
-        startAutoSlide();
+        const lazyImage = slide.querySelector('img[data-src]');
+        if (lazyImage) {
+          lazyImage.src = lazyImage.dataset.src;
+          lazyImage.removeAttribute('data-src');
+        }
+      });
     }
     
-    // Update slider state
-    function updateSlider() {
-        // Update slides visibility
-        const slides = document.querySelectorAll('.slide');
-        slides.forEach((slide, index) => {
-            slide.style.display = index === currentSlide ? 'block' : 'none';
-        });
-        
-        // Update dots
-        const dots = document.querySelectorAll('.dot');
-        dots.forEach((dot, index) => {
-            dot.classList.toggle('active', index === currentSlide);
-        });
-        
-        // Update progress bar
-        const progressPercentage = ((currentSlide + 1) / slidesData.length) * 100;
-        progressBar.style.width = `${progressPercentage}%`;
+    // Update slide state
+    function updateSlideState(newIndex) {
+      if (isTransitioning || newIndex === currentIndex) return;
+      
+      isTransitioning = true;
+      
+      // Update slides
+      slides[currentIndex].classList.remove('active');
+      slides[currentIndex].setAttribute('aria-hidden', 'true');
+      
+      slides[newIndex].classList.add('active');
+      slides[newIndex].setAttribute('aria-hidden', 'false');
+      
+      // Update indicators
+      indicators.forEach((indicator, i) => {
+        indicator.setAttribute('aria-selected', i === newIndex ? 'true' : 'false');
+        indicator.classList.toggle('active', i === newIndex);
+      });
+      
+      // Load images for visible and adjacent slides
+      lazyLoadImages();
+      
+      currentIndex = newIndex;
+      
+      // Reset transition lock after animation completes
+      setTimeout(() => {
+        isTransitioning = false;
+      }, 500); // Match this to CSS transition time
     }
     
-    // Go to specific slide
+    // Navigation functions
+    function goToNextSlide() {
+      updateSlideState((currentIndex + 1) % totalSlides);
+    }
+    
+    function goToPrevSlide() {
+      updateSlideState((currentIndex - 1 + totalSlides) % totalSlides);
+    }
+    
     function goToSlide(index) {
-        currentSlide = index;
-        if (currentSlide < 0) currentSlide = slidesData.length - 1;
-        if (currentSlide >= slidesData.length) currentSlide = 0;
-        updateSlider();
-        
-        // Reset auto-slide timer
-        resetAutoSlide();
+      updateSlideState(parseInt(index) % totalSlides);
     }
     
-    // Next slide
-    function nextSlide() {
-        goToSlide(currentSlide + 1);
+    // Set up autoplay if enabled
+    function startAutoplay() {
+      const autoplayDelay = parseInt(slider.dataset.autoplayDelay || 5000);
+      
+      if (slider.dataset.autoplay === 'true' && autoplayDelay > 0) {
+        autoplayTimer = setInterval(goToNextSlide, autoplayDelay);
+      }
     }
     
-    // Previous slide
-    function prevSlide() {
-        goToSlide(currentSlide - 1);
-    }
-    
-    // Auto-slide functionality
-    function startAutoSlide() {
-        autoSlideTimer = setInterval(nextSlide, slideInterval);
-    }
-    
-    function resetAutoSlide() {
-        clearInterval(autoSlideTimer);
-        startAutoSlide();
+    function stopAutoplay() {
+      if (autoplayTimer) {
+        clearInterval(autoplayTimer);
+        autoplayTimer = null;
+      }
     }
     
     // Event listeners
-    prevBtn.addEventListener('click', () => {
-        prevSlide();
+    prevButton.addEventListener('click', (e) => {
+      e.preventDefault();
+      goToPrevSlide();
+      stopAutoplay(); // Stop autoplay when user interacts
     });
     
-    nextBtn.addEventListener('click', () => {
-        nextSlide();
+    nextButton.addEventListener('click', (e) => {
+      e.preventDefault();
+      goToNextSlide();
+      stopAutoplay(); // Stop autoplay when user interacts
     });
     
-    // Handle keyboard navigation
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'ArrowLeft') prevSlide();
-        if (e.key === 'ArrowRight') nextSlide();
+    indicators.forEach(indicator => {
+      indicator.addEventListener('click', (e) => {
+        e.preventDefault();
+        goToSlide(indicator.dataset.index);
+        stopAutoplay(); // Stop autoplay when user interacts
+      });
     });
     
-    // Initialize the slider
-    initSlider();
-});
+    // Keyboard navigation
+    slider.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowLeft') {
+        goToPrevSlide();
+        stopAutoplay();
+      } else if (e.key === 'ArrowRight') {
+        goToNextSlide();
+        stopAutoplay();
+      }
+    });
+    
+    // Touch events for mobile
+    slider.addEventListener('touchstart', (e) => {
+      touchStartX = e.changedTouches[0].screenX;
+    }, { passive: true });
+    
+    slider.addEventListener('touchend', (e) => {
+      touchEndX = e.changedTouches[0].screenX;
+      handleSwipe();
+    }, { passive: true });
+    
+    function handleSwipe() {
+      const threshold = 50;
+      const swipeDistance = touchEndX - touchStartX;
+      
+      if (swipeDistance > threshold) {
+        goToPrevSlide();
+        stopAutoplay();
+      } else if (swipeDistance < -threshold) {
+        goToNextSlide();
+        stopAutoplay();
+      }
+    }
+    
+    // Handle visibility changes to pause autoplay when not visible
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) {
+        stopAutoplay();
+      } else {
+        startAutoplay();
+      }
+    });
+    
+    // Start autoplay
+    startAutoplay();
+    
+    // Preload adjacent images
+    lazyLoadImages();
+    
+    // Mark as initialized
+    slider.dataset.initialized = 'true';
+    
+    // Announce to screen readers
+    const announcer = document.createElement('div');
+    announcer.className = 'sr-only';
+    announcer.setAttribute('aria-live', 'polite');
+    announcer.textContent = `Slider initialized with ${totalSlides} slides. Use arrow keys to navigate.`;
+    slider.appendChild(announcer);
+    
+    // Clear announcement after it's read
+    setTimeout(() => {
+      announcer.textContent = '';
+    }, 3000);
+  });
+}
+
+// Initialize sliders when the document is ready
+document.addEventListener('DOMContentLoaded', initializeSliders);
+
+// Also export for use in other modules
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = { initializeSliders };
+}

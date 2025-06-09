@@ -4,7 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cusumano Home Improvements | Monroe, MI</title>
-    <meta name="description" content="Expert home improvement services in Monroe, MI. Specializing in siding, windows, decks, and dumpster rentals. Call for a free quote!">
+    <meta name="description" content="Expert home improvement services in Monroe, MI. Specializing in siding, windows, decks, and dumpster rentals. Family-owned and trusted for over 20 years.">
+    <meta name="keywords" content="home improvement, Monroe MI, siding installation, window replacement, deck builder, dumpster rental">
+    <meta name="author" content="Cusumano Home Improvements">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="images/logo.png">
     
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -16,28 +21,31 @@
     <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
+    <!-- Banner image that doesn't scroll -->
+    <div class="hero-banner">
+        <!-- Banner image is set as background in CSS -->
+    </div>
+
+    <!-- Header with navigation that will be sticky -->
     <header class="main-header">
-        <div class="header-content">
-            <a href="#" class="logo">Cusumano Home Improvements</a>
-            <nav class="main-nav">
-                <a href="#about">About</a>
-                <a href="#services">Services</a>
-                <a href="#contact" class="nav-contact-btn">Contact</a>
-            </nav>
+        <div class="header-container">
+            <div class="header-content">
+                <a href="#" class="logo">Cusumano Home Improvements</a>
+                <nav class="main-nav">
+                    <a href="#about">About</a>
+                    <a href="#services">Services</a>
+                    <a href="#gallery">Gallery</a>
+                    <a href="#social">Social</a>
+                    <a href="#map">Find Us</a>
+                    <a href="#contact" class="nav-contact-btn">Contact</a>
+                </nav>
+            </div>
         </div>
     </header>
 
-    <div class="hero-banner">
-        <div class="hero-overlay">
-            <h1>Transform Your Home Today</h1>
-            <p>Quality improvements that last a lifetime.</p>
-            <a href="#contact" class="btn-primary">Get a Free Quote</a>
-        </div>
-    </div>
-
     <section id="about" class="container">
         <h2 class="section-title">About Us</h2>
-        <p>For over 50 years, Cusumano Home Improvements has been a family-owned and operated business proudly serving the Monroe, MI area. We are dedicated to providing the best home improvement services in Monroe, MI.</p>
+        <p>We are dedicated to providing the best home improvement services in Monroe, MI.</p>
     </section>
 
     <section id="services" class="container">
@@ -46,22 +54,27 @@
             <div class="service-card">
                 <div class="service-icon">🏠</div>
                 <h3>Siding Installation</h3>
-                <p>Expert siding services to enhance your home's appearance and protection.</p>
+                <p>Expert siding services to enhance your home's appearance and protection. We offer vinyl, fiber cement, and wood siding options to match your style and budget.</p>
             </div>
             <div class="service-card">
                 <div class="service-icon">🪟</div>
                 <h3>Window Replacement</h3>
-                <p>Energy-efficient windows installed by experienced professionals.</p>
+                <p>Energy-efficient windows installed by experienced professionals. Improve your home's comfort, appearance, and energy savings with quality window options.</p>
             </div>
             <div class="service-card">
                 <div class="service-icon">🏗️</div>
                 <h3>Custom Decks</h3>
-                <p>Create the perfect outdoor space with our custom deck building services.</p>
+                <p>Create the perfect outdoor space with our custom deck building services. We build beautiful, durable decks designed to your specifications and lifestyle.</p>
+            </div>
+            <div class="service-card">
+                <div class="service-icon">🗑️</div>
+                <h3>Dumpster Rentals</h3>
+                <p>Convenient dumpster rentals for construction projects, home cleanouts, and more. Various sizes available to meet your specific needs.</p>
             </div>
         </div>
     </section>
 
-    <section id="gallery-slider-section" class="container">
+    <section id="gallery" class="container">
         <h2 class="section-title">Our Work</h2>
         <div class="slider-container">
             <div class="slider">
@@ -78,36 +91,161 @@
         </div>
     </section>
 
+    <!-- OpenStreetMap Section -->
+    <section id="map" class="container">
+        <h2 class="section-title">Find Us</h2>
+        <div class="map-container">
+            <div id="open-map" class="open-map">
+                <!-- OpenStreetMap will be loaded here -->
+                <iframe 
+                    width="100%" 
+                    height="100%" 
+                    frameborder="0" 
+                    scrolling="no" 
+                    marginheight="0" 
+                    marginwidth="0" 
+                    src="https://www.openstreetmap.org/export/embed.html?bbox=-83.39984416961671%2C41.91352888809094%2C-83.38250637054443%2C41.9221459317958&amp;layer=mapnik&amp;marker=41.9165%2C-83.3925" 
+                    style="border: 1px solid #ddd;">
+                </iframe>
+            </div>
+            <div class="map-info">
+                <h3>Serving Monroe County</h3>
+                <p>We provide home improvement services throughout Monroe County and surrounding areas.</p>
+                <p>Based in Monroe, Michigan</p>
+                <div class="map-actions">
+                    <a href="https://www.openstreetmap.org/?mlat=41.9165&mlon=-83.3977#map=13/41.9165/-83.3977" class="btn-secondary" target="_blank" rel="noopener noreferrer">Get Directions</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Facebook Feed Section -->
+    <section id="social" class="container">
+        <h2 class="section-title">Follow Our Work</h2>
+        <div class="facebook-container">
+            <div class="facebook-intro">
+                <h3>Connect With Us on Facebook</h3>
+                <p>Follow our Facebook page to see our latest projects, special offers, and more!</p>
+                <div class="social-actions">
+                    <a href="https://www.facebook.com/cusumanocement/" target="_blank" rel="noopener noreferrer" class="btn-facebook">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M9 8h-3v4h3v12h5v-12h3.642l.358-4h-4v-1.667c0-.955.192-1.333 1.115-1.333h2.885v-5h-3.808c-3.596 0-5.192 1.583-5.192 4.615v3.385z"/>
+                        </svg>
+                        Visit Our Page
+                    </a>
+                </div>
+            </div>
+            <div class="facebook-feed">
+                <!-- Facebook Page Plugin -->
+                <div id="fb-root"></div>
+                <div class="fb-page" 
+                    data-href="https://www.facebook.com/cusumanocement/" 
+                    data-tabs="timeline" 
+                    data-width="500" 
+                    data-height="600" 
+                    data-small-header="false" 
+                    data-adapt-container-width="true" 
+                    data-hide-cover="false" 
+                    data-show-facepile="true">
+                    <blockquote cite="https://www.facebook.com/cusumanocement/" class="fb-xfbml-parse-ignore">
+                        <a href="https://www.facebook.com/cusumanocement/">Cusumano Cement</a>
+                    </blockquote>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <section id="contact" class="container">
         <h2 class="section-title">Contact Us</h2>
-        <p>Get in touch for a free consultation!</p>
-        <a href="#" class="btn-primary btn-hero-pulse" id="open-contact-modal">Request a Quote</a>
+        <div class="contact-wrapper">
+            <div class="contact-content">
+                <p class="contact-intro">Ready to start your home improvement project? Our team is here to help transform your vision into reality.</p>
+                
+                <div class="contact-info">
+                    <div class="contact-method">
+                        <div class="contact-icon">📞</div>
+                        <h3>Call Us</h3>
+                        <a href="tel:7347778158">(734) 777-8158</a>
+                        <p class="contact-desc">For quick questions and immediate assistance</p>
+                    </div>
+                    <div class="contact-method">
+                        <div class="contact-icon">📧</div>
+                        <h3>Email Us</h3>
+                        <a href="mailto:copernan@yahoo.com" class="secure-email">copernan@yahoo.com</a>
+                        <p class="contact-desc">For detailed inquiries and quote requests</p>
+                    </div>
+                    <div class="contact-method">
+                        <div class="contact-icon">🕒</div>
+                        <h3>Business Hours</h3>
+                        <p>Mon-Fri: 8AM-6PM</p>
+                        <p>Sat: 9AM-2PM</p>
+                    </div>
+                </div>
+                
+                <div class="contact-cta">
+                    <h3>Get Your Free Quote Today!</h3>
+                    <div class="contact-buttons">
+                        <a href="#" class="btn-primary btn-hero-pulse" id="open-contact-modal">Request a Quote</a>
+                        <a href="tel:7347778158" class="btn-secondary">Call Now</a>
+                    </div>
+                </div>
+            </div>
+        </div>
     </section>
 
     <footer class="main-footer">
-        <p>&copy; 2025 Cusumano Home Improvements. All rights reserved.</p>
+        <div class="footer-content">
+            <div class="footer-info">
+                <h3>Cusumano Home Improvements</h3>
+                <p>Serving Monroe, MI and surrounding areas</p>
+                <p>Phone: (734) 777-8158</p>
+                <p>Email: copernan@yahoo.com</p>
+            </div>
+            <div class="footer-links">
+                <h3>Site Links</h3>
+                <a href="#about">About</a>
+                <a href="#services">Services</a>
+                <a href="#gallery">Gallery</a>
+                <a href="#social">Social</a>
+                <a href="#map">Find Us</a>
+                <a href="#contact">Contact</a>
+            </div>
+            <div class="footer-social">
+                <h3>Follow Us</h3>
+                <div class="social-icons">
+                    <a href="https://www.facebook.com/cusumanocement/" target="_blank" rel="noopener" aria-label="Facebook">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M9 8h-3v4h3v12h5v-12h3.642l.358-4h-4v-1.667c0-.955.192-1.333 1.115-1.333h2.885v-5h-3.808c-3.596 0-5.192 1.583-5.192 4.615v3.385z"/>
+                        </svg>
+                    </a>
+                </div>
+            </div>
+            <div class="footer-copyright">
+                <p>&copy; 2025 Cusumano Home Improvements. All rights reserved.</p>
+            </div>
+        </div>
     </footer>
 
     <div class="modal-overlay" id="contact-modal">
         <div class="modal-content">
             <button class="modal-close-btn">&times;</button>
             <h2>Contact Us</h2>
-            <form class="contact-form" id="contact-form">
+            <form class="contact-form" id="contact-form" method="post">
                 <div class="form-group">
                     <label for="name">Name</label>
-                    <input type="text" id="name" class="field-element" required>
+                    <input type="text" id="name" name="name" class="field-element" required>
                 </div>
                 <div class="form-group">
                     <label for="email">Email</label>
-                    <input type="email" id="email" class="field-element" required>
+                    <input type="email" id="email" name="email" class="field-element" required>
                 </div>
                 <div class="form-group">
                     <label for="phone">Phone Number</label>
-                    <input type="tel" id="phone" class="field-element">
+                    <input type="tel" id="phone" name="phone" class="field-element">
                 </div>
                 <div class="form-group">
                     <label for="message">Message</label>
-                    <textarea id="message" class="field-element" required></textarea>
+                    <textarea id="message" name="message" class="field-element" required></textarea>
                 </div>
                 <div class="form-actions">
                     <button type="submit" class="btn btn-primary">Send Message</button>
@@ -122,6 +260,9 @@
         <a href="#" title="Admin Login" id="admin-login-btn">🔒</a>
     </div>
 
+    <!-- Facebook SDK -->
+    <script async defer crossorigin="anonymous" src="https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v18.0" nonce="pJrJA0iY"></script>
+    
     <!-- JavaScript Files -->
     <script src="js/main.js"></script>
     <script src="js/slider.js"></script>
