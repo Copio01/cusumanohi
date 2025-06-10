@@ -55,11 +55,11 @@
         .hero-overlay {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(10, 77, 104, 0.5); 
+            background: none; 
             display: flex; flex-direction: column; 
-            justify-content: space-around; 
+            justify-content: flex-start; 
             align-items: center; text-align: center; color: var(--white); 
-            padding: 3rem 1rem; 
+            padding: 3rem 1rem 0 1rem; 
         }
         .hero-overlay h1 { font-size: 3.5rem; margin-bottom: 1rem; color: var(--white); text-shadow: 1px 1px 3px rgba(0,0,0,0.4); }
         .hero-overlay p { font-size: 1.2rem; max-width: 600px; margin: 0 auto 2rem; text-shadow: 1px 1px 3px rgba(0,0,0,0.4); }
@@ -255,10 +255,10 @@
 
     <main>
         <section class="hero-banner">
-            <div class="hero-overlay">
-                <div>
-                    <h1>Transform Your Space</h1>
-                    <p>Quality construction and home improvement services in Monroe, MI</p>
+            <div class="hero-overlay" style="background: none; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: flex-start; align-items: center; text-align: center; color: var(--white); padding: 3rem 1rem 0 1rem;">
+                <div style="margin-top: 2.5rem; margin-bottom: 1.5rem;">
+                    <h1 style="font-size: 3.5rem; margin-bottom: 1rem; color: var(--white); text-shadow: 1px 1px 3px rgba(0,0,0,0.4);">Transform Your Space</h1>
+                    <p style="font-size: 1.2rem; max-width: 600px; margin: 0 auto 2rem; text-shadow: 1px 1px 3px rgba(0,0,0,0.4);">Quality construction and home improvement services in Monroe, MI</p>
                 </div>
                 <a href="tel:734-777-8158" class="btn btn-primary">Call For a Free Quote</a>
             </div>
