@@ -169,6 +169,21 @@
                     <div class="upload-message" id="upload-message"></div>
                 </div>
             </div>
+
+            <div class="control-card">
+                <h2>Hero Banner Image</h2>
+                <p>Upload or change the homepage hero banner image. This image appears at the top of the homepage.</p>
+                <div class="upload-area" id="hero-upload-area">
+                    <div class="upload-preview" id="hero-upload-preview"></div>
+                    <p>Click or drag file to this area to upload</p>
+                    <input type="file" id="hero-image-upload-input" accept="image/jpeg, image/png, image/webp" hidden>
+                    <button id="hero-upload-btn" class="btn" style="width: auto; background: var(--primary-color);">Choose Banner Image</button>
+                    <progress id="hero-upload-progress" value="0" max="100" style="display:none;"></progress>
+                    <div class="upload-message" id="hero-upload-message"></div>
+                </div>
+                <div id="current-hero-banner" style="margin-top:1rem; text-align:center;"></div>
+            </div>
+
             <div class="control-card" id="site-editor-card">
                 <h2>Edit Website Text</h2>
                 <form id="site-editor-form" autocomplete="off">
@@ -212,7 +227,7 @@
         // --- Firebase Imports ---
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-auth.js";
-        import { getFirestore, collection, addDoc, deleteDoc, doc, onSnapshot, setDoc } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, deleteDoc, doc, onSnapshot, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-firestore.js";
         import { getStorage, ref, uploadBytesResumable, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-storage.js";
 
         // --- Your Firebase Configuration ---
@@ -246,6 +261,12 @@
         const uploadPreview = document.getElementById('upload-preview');
         const uploadMessage = document.getElementById('upload-message');
         const saveBtn = document.getElementById('save-btn');
+        const heroImageUploadInput = document.getElementById('hero-image-upload-input');
+        const heroUploadBtn = document.getElementById('hero-upload-btn');
+        const heroUploadPreview = document.getElementById('hero-upload-preview');
+        const heroUploadProgress = document.getElementById('hero-upload-progress');
+        const heroUploadMessage = document.getElementById('hero-upload-message');
+        const currentHeroBanner = document.getElementById('current-hero-banner');
 
         // --- Firebase logic ---
         onAuthStateChanged(auth, user => {
@@ -253,6 +274,7 @@
                 loginScreen.style.display = 'none';
                 adminDashboard.style.display = 'flex';
                 setupImageListener();
+                setupHeroBannerListener();
             } else {
                 adminDashboard.style.display = 'none';
                 loginScreen.style.display = 'block';
@@ -271,6 +293,7 @@
             }
         });
         uploadBtn.addEventListener('click', () => imageUploadInput.click());
+        heroUploadBtn.addEventListener('click', () => heroImageUploadInput.click());
 
         togglePasswordBtn.addEventListener('click', () => {
             if (passwordInput.type === 'password') {
@@ -294,6 +317,14 @@
                     card.innerHTML = `<img src="${imgData.url}" alt="Slider Image"><button class="delete-btn" data-id="${doc.id}" data-path="${imgData.path}">&times;</button>`;
                     galleryContainer.appendChild(card);
                 });
+            });
+        }
+
+        function setupHeroBannerListener() {
+            const heroBannerDoc = doc(db, 'siteContent', 'main');
+            onSnapshot(heroBannerDoc, (doc) => {
+                const data = doc.data();
+                currentHeroBanner.innerHTML = data.heroBanner ? `<img src="${data.heroBanner}" alt="Current Hero Banner" style="max-width:100%; border-radius:8px;">` : 'No hero banner set.';
             });
         }
         
@@ -360,6 +391,77 @@
                         uploadMessage.textContent = 'Image uploaded successfully!';
                         uploadMessage.className = 'upload-message success';
                         uploadMessage.style.display = 'block';
+                    });
+                }
+            );
+        });
+
+        // Load current hero banner image from Firestore
+        async function loadHeroBanner() {
+            try {
+                const docRef = doc(db, 'siteContent', 'main');
+                const docSnap = await getDoc(docRef);
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    if (data.heroBannerUrl) {
+                        currentHeroBanner.innerHTML = `<img src="${data.heroBannerUrl}" alt="Current Hero Banner" style="max-width:100%;max-height:180px;border-radius:8px;box-shadow:0 2px 8px rgba(10,77,104,0.10);margin-bottom:0.5rem;">`;
+                    } else {
+                        currentHeroBanner.innerHTML = '<em>No hero banner image set.</em>';
+                    }
+                }
+            } catch (e) {
+                currentHeroBanner.innerHTML = '<em>Error loading hero banner.</em>';
+            }
+        }
+
+        // Initial load
+        loadHeroBanner();
+
+        heroUploadBtn.addEventListener('click', () => heroImageUploadInput.click());
+
+        heroImageUploadInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            heroUploadPreview.innerHTML = '';
+            heroUploadMessage.style.display = 'none';
+            if (!file) return;
+            // Preview
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                heroUploadPreview.innerHTML = `<img src="${evt.target.result}" alt="Preview"><div>${file.name}</div>`;
+            };
+            reader.readAsDataURL(file);
+        });
+
+        heroImageUploadInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            const storagePath = `banner/main-banner_${Date.now()}_${file.name}`;
+            const storageRef = ref(storage, storagePath);
+            const uploadTask = uploadBytesResumable(storageRef, file);
+            heroUploadProgress.style.display = 'block';
+            uploadTask.on('state_changed',
+                (snapshot) => {
+                    const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                    heroUploadProgress.value = progress;
+                },
+                (error) => {
+                    console.error("Upload failed", error);
+                    heroUploadMessage.textContent = 'Upload failed. See console for details.';
+                    heroUploadMessage.className = 'upload-message error';
+                    heroUploadMessage.style.display = 'block';
+                    alert("Upload failed. See console for details.");
+                },
+                () => {
+                    getDownloadURL(uploadTask.snapshot.ref).then(async (downloadURL) => {
+                        // Save URL to Firestore
+                        await setDoc(doc(db, 'siteContent', 'main'), { heroBannerUrl: downloadURL }, { merge: true });
+                        heroUploadProgress.style.display = 'none';
+                        heroImageUploadInput.value = '';
+                        heroUploadPreview.innerHTML = '';
+                        heroUploadMessage.textContent = 'Hero banner image uploaded and set!';
+                        heroUploadMessage.className = 'upload-message success';
+                        heroUploadMessage.style.display = 'block';
+                        loadHeroBanner();
                     });
                 }
             );
