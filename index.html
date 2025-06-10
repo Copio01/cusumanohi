@@ -565,10 +565,16 @@
                     (data.services || []).forEach(service => {
                         const card = document.createElement('article');
                         card.className = 'service-card';
+                        let iconHTML = '';
+                        if (service.icon && service.icon.trim().startsWith('<svg')) {
+                            iconHTML = service.icon;
+                        } else if (service.icon) {
+                            iconHTML = `<svg class="service-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="${service.icon}"></path></svg>`;
+                        } else {
+                            iconHTML = '';
+                        }
                         card.innerHTML = `
-                            <svg class="service-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="${service.icon || ''}"></path>
-                            </svg>
+                            ${iconHTML}
                             <h3>${service.label}</h3>
                             <p>${service.value}</p>
                         `;
