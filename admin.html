@@ -1152,6 +1152,7 @@
             const contactEmail = document.getElementById('contact-email').value;
             const servicesArr = services.map(s => ({ label: s.label, value: s.value, icon: s.icon || '', imageUrl: s.imageUrl || '' }));
             try {
+                // Use merge:true to preserve heroBannerUrl, logoUrl, and any other fields
                 await setDoc(doc(db, 'siteContent', 'main'), {
                     about,
                     services: servicesArr,
@@ -1159,11 +1160,12 @@
                     contactAddress,
                     contactPhone,
                     contactEmail
-                });
+                }, { merge: true });
                 saveBtn.textContent = 'Saved!';
                 setTimeout(() => { saveBtn.textContent = 'Save to Website'; }, 2000);
             } catch (e) {
                 saveBtn.textContent = 'Error!';
+                alert('Failed to save site content. Please check your connection and try again.');
                 setTimeout(() => { saveBtn.textContent = 'Save to Website'; }, 2000);
             }
         });
