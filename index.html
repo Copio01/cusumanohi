@@ -56,9 +56,12 @@
             top: 0; left: 0; width: 100%; height: 100%;
             background: none;
             display: flex; flex-direction: column;
-            justify-content: center; /* Center vertically */
+            justify-content: flex-start; /* Move text higher up */
             align-items: center; text-align: center; color: var(--white);
-            padding: 3rem 1rem 0 1rem;
+            padding: 1.5rem 1rem 0 1rem; /* Reduced top padding to move text higher */
+        }
+        @media (max-width: 768px) {
+            .hero-overlay { padding: 1rem 0.5rem; } /* Also reduce on mobile */
         }
         .hero-title-bg {
             display: inline-block;
@@ -84,15 +87,16 @@
             margin: 0.4em 0 0 0;
             text-shadow: 0 1px 6px rgba(10,77,104,0.18), 0 1px 3px rgba(0,0,0,0.3);
         }
+        @media (max-width: 768px) {
+            .hero-overlay {
+                padding-top: 2.5rem;
+                padding-bottom: 0;
+            }
+        }
         @media (max-width: 600px) {
-            .hero-title-bg {
-                padding: 0.12em 0.35em;
-            }
-            .hero-title-bg h1 {
-                font-size: 2rem;
-            }
-            .hero-title-bg p {
-                font-size: 1rem;
+            .hero-overlay {
+                padding-top: 1.2rem;
+                padding-bottom: 0;
             }
         }
 
@@ -387,6 +391,8 @@
                 <a href="#about">About</a>
                 <a href="#services">Services</a>
                 <a href="#contact">Contact</a>
+                <a href="#socials-section">Socials</a>
+                <a href="#socials-section" id="nav-reviews-link">Reviews</a>
             </nav>
         </div>
     </header>
