@@ -43,7 +43,7 @@
             width: 100%;
             height: 70vh;
             max-height: 750px;
-            background-size: cover !important;
+            background-size: contain !important;
             background-position: center !important;
             background-repeat: no-repeat !important;
             background-color: #eef2f3;
@@ -64,36 +64,49 @@
             position: relative;
             display: inline-block;
             border-radius: 2.5rem;
-            background: rgba(255,255,255,0.3);
+            background: rgba(255,255,255,0.6); /* Increased opacity to 60% */
             backdrop-filter: blur(18px);
             -webkit-backdrop-filter: blur(18px);
             box-shadow: 0 8px 32px rgba(10,77,104,0.10);
-            padding: 2.2rem 2.5rem 1.5rem 2.5rem;
+            padding: 1.2rem 1.5rem 1rem 1.5rem; /* Tightened padding */
             margin-top: 2.5rem;
             margin-bottom: 1.5rem;
             max-width: 95vw;
         }
-        .hero-overlay h1 {
-            font-size: 3.5rem;
-            margin-bottom: 1rem;
-            color: var(--white);
-            text-shadow: 1px 1px 3px rgba(0,0,0,0.4);
-        }
-        .hero-overlay p {
-            font-size: 1.2rem;
-            max-width: 600px;
-            margin: 0 auto 2rem;
-            text-shadow: 1px 1px 3px rgba(0,0,0,0.4);
-        }
         @media (max-width: 600px) {
             .hero-bubble-blur {
-                padding: 1.2rem 0.7rem 1rem 0.7rem;
+                padding: 0.7rem 0.5rem 0.7rem 0.5rem; /* Tighten further on mobile */
             }
             .hero-overlay h1 {
                 font-size: 2rem;
             }
             .hero-overlay p {
                 font-size: 1rem;
+            }
+        }
+
+        /* Call For a Free Quote Button Below Hero Banner */
+        .hero-call-btn-wrapper {
+            display: flex;
+            justify-content: center;
+            margin-top: -1.5rem;
+            margin-bottom: 2.5rem;
+            position: relative;
+            z-index: 20; /* Ensure button stays above hero banner and overlays */
+        }
+        .hero-call-btn-wrapper .btn-primary {
+            box-shadow: 0 4px 18px rgba(10,77,104,0.18);
+            font-size: 1.15rem;
+            padding: 1.1rem 2.2rem;
+        }
+        @media (max-width: 600px) {
+            .hero-call-btn-wrapper {
+                margin-top: -1.2rem;
+                margin-bottom: 1.5rem;
+            }
+            .hero-call-btn-wrapper .btn-primary {
+                font-size: 1rem;
+                padding: 0.9rem 1.2rem;
             }
         }
 
@@ -293,9 +306,11 @@
                     <h1 style="font-size: 3.5rem; margin-bottom: 1rem; color: var(--white); text-shadow: 1px 1px 3px rgba(0,0,0,0.4);">Transform Your Space</h1>
                     <p style="font-size: 1.2rem; max-width: 600px; margin: 0 auto 2rem; text-shadow: 1px 1px 3px rgba(0,0,0,0.4);">Quality construction and home improvement services in Monroe, MI</p>
                 </div>
-                <a href="tel:734-777-8158" class="btn btn-primary">Call For a Free Quote</a>
             </div>
         </section>
+        <div class="hero-call-btn-wrapper">
+            <a href="tel:734-777-8158" class="btn btn-primary">Call For a Free Quote</a>
+        </div>
 
         <section id="gallery-slider-section" class="container">
             <h2 class="section-title">Our Work</h2>
@@ -500,12 +515,12 @@
                     const heroBanner = document.getElementById('hero-banner');
                     if (data.heroBannerUrl) {
                         heroBanner.style.backgroundImage = `url('${data.heroBannerUrl}')`;
-                        heroBanner.style.backgroundSize = 'contain';
+                        heroBanner.style.backgroundSize = 'contain'; // Ensure full image is visible
                         heroBanner.style.backgroundPosition = 'center';
                         heroBanner.style.backgroundRepeat = 'no-repeat';
                     } else {
                         heroBanner.style.backgroundImage = "url('https://firebasestorage.googleapis.com/v0/b/cusumano-website.appspot.com/o/banner%2Fmain-banner.jpg?alt=media')";
-                        heroBanner.style.backgroundSize = 'contain';
+                        heroBanner.style.backgroundSize = 'contain'; // Ensure full image is visible
                         heroBanner.style.backgroundPosition = 'center';
                         heroBanner.style.backgroundRepeat = 'no-repeat';
                     }
