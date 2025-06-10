@@ -218,10 +218,11 @@
         /* Note: .btn-primary in the form already uses var(--accent-color) by default. */
         
         @media (max-width: 900px) {
-            /* ...existing code... */
+            #contact .container { flex-direction: column; }
+            .contact-map-column { margin-top: 2rem; max-width: 100% !important; }
         }
         @media (max-width: 600px) {
-            /* ...existing code... */
+            .contact-map-column { margin-top: 1.5rem; }
         }        @media (max-width: 768px) {
             .header-content { flex-direction: column; }
             .main-nav { margin-top: 1rem; }
@@ -342,13 +343,12 @@
                         </div>
                     </form>
                 </div>
-                
-                <!-- Map section hidden in current version -->
-                <div style="display: none;">
+                <div style="flex:1 1 300px; min-width:280px; max-width:400px; display: block;" class="contact-map-column">
                     <div style="border-radius:12px; overflow:hidden; box-shadow:0 2px 16px rgba(10,77,104,0.10); margin-bottom:1rem;">
                         <iframe title="Monroe Michigan Map" width="100%" height="260" frameborder="0" style="border:0; min-width:220px; min-height:180px;" allowfullscreen loading="lazy"
                             src="https://www.openstreetmap.org/export/embed.html?bbox=-83.442%2C41.887%2C-83.322%2C41.963&amp;layer=mapnik&amp;marker=41.916%2C-83.397"></iframe>
                     </div>
+                    <div style="font-size:0.95rem; color:#e0e0e0; text-align:center;">Monroe, Michigan and surrounding areas highlighted.</div>
                 </div>
             </div>
         </div></section>
