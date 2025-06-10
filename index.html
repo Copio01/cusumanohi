@@ -307,6 +307,19 @@
             display: inline;
         }
 
+        .service-icon-img {
+            display: block;
+            margin: 0 auto 1rem auto;
+            max-width: 64px;
+            max-height: 64px;
+            width: auto;
+            height: auto;
+            object-fit: contain;
+            border-radius: 8px;
+            background: #f7f8fc;
+            box-shadow: 0 1px 4px rgba(10,77,104,0.07);
+        }
+
     </style>
 </head>
 <body>
@@ -567,7 +580,7 @@
                         card.className = 'service-card';
                         let iconHTML = '';
                         if (service.imageUrl) {
-                            iconHTML = `<img src="${service.imageUrl}" alt="${service.label} icon" class="service-icon-img" style="display:block;margin:0 auto 1rem auto;max-width:64px;max-height:64px;width:auto;height:auto;object-fit:contain;" loading="lazy">`;
+                            iconHTML = `<img src="${service.imageUrl}" alt="${service.label} icon" class="service-icon-img" loading="lazy">`;
                         } else if (service.icon && service.icon.trim().startsWith('<svg')) {
                             iconHTML = service.icon;
                         } else if (service.icon && serviceIconSVGs[service.icon]) {
