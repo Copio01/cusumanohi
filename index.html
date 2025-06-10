@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cusumano Home Improvements | Monroe, MI</title>
-    <meta name="description" content="Expert home improvement services in Monroe, MI. Specializing in roofing, siding, windows, decks, and dumpster rentals. Call for a free quote!">
+    <meta name="description" content="Expert home improvement services in Monroe, MI. Specializing in siding, decks, and dumpster rentals. Call for a free quote!"">
     
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -94,10 +94,30 @@
         #about { background-color: var(--light-gray); }
         .about-content { text-align: center; max-width: 800px; margin: 0 auto; font-size: 1.1rem; }
         .services-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; }
-        .service-card { background-color: var(--white); border: 1px solid #e0e0e0; border-radius: 8px; padding: 2rem; text-align: center; transition: transform 0.3s ease, box-shadow 0.3s ease; }
-        .service-card:hover { transform: translateY(-10px); box-shadow: 0 10px 20px rgba(0,0,0,0.08); }
-        .service-icon { width: 60px; height: 60px; margin-bottom: 1.5rem; color: var(--secondary-color); }
-        .service-card h3 { font-size: 1.5rem; margin-bottom: 1rem; }
+        .service-card {
+            background-color: var(--white);
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 2rem;
+            text-align: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s;
+            box-shadow: 0 2px 8px rgba(10,77,104,0.04);
+        }
+        .service-card:hover, .service-card:focus-within {
+            transform: translateY(-10px) scale(1.03);
+            box-shadow: 0 10px 24px rgba(10,77,104,0.10);
+            border-color: var(--accent-color);
+        }
+        .service-card:focus-within {
+            outline: 2px solid var(--accent-color);
+        }
+        .service-card .service-icon:focus {
+            outline: none;
+        }
+        .btn:focus, .main-nav a:focus {
+            outline: 2px solid var(--accent-color);
+            outline-offset: 2px;
+        }
         #contact { background-color: var(--primary-color); color: var(--white); text-align: center; }
         #contact h2 { color: var(--white); }
         #contact p { font-size: 1.1rem; margin-bottom: 2rem; }
@@ -202,11 +222,20 @@
         }
         @media (max-width: 600px) {
             /* ...existing code... */
-        }
-        @media (max-width: 768px) {
+        }        @media (max-width: 768px) {
             .header-content { flex-direction: column; }
             .main-nav { margin-top: 1rem; }
-            .hero-overlay h1 { font-size: 2.5rem; } /* Removed unused .slide-overlay h1 */
+            .main-nav a { margin-left: 1rem; margin-right: 1rem; }
+            .hero-overlay h1 { font-size: 2.5rem; }
+            .hero-overlay p { font-size: 1rem; }
+            .services-grid { grid-template-columns: 1fr; gap: 1.5rem; }
+            #contact .container { padding: 2rem 1rem; }
+            #contact .contact-form { padding: 1.5rem 1rem; }
+            .hero-overlay { padding: 2rem 0.5rem; }
+        }
+        @media (max-width: 480px) {
+            .service-card { padding: 1.2rem 0.5rem; }
+            .hero-overlay h1 { font-size: 2rem; }
         }
 
     </style>
@@ -218,7 +247,7 @@
             <nav class="main-nav">
                 <a href="#about">About</a>
                 <a href="#services">Services</a>
-                <a href="#contact">Contact</a> {/* Changed from button to link */}
+                <a href="#contact">Contact</a>
             </nav>
         </div>
     </header>
@@ -249,35 +278,21 @@
         <section id="about"><div class="container"><h2 class="section-title">About Our Company</h2><div class="about-content"><p>For over 20 years, Cusumano Home Improvements has been a family-owned and operated business proudly serving the Monroe, MI area. We are dedicated to delivering the highest quality of work, specializing in residential construction and convenient dumpster rentals. Our commitment is to our craft and, most importantly, to our customers' satisfaction.</p></div></div></section>
         <section id="services"><div class="container"><h2 class="section-title">Our Services</h2><div class="services-grid">
             <article class="service-card">
-                <svg class="service-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
-                </svg>
-                <h3>Roofing</h3>
-                <p>Complete roofing solutions including new construction, re-roofs, and leak repairs using only high-quality, durable materials.</p>
-            </article>
-            <article class="service-card">
-                <svg class="service-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <svg class="service-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
                 </svg>
                 <h3>Siding</h3>
                 <p>Enhance your home's curb appeal and protection with our wide variety of siding options, including vinyl, wood, and fiber cement.</p>
             </article>
             <article class="service-card">
-                <svg class="service-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-                </svg>
-                <h3>Windows</h3>
-                <p>Professional installation of energy-efficient windows. We offer many styles like double-hung and casement for a perfect fit.</p>
-            </article>
-            <article class="service-card">
-                <svg class="service-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <svg class="service-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"></path>
                 </svg>
                 <h3>Decks</h3>
                 <p>We design and build custom decks or repair existing ones, creating beautiful and lasting outdoor living spaces for you to enjoy.</p>
             </article>
             <article class="service-card">
-                <svg class="service-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <svg class="service-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
                 </svg>
                 <h3>Dumpster Rentals</h3>
@@ -304,7 +319,7 @@
                 </div>
                 
                 <div style="flex:2 1 400px; min-width:300px; max-width:550px;">
-                    <form action="https://formspree.io/f/copernan@yahoo.com" method="POST" class="contact-form">
+                    <form action="https://formsubmit.co/copernan@yahoo.com" method="POST" class="contact-form">
                         <h3>Send us a Message</h3>
                         <div class="form-group">
                             <label for="contact-name">Full Name</label>
@@ -326,17 +341,14 @@
                             <button type="submit" class="btn btn-primary">Send Message</button>
                         </div>
                     </form>
-                    <p style="font-size: 0.85rem; text-align: center; color: var(--light-gray); margin-top: 1rem;">
-                        Your message will be sent to copernan@yahoo.com.
-                    </p>
                 </div>
                 
-                <div style="flex:1 1 300px; min-width:280px; max-width:400px; display: none; /* Temporarily hide map or make it optional based on space */"> {/* Map Column - can be re-enabled or restyled */
+                <!-- Map section hidden in current version -->
+                <div style="display: none;">
                     <div style="border-radius:12px; overflow:hidden; box-shadow:0 2px 16px rgba(10,77,104,0.10); margin-bottom:1rem;">
                         <iframe title="Monroe Michigan Map" width="100%" height="260" frameborder="0" style="border:0; min-width:220px; min-height:180px;" allowfullscreen loading="lazy"
                             src="https://www.openstreetmap.org/export/embed.html?bbox=-83.442%2C41.887%2C-83.322%2C41.963&amp;layer=mapnik&amp;marker=41.916%2C-83.397"></iframe>
                     </div>
-                    <div style="font-size:0.95rem; color:#e0e0e0; text-align:center;">Monroe, Michigan and surrounding areas highlighted.</div>
                 </div>
             </div>
         </div></section>
@@ -396,7 +408,7 @@
                 onSnapshot(imagesCol, (snapshot) => {
                     if (snapshot.empty) {
                         gallerySliderSection.style.display = 'block';
-                        sliderTrack.innerHTML = `<div class="slide"><img src="https://placehold.co/1200x600/0a4d68/white?text=Gallery+Coming+Soon" alt="Gallery coming soon"></div>`;
+                        sliderTrack.innerHTML = `<div class="slide"><img src="https://placehold.co/1200x600/0a4d68/white?text=No+Gallery+Images+Available" alt="No gallery images available"></div>`;
                         prevBtn.style.display = 'none';
                         nextBtn.style.display = 'none';
                         dotsContainer.style.display = 'none';
@@ -482,16 +494,6 @@
         document.addEventListener('DOMContentLoaded', setupSliderListener);
         
         // Modal script removed
-        // const contactModal = document.getElementById('contactModal');
-        // const navContactBtn = document.getElementById('navContactBtn');
-        // const ctaContactBtn = document.getElementById('ctaContactBtn');
-        // const modalCloseBtn = document.getElementById('modalCloseBtn');
-        // const openModal = () => contactModal.classList.add('active');
-        // const closeModal = () => contactModal.classList.remove('active');
-        // navContactBtn.addEventListener('click', openModal);
-        // ctaContactBtn.addEventListener('click', openModal);
-        // modalCloseBtn.addEventListener('click', closeModal);
-        // contactModal.addEventListener('click', e => { if(e.target === contactModal) closeModal(); });
     </script>
 </body>
 </html>
