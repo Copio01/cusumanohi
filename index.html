@@ -566,8 +566,12 @@
                         const card = document.createElement('article');
                         card.className = 'service-card';
                         let iconHTML = '';
-                        if (service.icon && service.icon.trim().startsWith('<svg')) {
+                        if (service.imageUrl) {
+                            iconHTML = `<img src="${service.imageUrl}" alt="${service.label} icon" class="service-icon-img" style="display:block;margin:0 auto 1rem auto;max-width:64px;max-height:64px;width:auto;height:auto;object-fit:contain;" loading="lazy">`;
+                        } else if (service.icon && service.icon.trim().startsWith('<svg')) {
                             iconHTML = service.icon;
+                        } else if (service.icon && serviceIconSVGs[service.icon]) {
+                            iconHTML = serviceIconSVGs[service.icon];
                         } else if (service.icon) {
                             iconHTML = `<svg class="service-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="${service.icon}"></path></svg>`;
                         } else {
@@ -604,6 +608,14 @@
             setupSliderListener();
             loadSiteContent();
         });
+        // --- Static SVG Icon Map (match admin panel) ---
+        const serviceIconSVGs = {
+            home: `<svg class="service-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l9-9 9 9M4 10v10a1 1 0 001 1h3m10-11v10a1 1 0 01-1 1h-3m-4 0h4"/></svg>`,
+            clipboard: `<svg class="service-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false"><rect width="16" height="20" x="4" y="2" rx="2"/><path d="M9 2v4h6V2"/></svg>`,
+            shield: `<svg class="service-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>`,
+            truck: `<svg class="service-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false"><rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8h3l4 4v4a2 2 0 01-2 2h-1"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>`,
+            // ...add more icons as needed...
+        };
     </script>
 </body>
 </html>
