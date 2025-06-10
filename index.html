@@ -43,7 +43,7 @@
             width: 100%;
             height: 70vh;
             max-height: 750px;
-            background-size: cover !important;
+            background-size: contain !important;
             background-position: center !important;
             background-repeat: no-repeat !important;
             background-color: #eef2f3;
@@ -466,7 +466,7 @@
                     const heroBanner = document.getElementById('hero-banner');
                     if (data.heroBannerUrl) {
                         heroBanner.style.backgroundImage = `url('${data.heroBannerUrl}')`;
-                        heroBanner.style.backgroundSize = 'cover';
+                        heroBanner.style.backgroundSize = 'contain';
                         heroBanner.style.backgroundPosition = 'center';
                         heroBanner.style.backgroundRepeat = 'no-repeat';
                     } else {
