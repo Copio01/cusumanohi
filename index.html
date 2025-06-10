@@ -159,6 +159,11 @@
             text-align: center;
             transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s;
             box-shadow: 0 2px 8px rgba(10,77,104,0.04);
+            min-height: 320px; /* Ensures enough space for icon, title, and text */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
         }
         .service-card:hover, .service-card:focus-within {
             transform: translateY(-10px) scale(1.03);
@@ -310,10 +315,9 @@
         .service-icon-img {
             display: block;
             margin: 0 auto 1rem auto;
-            max-width: 64px;
-            max-height: 64px;
+            height: 64px;
             width: auto;
-            height: auto;
+            max-width: 100%;
             object-fit: contain;
             border-radius: 8px;
             background: #f7f8fc;
