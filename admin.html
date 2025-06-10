@@ -11,121 +11,453 @@
 
     <style>
         :root {
-            --primary-color: #0a4d68; --secondary-color: #088395; --accent-color: #f5a623;
-            --light-bg: #f7f8fc; --dark-gray: #333333; --medium-gray: #6c757d;
-            --white: #ffffff; --danger-color: #e63946; --success-color: #2a9d8f;
-            --font-heading: 'Poppins', sans-serif; --font-body: 'Roboto', sans-serif;
-            --shadow-md: 0 4px 12px rgba(0,0,0,0.1);
+            --primary-color: #0a4d68;
+            --secondary-color: #088395;
+            --accent-color: #f5a623;
+            --light-bg: #f7f8fc;
+            --dark-gray: #222b45;
+            --medium-gray: #6c757d;
+            --white: #ffffff;
+            --danger-color: #e63946;
+            --success-color: #2a9d8f;
+            --glass-bg: rgba(255,255,255,0.75);
+            --glass-blur: 16px;
+            --shadow-md: 0 8px 32px rgba(10,77,104,0.10);
+            --shadow-lg: 0 16px 48px rgba(10,77,104,0.18);
+            --font-heading: 'Poppins', sans-serif;
+            --font-body: 'Roboto', sans-serif;
         }
-        body { margin: 0; font-family: var(--font-body); background: linear-gradient(to top right, #eef2f3, #f7f8fc); display: flex; justify-content: center; align-items: center; min-height: 100vh; }
-        #login-screen { background-color: var(--white); padding: 3rem; border-radius: 12px; box-shadow: var(--shadow-md); width: 100%; max-width: 420px; text-align: center; border: 1px solid #e9ecef; }
-        .login-logo { font-family: var(--font-heading); font-weight: 700; font-size: 1.8rem; color: var(--primary-color); margin-bottom: 0.5rem; }
-        .form-group { margin-bottom: 1.5rem; text-align: left; position: relative; }
-        .form-group label { display: block; margin-bottom: 0.5rem; font-weight: 700; font-size: 0.9rem; }
-        .form-group input { width: 100%; padding: 0.8rem 1rem; border: 1px solid #ced4da; border-radius: 8px; font-size: 1rem; }
-        .btn { display: inline-block; width: 100%; padding: 0.9rem 1.5rem; border-radius: 8px; font-weight: 700; cursor: pointer; border: none; font-size: 1.1rem; font-family: var(--font-heading); background: linear-gradient(45deg, var(--secondary-color), var(--primary-color)); color: var(--white); }
-        #login-error { color: var(--danger-color); background-color: rgba(230, 57, 70, 0.1); margin-top: 1.5rem; padding: 0.8rem; border-radius: 8px; display: none; }
-        #admin-dashboard { width: 100%; height: 100vh; display: none; flex-direction: column; background-color: var(--light-bg); }
-        .admin-header { background-color: var(--white); padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e9ecef; }
-        .admin-header h1 { font-size: 1.5rem; color: var(--primary-color); }
-        .logout-btn { background-color: transparent; color: var(--danger-color); border: 2px solid var(--danger-color); padding: 0.5rem 1rem; border-radius: 8px; cursor: pointer; font-weight: 700; }
-        .admin-main { padding: 2.5rem; flex-grow: 1; overflow-y: auto; }
-        .control-card {
-            background-color: var(--white);
-            padding: 2rem;
+        body {
+            margin: 0;
+            font-family: var(--font-body);
+            background: linear-gradient(135deg, #e0eafc 0%, #cfdef3 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        #login-screen {
+            background: var(--glass-bg);
+            backdrop-filter: blur(var(--glass-blur));
+            box-shadow: var(--shadow-lg);
+            border-radius: 18px;
+            padding: 3rem 2.5rem 2.5rem 2.5rem;
+            max-width: 420px;
+            width: 100%;
+            text-align: center;
+            border: 1.5px solid #e9ecef;
+            animation: fadeIn 0.7s cubic-bezier(.4,0,.2,1);
+        }
+        .login-logo {
+            font-family: var(--font-heading);
+            font-weight: 700;
+            font-size: 2.2rem;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+            letter-spacing: 1px;
+            text-shadow: 0 2px 8px #b2d8f7;
+        }
+        .form-group {
+            margin-bottom: 1.7rem;
+            text-align: left;
+            position: relative;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 700;
+            font-size: 1rem;
+            color: var(--primary-color);
+            letter-spacing: 0.5px;
+        }
+        .form-group input, .form-group textarea {
+            width: 100%;
+            padding: 1rem 1.1rem;
+            border: 1.5px solid #d1e3f8;
+            border-radius: 10px;
+            font-size: 1.08rem;
+            background: rgba(255,255,255,0.95);
+            box-shadow: 0 2px 8px rgba(10,77,104,0.04);
+            transition: border 0.2s, box-shadow 0.2s;
+        }
+        .form-group input:focus, .form-group textarea:focus {
+            border: 1.5px solid var(--secondary-color);
+            outline: none;
+            box-shadow: 0 4px 16px rgba(10,77,104,0.10);
+        }
+        .btn {
+            display: inline-block;
+            padding: 1rem 2.2rem;
             border-radius: 12px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-            border: 1px solid #e9ecef;
+            font-weight: 700;
+            cursor: pointer;
+            border: none;
+            font-size: 1.13rem;
+            font-family: var(--font-heading);
+            background: linear-gradient(90deg, var(--secondary-color) 0%, var(--primary-color) 100%);
+            color: var(--white);
+            box-shadow: 0 2px 8px rgba(10,77,104,0.10);
+            transition: box-shadow 0.2s, background 0.2s, color 0.2s, transform 0.1s;
+            margin-bottom: 0.2rem;
+        }
+        .btn:hover, .btn:focus {
+            background: linear-gradient(90deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            box-shadow: 0 6px 24px rgba(10,77,104,0.13);
+            filter: brightness(1.07);
+            transform: translateY(-2px) scale(1.03);
+        }
+        .logout-btn {
+            background: transparent;
+            color: var(--danger-color);
+            border: 2px solid var(--danger-color);
+            padding: 0.6rem 1.2rem;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 1.05rem;
+            transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+        }
+        .logout-btn:hover, .logout-btn:focus {
+            background: var(--danger-color);
+            color: var(--white);
+            box-shadow: 0 4px 16px rgba(230,57,70,0.13);
+        }
+        #login-error {
+            color: var(--danger-color);
+            background: rgba(230, 57, 70, 0.13);
+            margin-top: 1.5rem;
+            padding: 0.9rem;
+            border-radius: 10px;
+            display: none;
+            font-weight: 600;
+            letter-spacing: 0.2px;
+        }
+        #admin-dashboard {
+            width: 100vw;
+            min-height: 100vh;
+            display: none;
+            flex-direction: column;
+            background: linear-gradient(120deg, #e0eafc 0%, #f7f8fc 100%);
+            animation: fadeIn 0.7s cubic-bezier(.4,0,.2,1);
+        }
+        .admin-header {
+            background: var(--glass-bg);
+            backdrop-filter: blur(var(--glass-blur));
+            padding: 1.2rem 2.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1.5px solid #e9ecef;
+            box-shadow: 0 2px 12px rgba(10,77,104,0.06);
+        }
+        .admin-header h1 {
+            font-size: 2rem;
+            color: var(--primary-color);
+            font-family: var(--font-heading);
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+        .admin-main {
+            padding: 3.5rem 2.5rem 2.5rem 2.5rem;
+            flex-grow: 1;
+            overflow-y: auto;
+            background: none;
+        }
+        .control-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(var(--glass-blur));
+            padding: 2.5rem 2rem;
+            border-radius: 18px;
+            box-shadow: var(--shadow-md);
+            border: 1.5px solid #e9ecef;
+            margin-bottom: 2.5rem;
             transition: box-shadow 0.2s, transform 0.2s;
+            animation: fadeInUp 0.7s cubic-bezier(.4,0,.2,1);
         }
         .control-card:hover, .control-card:focus-within {
-            box-shadow: 0 8px 32px rgba(10,77,104,0.10);
-            transform: translateY(-4px) scale(1.01);
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-4px) scale(1.012);
         }
-        .btn:focus, .logout-btn:focus, .toggle-password:focus {
-            outline: 2px solid var(--accent-color);
-            outline-offset: 2px;
-        }
-        .btn, .logout-btn {
-            transition: box-shadow 0.2s, background 0.2s, color 0.2s;
-        }
-        .btn:hover, .logout-btn:hover {
-            box-shadow: 0 4px 16px rgba(10,77,104,0.12);
-            filter: brightness(1.05);
+        .form-actions {
+            display: flex;
+            gap: 1.2rem;
+            flex-wrap: wrap;
+            margin-top: 2.2rem;
         }
         .upload-area {
-            border: 2px dashed var(--secondary-color);
-            background-color: #f0f6fa;
-            transition: border-color 0.2s, background 0.2s;
+            border: 2.5px dashed var(--secondary-color);
+            background: rgba(240,246,250,0.85);
+            border-radius: 12px;
+            padding: 2.2rem 1.2rem;
+            text-align: center;
+            transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+            box-shadow: 0 2px 8px rgba(10,77,104,0.04);
+            margin-bottom: 0.5rem;
+            position: relative;
         }
         .upload-area:focus-within, .upload-area:hover {
             border-color: var(--accent-color);
             background: #f7f8fc;
+            box-shadow: 0 4px 16px rgba(245,166,35,0.08);
+        }
+        .upload-preview {
+            margin-bottom: 1.1rem;
+            text-align: center;
+        }
+        .upload-preview img {
+            max-width: 120px;
+            max-height: 120px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(10,77,104,0.10);
+            margin-bottom: 0.5rem;
+            background: #fff;
+        }
+        .upload-message {
+            margin-top: 1rem;
+            font-size: 1.05rem;
+            border-radius: 10px;
+            padding: 0.7rem 1.1rem;
+            display: none;
+            font-weight: 600;
         }
         .upload-message.success {
-            border: 1px solid var(--success-color);
-            background: rgba(42,157,143,0.18);
+            background: rgba(42,157,143,0.12);
+            color: var(--success-color);
+            border: 1.5px solid var(--success-color);
         }
         .upload-message.error {
-            border: 1px solid var(--danger-color);
-            background: rgba(230,57,70,0.18);
+            background: rgba(230,57,70,0.12);
+            color: var(--danger-color);
+            border: 1.5px solid var(--danger-color);
         }
-        @media (max-width: 600px) {
-            .admin-main { padding: 1rem; }
-            .control-card { padding: 1rem; }
-            .image-gallery { gap: 0.7rem; }
+        .image-gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 1.7rem;
+            margin-bottom: 2rem;
         }
-        .image-gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
-        .img-card { position: relative; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-        .img-card img { width: 100%; height: 150px; object-fit: cover; display: block; }
-        .img-card .delete-btn { position: absolute; top: 8px; right: 8px; background-color: rgba(230, 57, 70, 0.8); color: white; border: none; border-radius: 50%; width: 30px; height: 30px; cursor: pointer; font-size: 1rem; line-height: 30px; text-align: center; }
-        .upload-area { border: 2px dashed #ced4da; border-radius: 8px; padding: 2rem; text-align: center; background-color: #f8f9fa; }
-        #upload-progress { width: 100%; margin-top: 1rem; display: none; }
-        
-        /* Floating Button on Admin Page */
-        .site-return-float { position: fixed; bottom: 20px; right: 20px; z-index: 1001; }
-        .site-return-float a { display: flex; align-items: center; justify-content: center; width: 50px; height: 50px; background-color: var(--secondary-color); color: var(--white); border-radius: 50%; text-decoration: none; box-shadow: 0 4px 12px rgba(0,0,0,0.2); transition: transform 0.2s; }
-        .site-return-float a:hover { transform: scale(1.1); }
-
-        .form-group.password-group { position: relative; }
+        .img-card {
+            position: relative;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 12px rgba(10,77,104,0.10);
+            background: var(--white);
+            transition: box-shadow 0.2s, transform 0.2s;
+        }
+        .img-card img {
+            width: 100%;
+            height: 160px;
+            object-fit: cover;
+            display: block;
+            border-radius: 12px 12px 0 0;
+        }
+        .img-card .delete-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: linear-gradient(135deg, var(--danger-color), #ffb3b3);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 34px;
+            height: 34px;
+            cursor: pointer;
+            font-size: 1.2rem;
+            line-height: 34px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(230,57,70,0.13);
+            transition: background 0.2s, transform 0.1s;
+        }
+        .img-card .delete-btn:hover {
+            background: var(--danger-color);
+            transform: scale(1.08);
+        }
+        .image-count {
+            font-size: 1.08rem;
+            color: var(--medium-gray);
+            margin-bottom: 1rem;
+            text-align: right;
+            font-weight: 600;
+        }
+        .service-group {
+            background: rgba(255,255,255,0.85);
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(10,77,104,0.04);
+            padding: 1.2rem 1rem 1.2rem 1.2rem;
+            margin-bottom: 1.2rem;
+            border: 1.5px solid #e9ecef;
+            transition: box-shadow 0.2s, border 0.2s;
+        }
+        .service-group:hover, .service-group:focus-within {
+            box-shadow: 0 4px 16px rgba(10,77,104,0.10);
+            border: 1.5px solid var(--secondary-color);
+        }
+        .service-group label {
+            color: var(--primary-color);
+            font-size: 1.05rem;
+        }
+        .service-upload-area {
+            background: rgba(240,246,250,0.92);
+            border: 2px dashed var(--secondary-color);
+            border-radius: 10px;
+            padding: 1.1rem 0.7rem;
+            min-width: 160px;
+            max-width: 200px;
+            margin-left: 0.5rem;
+            margin-top: 0.2rem;
+        }
+        .service-upload-btn {
+            background: linear-gradient(90deg, var(--secondary-color) 0%, var(--primary-color) 100%);
+            color: var(--white);
+            border-radius: 8px;
+            font-size: 1rem;
+            padding: 0.6rem 1.2rem;
+            margin-top: 0.3rem;
+            width: 100%;
+        }
+        .service-upload-btn:hover {
+            background: linear-gradient(90deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+        }
+        .move-up, .move-down, .remove-service {
+            background: var(--white);
+            border: 1.5px solid #d1e3f8;
+            color: var(--primary-color);
+            border-radius: 8px;
+            font-size: 1.2rem;
+            padding: 0.3rem 0.7rem;
+            margin-bottom: 0.2rem;
+            cursor: pointer;
+            transition: background 0.2s, color 0.2s, border 0.2s, transform 0.1s;
+        }
+        .move-up:disabled, .move-down:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .move-up:hover:not(:disabled), .move-down:hover:not(:disabled) {
+            background: var(--secondary-color);
+            color: var(--white);
+            border: 1.5px solid var(--secondary-color);
+            transform: scale(1.08);
+        }
+        .remove-service {
+            color: var(--danger-color);
+            border: 1.5px solid var(--danger-color);
+        }
+        .remove-service:hover {
+            background: var(--danger-color);
+            color: var(--white);
+            transform: scale(1.08);
+        }
+        #add-service-btn {
+            background: var(--secondary-color);
+            color: var(--white);
+            border-radius: 10px;
+            font-size: 1.3rem;
+            padding: 0.7rem 2rem;
+            margin-top: 0.7rem;
+            width: auto;
+            box-shadow: 0 2px 8px rgba(245,166,35,0.10);
+        }
+        #add-service-btn:hover {
+            background: var(--primary-color);
+        }
         .toggle-password {
             position: absolute;
-            right: 1rem;
+            right: 1.1rem;
             top: 50%;
             transform: translateY(-50%);
             background: none;
             border: none;
             cursor: pointer;
             color: var(--medium-gray);
-            font-size: 1.1rem;
+            font-size: 1.2rem;
             padding: 0;
+            transition: color 0.2s;
         }
-        .image-count {
-            font-size: 1rem;
-            color: var(--medium-gray);
-            margin-bottom: 1rem;
-            text-align: right;
+        .toggle-password:hover {
+            color: var(--primary-color);
         }
-        .upload-preview {
-            margin-bottom: 1rem;
-            text-align: center;
+        #site-preview {
+            background: rgba(255,255,255,0.92);
+            border-radius: 12px;
+            padding: 1.7rem 1.2rem;
+            box-shadow: 0 2px 8px rgba(10,77,104,0.06);
+            font-size: 1.08rem;
+            color: var(--dark-gray);
+            margin-top: 2rem;
+            animation: fadeIn 0.7s cubic-bezier(.4,0,.2,1);
         }
-        .upload-preview img {
-            max-width: 120px;
-            max-height: 120px;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(10,77,104,0.10);
-            margin-bottom: 0.5rem;
+        .site-return-float {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            z-index: 1001;
         }
-        .upload-message {
-            margin-top: 1rem;
-            font-size: 1rem;
-            border-radius: 8px;
-            padding: 0.7rem 1rem;
-            display: none;
+        .site-return-float a {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 56px;
+            height: 56px;
+            background: linear-gradient(135deg, var(--secondary-color), var(--primary-color));
+            color: var(--white);
+            border-radius: 50%;
+            text-decoration: none;
+            box-shadow: 0 4px 16px rgba(10,77,104,0.18);
+            transition: transform 0.2s, box-shadow 0.2s;
+            font-size: 1.5rem;
         }
-        .upload-message.success { background: rgba(42,157,143,0.12); color: var(--success-color); }
-        .upload-message.error { background: rgba(230,57,70,0.12); color: var(--danger-color); }
+        .site-return-float a:hover {
+            transform: scale(1.13);
+            box-shadow: 0 8px 32px rgba(10,77,104,0.22);
+        }
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(24px); }
+            to { opacity: 1; transform: none; }
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(32px); }
+            to { opacity: 1; transform: none; }
+        }
+        /* Responsive Design */
+        @media (max-width: 900px) {
+            .admin-main {
+                padding: 1.2rem 0.5rem;
+            }
+            .control-card {
+                padding: 1.2rem 0.7rem;
+            }
+        }
+        @media (max-width: 600px) {
+            #login-screen {
+                padding: 1.2rem 0.5rem;
+            }
+            .admin-header {
+                padding: 0.7rem 0.7rem;
+            }
+            .admin-header h1 {
+                font-size: 1.3rem;
+            }
+            .admin-main {
+                padding: 0.5rem 0.1rem;
+            }
+            .control-card {
+                padding: 0.7rem 0.3rem;
+            }
+            .image-gallery {
+                gap: 0.7rem;
+            }
+            .service-group {
+                flex-direction: column;
+                padding: 0.7rem 0.3rem;
+            }
+            .service-upload-area {
+                min-width: 100px;
+                max-width: 100%;
+                margin-left: 0;
+            }
+        }
     </style>
 </head>
 <body>
@@ -571,24 +903,71 @@
             const el = document.getElementById(id);
             if (el) el.closest('.form-group').remove();
         });
-        // Insert dynamic service fields
+        // Insert dynamic service fields (FIX: ensure it is appended to the form if not present)
         const insertAfter = document.getElementById('about-text').closest('.form-group');
-        insertAfter.parentNode.insertBefore(servicesContainer, insertAfter.nextSibling);
+        if (!document.getElementById('services-fields')) {
+            insertAfter.parentNode.insertBefore(servicesContainer, insertAfter.nextSibling);
+        }
         function renderServiceFields() {
             servicesContainer.innerHTML = '';
+            // Icon options: add more relevant icons
+            const iconOptions = [
+                { value: 'siding', label: 'Siding', svg: serviceIconSVGs.siding },
+                { value: 'decks', label: 'Decks', svg: serviceIconSVGs.decks },
+                { value: 'dumpster', label: 'Dumpster', svg: serviceIconSVGs.dumpster },
+                { value: 'roof', label: 'Roof', svg: serviceIconSVGs.roof },
+                { value: 'paint', label: 'Paint', svg: serviceIconSVGs.paint },
+                { value: 'bath', label: 'Bath', svg: serviceIconSVGs.bath },
+                { value: 'kitchen', label: 'Kitchen', svg: serviceIconSVGs.kitchen },
+                { value: 'window', label: 'Window', svg: serviceIconSVGs.window },
+                { value: 'floor', label: 'Flooring', svg: '<svg width="36" height="36" fill="none" stroke="#0a4d68" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/></svg>' },
+                { value: 'garage', label: 'Garage', svg: '<svg width="36" height="36" fill="none" stroke="#0a4d68" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="14" rx="2"/><path d="M7 21V7m10 14V7"/></svg>' },
+                { value: 'door', label: 'Doors', svg: '<svg width="36" height="36" fill="none" stroke="#0a4d68" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="6" y="3" width="12" height="18" rx="2"/><circle cx="9" cy="12" r="1"/></svg>' },
+                { value: 'fence', label: 'Fencing', svg: '<svg width="36" height="36" fill="none" stroke="#0a4d68" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M3 21V3m6 18V3m6 18V3m6 18V3"/><path d="M3 7h18M3 15h18"/></svg>' },
+                { value: 'gutter', label: 'Gutters', svg: '<svg width="36" height="36" fill="none" stroke="#0a4d68" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M3 5h18v2a7 7 0 01-14 0V5z"/></svg>' },
+                { value: 'plumbing', label: 'Plumbing', svg: '<svg width="36" height="36" fill="none" stroke="#0a4d68" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M12 3v18M5 12h14"/></svg>' },
+                { value: 'electric', label: 'Electrical', svg: '<svg width="36" height="36" fill="none" stroke="#0a4d68" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polygon points="13 2 2 22 22 22 11 2"/></svg>' },
+                { value: 'hvac', label: 'HVAC', svg: '<svg width="36" height="36" fill="none" stroke="#0a4d68" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 2v20M2 12h20"/></svg>' },
+                { value: 'tree', label: 'Tree Service', svg: '<svg width="36" height="36" fill="none" stroke="#0a4d68" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="12" cy="8" r="6"/><rect x="10" y="14" width="4" height="7" rx="1"/></svg>' },
+                { value: 'custom', label: 'Custom', svg: serviceIconSVGs.custom }
+            ];
             services.forEach((service, idx) => {
                 const group = document.createElement('div');
                 group.className = 'form-group service-group';
                 group.style.display = 'flex';
-                group.style.alignItems = 'center';
+                group.style.alignItems = 'flex-start';
                 group.style.gap = '0.5rem';
                 group.innerHTML = `
-                    <label for="service-${service.id}" style="flex:0 0 140px;">${service.label} Description</label>
-                    <textarea id="service-${service.id}" rows="2" class="field-element" style="flex:1;">${service.value}</textarea>
-                    <div style="display:flex; flex-direction:column; gap:0.2rem;">
+                    <div style="flex:1;min-width:0;">
+                        <label for="service-${service.id}" style="flex:0 0 140px;">${service.label} Description</label>
+                        <textarea id="service-${service.id}" rows="2" class="field-element" style="width:100%;">${service.value}</textarea>
+                    </div>
+                    <div style="display:flex; flex-direction:column; gap:0.2rem; align-items:center;">
                         <button type="button" class="move-up" data-idx="${idx}" ${idx===0?'disabled':''} title="Move Up">⬆️</button>
                         <button type="button" class="move-down" data-idx="${idx}" ${idx===services.length-1?'disabled':''} title="Move Down">⬇️</button>
                         <button type="button" class="remove-service" data-idx="${idx}" title="Remove Service" style="color:#e63946;">➖</button>
+                    </div>
+                    <div style="display:flex; flex-direction:column; align-items:center; gap:0.5rem; min-width:180px; max-width:220px;">
+                        <div style="margin-bottom:0.3rem;width:100%;">
+                            <label for="service-icon-search-${service.id}" style="font-size:0.95rem; color:var(--primary-color);">Icon</label>
+                            <input type="text" id="service-icon-search-${service.id}" placeholder="Search icons..." style="width:100%;margin-bottom:0.3rem;padding:0.3rem 0.5rem;border-radius:6px;border:1px solid #d1e3f8;">
+                            <div class="icon-select-list" id="service-icon-list-${service.id}" style="display:flex;flex-wrap:wrap;gap:0.3rem;max-height:90px;overflow-y:auto;background:#f7f8fc;border-radius:8px;padding:0.3rem 0.2rem 0.2rem 0.2rem;">
+                                ${iconOptions.map(opt => `
+                                    <div class="icon-option" data-value="${opt.value}" title="${opt.label}" style="width:38px;height:38px;display:flex;align-items:center;justify-content:center;border-radius:7px;cursor:pointer;border:2px solid ${service.iconType===opt.value?'var(--primary-color)':'transparent'};background:${service.iconType===opt.value?'#e0eafc':'transparent'};transition:border 0.2s,background 0.2s;">
+                                        ${opt.svg}
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                        <div class="upload-area service-upload-area" style="min-width:160px;max-width:200px;">
+                            <div class="upload-preview" id="service-upload-preview-${service.id}">
+                                ${service.imageUrl ? `<img src="${service.imageUrl}" alt="Service Image" style="max-width:120px;max-height:80px;">` : ''}
+                            </div>
+                            <input type="file" id="service-image-upload-input-${service.id}" accept="image/jpeg, image/png, image/webp, image/svg+xml" hidden>
+                            <button type="button" class="btn service-upload-btn" data-idx="${idx}" style="width:auto;background:var(--secondary-color);margin-top:0.3rem;">Upload Image</button>
+                            <progress id="service-upload-progress-${service.id}" value="0" max="100" style="display:none;"></progress>
+                            <div class="upload-message" id="service-upload-message-${service.id}"></div>
+                        </div>
                     </div>
                 `;
                 servicesContainer.appendChild(group);
@@ -599,6 +978,66 @@
             addBtnGroup.style.textAlign = 'center';
             addBtnGroup.innerHTML = '<button type="button" id="add-service-btn" class="btn" style="width:auto;font-size:1.5rem;">➕ Add Service</button>';
             servicesContainer.appendChild(addBtnGroup);
+
+            // Attach upload listeners for each service
+            services.forEach((service, idx) => {
+                const uploadBtn = document.querySelector(`.service-upload-btn[data-idx='${idx}']`);
+                const uploadInput = document.getElementById(`service-image-upload-input-${service.id}`);
+                const uploadPreview = document.getElementById(`service-upload-preview-${service.id}`);
+                const uploadProgress = document.getElementById(`service-upload-progress-${service.id}`);
+                const uploadMessage = document.getElementById(`service-upload-message-${service.id}`);
+                if (uploadBtn && uploadInput) {
+                    uploadBtn.onclick = () => uploadInput.click();
+                    uploadInput.onchange = (e) => {
+                        const file = e.target.files[0];
+                        uploadPreview.innerHTML = '';
+                        uploadMessage.style.display = 'none';
+                        if (!file) return;
+                        // Preview
+                        const reader = new FileReader();
+                        reader.onload = function(evt) {
+                            uploadPreview.innerHTML = `<img src="${evt.target.result}" alt="Preview" style="max-width:120px;max-height:80px;"><div>${file.name}</div>`;
+                        };
+                        reader.readAsDataURL(file);
+                        // Upload
+                        const storagePath = `serviceImages/${service.id}_${Date.now()}_${file.name}`;
+                        const storageRef = ref(storage, storagePath);
+                        const uploadTask = uploadBytesResumable(storageRef, file);
+                        uploadProgress.style.display = 'block';
+                        uploadTask.on('state_changed',
+                            (snapshot) => {
+                                const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                                uploadProgress.value = progress;
+                            },
+                            (error) => {
+                                uploadMessage.textContent = 'Upload failed. See console for details.';
+                                uploadMessage.className = 'upload-message error';
+                                uploadMessage.style.display = 'block';
+                            },
+                            () => {
+                                getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+                                    service.imageUrl = downloadURL;
+                                    uploadProgress.style.display = 'none';
+                                    uploadInput.value = '';
+                                    uploadPreview.innerHTML = `<img src="${downloadURL}" alt="Service Image" style="max-width:120px;max-height:80px;">`;
+                                    uploadMessage.textContent = 'Image uploaded!';
+                                    uploadMessage.className = 'upload-message success';
+                                    uploadMessage.style.display = 'block';
+                                });
+                            }
+                        );
+                    };
+                }
+                // Icon select logic
+                const iconSelect = document.getElementById(`service-icon-select-${service.id}`);
+                if (iconSelect) {
+                    iconSelect.value = service.iconType || service.id;
+                    iconSelect.onchange = (e) => {
+                        service.iconType = e.target.value;
+                        renderPreview();
+                    };
+                }
+            });
         }
         // Initial values (should match your current site)
         aboutText.value = "For over 20 years, Cusumano Home Improvements has been a family-owned and operated business proudly serving the Monroe, MI area. We are dedicated to delivering the highest quality of work, specializing in residential construction and convenient dumpster rentals. Our commitment is to our craft and, most importantly, to our customers' satisfaction.";
@@ -668,18 +1107,24 @@
         });
         function renderPreview() {
             sitePreview.innerHTML = `
-                <h3>About</h3>
+                <h2 style="font-family:var(--font-heading);color:var(--primary-color);font-size:1.5rem;">About</h2>
                 <p>${aboutText.value}</p>
-                <h3>Services</h3>
-                <ul>
-                    ${services.map(s => `<li><strong>${s.label}:</strong> ${s.value}</li>`).join('')}
-                </ul>
-                <h3>Contact Info</h3>
-                <ul>
-                    <li><strong>Address:</strong> ${contactAddress.value}</li>
-                    <li><strong>Phone:</strong> ${contactPhone.value}</li>
-                    <li><strong>Email:</strong> ${contactEmail.value}</li>
-                </ul>
+                <h2 style="font-family:var(--font-heading);color:var(--primary-color);font-size:1.5rem;">Services</h2>
+                <div style="display:flex;flex-wrap:wrap;gap:2rem;">
+                    ${services.map(service => `
+                        <div style="background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(10,77,104,0.06);padding:1.2rem;min-width:220px;max-width:320px;flex:1;display:flex;flex-direction:column;align-items:center;">
+                            <div style="margin-bottom:0.7rem;">
+                                ${service.imageUrl ? `<img src="${service.imageUrl}" alt="Service Image" style="max-width:80px;max-height:60px;display:block;margin:0 auto 0.5rem auto;">` : serviceIconSVGs[service.iconType||service.id]}
+                            </div>
+                            <div style="font-weight:700;font-size:1.1rem;color:var(--primary-color);margin-bottom:0.3rem;">${service.label}</div>
+                            <div style="font-size:1rem;color:var(--dark-gray);">${service.textarea ? service.textarea.value : service.value}</div>
+                        </div>
+                    `).join('')}
+                </div>
+                <h2 style="font-family:var(--font-heading);color:var(--primary-color);font-size:1.5rem;margin-top:2rem;">Contact</h2>
+                <div><strong>Address:</strong> ${contactAddress.value}</div>
+                <div><strong>Phone:</strong> ${contactPhone.value}</div>
+                <div><strong>Email:</strong> ${contactEmail.value}</div>
             `;
         }
         // Initial preview
@@ -705,7 +1150,7 @@
             const contactAddress = document.getElementById('contact-address').value;
             const contactPhone = document.getElementById('contact-phone').value;
             const contactEmail = document.getElementById('contact-email').value;
-            const servicesArr = services.map(s => ({ label: s.label, value: s.value, icon: s.icon }));
+            const servicesArr = services.map(s => ({ label: s.label, value: s.value, icon: s.icon, imageUrl: s.imageUrl || '' }));
             try {
                 await setDoc(doc(db, 'siteContent', 'main'), {
                     about,
@@ -722,6 +1167,48 @@
                 setTimeout(() => { saveBtn.textContent = 'Save to Website'; }, 2000);
             }
         });
+
+        // When loading from Firestore, also load imageUrl for each service
+        async function loadSiteContentFromFirestore() {
+            try {
+                const docRef = doc(db, 'siteContent', 'main');
+                const docSnap = await getDoc(docRef);
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    if (Array.isArray(data.services)) {
+                        services = data.services.map(s => ({
+                            ...s,
+                            textarea: null,
+                            imageUrl: s.imageUrl || ''
+                        }));
+                    }
+                    aboutText.value = data.about || '';
+                    contactAddress.value = data.contactAddress || '';
+                    contactPhone.value = data.contactPhone || '';
+                    contactEmail.value = data.contactEmail || '';
+                    renderServiceFields();
+                    updateServiceRefsAndListeners();
+                    renderPreview();
+                }
+            } catch (e) {
+                // fallback: do nothing
+            }
+        }
+
+        // On page load, call loadSiteContentFromFirestore instead of just renderServiceFields
+        loadSiteContentFromFirestore();
+        // SVG icon map for preview and homepage rendering
+        const serviceIconSVGs = {
+            siding: `<svg width="36" height="36" fill="none" stroke="#0a4d68" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="6" rx="1.5"/><rect x="3" y="9" width="18" height="6" rx="1.5"/><rect x="3" y="15" width="18" height="6" rx="1.5"/></svg>`,
+            decks: `<svg width="36" height="36" fill="none" stroke="#0a4d68" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="2" y="10" width="20" height="8" rx="2"/><path d="M6 18v2M10 18v2M14 18v2M18 18v2"/></svg>`,
+            dumpster: `<svg width="36" height="36" fill="none" stroke="#0a4d68" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="10" rx="2"/><path d="M7 17v2M17 17v2"/></svg>`,
+            roof: `<svg width="36" height="36" fill="none" stroke="#0a4d68" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M3 12L12 3l9 9"/><path d="M9 21V9h6v12"/></svg>`,
+            paint: `<svg width="36" height="36" fill="none" stroke="#0a4d68" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="6" rx="1.5"/><path d="M9 9v12a3 3 0 006 0V9"/></svg>`,
+            bath: `<svg width="36" height="36" fill="none" stroke="#0a4d68" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="3" y="10" width="18" height="7" rx="2"/><path d="M7 17v2M17 17v2"/><circle cx="7" cy="7" r="2"/></svg>`,
+            kitchen: `<svg width="36" height="36" fill="none" stroke="#0a4d68" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="10" rx="2"/><path d="M7 17v2M17 17v2"/><rect x="7" y="10" width="4" height="4" rx="1"/></svg>`,
+            window: `<svg width="36" height="36" fill="none" stroke="#0a4d68" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 12h18M12 3v18"/></svg>`,
+            custom: `<svg width="36" height="36" fill="none" stroke="#0a4d68" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M8 12h8"/></svg>`
+        };
     </script>
 </body>
 </html>
