@@ -43,7 +43,7 @@
             width: 100%;
             height: 70vh;
             max-height: 750px;
-            background-size: contain !important;
+            background-size: cover !important;
             background-position: center !important;
             background-repeat: no-repeat !important;
             background-color: #eef2f3;
@@ -54,14 +54,48 @@
         .hero-overlay {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: none; 
-            display: flex; flex-direction: column; 
-            justify-content: flex-start; 
-            align-items: center; text-align: center; color: var(--white); 
-            padding: 3rem 1rem 0 1rem; 
+            background: none;
+            display: flex; flex-direction: column;
+            justify-content: flex-start;
+            align-items: center; text-align: center; color: var(--white);
+            padding: 3rem 1rem 0 1rem;
         }
-        .hero-overlay h1 { font-size: 3.5rem; margin-bottom: 1rem; color: var(--white); text-shadow: 1px 1px 3px rgba(0,0,0,0.4); }
-        .hero-overlay p { font-size: 1.2rem; max-width: 600px; margin: 0 auto 2rem; text-shadow: 1px 1px 3px rgba(0,0,0,0.4); }
+        .hero-bubble-blur {
+            position: relative;
+            display: inline-block;
+            border-radius: 2.5rem;
+            background: rgba(255,255,255,0.3);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            box-shadow: 0 8px 32px rgba(10,77,104,0.10);
+            padding: 2.2rem 2.5rem 1.5rem 2.5rem;
+            margin-top: 2.5rem;
+            margin-bottom: 1.5rem;
+            max-width: 95vw;
+        }
+        .hero-overlay h1 {
+            font-size: 3.5rem;
+            margin-bottom: 1rem;
+            color: var(--white);
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.4);
+        }
+        .hero-overlay p {
+            font-size: 1.2rem;
+            max-width: 600px;
+            margin: 0 auto 2rem;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.4);
+        }
+        @media (max-width: 600px) {
+            .hero-bubble-blur {
+                padding: 1.2rem 0.7rem 1rem 0.7rem;
+            }
+            .hero-overlay h1 {
+                font-size: 2rem;
+            }
+            .hero-overlay p {
+                font-size: 1rem;
+            }
+        }
 
         /* Image Slider Section */
         #gallery-slider-section {
@@ -255,7 +289,7 @@
     <main>
         <section class="hero-banner" id="hero-banner">
             <div class="hero-overlay" style="background: none; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: flex-start; align-items: center; text-align: center; color: var(--white); padding: 3rem 1rem 0 1rem;">
-                <div style="margin-top: 2.5rem; margin-bottom: 1.5rem;">
+                <div class="hero-bubble-blur">
                     <h1 style="font-size: 3.5rem; margin-bottom: 1rem; color: var(--white); text-shadow: 1px 1px 3px rgba(0,0,0,0.4);">Transform Your Space</h1>
                     <p style="font-size: 1.2rem; max-width: 600px; margin: 0 auto 2rem; text-shadow: 1px 1px 3px rgba(0,0,0,0.4);">Quality construction and home improvement services in Monroe, MI</p>
                 </div>
