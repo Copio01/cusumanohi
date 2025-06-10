@@ -176,17 +176,8 @@
                         <label for="about-text">About Section</label>
                         <textarea id="about-text" rows="4" class="field-element"></textarea>
                     </div>
-                    <div class="form-group">
-                        <label for="services-siding">Siding Description</label>
-                        <textarea id="services-siding" rows="2" class="field-element"></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label for="services-decks">Decks Description</label>
-                        <textarea id="services-decks" rows="2" class="field-element"></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label for="services-dumpster">Dumpster Rentals Description</label>
-                        <textarea id="services-dumpster" rows="2" class="field-element"></textarea>
+                    <div class="form-group" id="services-fields">
+                        <!-- Dynamic service fields will be inserted here -->
                     </div>
                     <div class="form-group">
                         <label for="contact-address">Contact Address</label>
@@ -374,35 +365,102 @@
         // --- End of Firebase logic ---
 
         // --- Website Editor Logic ---
+        // Services as an array for reordering
+        const services = [
+            { id: 'siding', label: 'Siding', value: '', textarea: null },
+            { id: 'decks', label: 'Decks', value: '', textarea: null },
+            { id: 'dumpster', label: 'Dumpster Rentals', value: '', textarea: null }
+        ];
         const aboutText = document.getElementById('about-text');
-        const sidingText = document.getElementById('services-siding');
-        const decksText = document.getElementById('services-decks');
-        const dumpsterText = document.getElementById('services-dumpster');
         const contactAddress = document.getElementById('contact-address');
         const contactPhone = document.getElementById('contact-phone');
         const contactEmail = document.getElementById('contact-email');
         const previewBtn = document.getElementById('preview-btn');
         const downloadBtn = document.getElementById('download-html-btn');
         const sitePreview = document.getElementById('site-preview');
-
+        // Replace static service fields with dynamic ones
+        const servicesContainer = document.createElement('div');
+        servicesContainer.id = 'services-fields';
+        const form = document.getElementById('site-editor-form');
+        // Remove old service fields
+        ['services-siding','services-decks','services-dumpster'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.closest('.form-group').remove();
+        });
+        // Insert dynamic service fields
+        const insertAfter = document.getElementById('about-text').closest('.form-group');
+        insertAfter.parentNode.insertBefore(servicesContainer, insertAfter.nextSibling);
+        function renderServiceFields() {
+            servicesContainer.innerHTML = '';
+            services.forEach((service, idx) => {
+                const group = document.createElement('div');
+                group.className = 'form-group service-group';
+                group.style.display = 'flex';
+                group.style.alignItems = 'center';
+                group.style.gap = '0.5rem';
+                group.innerHTML = `
+                    <label for="service-${service.id}" style="flex:0 0 140px;">${service.label} Description</label>
+                    <textarea id="service-${service.id}" rows="2" class="field-element" style="flex:1;">${service.value}</textarea>
+                    <div style="display:flex; flex-direction:column; gap:0.2rem;">
+                        <button type="button" class="move-up" data-idx="${idx}" ${idx===0?'disabled':''} title="Move Up">⬆️</button>
+                        <button type="button" class="move-down" data-idx="${idx}" ${idx===services.length-1?'disabled':''} title="Move Down">⬇️</button>
+                    </div>
+                `;
+                servicesContainer.appendChild(group);
+            });
+        }
         // Initial values (should match your current site)
         aboutText.value = "For over 20 years, Cusumano Home Improvements has been a family-owned and operated business proudly serving the Monroe, MI area. We are dedicated to delivering the highest quality of work, specializing in residential construction and convenient dumpster rentals. Our commitment is to our craft and, most importantly, to our customers' satisfaction.";
-        sidingText.value = "Enhance your home's curb appeal and protection with our wide variety of siding options, including vinyl, wood, and fiber cement.";
-        decksText.value = "We design and build custom decks or repair existing ones, creating beautiful and lasting outdoor living spaces for you to enjoy.";
-        dumpsterText.value = "Convenient and competitively priced dumpster rentals for your project needs, with various sizes and flexible scheduling.";
+        services[0].value = "Enhance your home's curb appeal and protection with our wide variety of siding options, including vinyl, wood, and fiber cement.";
+        services[1].value = "We design and build custom decks or repair existing ones, creating beautiful and lasting outdoor living spaces for you to enjoy.";
+        services[2].value = "Convenient and competitively priced dumpster rentals for your project needs, with various sizes and flexible scheduling.";
         contactAddress.value = "Monroe, MI";
         contactPhone.value = "734-777-8158";
         contactEmail.value = "copernan@yahoo.com";
-
+        renderServiceFields();
+        // Attach textarea refs and listeners
+        function updateServiceRefsAndListeners() {
+            services.forEach((service, idx) => {
+                service.textarea = document.getElementById(`service-${service.id}`);
+                service.textarea.value = service.value;
+                service.textarea.addEventListener('input', () => {
+                    service.value = service.textarea.value;
+                    renderPreview();
+                });
+            });
+        }
+        updateServiceRefsAndListeners();
+        // Move up/down logic
+        servicesContainer.addEventListener('click', (e) => {
+            if (e.target.classList.contains('move-up')) {
+                const idx = parseInt(e.target.dataset.idx);
+                if (idx > 0) {
+                    [services[idx-1], services[idx]] = [services[idx], services[idx-1]];
+                    renderServiceFields();
+                    updateServiceRefsAndListeners();
+                    renderPreview();
+                }
+            } else if (e.target.classList.contains('move-down')) {
+                const idx = parseInt(e.target.dataset.idx);
+                if (idx < services.length-1) {
+                    [services[idx], services[idx+1]] = [services[idx+1], services[idx]];
+                    renderServiceFields();
+                    updateServiceRefsAndListeners();
+                    renderPreview();
+                }
+            }
+        });
+        // Live preview on all changes
+        [aboutText, contactAddress, contactPhone, contactEmail].forEach(el => {
+            el.addEventListener('input', renderPreview);
+        });
         function renderPreview() {
             sitePreview.innerHTML = `
                 <h3>About</h3>
                 <p>${aboutText.value}</p>
                 <h3>Services</h3>
                 <ul>
-                    <li><strong>Siding:</strong> ${sidingText.value}</li>
-                    <li><strong>Decks:</strong> ${decksText.value}</li>
-                    <li><strong>Dumpster Rentals:</strong> ${dumpsterText.value}</li>
+                    ${services.map(s => `<li><strong>${s.label}:</strong> ${s.value}</li>`).join('')}
                 </ul>
                 <h3>Contact Info</h3>
                 <ul>
@@ -412,11 +470,12 @@
                 </ul>
             `;
         }
+        // Initial preview
+        renderPreview();
         previewBtn.addEventListener('click', renderPreview);
-
         downloadBtn.addEventListener('click', () => {
             // This is a basic HTML snippet for manual replacement
-            const html = `<!-- About Section -->\n<p>${aboutText.value}</p>\n<!-- Services Section -->\n<ul>\n<li><strong>Siding:</strong> ${sidingText.value}</li>\n<li><strong>Decks:</strong> ${decksText.value}</li>\n<li><strong>Dumpster Rentals:</strong> ${dumpsterText.value}</li>\n</ul>\n<!-- Contact Info -->\n<ul>\n<li><strong>Address:</strong> ${contactAddress.value}</li>\n<li><strong>Phone:</strong> ${contactPhone.value}</li>\n<li><strong>Email:</strong> ${contactEmail.value}</li>\n</ul>`;
+            const html = `<!-- About Section -->\n<p>${aboutText.value}</p>\n<!-- Services Section -->\n<ul>\n${services.map(s => `<li><strong>${s.label}:</strong> ${s.value}</li>`).join('\n')}\n</ul>\n<!-- Contact Info -->\n<ul>\n<li><strong>Address:</strong> ${contactAddress.value}</li>\n<li><strong>Phone:</strong> ${contactPhone.value}</li>\n<li><strong>Email:</strong> ${contactEmail.value}</li>\n</ul>`;
             const blob = new Blob([html], {type: 'text/html'});
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
@@ -426,7 +485,7 @@
             a.click();
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
-        }
+        });
     </script>
 </body>
 </html>
