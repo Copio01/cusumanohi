@@ -184,6 +184,20 @@
                 <div id="current-hero-banner" style="margin-top:1rem; text-align:center;"></div>
             </div>
 
+            <div class="control-card">
+                <h2>Logo Image</h2>
+                <p>Upload or change the company logo. This logo will appear on the homepage and admin panel.</p>
+                <div class="upload-area" id="logo-upload-area">
+                    <div class="upload-preview" id="logo-upload-preview"></div>
+                    <p>Click or drag file to this area to upload</p>
+                    <input type="file" id="logo-image-upload-input" accept="image/jpeg, image/png, image/webp, image/svg+xml" hidden>
+                    <button id="logo-upload-btn" class="btn" style="width: auto; background: var(--primary-color);">Choose Logo Image</button>
+                    <progress id="logo-upload-progress" value="0" max="100" style="display:none;"></progress>
+                    <div class="upload-message" id="logo-upload-message"></div>
+                </div>
+                <div id="current-logo-image" style="margin-top:1rem; text-align:center;"></div>
+            </div>
+
             <div class="control-card" id="site-editor-card">
                 <h2>Edit Website Text</h2>
                 <form id="site-editor-form" autocomplete="off">
@@ -267,6 +281,12 @@
         const heroUploadProgress = document.getElementById('hero-upload-progress');
         const heroUploadMessage = document.getElementById('hero-upload-message');
         const currentHeroBanner = document.getElementById('current-hero-banner');
+        const logoImageUploadInput = document.getElementById('logo-image-upload-input');
+        const logoUploadBtn = document.getElementById('logo-upload-btn');
+        const logoUploadPreview = document.getElementById('logo-upload-preview');
+        const logoUploadProgress = document.getElementById('logo-upload-progress');
+        const logoUploadMessage = document.getElementById('logo-upload-message');
+        const currentLogoImage = document.getElementById('current-logo-image');
 
         // --- Firebase logic ---
         onAuthStateChanged(auth, user => {
@@ -275,6 +295,7 @@
                 adminDashboard.style.display = 'flex';
                 setupImageListener();
                 setupHeroBannerListener();
+                setupLogoListener();
             } else {
                 adminDashboard.style.display = 'none';
                 loginScreen.style.display = 'block';
@@ -294,6 +315,7 @@
         });
         uploadBtn.addEventListener('click', () => imageUploadInput.click());
         heroUploadBtn.addEventListener('click', () => heroImageUploadInput.click());
+        logoUploadBtn.addEventListener('click', () => logoImageUploadInput.click());
 
         togglePasswordBtn.addEventListener('click', () => {
             if (passwordInput.type === 'password') {
@@ -325,6 +347,18 @@
             onSnapshot(heroBannerDoc, (doc) => {
                 const data = doc.data();
                 currentHeroBanner.innerHTML = data.heroBanner ? `<img src="${data.heroBanner}" alt="Current Hero Banner" style="max-width:100%; border-radius:8px;">` : 'No hero banner set.';
+            });
+        }
+
+        function setupLogoListener() {
+            const logoDoc = doc(db, 'siteContent', 'main');
+            onSnapshot(logoDoc, (docSnap) => {
+                const data = docSnap.data();
+                if (data && data.logoUrl) {
+                    currentLogoImage.innerHTML = `<img src="${data.logoUrl}" alt="Current Logo" style="max-width:180px;max-height:120px;border-radius:8px;box-shadow:0 2px 8px rgba(10,77,104,0.10);margin-bottom:0.5rem;">`;
+                } else {
+                    currentLogoImage.innerHTML = '<em>No logo image set.</em>';
+                }
             });
         }
         
@@ -466,11 +500,57 @@
                 }
             );
         });
+
+        logoImageUploadInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            logoUploadPreview.innerHTML = '';
+            logoUploadMessage.style.display = 'none';
+            if (!file) return;
+            // Preview
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                logoUploadPreview.innerHTML = `<img src="${evt.target.result}" alt="Preview" style="max-width:120px;max-height:80px;"><div>${file.name}</div>`;
+            };
+            reader.readAsDataURL(file);
+        });
+        logoImageUploadInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            const storagePath = `logo/logo_${Date.now()}_${file.name}`;
+            const storageRef = ref(storage, storagePath);
+            const uploadTask = uploadBytesResumable(storageRef, file);
+            logoUploadProgress.style.display = 'block';
+            uploadTask.on('state_changed',
+                (snapshot) => {
+                    const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                    logoUploadProgress.value = progress;
+                },
+                (error) => {
+                    console.error("Upload failed", error);
+                    logoUploadMessage.textContent = 'Upload failed. See console for details.';
+                    logoUploadMessage.className = 'upload-message error';
+                    logoUploadMessage.style.display = 'block';
+                    alert("Upload failed. See console for details.");
+                },
+                () => {
+                    getDownloadURL(uploadTask.snapshot.ref).then(async (downloadURL) => {
+                        // Save URL to Firestore
+                        await setDoc(doc(db, 'siteContent', 'main'), { logoUrl: downloadURL }, { merge: true });
+                        logoUploadProgress.style.display = 'none';
+                        logoImageUploadInput.value = '';
+                        logoUploadPreview.innerHTML = '';
+                        logoUploadMessage.textContent = 'Logo image uploaded and set!';
+                        logoUploadMessage.className = 'upload-message success';
+                        logoUploadMessage.style.display = 'block';
+                    });
+                }
+            );
+        });
         // --- End of Firebase logic ---
 
         // --- Website Editor Logic ---
         // Services as an array for reordering
-        const services = [
+        let services = [
             { id: 'siding', label: 'Siding', value: '', textarea: null, icon: 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4' },
             { id: 'decks', label: 'Decks', value: '', textarea: null, icon: 'M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4' },
             { id: 'dumpster', label: 'Dumpster Rentals', value: '', textarea: null, icon: 'M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16' }
@@ -508,10 +588,17 @@
                     <div style="display:flex; flex-direction:column; gap:0.2rem;">
                         <button type="button" class="move-up" data-idx="${idx}" ${idx===0?'disabled':''} title="Move Up">⬆️</button>
                         <button type="button" class="move-down" data-idx="${idx}" ${idx===services.length-1?'disabled':''} title="Move Down">⬇️</button>
+                        <button type="button" class="remove-service" data-idx="${idx}" title="Remove Service" style="color:#e63946;">➖</button>
                     </div>
                 `;
                 servicesContainer.appendChild(group);
             });
+            // Add + button at the bottom
+            const addBtnGroup = document.createElement('div');
+            addBtnGroup.className = 'form-group';
+            addBtnGroup.style.textAlign = 'center';
+            addBtnGroup.innerHTML = '<button type="button" id="add-service-btn" class="btn" style="width:auto;font-size:1.5rem;">➕ Add Service</button>';
+            servicesContainer.appendChild(addBtnGroup);
         }
         // Initial values (should match your current site)
         aboutText.value = "For over 20 years, Cusumano Home Improvements has been a family-owned and operated business proudly serving the Monroe, MI area. We are dedicated to delivering the highest quality of work, specializing in residential construction and convenient dumpster rentals. Our commitment is to our craft and, most importantly, to our customers' satisfaction.";
@@ -552,6 +639,27 @@
                     updateServiceRefsAndListeners();
                     renderPreview();
                 }
+            } else if (e.target.classList.contains('remove-service')) {
+                const idx = parseInt(e.target.dataset.idx);
+                if (services.length > 1 && confirm(`Remove service: ${services[idx].label}?`)) {
+                    services.splice(idx, 1);
+                    renderServiceFields();
+                    updateServiceRefsAndListeners();
+                    renderPreview();
+                }
+            } else if (e.target.id === 'add-service-btn') {
+                const label = prompt('Enter new service name:');
+                if (!label) return;
+                if (services.some(s => s.label.toLowerCase() === label.toLowerCase())) {
+                    alert('Service already exists.');
+                    return;
+                }
+                const value = prompt('Enter service description:') || '';
+                const id = label.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+                services.push({ id, label, value, textarea: null, icon: '' });
+                renderServiceFields();
+                updateServiceRefsAndListeners();
+                renderPreview();
             }
         });
         // Live preview on all changes
