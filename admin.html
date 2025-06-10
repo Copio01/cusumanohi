@@ -537,9 +537,6 @@
                         <label for="about-text">About Section</label>
                         <textarea id="about-text" rows="4" class="field-element"></textarea>
                     </div>
-                    <div class="form-group" id="services-fields">
-                        <!-- Dynamic service fields will be inserted here -->
-                    </div>
                     <div class="form-group">
                         <label for="contact-address">Contact Address</label>
                         <input type="text" id="contact-address" class="field-element">
@@ -551,6 +548,9 @@
                     <div class="form-group">
                         <label for="contact-email">Contact Email</label>
                         <input type="email" id="contact-email" class="field-element">
+                    </div>
+                    <div class="form-group" id="services-fields">
+                        <!-- Dynamic service fields will be inserted here -->
                     </div>
                     <div class="form-actions">
                         <button type="button" id="preview-btn" class="btn" style="width:auto; background: var(--primary-color);">Preview</button>
@@ -619,6 +619,40 @@
         const logoUploadProgress = document.getElementById('logo-upload-progress');
         const logoUploadMessage = document.getElementById('logo-upload-message');
         const currentLogoImage = document.getElementById('current-logo-image');
+
+        // --- Feather Icons Integration ---
+        let featherIcons = {};
+        let featherIconNames = [];
+        let featherIconsLoaded = false;
+
+        // Load icons.json dynamically
+        function loadFeatherIcons() {
+            if (featherIconsLoaded) return Promise.resolve(featherIcons);
+            return fetch('icons.json')
+                .then(res => res.json())
+                .then(data => {
+                    featherIcons = data;
+                    featherIconNames = Object.keys(featherIcons);
+                    featherIconsLoaded = true;
+                    return featherIcons;
+                })
+                .catch(() => {
+                    featherIcons = {};
+                    featherIconNames = [];
+                    featherIconsLoaded = false;
+                    return featherIcons;
+                });
+        }
+
+        // Helper: Render SVG from Feather icon name
+        function renderFeatherSVG(iconName, size = 36, color = '#0a4d68') {
+            if (!featherIcons[iconName]) return '';
+            let svg = featherIcons[iconName].svg || featherIcons[iconName];
+            svg = svg.replace(/width="[0-9]+"/, `width=\"${size}\"`)
+                     .replace(/height="[0-9]+"/, `height=\"${size}\"`)
+                     .replace(/stroke=\"[^\"]*\"/, `stroke=\"${color}\"`);
+            return svg;
+        }
 
         // --- Firebase logic ---
         onAuthStateChanged(auth, user => {
@@ -883,9 +917,9 @@
         // --- Website Editor Logic ---
         // Services as an array for reordering
         let services = [
-            { id: 'siding', label: 'Siding', value: '', textarea: null, icon: 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4' },
-            { id: 'decks', label: 'Decks', value: '', textarea: null, icon: 'M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4' },
-            { id: 'dumpster', label: 'Dumpster Rentals', value: '', textarea: null, icon: 'M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16' }
+            { id: 'siding', label: 'Siding', value: '', textarea: null, icon: 'home' },
+            { id: 'decks', label: 'Decks', value: '', textarea: null, icon: 'tool' },
+            { id: 'dumpster', label: 'Dumpster Rentals', value: '', textarea: null, icon: 'truck' }
         ];
         const aboutText = document.getElementById('about-text');
         const contactAddress = document.getElementById('contact-address');
@@ -895,148 +929,138 @@
         const downloadBtn = document.getElementById('download-html-btn');
         const sitePreview = document.getElementById('site-preview');
         // Replace static service fields with dynamic ones
-        const servicesContainer = document.createElement('div');
-        servicesContainer.id = 'services-fields';
+        const servicesContainer = document.getElementById('services-fields');
         const form = document.getElementById('site-editor-form');
         // Remove old service fields
         ['services-siding','services-decks','services-dumpster'].forEach(id => {
             const el = document.getElementById(id);
             if (el) el.closest('.form-group').remove();
         });
-        // Insert dynamic service fields (FIX: ensure it is appended to the form if not present)
-        const insertAfter = document.getElementById('about-text').closest('.form-group');
-        if (!document.getElementById('services-fields')) {
-            insertAfter.parentNode.insertBefore(servicesContainer, insertAfter.nextSibling);
-        }
+        // No need to create or insert servicesContainer, it already exists in the DOM
         function renderServiceFields() {
             servicesContainer.innerHTML = '';
-            // Icon options: add more relevant icons
-            const iconOptions = [
-                { value: 'siding', label: 'Siding', svg: serviceIconSVGs.siding },
-                { value: 'decks', label: 'Decks', svg: serviceIconSVGs.decks },
-                { value: 'dumpster', label: 'Dumpster', svg: serviceIconSVGs.dumpster },
-                { value: 'roof', label: 'Roof', svg: serviceIconSVGs.roof },
-                { value: 'paint', label: 'Paint', svg: serviceIconSVGs.paint },
-                { value: 'bath', label: 'Bath', svg: serviceIconSVGs.bath },
-                { value: 'kitchen', label: 'Kitchen', svg: serviceIconSVGs.kitchen },
-                { value: 'window', label: 'Window', svg: serviceIconSVGs.window },
-                { value: 'floor', label: 'Flooring', svg: '<svg width="36" height="36" fill="none" stroke="#0a4d68" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/></svg>' },
-                { value: 'garage', label: 'Garage', svg: '<svg width="36" height="36" fill="none" stroke="#0a4d68" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="14" rx="2"/><path d="M7 21V7m10 14V7"/></svg>' },
-                { value: 'door', label: 'Doors', svg: '<svg width="36" height="36" fill="none" stroke="#0a4d68" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="6" y="3" width="12" height="18" rx="2"/><circle cx="9" cy="12" r="1"/></svg>' },
-                { value: 'fence', label: 'Fencing', svg: '<svg width="36" height="36" fill="none" stroke="#0a4d68" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M3 21V3m6 18V3m6 18V3m6 18V3"/><path d="M3 7h18M3 15h18"/></svg>' },
-                { value: 'gutter', label: 'Gutters', svg: '<svg width="36" height="36" fill="none" stroke="#0a4d68" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M3 5h18v2a7 7 0 01-14 0V5z"/></svg>' },
-                { value: 'plumbing', label: 'Plumbing', svg: '<svg width="36" height="36" fill="none" stroke="#0a4d68" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M12 3v18M5 12h14"/></svg>' },
-                { value: 'electric', label: 'Electrical', svg: '<svg width="36" height="36" fill="none" stroke="#0a4d68" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polygon points="13 2 2 22 22 22 11 2"/></svg>' },
-                { value: 'hvac', label: 'HVAC', svg: '<svg width="36" height="36" fill="none" stroke="#0a4d68" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 2v20M2 12h20"/></svg>' },
-                { value: 'tree', label: 'Tree Service', svg: '<svg width="36" height="36" fill="none" stroke="#0a4d68" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="12" cy="8" r="6"/><rect x="10" y="14" width="4" height="7" rx="1"/></svg>' },
-                { value: 'custom', label: 'Custom', svg: serviceIconSVGs.custom }
-            ];
-            services.forEach((service, idx) => {
-                const group = document.createElement('div');
-                group.className = 'form-group service-group';
-                group.style.display = 'flex';
-                group.style.alignItems = 'flex-start';
-                group.style.gap = '0.5rem';
-                group.innerHTML = `
-                    <div style="flex:1;min-width:0;">
-                        <label for="service-${service.id}" style="flex:0 0 140px;">${service.label} Description</label>
-                        <textarea id="service-${service.id}" rows="2" class="field-element" style="width:100%;">${service.value}</textarea>
-                    </div>
-                    <div style="display:flex; flex-direction:column; gap:0.2rem; align-items:center;">
-                        <button type="button" class="move-up" data-idx="${idx}" ${idx===0?'disabled':''} title="Move Up">⬆️</button>
-                        <button type="button" class="move-down" data-idx="${idx}" ${idx===services.length-1?'disabled':''} title="Move Down">⬇️</button>
-                        <button type="button" class="remove-service" data-idx="${idx}" title="Remove Service" style="color:#e63946;">➖</button>
-                    </div>
-                    <div style="display:flex; flex-direction:column; align-items:center; gap:0.5rem; min-width:180px; max-width:220px;">
-                        <div style="margin-bottom:0.3rem;width:100%;">
-                            <label for="service-icon-search-${service.id}" style="font-size:0.95rem; color:var(--primary-color);">Icon</label>
-                            <input type="text" id="service-icon-search-${service.id}" placeholder="Search icons..." style="width:100%;margin-bottom:0.3rem;padding:0.3rem 0.5rem;border-radius:6px;border:1px solid #d1e3f8;">
-                            <div class="icon-select-list" id="service-icon-list-${service.id}" style="display:flex;flex-wrap:wrap;gap:0.3rem;max-height:90px;overflow-y:auto;background:#f7f8fc;border-radius:8px;padding:0.3rem 0.2rem 0.2rem 0.2rem;">
-                                ${iconOptions.map(opt => `
-                                    <div class="icon-option" data-value="${opt.value}" title="${opt.label}" style="width:38px;height:38px;display:flex;align-items:center;justify-content:center;border-radius:7px;cursor:pointer;border:2px solid ${service.iconType===opt.value?'var(--primary-color)':'transparent'};background:${service.iconType===opt.value?'#e0eafc':'transparent'};transition:border 0.2s,background 0.2s;">
-                                        ${opt.svg}
-                                    </div>
-                                `).join('')}
+            loadFeatherIcons().then(() => {
+                services.forEach((service, idx) => {
+                    const group = document.createElement('div');
+                    group.className = 'form-group service-group';
+                    group.style.display = 'flex';
+                    group.style.alignItems = 'flex-start';
+                    group.style.gap = '0.5rem';
+                    group.innerHTML = `
+                        <div style=\"flex:1;min-width:0;\">
+                            <label for=\"service-${service.id}\" style=\"flex:0 0 140px;\">${service.label} Description</label>
+                            <textarea id=\"service-${service.id}\" rows=\"2\" class=\"field-element\" style=\"width:100%;\">${service.value}</textarea>
+                        </div>
+                        <div style=\"display:flex; flex-direction:column; gap:0.2rem; align-items:center;\">
+                            <button type=\"button\" class=\"move-up\" data-idx=\"${idx}\" ${idx===0?'disabled':''} title=\"Move Up\">⬆️</button>
+                            <button type=\"button\" class=\"move-down\" data-idx=\"${idx}\" ${idx===services.length-1?'disabled':''} title=\"Move Down\">⬇️</button>
+                            <button type=\"button\" class=\"remove-service\" data-idx=\"${idx}\" title=\"Remove Service\" style=\"color:#e63946;\">➖</button>
+                        </div>
+                        <div style=\"display:flex; flex-direction:column; align-items:center; gap:0.5rem; min-width:180px; max-width:220px;\">
+                            <div style=\"margin-bottom:0.3rem;width:100%;\">
+                                <label for=\"service-icon-search-${service.id}\" style=\"font-size:0.95rem; color:var(--primary-color);\">Icon</label>
+                                <input type=\"text\" id=\"service-icon-search-${service.id}\" placeholder=\"Search icons...\" style=\"width:100%;margin-bottom:0.3rem;padding:0.3rem 0.5rem;border-radius:6px;border:1px solid #d1e3f8;\">
+                                <div class=\"icon-select-list\" id=\"service-icon-list-${service.id}\" style=\"display:flex;flex-wrap:wrap;gap:0.3rem;max-height:90px;overflow-y:auto;background:#f7f8fc;border-radius:8px;padding:0.3rem 0.2rem 0.2rem 0.2rem;\">
+                                    <!-- Icon options will be rendered here -->
+                                </div>
+                            </div>
+                            <div class=\"upload-area service-upload-area\" style=\"min-width:160px;max-width:200px;\">
+                                <div class=\"upload-preview\" id=\"service-upload-preview-${service.id}\">${service.imageUrl ? `<img src=\"${service.imageUrl}\" alt=\"Service Image\" style=\"max-width:120px;max-height:80px;\">` : ''}</div>
+                                <input type=\"file\" id=\"service-image-upload-input-${service.id}\" accept=\"image/jpeg, image/png, image/webp, image/svg+xml\" hidden>
+                                <button type=\"button\" class=\"btn service-upload-btn\" data-idx=\"${idx}\" style=\"width:auto;background:var(--secondary-color);margin-top:0.3rem;\">Upload Image</button>
+                                <progress id=\"service-upload-progress-${service.id}\" value=\"0\" max=\"100\" style=\"display:none;\"></progress>
+                                <div class=\"upload-message\" id=\"service-upload-message-${service.id}\"></div>
                             </div>
                         </div>
-                        <div class="upload-area service-upload-area" style="min-width:160px;max-width:200px;">
-                            <div class="upload-preview" id="service-upload-preview-${service.id}">
-                                ${service.imageUrl ? `<img src="${service.imageUrl}" alt="Service Image" style="max-width:120px;max-height:80px;">` : ''}
-                            </div>
-                            <input type="file" id="service-image-upload-input-${service.id}" accept="image/jpeg, image/png, image/webp, image/svg+xml" hidden>
-                            <button type="button" class="btn service-upload-btn" data-idx="${idx}" style="width:auto;background:var(--secondary-color);margin-top:0.3rem;">Upload Image</button>
-                            <progress id="service-upload-progress-${service.id}" value="0" max="100" style="display:none;"></progress>
-                            <div class="upload-message" id="service-upload-message-${service.id}"></div>
-                        </div>
-                    </div>
-                `;
-                servicesContainer.appendChild(group);
-            });
-            // Add + button at the bottom
-            const addBtnGroup = document.createElement('div');
-            addBtnGroup.className = 'form-group';
-            addBtnGroup.style.textAlign = 'center';
-            addBtnGroup.innerHTML = '<button type="button" id="add-service-btn" class="btn" style="width:auto;font-size:1.5rem;">➕ Add Service</button>';
-            servicesContainer.appendChild(addBtnGroup);
+                    `;
+                    servicesContainer.appendChild(group);
 
-            // Attach upload listeners for each service
-            services.forEach((service, idx) => {
-                const uploadBtn = document.querySelector(`.service-upload-btn[data-idx='${idx}']`);
-                const uploadInput = document.getElementById(`service-image-upload-input-${service.id}`);
-                const uploadPreview = document.getElementById(`service-upload-preview-${service.id}`);
-                const uploadProgress = document.getElementById(`service-upload-progress-${service.id}`);
-                const uploadMessage = document.getElementById(`service-upload-message-${service.id}`);
-                if (uploadBtn && uploadInput) {
-                    uploadBtn.onclick = () => uploadInput.click();
-                    uploadInput.onchange = (e) => {
-                        const file = e.target.files[0];
-                        uploadPreview.innerHTML = '';
-                        uploadMessage.style.display = 'none';
-                        if (!file) return;
-                        // Preview
-                        const reader = new FileReader();
-                        reader.onload = function(evt) {
-                            uploadPreview.innerHTML = `<img src="${evt.target.result}" alt="Preview" style="max-width:120px;max-height:80px;"><div>${file.name}</div>`;
-                        };
-                        reader.readAsDataURL(file);
-                        // Upload
-                        const storagePath = `serviceImages/${service.id}_${Date.now()}_${file.name}`;
-                        const storageRef = ref(storage, storagePath);
-                        const uploadTask = uploadBytesResumable(storageRef, file);
-                        uploadProgress.style.display = 'block';
-                        uploadTask.on('state_changed',
-                            (snapshot) => {
-                                const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-                                uploadProgress.value = progress;
-                            },
-                            (error) => {
-                                uploadMessage.textContent = 'Upload failed. See console for details.';
-                                uploadMessage.className = 'upload-message error';
-                                uploadMessage.style.display = 'block';
-                            },
-                            () => {
-                                getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
-                                    service.imageUrl = downloadURL;
-                                    uploadProgress.style.display = 'none';
-                                    uploadInput.value = '';
-                                    uploadPreview.innerHTML = `<img src="${downloadURL}" alt="Service Image" style="max-width:120px;max-height:80px;">`;
-                                    uploadMessage.textContent = 'Image uploaded!';
-                                    uploadMessage.className = 'upload-message success';
+                    // Render icon options dynamically
+                    const iconList = group.querySelector(`#service-icon-list-${service.id}`);
+                    const searchInput = group.querySelector(`#service-icon-search-${service.id}`);
+                    function renderIconOptions(filter = '') {
+                        let iconNames = Object.keys(featherIcons);
+                        if (filter) {
+                            const f = filter.toLowerCase();
+                            iconNames = iconNames.filter(name => name.includes(f) || (featherIcons[name].tags && featherIcons[name].tags.some(tag => tag.includes(f))));
+                        }
+                        iconList.innerHTML = iconNames.slice(0, 60).map(iconName => `
+                            <div class=\"icon-option\" data-value=\"${iconName}\" title=\"${iconName}\" style=\"width:38px;height:38px;display:flex;align-items:center;justify-content:center;border-radius:7px;cursor:pointer;border:2px solid ${(service.icon===iconName)?'var(--primary-color)':'transparent'};background:${(service.icon===iconName)?'#e0eafc':'transparent'};transition:border 0.2s,background 0.2s;\">
+                                ${renderFeatherSVG(iconName)}
+                            </div>
+                        `).join('');
+                    }
+                    renderIconOptions();
+                    searchInput.addEventListener('input', e => {
+                        renderIconOptions(e.target.value);
+                    });
+                    iconList.addEventListener('click', e => {
+                        const opt = e.target.closest('.icon-option');
+                        if (opt) {
+                            service.icon = opt.dataset.value;
+                            renderServiceFields();
+                            updateServiceRefsAndListeners();
+                            renderPreview();
+                        }
+                    });
+                });
+                // Add + button at the bottom
+                const addBtnGroup = document.createElement('div');
+                addBtnGroup.className = 'form-group';
+                addBtnGroup.style.textAlign = 'center';
+                addBtnGroup.innerHTML = '<button type="button" id="add-service-btn" class="btn" style="width:auto;font-size:1.5rem;">➕ Add Service</button>';
+                servicesContainer.appendChild(addBtnGroup);
+
+                // Attach upload listeners for each service
+                services.forEach((service, idx) => {
+                    const uploadBtn = document.querySelector(`.service-upload-btn[data-idx='${idx}']`);
+                    const uploadInput = document.getElementById(`service-image-upload-input-${service.id}`);
+                    const uploadPreview = document.getElementById(`service-upload-preview-${service.id}`);
+                    const uploadProgress = document.getElementById(`service-upload-progress-${service.id}`);
+                    const uploadMessage = document.getElementById(`service-upload-message-${service.id}`);
+                    if (uploadBtn && uploadInput) {
+                        uploadBtn.onclick = () => uploadInput.click();
+                        uploadInput.onchange = (e) => {
+                            const file = e.target.files[0];
+                            uploadPreview.innerHTML = '';
+                            uploadMessage.style.display = 'none';
+                            if (!file) return;
+                            // Preview
+                            const reader = new FileReader();
+                            reader.onload = function(evt) {
+                                uploadPreview.innerHTML = `<img src="${evt.target.result}" alt="Preview" style="max-width:120px;max-height:80px;"><div>${file.name}</div>`;
+                            };
+                            reader.readAsDataURL(file);
+                            // Upload
+                            const storagePath = `serviceImages/${service.id}_${Date.now()}_${file.name}`;
+                            const storageRef = ref(storage, storagePath);
+                            const uploadTask = uploadBytesResumable(storageRef, file);
+                            uploadProgress.style.display = 'block';
+                            uploadTask.on('state_changed',
+                                (snapshot) => {
+                                    const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                                    uploadProgress.value = progress;
+                                },
+                                (error) => {
+                                    uploadMessage.textContent = 'Upload failed. See console for details.';
+                                    uploadMessage.className = 'upload-message error';
                                     uploadMessage.style.display = 'block';
-                                });
-                            }
-                        );
-                    };
-                }
-                // Icon select logic
-                const iconSelect = document.getElementById(`service-icon-select-${service.id}`);
-                if (iconSelect) {
-                    iconSelect.value = service.iconType || service.id;
-                    iconSelect.onchange = (e) => {
-                        service.iconType = e.target.value;
-                        renderPreview();
-                    };
-                }
+                                },
+                                () => {
+                                    getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+                                        service.imageUrl = downloadURL;
+                                        uploadProgress.style.display = 'none';
+                                        uploadInput.value = '';
+                                        uploadPreview.innerHTML = `<img src="${downloadURL}" alt="Service Image" style="max-width:120px;max-height:80px;">`;
+                                        uploadMessage.textContent = 'Image uploaded!';
+                                        uploadMessage.className = 'upload-message success';
+                                        uploadMessage.style.display = 'block';
+                                    });
+                                }
+                            );
+                        };
+                    }
+                });
             });
         }
         // Initial values (should match your current site)
@@ -1052,11 +1076,15 @@
         function updateServiceRefsAndListeners() {
             services.forEach((service, idx) => {
                 service.textarea = document.getElementById(`service-${service.id}`);
-                service.textarea.value = service.value;
-                service.textarea.addEventListener('input', () => {
-                    service.value = service.textarea.value;
-                    renderPreview();
-                });
+                if (service.textarea) {
+                    service.textarea.value = service.value;
+                    // Remove previous listeners if any (optional, for robustness)
+                    service.textarea.oninput = null;
+                    service.textarea.addEventListener('input', () => {
+                        service.value = service.textarea.value;
+                        renderPreview();
+                    });
+                }
             });
         }
         updateServiceRefsAndListeners();
@@ -1094,7 +1122,13 @@
                     return;
                 }
                 const value = prompt('Enter service description:') || '';
-                const id = label.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+                // Always generate a unique id (slug + timestamp)
+                const baseId = label.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+                let id = baseId;
+                let counter = 1;
+                while (services.some(s => s.id === id)) {
+                    id = `${baseId}-${Date.now()}-${counter++}`;
+                }
                 services.push({ id, label, value, textarea: null, icon: '' });
                 renderServiceFields();
                 updateServiceRefsAndListeners();
@@ -1114,7 +1148,7 @@
                     ${services.map(service => `
                         <div style="background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(10,77,104,0.06);padding:1.2rem;min-width:220px;max-width:320px;flex:1;display:flex;flex-direction:column;align-items:center;">
                             <div style="margin-bottom:0.7rem;">
-                                ${service.imageUrl ? `<img src="${service.imageUrl}" alt="Service Image" style="max-width:80px;max-height:60px;display:block;margin:0 auto 0.5rem auto;">` : serviceIconSVGs[service.iconType||service.id]}
+                                ${service.imageUrl ? `<img src="${service.imageUrl}" alt="Service Image" style="max-width:80px;max-height:60px;display:block;margin:0 auto 0.5rem auto;">` : (service.icon && featherIcons[service.icon] ? renderFeatherSVG(service.icon) : '')}
                             </div>
                             <div style="font-weight:700;font-size:1.1rem;color:var(--primary-color);margin-bottom:0.3rem;">${service.label}</div>
                             <div style="font-size:1rem;color:var(--dark-gray);">${service.textarea ? service.textarea.value : service.value}</div>
@@ -1150,7 +1184,7 @@
             const contactAddress = document.getElementById('contact-address').value;
             const contactPhone = document.getElementById('contact-phone').value;
             const contactEmail = document.getElementById('contact-email').value;
-            const servicesArr = services.map(s => ({ label: s.label, value: s.value, icon: s.icon, imageUrl: s.imageUrl || '' }));
+            const servicesArr = services.map(s => ({ label: s.label, value: s.value, icon: s.icon || '', imageUrl: s.imageUrl || '' }));
             try {
                 await setDoc(doc(db, 'siteContent', 'main'), {
                     about,
@@ -1176,11 +1210,21 @@
                 if (docSnap.exists()) {
                     const data = docSnap.data();
                     if (Array.isArray(data.services)) {
-                        services = data.services.map(s => ({
-                            ...s,
-                            textarea: null,
-                            imageUrl: s.imageUrl || ''
-                        }));
+                        services = data.services.map((s, idx) => {
+                            let id = s.id;
+                            if (!id || typeof id !== 'string' || id === 'undefined') {
+                                // Generate a unique id if missing or invalid
+                                const base = (s.label || 'service').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+                                id = `${base}-${Date.now()}-${idx}`;
+                            }
+                            return {
+                                ...s,
+                                id,
+                                textarea: null,
+                                imageUrl: s.imageUrl || '',
+                                icon: s.icon || ''
+                            };
+                        });
                     }
                     aboutText.value = data.about || '';
                     contactAddress.value = data.contactAddress || '';
@@ -1197,18 +1241,6 @@
 
         // On page load, call loadSiteContentFromFirestore instead of just renderServiceFields
         loadSiteContentFromFirestore();
-        // SVG icon map for preview and homepage rendering
-        const serviceIconSVGs = {
-            siding: `<svg width="36" height="36" fill="none" stroke="#0a4d68" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="6" rx="1.5"/><rect x="3" y="9" width="18" height="6" rx="1.5"/><rect x="3" y="15" width="18" height="6" rx="1.5"/></svg>`,
-            decks: `<svg width="36" height="36" fill="none" stroke="#0a4d68" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="2" y="10" width="20" height="8" rx="2"/><path d="M6 18v2M10 18v2M14 18v2M18 18v2"/></svg>`,
-            dumpster: `<svg width="36" height="36" fill="none" stroke="#0a4d68" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="10" rx="2"/><path d="M7 17v2M17 17v2"/></svg>`,
-            roof: `<svg width="36" height="36" fill="none" stroke="#0a4d68" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M3 12L12 3l9 9"/><path d="M9 21V9h6v12"/></svg>`,
-            paint: `<svg width="36" height="36" fill="none" stroke="#0a4d68" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="6" rx="1.5"/><path d="M9 9v12a3 3 0 006 0V9"/></svg>`,
-            bath: `<svg width="36" height="36" fill="none" stroke="#0a4d68" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="3" y="10" width="18" height="7" rx="2"/><path d="M7 17v2M17 17v2"/><circle cx="7" cy="7" r="2"/></svg>`,
-            kitchen: `<svg width="36" height="36" fill="none" stroke="#0a4d68" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="10" rx="2"/><path d="M7 17v2M17 17v2"/><rect x="7" y="10" width="4" height="4" rx="1"/></svg>`,
-            window: `<svg width="36" height="36" fill="none" stroke="#0a4d68" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 12h18M12 3v18"/></svg>`,
-            custom: `<svg width="36" height="36" fill="none" stroke="#0a4d68" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M8 12h8"/></svg>`
-        };
     </script>
 </body>
 </html>
