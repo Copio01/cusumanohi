@@ -620,39 +620,28 @@
         const logoUploadMessage = document.getElementById('logo-upload-message');
         const currentLogoImage = document.getElementById('current-logo-image');
 
-        // --- Feather Icons Integration ---
-        let featherIcons = {};
-        let featherIconNames = [];
-        let featherIconsLoaded = false;
-
-        // Load icons.json dynamically
-        function loadFeatherIcons() {
-            if (featherIconsLoaded) return Promise.resolve(featherIcons);
-            return fetch('icons.json')
-                .then(res => res.json())
-                .then(data => {
-                    featherIcons = data;
-                    featherIconNames = Object.keys(featherIcons);
-                    featherIconsLoaded = true;
-                    return featherIcons;
-                })
-                .catch(() => {
-                    featherIcons = {};
-                    featherIconNames = [];
-                    featherIconsLoaded = false;
-                    return featherIcons;
-                });
-        }
-
-        // Helper: Render SVG from Feather icon name
-        function renderFeatherSVG(iconName, size = 36, color = '#0a4d68') {
-            if (!featherIcons[iconName]) return '';
-            let svg = featherIcons[iconName].svg || featherIcons[iconName];
-            svg = svg.replace(/width="[0-9]+"/, `width=\"${size}\"`)
-                     .replace(/height="[0-9]+"/, `height=\"${size}\"`)
-                     .replace(/stroke=\"[^\"]*\"/, `stroke=\"${color}\"`);
-            return svg;
-        }
+        // --- Static SVG Icon Picker ---
+        const iconOptions = [
+            { name: 'Home', value: 'home', svg: '<svg width="36" height="36" fill="none" stroke="#0a4d68" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>' },
+            { name: 'Tool', value: 'tool', svg: '<svg width="36" height="36" fill="none" stroke="#0a4d68" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0-1.4 0l-1.3 1.3a1 1 0 0 0 0 1.4l1.3 1.3a1 1 0 0 0 1.4 0l1.3-1.3a1 1 0 0 0 0-1.4l-1.3-1.3z"></path><path d="M19.4 15.4a7 7 0 1 1-9.9-9.9"></path></svg>' },
+            { name: 'Truck', value: 'truck', svg: '<svg width="36" height="36" fill="none" stroke="#0a4d68" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13"></rect><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon><circle cx="5.5" cy="18.5" r="2.5"></circle><circle cx="18.5" cy="18.5" r="2.5"></circle></svg>' },
+            { name: 'Hammer', value: 'hammer', svg: '<svg width="36" height="36" fill="none" stroke="#0a4d68" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M17 3a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2h-2v2h2a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2h-2v2h2a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-2a2 2 0 0 1 2-2h2v-2H7a2 2 0 0 1-2-2v-2a2 2 0 0 1 2-2h2V7H7a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h10z"></path></svg>' },
+            { name: 'Wrench', value: 'wrench', svg: '<svg width="36" height="36" fill="none" stroke="#0a4d68" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M22.7 19.3a1 1 0 0 1-1.4 0l-7.3-7.3a1 1 0 0 1 0-1.4l7.3-7.3a1 1 0 0 1 1.4 1.4l-6.6 6.6 6.6 6.6a1 1 0 0 1 0 1.4z"></path></svg>' },
+            { name: 'Paint', value: 'paint', svg: '<svg width="36" height="36" fill="none" stroke="#0a4d68" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"></rect><path d="M16 3v4"></path><path d="M8 3v4"></path></svg>' },
+            { name: 'Ruler', value: 'ruler', svg: '<svg width="36" height="36" fill="none" stroke="#0a4d68" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"></rect><path d="M16 3v4"></path><path d="M8 3v4"></path></svg>' },
+            { name: 'Saw', value: 'saw', svg: '<svg width="36" height="36" fill="none" stroke="#0a4d68" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M21 16v-2a2 2 0 0 0-2-2h-4V7a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2z"></path></svg>' },
+            { name: 'Clipboard', value: 'clipboard', svg: '<svg width="36" height="36" fill="none" stroke="#0a4d68" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="4" rx="1"></rect><rect x="3" y="6" width="18" height="16" rx="2"></rect></svg>' },
+            { name: 'Check', value: 'check', svg: '<svg width="36" height="36" fill="none" stroke="#0a4d68" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>' },
+            { name: 'Users', value: 'users', svg: '<svg width="36" height="36" fill="none" stroke="#0a4d68" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>' },
+            { name: 'Phone', value: 'phone', svg: '<svg width="36" height="36" fill="none" stroke="#0a4d68" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M22 16.92V21a2 2 0 0 1-2.18 2A19.72 19.72 0 0 1 3 5.18 2 2 0 0 1 5 3h4.09a2 2 0 0 1 2 1.72c.13 1.13.37 2.23.72 3.28a2 2 0 0 1-.45 2.11l-1.27 1.27a16 16 0 0 0 6.29 6.29l1.27-1.27a2 2 0 0 1 2.11-.45c1.05.35 2.15.59 3.28.72A2 2 0 0 1 21 18.91V21z"></path></svg>' },
+            { name: 'Mail', value: 'mail', svg: '<svg width="36" height="36" fill="none" stroke="#0a4d68" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"></rect><polyline points="3 7 12 13 21 7"></polyline></svg>' },
+            { name: 'Calendar', value: 'calendar', svg: '<svg width="36" height="36" fill="none" stroke="#0a4d68" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>' },
+            { name: 'Star', value: 'star', svg: '<svg width="36" height="36" fill="none" stroke="#0a4d68" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>' },
+            { name: 'Shield', value: 'shield', svg: '<svg width="36" height="36" fill="none" stroke="#0a4d68" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>' },
+            { name: 'Briefcase', value: 'briefcase', svg: '<svg width="36" height="36" fill="none" stroke="#0a4d68" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"></rect><path d="M16 3v4"></path><path d="M8 3v4"></path></svg>' },
+            { name: 'Award', value: 'award', svg: '<svg width="36" height="36" fill="none" stroke="#0a4d68" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="12" cy="8" r="7"></circle><polyline points="8.21 13.89 7 23 12 20.13 17 23 15.79 13.88"></polyline></svg>' }
+        ];
+        const serviceIconSVGs = Object.fromEntries(iconOptions.map(opt => [opt.value, opt.svg]));
 
         // --- Firebase logic ---
         onAuthStateChanged(auth, user => {
@@ -939,128 +928,105 @@
         // No need to create or insert servicesContainer, it already exists in the DOM
         function renderServiceFields() {
             servicesContainer.innerHTML = '';
-            loadFeatherIcons().then(() => {
-                services.forEach((service, idx) => {
-                    const group = document.createElement('div');
-                    group.className = 'form-group service-group';
-                    group.style.display = 'flex';
-                    group.style.alignItems = 'flex-start';
-                    group.style.gap = '0.5rem';
-                    group.innerHTML = `
-                        <div style=\"flex:1;min-width:0;\">
-                            <label for=\"service-${service.id}\" style=\"flex:0 0 140px;\">${service.label} Description</label>
-                            <textarea id=\"service-${service.id}\" rows=\"2\" class=\"field-element\" style=\"width:100%;\">${service.value}</textarea>
+            services.forEach((service, idx) => {
+                const group = document.createElement('div');
+                group.className = 'form-group service-group';
+                group.style.display = 'flex';
+                group.style.alignItems = 'flex-start';
+                group.style.gap = '0.5rem';
+                group.innerHTML = `
+                    <div style="flex:1;min-width:0;">
+                        <label for="service-${service.id}" style="flex:0 0 140px;">${service.label} Description</label>
+                        <textarea id="service-${service.id}" rows="2" class="field-element" style="width:100%;">${service.value}</textarea>
+                    </div>
+                    <div style="display:flex; flex-direction:column; gap:0.2rem; align-items:center;">
+                        <button type="button" class="move-up" data-idx="${idx}" ${idx===0?'disabled':''} title="Move Up">⬆️</button>
+                        <button type="button" class="move-down" data-idx="${idx}" ${idx===services.length-1?'disabled':''} title="Move Down">⬇️</button>
+                        <button type="button" class="remove-service" data-idx="${idx}" title="Remove Service" style="color:#e63946;">➖</button>
+                    </div>
+                    <div style="display:flex; flex-direction:column; align-items:center; gap:0.5rem; min-width:180px; max-width:220px;">
+                        <div style="margin-bottom:0.3rem;width:100%;">
+                            <label for="service-icon-select-${service.id}" style="font-size:0.95rem; color:var(--primary-color);">Icon</label>
+                            <select id="service-icon-select-${service.id}" class="service-icon-select" style="width:100%;margin-bottom:0.3rem;padding:0.3rem 0.5rem;border-radius:6px;border:1px solid #d1e3f8;">
+                                ${iconOptions.map(opt => `<option value="${opt.value}" ${service.icon===opt.value?'selected':''}>${opt.name}</option>`).join('')}
+                            </select>
+                            <div class="icon-preview" style="margin-top:0.2rem;text-align:center;">${serviceIconSVGs[service.icon] || ''}</div>
                         </div>
-                        <div style=\"display:flex; flex-direction:column; gap:0.2rem; align-items:center;\">
-                            <button type=\"button\" class=\"move-up\" data-idx=\"${idx}\" ${idx===0?'disabled':''} title=\"Move Up\">⬆️</button>
-                            <button type=\"button\" class=\"move-down\" data-idx=\"${idx}\" ${idx===services.length-1?'disabled':''} title=\"Move Down\">⬇️</button>
-                            <button type=\"button\" class=\"remove-service\" data-idx=\"${idx}\" title=\"Remove Service\" style=\"color:#e63946;\">➖</button>
+                        <div class="upload-area service-upload-area" style="min-width:160px;max-width:200px;">
+                            <div class="upload-preview" id="service-upload-preview-${service.id}">${service.imageUrl ? `<img src="${service.imageUrl}" alt="Service Image" style="max-width:120px;max-height:80px;">` : ''}</div>
+                            <input type="file" id="service-image-upload-input-${service.id}" accept="image/jpeg, image/png, image/webp, image/svg+xml" hidden>
+                            <button type="button" class="btn service-upload-btn" data-idx="${idx}" style="width:auto;background:var(--secondary-color);margin-top:0.3rem;">Upload Image</button>
+                            <progress id="service-upload-progress-${service.id}" value="0" max="100" style="display:none;"></progress>
+                            <div class="upload-message" id="service-upload-message-${service.id}"></div>
                         </div>
-                        <div style=\"display:flex; flex-direction:column; align-items:center; gap:0.5rem; min-width:180px; max-width:220px;\">
-                            <div style=\"margin-bottom:0.3rem;width:100%;\">
-                                <label for=\"service-icon-search-${service.id}\" style=\"font-size:0.95rem; color:var(--primary-color);\">Icon</label>
-                                <input type=\"text\" id=\"service-icon-search-${service.id}\" placeholder=\"Search icons...\" style=\"width:100%;margin-bottom:0.3rem;padding:0.3rem 0.5rem;border-radius:6px;border:1px solid #d1e3f8;\">
-                                <div class=\"icon-select-list\" id=\"service-icon-list-${service.id}\" style=\"display:flex;flex-wrap:wrap;gap:0.3rem;max-height:90px;overflow-y:auto;background:#f7f8fc;border-radius:8px;padding:0.3rem 0.2rem 0.2rem 0.2rem;\">
-                                    <!-- Icon options will be rendered here -->
-                                </div>
-                            </div>
-                            <div class=\"upload-area service-upload-area\" style=\"min-width:160px;max-width:200px;\">
-                                <div class=\"upload-preview\" id=\"service-upload-preview-${service.id}\">${service.imageUrl ? `<img src=\"${service.imageUrl}\" alt=\"Service Image\" style=\"max-width:120px;max-height:80px;\">` : ''}</div>
-                                <input type=\"file\" id=\"service-image-upload-input-${service.id}\" accept=\"image/jpeg, image/png, image/webp, image/svg+xml\" hidden>
-                                <button type=\"button\" class=\"btn service-upload-btn\" data-idx=\"${idx}\" style=\"width:auto;background:var(--secondary-color);margin-top:0.3rem;\">Upload Image</button>
-                                <progress id=\"service-upload-progress-${service.id}\" value=\"0\" max=\"100\" style=\"display:none;\"></progress>
-                                <div class=\"upload-message\" id=\"service-upload-message-${service.id}\"></div>
-                            </div>
-                        </div>
-                    `;
-                    servicesContainer.appendChild(group);
-
-                    // Render icon options dynamically
-                    const iconList = group.querySelector(`#service-icon-list-${service.id}`);
-                    const searchInput = group.querySelector(`#service-icon-search-${service.id}`);
-                    function renderIconOptions(filter = '') {
-                        let iconNames = Object.keys(featherIcons);
-                        if (filter) {
-                            const f = filter.toLowerCase();
-                            iconNames = iconNames.filter(name => name.includes(f) || (featherIcons[name].tags && featherIcons[name].tags.some(tag => tag.includes(f))));
-                        }
-                        iconList.innerHTML = iconNames.slice(0, 60).map(iconName => `
-                            <div class=\"icon-option\" data-value=\"${iconName}\" title=\"${iconName}\" style=\"width:38px;height:38px;display:flex;align-items:center;justify-content:center;border-radius:7px;cursor:pointer;border:2px solid ${(service.icon===iconName)?'var(--primary-color)':'transparent'};background:${(service.icon===iconName)?'#e0eafc':'transparent'};transition:border 0.2s,background 0.2s;\">
-                                ${renderFeatherSVG(iconName)}
-                            </div>
-                        `).join('');
-                    }
-                    renderIconOptions();
-                    searchInput.addEventListener('input', e => {
-                        renderIconOptions(e.target.value);
-                    });
-                    iconList.addEventListener('click', e => {
-                        const opt = e.target.closest('.icon-option');
-                        if (opt) {
-                            service.icon = opt.dataset.value;
-                            renderServiceFields();
-                            updateServiceRefsAndListeners();
-                            renderPreview();
-                        }
-                    });
+                    </div>
+                `;
+                servicesContainer.appendChild(group);
+                // Icon select logic
+                const iconSelect = group.querySelector(`#service-icon-select-${service.id}`);
+                const iconPreview = group.querySelector('.icon-preview');
+                iconSelect.addEventListener('change', e => {
+                    service.icon = e.target.value;
+                    iconPreview.innerHTML = serviceIconSVGs[service.icon] || '';
+                    renderPreview();
                 });
-                // Add + button at the bottom
-                const addBtnGroup = document.createElement('div');
-                addBtnGroup.className = 'form-group';
-                addBtnGroup.style.textAlign = 'center';
-                addBtnGroup.innerHTML = '<button type="button" id="add-service-btn" class="btn" style="width:auto;font-size:1.5rem;">➕ Add Service</button>';
-                servicesContainer.appendChild(addBtnGroup);
+            });
+            // Add + button at the bottom
+            const addBtnGroup = document.createElement('div');
+            addBtnGroup.className = 'form-group';
+            addBtnGroup.style.textAlign = 'center';
+            addBtnGroup.innerHTML = '<button type="button" id="add-service-btn" class="btn" style="width:auto;font-size:1.5rem;">➕ Add Service</button>';
+            servicesContainer.appendChild(addBtnGroup);
 
-                // Attach upload listeners for each service
-                services.forEach((service, idx) => {
-                    const uploadBtn = document.querySelector(`.service-upload-btn[data-idx='${idx}']`);
-                    const uploadInput = document.getElementById(`service-image-upload-input-${service.id}`);
-                    const uploadPreview = document.getElementById(`service-upload-preview-${service.id}`);
-                    const uploadProgress = document.getElementById(`service-upload-progress-${service.id}`);
-                    const uploadMessage = document.getElementById(`service-upload-message-${service.id}`);
-                    if (uploadBtn && uploadInput) {
-                        uploadBtn.onclick = () => uploadInput.click();
-                        uploadInput.onchange = (e) => {
-                            const file = e.target.files[0];
-                            uploadPreview.innerHTML = '';
-                            uploadMessage.style.display = 'none';
-                            if (!file) return;
-                            // Preview
-                            const reader = new FileReader();
-                            reader.onload = function(evt) {
-                                uploadPreview.innerHTML = `<img src="${evt.target.result}" alt="Preview" style="max-width:120px;max-height:80px;"><div>${file.name}</div>`;
-                            };
-                            reader.readAsDataURL(file);
-                            // Upload
-                            const storagePath = `serviceImages/${service.id}_${Date.now()}_${file.name}`;
-                            const storageRef = ref(storage, storagePath);
-                            const uploadTask = uploadBytesResumable(storageRef, file);
-                            uploadProgress.style.display = 'block';
-                            uploadTask.on('state_changed',
-                                (snapshot) => {
-                                    const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-                                    uploadProgress.value = progress;
-                                },
-                                (error) => {
-                                    uploadMessage.textContent = 'Upload failed. See console for details.';
-                                    uploadMessage.className = 'upload-message error';
-                                    uploadMessage.style.display = 'block';
-                                },
-                                () => {
-                                    getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
-                                        service.imageUrl = downloadURL;
-                                        uploadProgress.style.display = 'none';
-                                        uploadInput.value = '';
-                                        uploadPreview.innerHTML = `<img src="${downloadURL}" alt="Service Image" style="max-width:120px;max-height:80px;">`;
-                                        uploadMessage.textContent = 'Image uploaded!';
-                                        uploadMessage.className = 'upload-message success';
-                                        uploadMessage.style.display = 'block';
-                                    });
-                                }
-                            );
+            // Attach upload listeners for each service
+            services.forEach((service, idx) => {
+                const uploadBtn = document.querySelector(`.service-upload-btn[data-idx='${idx}']`);
+                const uploadInput = document.getElementById(`service-image-upload-input-${service.id}`);
+                const uploadPreview = document.getElementById(`service-upload-preview-${service.id}`);
+                const uploadProgress = document.getElementById(`service-upload-progress-${service.id}`);
+                const uploadMessage = document.getElementById(`service-upload-message-${service.id}`);
+                if (uploadBtn && uploadInput) {
+                    uploadBtn.onclick = () => uploadInput.click();
+                    uploadInput.onchange = (e) => {
+                        const file = e.target.files[0];
+                        uploadPreview.innerHTML = '';
+                        uploadMessage.style.display = 'none';
+                        if (!file) return;
+                        // Preview
+                        const reader = new FileReader();
+                        reader.onload = function(evt) {
+                            uploadPreview.innerHTML = `<img src="${evt.target.result}" alt="Preview" style="max-width:120px;max-height:80px;"><div>${file.name}</div>`;
                         };
-                    }
-                });
+                        reader.readAsDataURL(file);
+                        // Upload
+                        const storagePath = `serviceImages/${service.id}_${Date.now()}_${file.name}`;
+                        const storageRef = ref(storage, storagePath);
+                        const uploadTask = uploadBytesResumable(storageRef, file);
+                        uploadProgress.style.display = 'block';
+                        uploadTask.on('state_changed',
+                            (snapshot) => {
+                                const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                                uploadProgress.value = progress;
+                            },
+                            (error) => {
+                                uploadMessage.textContent = 'Upload failed. See console for details.';
+                                uploadMessage.className = 'upload-message error';
+                                uploadMessage.style.display = 'block';
+                            },
+                            () => {
+                                getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+                                    service.imageUrl = downloadURL;
+                                    uploadProgress.style.display = 'none';
+                                    uploadInput.value = '';
+                                    uploadPreview.innerHTML = `<img src="${downloadURL}" alt="Service Image" style="max-width:120px;max-height:80px;">`;
+                                    uploadMessage.textContent = 'Image uploaded!';
+                                    uploadMessage.className = 'upload-message success';
+                                    uploadMessage.style.display = 'block';
+                                });
+                            }
+                        );
+                    };
+                }
             });
         }
         // Initial values (should match your current site)
@@ -1148,7 +1114,7 @@
                     ${services.map(service => `
                         <div style="background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(10,77,104,0.06);padding:1.2rem;min-width:220px;max-width:320px;flex:1;display:flex;flex-direction:column;align-items:center;">
                             <div style="margin-bottom:0.7rem;">
-                                ${service.imageUrl ? `<img src="${service.imageUrl}" alt="Service Image" style="max-width:80px;max-height:60px;display:block;margin:0 auto 0.5rem auto;">` : (service.icon && featherIcons[service.icon] ? renderFeatherSVG(service.icon) : '')}
+                                ${service.imageUrl ? `<img src="${service.imageUrl}" alt="Service Image" style="max-width:80px;max-height:60px;display:block;margin:0 auto 0.5rem auto;">` : (service.icon ? serviceIconSVGs[service.icon] : '')}
                             </div>
                             <div style="font-weight:700;font-size:1.1rem;color:var(--primary-color);margin-bottom:0.3rem;">${service.label}</div>
                             <div style="font-size:1rem;color:var(--dark-gray);">${service.textarea ? service.textarea.value : service.value}</div>
