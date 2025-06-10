@@ -60,22 +60,34 @@
             align-items: center; text-align: center; color: var(--white);
             padding: 3rem 1rem 0 1rem;
         }
-        .hero-bubble-blur {
+        .hero-bubble-blur { display: none !important; }
+        .hero-bubble-text {
             position: relative;
-            display: inline-block;
-            border-radius: 2.5rem;
-            background: rgba(255,255,255,0.6); /* Increased opacity to 60% */
-            backdrop-filter: blur(18px);
-            -webkit-backdrop-filter: blur(18px);
-            box-shadow: 0 8px 32px rgba(10,77,104,0.10);
-            padding: 1.2rem 1.5rem 1rem 1.5rem; /* Tightened padding */
-            margin-top: 2.5rem;
-            margin-bottom: 1.5rem;
-            max-width: 95vw;
+            z-index: 1;
+        }
+        .hero-bubble-text::before {
+            content: '';
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            width: 120%;
+            height: 120%;
+            background: radial-gradient(circle at 60% 40%, rgba(245,166,35,0.25) 0%, rgba(8,131,149,0.18) 60%, rgba(10,77,104,0.12) 100%);
+            border-radius: 50%;
+            filter: blur(18px);
+            opacity: 0.85;
+            z-index: -1;
+            pointer-events: none;
         }
         @media (max-width: 600px) {
-            .hero-bubble-blur {
-                padding: 0.7rem 0.5rem 0.7rem 0.5rem; /* Tighten further on mobile */
+            .hero-bubble-text {
+                padding: 0.1em 0.2em;
+            }
+            .hero-bubble-text::before {
+                width: 140%;
+                height: 140%;
+                filter: blur(12px);
             }
             .hero-overlay h1 {
                 font-size: 2rem;
@@ -302,10 +314,8 @@
     <main>
         <section class="hero-banner" id="hero-banner">
             <div class="hero-overlay" style="background: none; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: flex-start; align-items: center; text-align: center; color: var(--white); padding: 3rem 1rem 0 1rem;">
-                <div class="hero-bubble-blur">
-                    <h1 style="font-size: 3.5rem; margin-bottom: 1rem; color: var(--white); text-shadow: 1px 1px 3px rgba(0,0,0,0.4);">Transform Your Space</h1>
-                    <p style="font-size: 1.2rem; max-width: 600px; margin: 0 auto 2rem; text-shadow: 1px 1px 3px rgba(0,0,0,0.4);">Quality construction and home improvement services in Monroe, MI</p>
-                </div>
+                <h1 class="hero-bubble-text" style="font-size: 3.5rem; margin-bottom: 1rem; color: var(--white); text-shadow: 1px 1px 3px rgba(0,0,0,0.4); position: relative; z-index: 1;">Transform Your Space</h1>
+                <p style="font-size: 1.2rem; max-width: 600px; margin: 0 auto 2rem; text-shadow: 1px 1px 3px rgba(0,0,0,0.4);">Quality construction and home improvement services in Monroe, MI</p>
             </div>
         </section>
         <div class="hero-call-btn-wrapper">
