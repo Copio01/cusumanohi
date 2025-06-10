@@ -285,6 +285,40 @@
             #game-container { width: 98vw; }
             #game-canvas { width: 98vw !important; height: 98vw !important; max-width: 98vw; max-height: 98vw; }
         }
+        /* Death screen styles */
+        #death-screen {
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255,255,255,0.97);
+            z-index: 20;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 2.2rem;
+        }
+        #death-screen .score {
+            font-size: 1.6rem;
+            color: #ff4e00;
+            font-weight: 600;
+        }
+        #death-screen button {
+            font-size: 1.2rem;
+            padding: 0.7rem 2.2rem;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(224,161,6,0.13);
+            transition: transform 0.13s;
+        }
+        #death-screen button:hover {
+            transform: scale(1.06);
+        }
     </style>
 </head>
 <body>
@@ -316,6 +350,15 @@
         <div id="leaderboard" style="display:none;">
             <h2>Leaderboard</h2>
             <div id="leaderboard-entries">Loading...</div>
+        </div>
+        <!-- Death screen overlay -->
+        <div id="death-screen" style="display:none;">
+            <div style="font-size:2.5rem;color:#e0a106;font-weight:700;">Game Over</div>
+            <div id="death-score" style="font-size:1.6rem;color:#ff4e00;font-weight:600;">Score: 0</div>
+            <div style="display:flex;gap:1.5rem;">
+                <button id="replay-btn" style="font-size:1.2rem;padding:0.7rem 2.2rem;background:linear-gradient(90deg,#e0a106,#ff4e00);color:#fff;border:none;border-radius:10px;font-weight:600;cursor:pointer;box-shadow:0 2px 8px rgba(224,161,6,0.13);">Replay</button>
+                <button id="return-menu-btn" style="font-size:1.2rem;padding:0.7rem 2.2rem;background:linear-gradient(90deg,#bfa14a,#ffd700);color:#fff;border:none;border-radius:10px;font-weight:600;cursor:pointer;box-shadow:0 2px 8px rgba(224,161,6,0.13);">Return to Menu</button>
+            </div>
         </div>
     </div>
     <script>
@@ -566,26 +609,45 @@
             }
         }
         ctx.globalAlpha = 1;
-        ctx.fillStyle = '#fffbe6';
-        ctx.strokeStyle = '#e0a106';
-        ctx.lineWidth = 3;
+        // --- Spinning hammer ---
+        const centerX = ball.x + BALL_SIZE/2;
+        const centerY = ball.y + BALL_SIZE/2;
+        const hammerLength = BALL_SIZE * 1.2;
+        const hammerHeadWidth = BALL_SIZE * 0.7;
+        const hammerHeadHeight = BALL_SIZE * 0.38;
+        const handleWidth = BALL_SIZE * 0.18;
+        const handleLength = BALL_SIZE * 0.9;
+        // Calculate rotation angle based on time for smooth spinning
+        const spinSpeed = 0.13; // radians per frame
+        if (!drawBall._angle) drawBall._angle = 0;
+        drawBall._angle += spinSpeed;
+        ctx.save();
+        ctx.translate(centerX, centerY);
+        ctx.rotate(drawBall._angle);
+        // Draw hammer handle
         ctx.beginPath();
-        ctx.arc(ball.x + BALL_SIZE/2, ball.y + BALL_SIZE/2, BALL_SIZE/2, 0, 2*Math.PI);
+        ctx.rect(-handleWidth/2, hammerHeadHeight/2, handleWidth, handleLength);
+        ctx.fillStyle = '#bfa14a';
+        ctx.shadowColor = '#e0a106';
+        ctx.shadowBlur = 6;
+        ctx.fill();
+        ctx.shadowBlur = 0;
+        // Draw hammer head
+        ctx.beginPath();
+        ctx.rect(-hammerHeadWidth/2, -hammerHeadHeight/2, hammerHeadWidth, hammerHeadHeight);
+        ctx.fillStyle = '#888';
+        ctx.strokeStyle = '#444';
+        ctx.lineWidth = 2.2;
         ctx.fill();
         ctx.stroke();
-        // Construction hat
-        ctx.save();
-        ctx.translate(ball.x + BALL_SIZE/2, ball.y + BALL_SIZE/2 - 8);
+        // Draw hammer face (circle at end)
         ctx.beginPath();
-        ctx.arc(0, 0, 8, Math.PI, 2*Math.PI);
+        ctx.arc(hammerHeadWidth/2, 0, hammerHeadHeight/2, 0, 2*Math.PI);
         ctx.fillStyle = '#e0a106';
+        ctx.strokeStyle = '#bfa14a';
+        ctx.lineWidth = 1.2;
         ctx.fill();
-        ctx.beginPath();
-        ctx.arc(0, 0, 8, 0, Math.PI);
-        ctx.fillStyle = '#fffbe6';
-        ctx.globalAlpha = 0.7;
-        ctx.fill();
-        ctx.globalAlpha = 1;
+        ctx.stroke();
         ctx.restore();
         ctx.restore();
     }
@@ -747,39 +809,471 @@
 
     // --- Enhanced gameLoop ---
     function gameLoop() {
-        // Move paddles
-        if (leftPaddle.vy) leftPaddle.y += leftPaddle.vy;
-        if (rightPaddle.vy) rightPaddle.y += rightPaddle.vy;
+        // --- SMOOTHER PADDLE MOVEMENT ---
+        // Add velocity easing for paddles for smoother movement
+        const paddleEasing = 0.32; // Lower = more smoothing
+        if (twoPlayerControls) {
+            // Left paddle (W/S)
+            let targetVyL = 0;
+            if (leftPaddleUp && !leftPaddleDown) targetVyL = -PADDLE_SPEED;
+            else if (leftPaddleDown && !leftPaddleUp) targetVyL = PADDLE_SPEED;
+            leftPaddle.vy += (targetVyL - leftPaddle.vy) * paddleEasing;
+            // Right paddle (Up/Down)
+            let targetVyR = 0;
+            if (rightPaddleUp && !rightPaddleDown) targetVyR = -PADDLE_SPEED;
+            else if (rightPaddleDown && !rightPaddleUp) targetVyR = PADDLE_SPEED;
+            rightPaddle.vy += (targetVyR - rightPaddle.vy) * paddleEasing;
+        }
+        if (!twoPlayerControls && aiEnabled) {
+            // AI paddle smoothing
+            let targetVy = 0;
+            if (ball.y + BALL_SIZE/2 < rightPaddle.y + PADDLE_HEIGHT/2 - 10) targetVy = -PADDLE_SPEED;
+            else if (ball.y + BALL_SIZE/2 > rightPaddle.y + PADDLE_HEIGHT/2 + 10) targetVy = PADDLE_SPEED;
+            rightPaddle.vy += (targetVy - rightPaddle.vy) * paddleEasing;
+        }
+        // Single player left paddle (no smoothing for responsiveness)
+        if (!twoPlayerControls && !aiEnabled) {
+            // leftPaddle.vy is set directly by key events
+        }
+        leftPaddle.y += leftPaddle.vy;
+        rightPaddle.y += rightPaddle.vy;
         leftPaddle.y = Math.max(0, Math.min(FIELD_HEIGHT-PADDLE_HEIGHT, leftPaddle.y));
         rightPaddle.y = Math.max(0, Math.min(FIELD_HEIGHT-PADDLE_HEIGHT, rightPaddle.y));
-        if (aiEnabled) {
-            if (ball.y + BALL_SIZE/2 < rightPaddle.y + PADDLE_HEIGHT/2 - 10) rightPaddle.vy = -PADDLE_SPEED;
-            else if (ball.y + BALL_SIZE/2 > rightPaddle.y + PADDLE_HEIGHT/2 + 10) rightPaddle.vy = PADDLE_SPEED;
-            else rightPaddle.vy = 0;
-        }
-        ball.x += ball.vx;
-        ball.y += ball.vy;
+
+        // --- SMOOTHER BALL MOVEMENT ---
+        // Add subpixel movement for ball for smoother animation
+        if (!ball._subx) ball._subx = ball.x;
+        if (!ball._suby) ball._suby = ball.y;
+        ball._subx += ball.vx;
+        ball._suby += ball.vy;
+        ball.x = ball._subx;
+        ball.y = ball._suby;
+
         // Ball collision with top/bottom
-        if (ball.y <= 0 || ball.y + BALL_SIZE >= FIELD_HEIGHT) {
+        if (ball.y <= 0) {
+            ball.y = 0;
+            ball._suby = ball.y;
             ball.vy *= -1;
-            // animateBallSquash(); // removed to prevent wobble
+        } else if (ball.y + BALL_SIZE >= FIELD_HEIGHT) {
+            ball.y = FIELD_HEIGHT - BALL_SIZE;
+            ball._suby = ball.y;
+            ball.vy *= -1;
         }
+
         // Powerup effects
         if ((gameMode === 'ultra' || gameMode === 'ultra-single') && activePowerups.length > 0) {
             applyPowerupEffects();
         }
         // Ball collision with paddles
-        if (ball.x <= leftPaddle.x + PADDLE_WIDTH && ball.y + BALL_SIZE > leftPaddle.y && ball.y < leftPaddle.y + PADDLE_HEIGHT) {
+        if (ball.x <= leftPaddle.x + PADDLE_WIDTH && ball.y + BALL_SIZE > leftPaddle.y && ball.y < leftPaddle.y + PADDLE_HEIGHT && ball.vx < 0) {
             ball.x = leftPaddle.x + PADDLE_WIDTH;
+            ball._subx = ball.x;
             ball.vx *= -1;
-            // animatePaddleHit(true); // removed to prevent wobble
-            // animateBallSquash(); // removed to prevent wobble
+            animatePaddleHit(true);
+            animateBallSquash();
         }
-        if (ball.x + BALL_SIZE >= rightPaddle.x && ball.y + BALL_SIZE > rightPaddle.y && ball.y < rightPaddle.y + PADDLE_HEIGHT) {
+        if (ball.x + BALL_SIZE >= rightPaddle.x && ball.y + BALL_SIZE > rightPaddle.y && ball.y < rightPaddle.y + PADDLE_HEIGHT && ball.vx > 0) {
             ball.x = rightPaddle.x - BALL_SIZE;
+            ball._subx = ball.x;
             ball.vx *= -1;
-            // animatePaddleHit(false); // removed to prevent wobble
-            // animateBallSquash(); // removed to prevent wobble
+            animatePaddleHit(false);
+            animateBallSquash();
+        }
+        // Ball out of bounds (score)
+        if (ball.x < 0 || ball.x > FIELD_WIDTH) {
+            endGame();
+            return;
+        }
+        // Ultra single mode: spawn powerups, increase difficulty
+        if (gameMode === 'ultra-single') {
+            if (Math.random() < 0.008 && powerups.length < 1) {
+                const ptype = POWERUP_TYPES[Math.floor(Math.random()*POWERUP_TYPES.length)];
+                powerups.push({
+                    ...ptype,
+                    x: Math.random()*(FIELD_WIDTH-POWERUP_SIZE-40)+20,
+                    y: Math.random()*(FIELD_HEIGHT-POWERUP_SIZE-40)+20
+                });
+            }
+            for (let i=powerups.length-1; i>=0; i--) {
+                const p = powerups[i];
+                const dx = (ball.x+BALL_SIZE/2)-(p.x+POWERUP_SIZE/2);
+                const dy = (ball.y+BALL_SIZE/2)-(p.y+POWERUP_SIZE/2);
+                if (Math.sqrt(dx*dx+dy*dy) < BALL_SIZE/2 + POWERUP_SIZE/2) {
+                    activePowerups.push({ type: p.type, timer: ULTRA_POWERUP_DURATION });
+                    powerups.splice(i,1);
+                }
+            }
+            for (let i=activePowerups.length-1; i>=0; i--) {
+                activePowerups[i].timer--;
+                if (activePowerups[i].timer <= 0) activePowerups.splice(i,1);
+            }
+            if (score > 0 && score % 100 === 0 && Math.abs(ball.vx) < maxBallSpeed) {
+                ball.vx *= 1.12;
+                ball.vy *= 1.12;
+                updateDifficultyBar();
+            }
+            updateDifficultyBar();
+        }
+        // Update score
+        score++;
+        animateScorePop();
+        scoreLabel.textContent = `Score: ${score}`;
+        ctx.clearRect(0,0,FIELD_WIDTH,FIELD_HEIGHT);
+        drawGame();
+    }
+
+    // --- Add paddle and ball hit animations ---
+    function animatePaddleHit(isLeft) {
+        // Add a quick scale animation to the paddle
+        const el = canvas;
+        const className = isLeft ? 'paddle-hit-left' : 'paddle-hit-right';
+        el.classList.remove(className);
+        void el.offsetWidth;
+        el.classList.add(className);
+        setTimeout(() => el.classList.remove(className), 180);
+    }
+    function animateBallSquash() {
+        const el = canvas;
+        el.classList.remove('ball-squash');
+        void el.offsetWidth;
+        el.classList.add('ball-squash');
+        setTimeout(() => el.classList.remove('ball-squash'), 180);
+    }
+
+    // --- Enhanced drawField ---
+    function drawField() {
+        ctx.fillStyle = '#e8ddb7';
+        ctx.fillRect(0, 0, FIELD_WIDTH, FIELD_HEIGHT);
+        // Center line with animated dashes
+        ctx.save();
+        ctx.strokeStyle = '#bfa14a';
+        ctx.setLineDash([16, 16]);
+        ctx.lineWidth = 4;
+        ctx.globalAlpha = 0.7;
+        ctx.beginPath();
+        const dashOffset = (Date.now()/30)%32;
+        ctx.setLineDash([16, 16]);
+        ctx.lineDashOffset = -dashOffset;
+        ctx.moveTo(FIELD_WIDTH/2, 0);
+        ctx.lineTo(FIELD_WIDTH/2, FIELD_HEIGHT);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.globalAlpha = 1;
+        // Construction cones
+        for (let i=0; i<3; i++) {
+            const cx = FIELD_WIDTH/2-18 + (i-1)*60;
+            const cy = 60 + i*120 + 20*Math.sin(Date.now()/600+i);
+            ctx.save();
+            ctx.translate(cx, cy);
+            ctx.beginPath();
+            ctx.moveTo(0, 18); ctx.lineTo(-12, -18); ctx.lineTo(12, -18); ctx.closePath();
+            ctx.fillStyle = '#ff4e00'; ctx.fill();
+            ctx.fillStyle = '#fff'; ctx.fillRect(-8, -8, 16, 4);
+            ctx.restore();
+        }
+        ctx.restore();
+    }
+
+    // --- Enhanced drawPaddle ---
+    function drawPaddle(paddle, isLeft) {
+        ctx.save();
+        ctx.fillStyle = isLeft ? '#e0a106' : '#ff4e00';
+        ctx.shadowColor = '#bfa14a';
+        ctx.shadowBlur = 8;
+        ctx.fillRect(paddle.x, paddle.y, PADDLE_WIDTH, PADDLE_HEIGHT);
+        // Bolts
+        for (let i=0; i<3; i++) {
+            ctx.beginPath();
+            ctx.arc(paddle.x+PADDLE_WIDTH/2, paddle.y+18+i*32, 3, 0, 2*Math.PI);
+            ctx.fillStyle = '#bfa14a';
+            ctx.fill();
+        }
+        ctx.restore();
+    }
+
+    // --- Enhanced drawBall ---
+    function drawBall() {
+        ctx.save();
+        // Ball trail if powerup
+        if (activePowerups.length > 0) {
+            for (let i=0; i<6; i++) {
+                ctx.globalAlpha = 0.08 + 0.04*i;
+                ctx.beginPath();
+                ctx.arc(ball.x + BALL_SIZE/2 - ball.vx*i*2, ball.y + BALL_SIZE/2 - ball.vy*i*2, BALL_SIZE/2, 0, 2*Math.PI);
+                ctx.fillStyle = '#e0a106';
+                ctx.fill();
+            }
+        }
+        ctx.globalAlpha = 1;
+        // --- Spinning hammer ---
+        const centerX = ball.x + BALL_SIZE/2;
+        const centerY = ball.y + BALL_SIZE/2;
+        const hammerLength = BALL_SIZE * 1.2;
+        const hammerHeadWidth = BALL_SIZE * 0.7;
+        const hammerHeadHeight = BALL_SIZE * 0.38;
+        const handleWidth = BALL_SIZE * 0.18;
+        const handleLength = BALL_SIZE * 0.9;
+        // Calculate rotation angle based on time for smooth spinning
+        const spinSpeed = 0.13; // radians per frame
+        if (!drawBall._angle) drawBall._angle = 0;
+        drawBall._angle += spinSpeed;
+        ctx.save();
+        ctx.translate(centerX, centerY);
+        ctx.rotate(drawBall._angle);
+        // Draw hammer handle
+        ctx.beginPath();
+        ctx.rect(-handleWidth/2, hammerHeadHeight/2, handleWidth, handleLength);
+        ctx.fillStyle = '#bfa14a';
+        ctx.shadowColor = '#e0a106';
+        ctx.shadowBlur = 6;
+        ctx.fill();
+        ctx.shadowBlur = 0;
+        // Draw hammer head
+        ctx.beginPath();
+        ctx.rect(-hammerHeadWidth/2, -hammerHeadHeight/2, hammerHeadWidth, hammerHeadHeight);
+        ctx.fillStyle = '#888';
+        ctx.strokeStyle = '#444';
+        ctx.lineWidth = 2.2;
+        ctx.fill();
+        ctx.stroke();
+        // Draw hammer face (circle at end)
+        ctx.beginPath();
+        ctx.arc(hammerHeadWidth/2, 0, hammerHeadHeight/2, 0, 2*Math.PI);
+        ctx.fillStyle = '#e0a106';
+        ctx.strokeStyle = '#bfa14a';
+        ctx.lineWidth = 1.2;
+        ctx.fill();
+        ctx.stroke();
+        ctx.restore();
+        ctx.restore();
+    }
+
+    // --- Enhanced drawPowerups ---
+    function drawPowerups() {
+        for (const p of powerups) {
+            ctx.save();
+            ctx.beginPath();
+            ctx.arc(p.x + POWERUP_SIZE/2, p.y + POWERUP_SIZE/2, POWERUP_SIZE/2, 0, 2*Math.PI);
+            ctx.fillStyle = p.color;
+            ctx.globalAlpha = 0.7 + 0.3 * Math.sin(Date.now()/200);
+            ctx.shadowColor = p.color;
+            ctx.shadowBlur = 12;
+            ctx.fill();
+            ctx.shadowBlur = 0;
+            ctx.globalAlpha = 1;
+            ctx.font = '24px Segoe UI';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            // Animate float
+            const floatY = 4*Math.sin(Date.now()/180 + p.x);
+            ctx.fillText(p.icon, p.x + POWERUP_SIZE/2, p.y + POWERUP_SIZE/2 + 1 + floatY);
+            ctx.restore();
+        }
+    }
+
+    // --- Enhanced drawHUD ---
+    function drawHUD() {
+        if ((gameMode === "ultra" || gameMode === "ultra-single") && activePowerups.length > 0) {
+            ctx.save();
+            ctx.globalAlpha = 1;
+            ctx.font = 'bold 18px Segoe UI';
+            ctx.textAlign = 'left';
+            ctx.textBaseline = 'top';
+            // HUD panel
+            ctx.save();
+            ctx.beginPath();
+            ctx.moveTo(12, 12); ctx.lineTo(160, 12); ctx.lineTo(160, 18+activePowerups.length*36); ctx.lineTo(12, 18+activePowerups.length*36); ctx.closePath();
+            ctx.fillStyle = 'rgba(255,255,255,0.85)';
+            ctx.strokeStyle = '#e0a106';
+            ctx.lineWidth = 2;
+            ctx.fill(); ctx.stroke();
+            ctx.restore();
+            let hudY = 18;
+            for (const ap of activePowerups) {
+                const details = POWERUP_TYPES.find(p => p.type === ap.type);
+                if (!details) continue;
+                // Animate icon pulse
+                const pulse = 1 + 0.08 * Math.sin(Date.now()/180 + hudY);
+                ctx.save();
+                ctx.translate(32, hudY+12);
+                ctx.scale(pulse, pulse);
+                ctx.fillText(details.icon, 0, 0);
+                ctx.restore();
+                ctx.fillStyle = details.color;
+                ctx.fillText(` ${details.type.charAt(0).toUpperCase() + details.type.slice(1)}`, 48, hudY);
+                // Timer bar
+                ctx.save();
+                ctx.fillStyle = 'rgba(60,60,60,0.75)';
+                ctx.fillRect(20, hudY+22, 100, 7);
+                ctx.fillStyle = details.color;
+                ctx.fillRect(20, hudY+22, 100 * (ap.timer/ULTRA_POWERUP_DURATION), 7);
+                ctx.restore();
+                hudY += 36;
+            }
+            ctx.restore();
+        }
+    }
+
+    // --- Enhanced applyPowerupEffects ---
+    function applyPowerupEffects() {
+        // Magnet: ball curves toward left paddle
+        if (activePowerups.some(p => p.type === "magnet")) {
+            if (ball.vx < 0) {
+                const paddleCenter = leftPaddle.y + PADDLE_HEIGHT/2;
+                const ballCenter = ball.y + BALL_SIZE/2;
+                const diff = paddleCenter - ballCenter;
+                ball.vy += 0.13 * Math.sign(diff);
+                ball.vy = Math.max(-maxBallSpeed, Math.min(maxBallSpeed, ball.vy));
+                // Magnet lines
+                ctx.save();
+                ctx.strokeStyle = '#4ecaff';
+                ctx.globalAlpha = 0.5;
+                ctx.beginPath();
+                ctx.moveTo(ball.x + BALL_SIZE/2, ball.y + BALL_SIZE/2);
+                ctx.lineTo(leftPaddle.x + PADDLE_WIDTH, paddleCenter);
+                ctx.stroke();
+                ctx.restore();
+            }
+        }
+        // Ghost: ball passes through left paddle once
+        if (activePowerups.some(p => p.type === "ghost")) {
+            if (ball.x <= leftPaddle.x + PADDLE_WIDTH && ball.y + BALL_SIZE > leftPaddle.y && ball.y < leftPaddle.y + PADDLE_HEIGHT && ball.vx < 0) {
+                const idx = activePowerups.findIndex(p => p.type === "ghost");
+                if (idx !== -1) {
+                    // Animate ghost effect
+                    for (let i = 0; i < 8; i++) {
+                        setTimeout(() => {
+                            ctx.save();
+                            ctx.globalAlpha = 0.15 + 0.1 * Math.sin(Date.now()/60 + i);
+                            ctx.beginPath();
+                            ctx.arc(ball.x + BALL_SIZE/2, ball.y + BALL_SIZE/2, BALL_SIZE/2 + i*2, 0, 2*Math.PI);
+                            ctx.fillStyle = '#b3b3ff';
+                            ctx.fill();
+                            ctx.restore();
+                        }, i*12);
+                    }
+                    activePowerups.splice(idx, 1);
+                    ball.x = leftPaddle.x + PADDLE_WIDTH + 2;
+                }
+            }
+        }
+        // Shield: ball reflects off left wall once
+        if (activePowerups.some(p => p.type === "shield")) {
+            if (ball.x < 0 && ball.vx < 0) {
+                const idx = activePowerups.findIndex(p => p.type === "shield");
+                if (idx !== -1) {
+                    for (let i = 0; i < 8; i++) {
+                        setTimeout(() => {
+                            ctx.save();
+                            ctx.globalAlpha = 0.12 + 0.1 * Math.sin(Date.now()/60 + i);
+                            ctx.beginPath();
+                            ctx.arc(0, ball.y + BALL_SIZE/2, 24 + i*2, 0, 2*Math.PI);
+                            ctx.fillStyle = '#76e6cd';
+                            ctx.fill();
+                            ctx.restore();
+                        }, i*12);
+                    }
+                    activePowerups.splice(idx, 1);
+                    ball.x = 2;
+                    ball.vx *= -1;
+                }
+            }
+        }
+        // Drill: ball pierces through left paddle, bounces off left wall
+        if (activePowerups.some(p => p.type === "drill")) {
+            if (ball.x <= leftPaddle.x + PADDLE_WIDTH && ball.y + BALL_SIZE > leftPaddle.y && ball.y < leftPaddle.y + PADDLE_HEIGHT && ball.vx < 0) {
+                const idx = activePowerups.findIndex(p => p.type === "drill");
+                if (idx !== -1) {
+                    for (let i = 0; i < 8; i++) {
+                        setTimeout(() => {
+                            ctx.save();
+                            ctx.globalAlpha = 0.13 + 0.1 * Math.sin(Date.now()/60 + i);
+                            ctx.beginPath();
+                            ctx.arc(ball.x + BALL_SIZE/2, ball.y + BALL_SIZE/2, BALL_SIZE/2 + i*2, 0, 2*Math.PI);
+                            ctx.fillStyle = '#c0c0c0';
+                            ctx.fill();
+                            ctx.restore();
+                        }, i*12);
+                    }
+                    activePowerups.splice(idx, 1);
+                    ball.x = 2;
+                    ball.vx *= -1;
+                }
+            }
+        }
+    }
+
+    // --- Enhanced gameLoop ---
+    function gameLoop() {
+        // --- SMOOTHER PADDLE MOVEMENT ---
+        // Add velocity easing for paddles for smoother movement
+        const paddleEasing = 0.32; // Lower = more smoothing
+        if (twoPlayerControls) {
+            // Left paddle (W/S)
+            let targetVyL = 0;
+            if (leftPaddleUp && !leftPaddleDown) targetVyL = -PADDLE_SPEED;
+            else if (leftPaddleDown && !leftPaddleUp) targetVyL = PADDLE_SPEED;
+            leftPaddle.vy += (targetVyL - leftPaddle.vy) * paddleEasing;
+            // Right paddle (Up/Down)
+            let targetVyR = 0;
+            if (rightPaddleUp && !rightPaddleDown) targetVyR = -PADDLE_SPEED;
+            else if (rightPaddleDown && !rightPaddleUp) targetVyR = PADDLE_SPEED;
+            rightPaddle.vy += (targetVyR - rightPaddle.vy) * paddleEasing;
+        }
+        if (!twoPlayerControls && aiEnabled) {
+            // AI paddle smoothing
+            let targetVy = 0;
+            if (ball.y + BALL_SIZE/2 < rightPaddle.y + PADDLE_HEIGHT/2 - 10) targetVy = -PADDLE_SPEED;
+            else if (ball.y + BALL_SIZE/2 > rightPaddle.y + PADDLE_HEIGHT/2 + 10) targetVy = PADDLE_SPEED;
+            rightPaddle.vy += (targetVy - rightPaddle.vy) * paddleEasing;
+        }
+        // Single player left paddle (no smoothing for responsiveness)
+        if (!twoPlayerControls && !aiEnabled) {
+            // leftPaddle.vy is set directly by key events
+        }
+        leftPaddle.y += leftPaddle.vy;
+        rightPaddle.y += rightPaddle.vy;
+        leftPaddle.y = Math.max(0, Math.min(FIELD_HEIGHT-PADDLE_HEIGHT, leftPaddle.y));
+        rightPaddle.y = Math.max(0, Math.min(FIELD_HEIGHT-PADDLE_HEIGHT, rightPaddle.y));
+
+        // --- SMOOTHER BALL MOVEMENT ---
+        // Add subpixel movement for ball for smoother animation
+        if (!ball._subx) ball._subx = ball.x;
+        if (!ball._suby) ball._suby = ball.y;
+        ball._subx += ball.vx;
+        ball._suby += ball.vy;
+        ball.x = ball._subx;
+        ball.y = ball._suby;
+
+        // Ball collision with top/bottom
+        if (ball.y <= 0) {
+            ball.y = 0;
+            ball._suby = ball.y;
+            ball.vy *= -1;
+        } else if (ball.y + BALL_SIZE >= FIELD_HEIGHT) {
+            ball.y = FIELD_HEIGHT - BALL_SIZE;
+            ball._suby = ball.y;
+            ball.vy *= -1;
+        }
+
+        // Powerup effects
+        if ((gameMode === 'ultra' || gameMode === 'ultra-single') && activePowerups.length > 0) {
+            applyPowerupEffects();
+        }
+        // Ball collision with paddles
+        if (ball.x <= leftPaddle.x + PADDLE_WIDTH && ball.y + BALL_SIZE > leftPaddle.y && ball.y < leftPaddle.y + PADDLE_HEIGHT && ball.vx < 0) {
+            ball.x = leftPaddle.x + PADDLE_WIDTH;
+            ball._subx = ball.x;
+            ball.vx *= -1;
+            animatePaddleHit(true);
+            animateBallSquash();
+        }
+        if (ball.x + BALL_SIZE >= rightPaddle.x && ball.y + BALL_SIZE > rightPaddle.y && ball.y < rightPaddle.y + PADDLE_HEIGHT && ball.vx > 0) {
+            ball.x = rightPaddle.x - BALL_SIZE;
+            ball._subx = ball.x;
+            ball.vx *= -1;
+            animatePaddleHit(false);
+            animateBallSquash();
         }
         // Ball out of bounds (score)
         if (ball.x < 0 || ball.x > FIELD_WIDTH) {
@@ -899,6 +1393,73 @@
         }, 500);
     });
 
+    // Add death screen HTML
+    const deathScreen = document.createElement('div');
+    deathScreen.id = 'death-screen';
+    deathScreen.style.display = 'none';
+    deathScreen.style.position = 'absolute';
+    deathScreen.style.top = '0';
+    deathScreen.style.left = '0';
+    deathScreen.style.width = '100%';
+    deathScreen.style.height = '100%';
+    deathScreen.style.background = 'rgba(255,255,255,0.97)';
+    deathScreen.style.zIndex = '20';
+    deathScreen.style.display = 'flex';
+    deathScreen.style.flexDirection = 'column';
+    deathScreen.style.alignItems = 'center';
+    deathScreen.style.justifyContent = 'center';
+    deathScreen.style.gap = '2.2rem';
+    deathScreen.innerHTML = `
+        <div style="font-size:2.5rem;color:#e0a106;font-weight:700;">Game Over</div>
+        <div id="death-score" style="font-size:1.6rem;color:#ff4e00;font-weight:600;">Score: 0</div>
+        <div style="display:flex;gap:1.5rem;">
+            <button id="replay-btn" style="font-size:1.2rem;padding:0.7rem 2.2rem;background:linear-gradient(90deg,#e0a106,#ff4e00);color:#fff;border:none;border-radius:10px;font-weight:600;cursor:pointer;box-shadow:0 2px 8px rgba(224,161,6,0.13);">Replay</button>
+            <button id="return-menu-btn" style="font-size:1.2rem;padding:0.7rem 2.2rem;background:linear-gradient(90deg,#bfa14a,#ffd700);color:#fff;border:none;border-radius:10px;font-weight:600;cursor:pointer;box-shadow:0 2px 8px rgba(224,161,6,0.13);">Return to Menu</button>
+        </div>
+    `;
+    document.getElementById('game-container').appendChild(deathScreen);
+    // Ensure death screen is hidden on initial load
+    window.addEventListener('DOMContentLoaded', () => {
+        deathScreen.style.display = 'none';
+    });
+
+    // Death screen logic
+    const deathScore = deathScreen.querySelector('#death-score');
+    const replayBtn = deathScreen.querySelector('#replay-btn');
+    const returnMenuBtn = deathScreen.querySelector('#return-menu-btn');
+
+    replayBtn.addEventListener('click', () => {
+        deathScreen.style.display = 'none';
+        leaderboard.style.display = 'none';
+        scoreArea.style.display = 'block';
+        canvas.style.display = 'block';
+        if (selectedMode === 'single') resetGame('single');
+        else if (selectedMode === 'ultra-single') resetGame('ultra-single');
+        else if (selectedMode === 'two-player') resetGame('two-player');
+    });
+    returnMenuBtn.addEventListener('click', () => {
+        deathScreen.style.display = 'none';
+        leaderboard.style.display = 'block';
+        mainMenu.style.display = 'flex';
+        canvas.style.display = 'none';
+        scoreArea.style.display = 'none';
+        difficultyMeter.style.display = 'none';
+    });
+
+    function endGame() {
+        running = false;
+        clearInterval(intervalId);
+        // Show death screen
+        deathScore.textContent = `Score: ${score}`;
+        deathScreen.style.display = 'flex';
+        canvas.style.display = 'none';
+        scoreArea.style.display = 'none';
+        difficultyMeter.style.display = 'none';
+        leaderboard.style.display = 'block';
+        submitScore(playerName, score);
+        updateLeaderboard();
+    }
+
     // --- Firebase logic for leaderboard (uses window.firebase* globals set by module script) ---
     var db, collection, addDoc, query, orderBy, limit, getDocs, serverTimestamp;
 
@@ -979,7 +1540,9 @@
     function endGame() {
         running = false;
         clearInterval(intervalId);
-        mainMenu.style.display = 'flex';
+        // Show death screen
+        deathScore.textContent = `Score: ${score}`;
+        deathScreen.style.display = 'flex';
         canvas.style.display = 'none';
         scoreArea.style.display = 'none';
         difficultyMeter.style.display = 'none';
