@@ -300,7 +300,8 @@
             <input type="text" id="player-name" maxlength="16" placeholder="Your name..." autocomplete="off" />
             <div style="margin:1.2rem 0;display:flex;gap:1.2rem;">
                 <button id="single-btn">Single Player</button>
-                <button id="versus-btn">Versus Mode</button>
+                <button id="versus-btn">Ultra Single Player</button>
+                <button id="twoplayer-btn">Classic 2 Player</button>
             </div>
             <button id="start-btn" style="display:none;margin-top:1.5rem;min-width:180px;opacity:0;transform:translateY(20px);transition:opacity 0.4s,transform 0.4s;">Start Game</button>
         </div>
@@ -327,6 +328,7 @@
     const scoreLabel = document.getElementById('score-label');
     const singleButton = document.getElementById('single-btn');
     const versusButton = document.getElementById('versus-btn');
+    const twoPlayerButton = document.getElementById('twoplayer-btn');
     const startButton = document.getElementById('start-btn');
     const difficultyMeter = document.createElement('div');
     difficultyMeter.id = 'difficulty-meter';
@@ -337,6 +339,7 @@
     difficultyMeter.style.display = 'none';
 
     let selectedMode = null;
+    let twoPlayerControls = false;
 
     // Animate menu and button
     function showStartButton() {
@@ -356,14 +359,26 @@
 
     singleButton.addEventListener('click', () => {
         selectedMode = 'single';
+        twoPlayerControls = false;
         singleButton.classList.add('selected');
         versusButton.classList.remove('selected');
+        twoPlayerButton.classList.remove('selected');
         showStartButton();
     });
     versusButton.addEventListener('click', () => {
         selectedMode = 'ultra-single';
+        twoPlayerControls = false;
         versusButton.classList.add('selected');
         singleButton.classList.remove('selected');
+        twoPlayerButton.classList.remove('selected');
+        showStartButton();
+    });
+    twoPlayerButton.addEventListener('click', () => {
+        selectedMode = 'two-player';
+        twoPlayerControls = true;
+        twoPlayerButton.classList.add('selected');
+        singleButton.classList.remove('selected');
+        versusButton.classList.remove('selected');
         showStartButton();
     });
     startButton.addEventListener('click', () => {
@@ -379,6 +394,7 @@
             mainMenu.style.transform = '';
             if (selectedMode === 'single') resetGame('single');
             else if (selectedMode === 'ultra-single') resetGame('ultra-single');
+            else if (selectedMode === 'two-player') resetGame('two-player');
         }, 500);
     });
 
@@ -443,6 +459,7 @@
         activePowerups = [];
         powerupTimer = 0;
         aiEnabled = (mode === "single" || mode === "ultra-single");
+        twoPlayerControls = (mode === "two-player");
         scoreLabel.textContent = "Score: 0";
         canvas.style.display = 'block';
         scoreArea.style.display = 'block';
@@ -818,15 +835,30 @@
     }
 
     // Controls
+    let leftPaddleUp = false, leftPaddleDown = false, rightPaddleUp = false, rightPaddleDown = false;
     document.addEventListener('keydown', e => {
         if (!running) return;
-        if (e.key === 'w' || e.key === 'ArrowUp') leftPaddle.vy = -PADDLE_SPEED;
-        if (e.key === 's' || e.key === 'ArrowDown') leftPaddle.vy = PADDLE_SPEED;
+        if (twoPlayerControls) {
+            if (e.key === 'w' || e.key === 'W') leftPaddleUp = true;
+            if (e.key === 's' || e.key === 'S') leftPaddleDown = true;
+            if (e.key === 'ArrowUp') rightPaddleUp = true;
+            if (e.key === 'ArrowDown') rightPaddleDown = true;
+        } else {
+            if (e.key === 'w' || e.key === 'ArrowUp') leftPaddle.vy = -PADDLE_SPEED;
+            if (e.key === 's' || e.key === 'ArrowDown') leftPaddle.vy = PADDLE_SPEED;
+        }
     });
     document.addEventListener('keyup', e => {
         if (!running) return;
-        if (e.key === 'w' || e.key === 'ArrowUp') leftPaddle.vy = 0;
-        if (e.key === 's' || e.key === 'ArrowDown') leftPaddle.vy = 0;
+        if (twoPlayerControls) {
+            if (e.key === 'w' || e.key === 'W') leftPaddleUp = false;
+            if (e.key === 's' || e.key === 'S') leftPaddleDown = false;
+            if (e.key === 'ArrowUp') rightPaddleUp = false;
+            if (e.key === 'ArrowDown') rightPaddleDown = false;
+        } else {
+            if (e.key === 'w' || e.key === 'ArrowUp') leftPaddle.vy = 0;
+            if (e.key === 's' || e.key === 'ArrowDown') leftPaddle.vy = 0;
+        }
     });
 
     // Main menu buttons
@@ -834,12 +866,21 @@
         selectedMode = 'single';
         singleButton.classList.add('selected');
         versusButton.classList.remove('selected');
+        twoPlayerButton.classList.remove('selected');
         showStartButton();
     });
     versusButton.addEventListener('click', () => {
         selectedMode = 'ultra-single';
         versusButton.classList.add('selected');
         singleButton.classList.remove('selected');
+        twoPlayerButton.classList.remove('selected');
+        showStartButton();
+    });
+    twoPlayerButton.addEventListener('click', () => {
+        selectedMode = 'two-player';
+        twoPlayerButton.classList.add('selected');
+        singleButton.classList.remove('selected');
+        versusButton.classList.remove('selected');
         showStartButton();
     });
     startButton.addEventListener('click', () => {
@@ -854,6 +895,7 @@
             mainMenu.style.transform = '';
             if (selectedMode === 'single') resetGame('single');
             else if (selectedMode === 'ultra-single') resetGame('ultra-single');
+            else if (selectedMode === 'two-player') resetGame('two-player');
         }, 500);
     });
 
@@ -885,7 +927,8 @@
 
     function submitScore(name, finalScore) {
         if (!db || !collection) return;
-        if (finalScore <= 0) {
+        // Prevent leaderboard submission for two-player mode
+        if (selectedMode === 'two-player' || gameMode === 'two-player' || finalScore <= 0) {
             updateLeaderboard();
             return;
         }
@@ -975,94 +1018,6 @@
     window.firebaseServerTimestamp = serverTimestamp;
 
     document.dispatchEvent(new Event('firebase-ready'));
-
-    // --- Firebase logic for leaderboard (uses window.firebase* globals set by module script) ---
-    var db, collection, addDoc, query, orderBy, limit, getDocs, serverTimestamp;
-
-    (function() {
-        function assignFirebaseGlobals() {
-            db = window.firebaseFirestore;
-            collection = window.firebaseCollection;
-            addDoc = window.firebaseAddDoc;
-            query = window.firebaseQuery;
-            orderBy = window.firebaseOrderBy;
-            limit = window.firebaseLimit;
-            getDocs = window.firebaseGetDocs;
-            serverTimestamp = window.firebaseServerTimestamp;
-        }
-        if (window.firebaseFirestore) {
-            assignFirebaseGlobals();
-        } else {
-            document.addEventListener('firebase-ready', assignFirebaseGlobals);
-        }
-    })();
-
-    function submitScore(name, finalScore) {
-        if (!db || !collection) return;
-        if (finalScore <= 0) {
-            updateLeaderboard();
-            return;
-        }
-        const scoresCollection = collection(db, leaderboardCollectionName);
-        addDoc(scoresCollection, {
-            name: name,
-            score: finalScore,
-            mode: gameMode,
-            timestamp: serverTimestamp()
-        }).then(() => {
-            updateLeaderboard();
-        }).catch(error => {
-            console.error("Error submitting score to Firebase: ", error);
-        });
-    }
-
-    async function updateLeaderboard() {
-        if (!db || !collection) return;
-        leaderboardEntries.className = 'loading';
-        leaderboardEntries.innerHTML = '<div class="loading-spinner"></div>';
-        const scoresCollection = collection(db, leaderboardCollectionName);
-        const q = query(scoresCollection, orderBy("score", "desc"), limit(LEADERBOARD_SIZE));
-        try {
-            const querySnapshot = await getDocs(q);
-            leaderboardEntries.className = '';
-            leaderboardEntries.innerHTML = '';
-            if (querySnapshot.empty) {
-                leaderboardEntries.innerHTML = `<div style="text-align:center;padding:30px;color:#ffcc33;"><div style="font-size:38px;margin-bottom:12px;animation: bounce 2s infinite;">🏆</div><div>No scores yet!</div></div>`;
-                return;
-            }
-            let rank = 1;
-            querySnapshot.forEach(doc => {
-                const s = doc.data();
-                const entry = document.createElement('div');
-                entry.className = 'score-entry';
-                entry.setAttribute('data-rank', rank);
-                const modeClass = s.mode === 'ultra-single' ? 'ultra-mode' : 'classic-mode';
-                entry.innerHTML = `<span class="player-name">${s.name} <small class="${modeClass}">(${s.mode})</small></span><span class="player-score">${s.score}</span>`;
-                leaderboardEntries.appendChild(entry);
-                rank++;
-            });
-        } catch (error) {
-            console.error("Error fetching leaderboard from Firebase: ", error);
-            leaderboardEntries.innerHTML = `<div style="text-align:center;padding:20px;color:#ff6b6b;"><div style="font-size:24px;margin-bottom:10px;">⚠️</div><div>Error loading scores</div><div style="font-size:0.9em;opacity:0.7;margin-top:5px;">Please try again later</div></div>`;
-        }
-    }
-
-    function endGame() {
-        running = false;
-        clearInterval(intervalId);
-        mainMenu.style.display = 'flex';
-        canvas.style.display = 'none';
-        scoreArea.style.display = 'none';
-        difficultyMeter.style.display = 'none';
-        leaderboard.style.display = 'block';
-        submitScore(playerName, score);
-        updateLeaderboard();
-    }
-
-    // Show leaderboard on main menu
-    mainMenu.style.display = 'flex';
-    leaderboard.style.display = 'block';
-    updateLeaderboard();
     </script>
 </body>
 </html>
