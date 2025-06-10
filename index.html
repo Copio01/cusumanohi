@@ -276,49 +276,13 @@
             </div>
         </section>
 
-        <section id="about"><div class="container"><h2 class="section-title">About Our Company</h2><div class="about-content"><p>For over 20 years, Cusumano Home Improvements has been a family-owned and operated business proudly serving the Monroe, MI area. We are dedicated to delivering the highest quality of work, specializing in residential construction and convenient dumpster rentals. Our commitment is to our craft and, most importantly, to our customers' satisfaction.</p></div></div></section>
-        <section id="services"><div class="container"><h2 class="section-title">Our Services</h2><div class="services-grid">
-            <article class="service-card">
-                <svg class="service-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
-                </svg>
-                <h3>Siding</h3>
-                <p>Enhance your home's curb appeal and protection with our wide variety of siding options, including vinyl, wood, and fiber cement.</p>
-            </article>
-            <article class="service-card">
-                <svg class="service-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"></path>
-                </svg>
-                <h3>Decks</h3>
-                <p>We design and build custom decks or repair existing ones, creating beautiful and lasting outdoor living spaces for you to enjoy.</p>
-            </article>
-            <article class="service-card">
-                <svg class="service-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                </svg>
-                <h3>Dumpster Rentals</h3>
-                <p>Convenient and competitively priced dumpster rentals for your project needs, with various sizes and flexible scheduling.</p>
-            </article>
-        </div></div></section>
+        <section id="about"><div class="container"><h2 class="section-title">About Our Company</h2><div class="about-content" id="about-content"><!-- About text will be loaded here --></div></div></section>
+        <section id="services"><div class="container"><h2 class="section-title">Our Services</h2><div class="services-grid" id="services-grid"><!-- Services will be loaded here --></div></div></section>
         <section id="contact"><div class="container">
             <h2 class="section-title">Ready to Start Your Project?</h2>
-            <p>Contact us today for a free, no-obligation quote. We're ready to help bring your vision to life. You can reach out via the form below, or call us directly!</p>
+            <p id="contact-intro"><!-- Contact intro will be loaded here --></p>
             <div style="display: flex; flex-wrap: wrap; gap: 2.5rem; align-items: flex-start; justify-content: space-between;">
-                
-                <div style="flex:1 1 300px; min-width:280px; max-width:400px;" class="contact-details-column">
-                    <h3 style="font-family: var(--font-heading); color: var(--white); margin-top:0; margin-bottom:1rem;">Contact Directly</h3>
-                    <ul style="list-style:none; padding:0; margin:0 0 1.5rem 0; font-size:1.1rem; color: var(--white);">
-                        <li style="margin-bottom: 0.5rem;"><strong>Phone:</strong> <a href="tel:734-777-8158" style="color:var(--accent-color);text-decoration:underline;">734-777-8158</a></li>
-                        <li><strong>Email:</strong> <a href="mailto:copernan@yahoo.com" style="color:var(--accent-color);text-decoration:underline;">copernan@yahoo.com</a></li>
-                    </ul>
-                    <div style="font-size:1.1rem; color: var(--white); margin-bottom:1.5rem;">
-                        <strong>Cusumano Home Improvements</strong><br>
-                        Monroe, MI<br>
-                        A family owned company.
-                    </div>
-                     <a href="tel:734-777-8158" class="btn btn-secondary">Call Us Now</a>
-                </div>
-                
+                <div style="flex:1 1 300px; min-width:280px; max-width:400px;" class="contact-details-column" id="contact-details-column"><!-- Contact details will be loaded here --></div>
                 <div style="flex:2 1 400px; min-width:300px; max-width:550px;">
                     <form action="https://formsubmit.co/copernan@yahoo.com" method="POST" class="contact-form">
                         <h3>Send us a Message</h3>
@@ -369,7 +333,7 @@
     <script type="module">
         // --- Firebase Imports ---
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-app.js";
-        import { getFirestore, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-firestore.js";
+        import { getFirestore, collection, onSnapshot, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-firestore.js";
         
         // --- Your Firebase Configuration ---
         // IMPORTANT: Ensure your Firebase Firestore security rules are properly configured to protect your data.
@@ -491,9 +455,55 @@
         nextBtn.addEventListener('click', () => { nextSlide(); resetInterval(); });
         prevBtn.addEventListener('click', () => { prevSlide(); resetInterval(); });
 
-        document.addEventListener('DOMContentLoaded', setupSliderListener);
-        
-        // Modal script removed
+        // --- Content Dynamic Loading ---
+        async function loadSiteContent() {
+            if (!db) return;
+            try {
+                const docRef = doc(db, 'siteContent', 'main');
+                const docSnap = await getDoc(docRef);
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    // About
+                    document.getElementById('about-content').innerHTML = `<p>${data.about || ''}</p>`;
+                    // Services
+                    const servicesGrid = document.getElementById('services-grid');
+                    servicesGrid.innerHTML = '';
+                    (data.services || []).forEach(service => {
+                        const card = document.createElement('article');
+                        card.className = 'service-card';
+                        card.innerHTML = `
+                            <svg class="service-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="${service.icon || ''}"></path>
+                            </svg>
+                            <h3>${service.label}</h3>
+                            <p>${service.value}</p>
+                        `;
+                        servicesGrid.appendChild(card);
+                    });
+                    // Contact
+                    document.getElementById('contact-intro').textContent = data.contactIntro || '';
+                    document.getElementById('contact-details-column').innerHTML = `
+                        <h3 style="font-family: var(--font-heading); color: var(--white); margin-top:0; margin-bottom:1rem;">Contact Directly</h3>
+                        <ul style="list-style:none; padding:0; margin:0 0 1.5rem 0; font-size:1.1rem; color: var(--white);">
+                            <li style="margin-bottom: 0.5rem;"><strong>Phone:</strong> <a href="tel:${data.contactPhone || ''}" style="color:var(--accent-color);text-decoration:underline;">${data.contactPhone || ''}</a></li>
+                            <li><strong>Email:</strong> <a href="mailto:${data.contactEmail || ''}" style="color:var(--accent-color);text-decoration:underline;">${data.contactEmail || ''}</a></li>
+                        </ul>
+                        <div style="font-size:1.1rem; color: var(--white); margin-bottom:1.5rem;">
+                            <strong>Cusumano Home Improvements</strong><br>
+                            ${data.contactAddress || ''}<br>
+                            A family owned company.
+                        </div>
+                        <a href="tel:${data.contactPhone || ''}" class="btn btn-secondary">Call Us Now</a>
+                    `;
+                }
+            } catch (e) {
+                console.error('Error loading site content:', e);
+            }
+        }
+        document.addEventListener('DOMContentLoaded', () => {
+            setupSliderListener();
+            loadSiteContent();
+        });
     </script>
 </body>
 </html>

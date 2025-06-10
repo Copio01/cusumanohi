@@ -194,6 +194,7 @@
                     <div class="form-actions">
                         <button type="button" id="preview-btn" class="btn" style="width:auto; background: var(--primary-color);">Preview</button>
                         <button type="button" id="download-html-btn" class="btn" style="width:auto; background: var(--accent-color);">Download HTML</button>
+                        <button type="button" id="save-btn" class="btn" style="width:auto; background: var(--success-color); margin-left:1rem;">Save to Website</button>
                     </div>
                 </form>
                 <div id="site-preview" style="margin-top:2rem; background:#f7f8fc; border-radius:8px; padding:1.5rem; box-shadow:0 2px 8px rgba(10,77,104,0.06);"></div>
@@ -211,7 +212,7 @@
         // --- Firebase Imports ---
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-auth.js";
-        import { getFirestore, collection, addDoc, deleteDoc, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, deleteDoc, doc, onSnapshot, setDoc } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-firestore.js";
         import { getStorage, ref, uploadBytesResumable, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-storage.js";
 
         // --- Your Firebase Configuration ---
@@ -244,6 +245,7 @@
         const imageCount = document.getElementById('image-count');
         const uploadPreview = document.getElementById('upload-preview');
         const uploadMessage = document.getElementById('upload-message');
+        const saveBtn = document.getElementById('save-btn');
 
         // --- Firebase logic ---
         onAuthStateChanged(auth, user => {
@@ -367,9 +369,9 @@
         // --- Website Editor Logic ---
         // Services as an array for reordering
         const services = [
-            { id: 'siding', label: 'Siding', value: '', textarea: null },
-            { id: 'decks', label: 'Decks', value: '', textarea: null },
-            { id: 'dumpster', label: 'Dumpster Rentals', value: '', textarea: null }
+            { id: 'siding', label: 'Siding', value: '', textarea: null, icon: 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4' },
+            { id: 'decks', label: 'Decks', value: '', textarea: null, icon: 'M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4' },
+            { id: 'dumpster', label: 'Dumpster Rentals', value: '', textarea: null, icon: 'M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16' }
         ];
         const aboutText = document.getElementById('about-text');
         const contactAddress = document.getElementById('contact-address');
@@ -485,6 +487,30 @@
             a.click();
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
+        });
+        // --- Firestore Live Save ---
+        saveBtn.addEventListener('click', async () => {
+            const about = aboutText.value;
+            const contactIntro = "Contact us today for a free, no-obligation quote. We're ready to help bring your vision to life. You can reach out via the form below, or call us directly!";
+            const contactAddress = document.getElementById('contact-address').value;
+            const contactPhone = document.getElementById('contact-phone').value;
+            const contactEmail = document.getElementById('contact-email').value;
+            const servicesArr = services.map(s => ({ label: s.label, value: s.value, icon: s.icon }));
+            try {
+                await setDoc(doc(db, 'siteContent', 'main'), {
+                    about,
+                    services: servicesArr,
+                    contactIntro,
+                    contactAddress,
+                    contactPhone,
+                    contactEmail
+                });
+                saveBtn.textContent = 'Saved!';
+                setTimeout(() => { saveBtn.textContent = 'Save to Website'; }, 2000);
+            } catch (e) {
+                saveBtn.textContent = 'Error!';
+                setTimeout(() => { saveBtn.textContent = 'Save to Website'; }, 2000);
+            }
         });
     </script>
 </body>
