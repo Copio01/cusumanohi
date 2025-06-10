@@ -475,9 +475,15 @@
             <button type="button" class="toggle-password" id="toggle-password" aria-label="Show password" title="Show/Hide Password">👁️</button>
         </div>
         <button id="login-btn" class="btn">Login</button>
-        <a href="constructionsnake.html" style="display:inline-block;margin-left:1.2rem;padding:0.6rem 1.3rem;font-size:1.1rem;background:linear-gradient(90deg,#e0a106,#ff4e00);color:#fff;text-decoration:none;border-radius:8px;box-shadow:0 2px 8px rgba(224,161,6,0.13);font-weight:600;vertical-align:middle;transition:transform 0.15s;">
-            🏗️ Play Snake
+        <a href="#" id="play-games-launcher" style="display:inline-block;margin-left:1.2rem;padding:0.6rem 1.3rem;font-size:1.1rem;background:linear-gradient(90deg,#e0a106,#ff4e00);color:#fff;text-decoration:none;border-radius:8px;box-shadow:0 2px 8px rgba(224,161,6,0.13);font-weight:600;vertical-align:middle;transition:transform 0.15s;">
+            🏗️ Play Games
         </a>
+        <script>
+        document.getElementById('play-games-launcher').onclick = function(e) {
+            e.preventDefault();
+            window.location.href = 'Games.html';
+        };
+        </script>
         <p id="login-error">Error logging in. Check email/password.</p>
     </div>
 

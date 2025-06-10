@@ -7,9 +7,35 @@
     <title>Construction Snake</title>
     <style>
         body {
-            background: #f2e6c9 url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?fit=crop&w=800&q=80') no-repeat center center fixed;
-            background-size: cover;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: radial-gradient(ellipse at 60% 40%, #ffd70033 0%, #23232b 100%), linear-gradient(135deg, #23232b 0%, #2d2d3a 100%);
+            font-family: 'Segoe UI', Arial, sans-serif;
+            min-height: 100vh;
+            min-width: 100vw;
+            overflow-x: hidden;
+            overflow-y: auto;
+        }
+        .animated-bg {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+            overflow: hidden;
+        }
+        .bg-shape {
+            position: absolute;
+            border-radius: 50%;
+            opacity: 0.18;
+            filter: blur(18px);
+            animation: floatBg 8s ease-in-out infinite alternate;
+        }
+        .bg-shape1 { width: 340px; height: 340px; background: #ffd700; left: 8vw; top: 10vh; animation-delay: 0s; }
+        .bg-shape2 { width: 220px; height: 220px; background: #ff4e00; right: 10vw; top: 30vh; animation-delay: 2s; }
+        .bg-shape3 { width: 180px; height: 180px; background: #00cfff; left: 30vw; bottom: 8vh; animation-delay: 4s; }
+        @keyframes floatBg {
+            0% { transform: translateY(0) scale(1); }
+            100% { transform: translateY(-30px) scale(1.08); }
         }
         #game-container {
             width: 900px;
@@ -227,6 +253,11 @@
     </style>
 </head>
 <body>
+    <div class="animated-bg">
+        <div class="bg-shape bg-shape1"></div>
+        <div class="bg-shape bg-shape2"></div>
+        <div class="bg-shape bg-shape3"></div>
+    </div>
     <div id="game-container">
         <h1 style="color:#e0a106;text-align:center;">🚧 Construction Snake 🚧</h1>
         <div id="main-menu">

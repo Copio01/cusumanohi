@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Game Launcher</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background: radial-gradient(ellipse at 60% 40%, #ffd70033 0%, #23232b 100%), linear-gradient(135deg, #23232b 0%, #2d2d3a 100%);
+      font-family: 'Segoe UI', Arial, sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      overflow: hidden;
+    }
+    .animated-bg {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      overflow: hidden;
+    }
+    .bg-shape {
+      position: absolute;
+      border-radius: 50%;
+      opacity: 0.18;
+      filter: blur(18px);
+      animation: floatBg 8s ease-in-out infinite alternate;
+    }
+    .bg-shape1 { width: 340px; height: 340px; background: #ffd700; left: 8vw; top: 10vh; animation-delay: 0s; }
+    .bg-shape2 { width: 220px; height: 220px; background: #ff4e00; right: 10vw; top: 30vh; animation-delay: 2s; }
+    .bg-shape3 { width: 180px; height: 180px; background: #00cfff; left: 30vw; bottom: 8vh; animation-delay: 4s; }
+    @keyframes floatBg {
+      0% { transform: translateY(0) scale(1); }
+      100% { transform: translateY(-30px) scale(1.08); }
+    }
+    .launcher-modal {
+      background: rgba(35,35,43,0.98);
+      border-radius: 22px;
+      box-shadow: 0 12px 48px 0 #000a, 0 0 0 4px #ffd70033;
+      padding: 44px 38px 32px 38px;
+      min-width: 340px;
+      min-height: 340px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+      animation: fadeIn 0.5s cubic-bezier(.4,2,.6,1);
+      z-index: 2;
+      overflow: visible;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.92); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    .launcher-title {
+      font-size: 2.3rem;
+      color: #ffd700;
+      margin-bottom: 22px;
+      letter-spacing: 1.5px;
+      text-shadow: 0 4px 18px #000a, 0 1px 0 #fff2;
+      font-family: 'Poppins', 'Segoe UI', Arial, sans-serif;
+      font-weight: 700;
+      position: relative;
+      animation: popTitle 1s cubic-bezier(.4,2,.6,1);
+    }
+    @keyframes popTitle {
+      0% { opacity: 0; transform: translateY(-30px) scale(0.8); }
+      60% { opacity: 1; transform: translateY(8px) scale(1.08); }
+      100% { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    .game-options {
+      display: flex;
+      gap: 38px;
+      margin-bottom: 18px;
+      z-index: 1;
+    }
+    .game-card {
+      background: linear-gradient(135deg, #31313c 60%, #23232b 100%);
+      border-radius: 16px;
+      box-shadow: 0 4px 24px #0006, 0 0 0 2px #ffd70033;
+      padding: 28px 34px 22px 34px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      cursor: pointer;
+      transition: transform 0.18s cubic-bezier(.4,2,.6,1), box-shadow 0.18s, border 0.18s;
+      border: 2.5px solid transparent;
+      min-width: 140px;
+      position: relative;
+      overflow: visible;
+      animation: cardIn 0.7s cubic-bezier(.4,2,.6,1);
+    }
+    .game-card:hover {
+      transform: translateY(-8px) scale(1.07) rotate(-2deg);
+      box-shadow: 0 12px 36px #ffd70055, 0 0 0 4px #ffd70099;
+      border-color: #ffd700;
+      z-index: 2;
+    }
+    @keyframes cardIn {
+      0% { opacity: 0; transform: translateY(40px) scale(0.8); }
+      100% { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    .game-card::after {
+      content: '';
+      position: absolute;
+      left: 50%;
+      top: 100%;
+      transform: translateX(-50%) scale(0.7);
+      width: 60px;
+      height: 18px;
+      background: radial-gradient(ellipse at center, #ffd70055 0%, #0000 80%);
+      opacity: 0.7;
+      filter: blur(2px);
+      z-index: 0;
+      pointer-events: none;
+      transition: opacity 0.2s;
+    }
+    .game-card:hover::after {
+      opacity: 1;
+    }
+    .game-icon {
+      font-size: 3.2rem;
+      margin-bottom: 14px;
+      filter: drop-shadow(0 2px 8px #ffd70088) drop-shadow(0 0px 2px #0008);
+      animation: iconPulse 2.2s infinite cubic-bezier(.4,2,.6,1);
+      transition: filter 0.2s;
+    }
+    .game-card:hover .game-icon {
+      filter: drop-shadow(0 0px 16px #ffd700cc) drop-shadow(0 0px 2px #0008) brightness(1.2);
+      animation: iconPulseHover 0.7s 1 cubic-bezier(.4,2,.6,1);
+    }
+    @keyframes iconPulse {
+      0%, 100% { transform: scale(1) rotate(-6deg); }
+      50% { transform: scale(1.13) rotate(6deg); }
+    }
+    @keyframes iconPulseHover {
+      0% { transform: scale(1.13) rotate(6deg); }
+      100% { transform: scale(1) rotate(-6deg); }
+    }
+    .game-title {
+      font-size: 1.25rem;
+      color: #fff;
+      font-weight: 700;
+      margin-bottom: 6px;
+      letter-spacing: 0.7px;
+      text-shadow: 0 2px 8px #000a, 0 1px 0 #fff2;
+      font-family: 'Poppins', 'Segoe UI', Arial, sans-serif;
+    }
+    .game-desc {
+      font-size: 1.01rem;
+      color: #ffd700;
+      opacity: 0.88;
+      text-align: center;
+      text-shadow: 0 1px 4px #000a;
+      font-family: 'Segoe UI', Arial, sans-serif;
+    }
+    .close-btn {
+      position: absolute;
+      top: 12px;
+      right: 16px;
+      background: none;
+      border: none;
+      color: #ffd700;
+      font-size: 2.1rem;
+      cursor: pointer;
+      transition: color 0.15s, transform 0.18s cubic-bezier(.4,2,.6,1);
+      z-index: 3;
+      filter: drop-shadow(0 2px 8px #000a);
+    }
+    .close-btn:hover {
+      color: #fff;
+      transform: scale(1.18) rotate(8deg);
+    }
+    .sparkle {
+      position: absolute;
+      pointer-events: none;
+      width: 18px; height: 18px;
+      background: radial-gradient(circle, #fffde4 0%, #ffd700 60%, #ff4e00 100%, #0000 100%);
+      border-radius: 50%;
+      opacity: 0.7;
+      animation: sparkleAnim 1.2s linear forwards;
+      z-index: 10;
+      filter: blur(0.5px) brightness(1.2);
+    }
+    @keyframes sparkleAnim {
+      0% { opacity: 0.7; transform: scale(0.7) rotate(0deg); }
+      60% { opacity: 1; transform: scale(1.2) rotate(180deg); }
+      100% { opacity: 0; transform: scale(0.3) rotate(360deg); }
+    }
+    .fullscreen-fade {
+      position: fixed;
+      inset: 0;
+      background: #18181f;
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      animation: fadeToFull 0.7s cubic-bezier(.4,2,.6,1) forwards;
+      opacity: 0;
+      pointer-events: none;
+    }
+    .fullscreen-fade.active {
+      opacity: 1;
+      pointer-events: all;
+    }
+    @keyframes fadeToFull {
+      0% { opacity: 0; }
+      100% { opacity: 1; }
+    }
+    .fullscreen-iframe {
+      width: 100vw;
+      height: 100vh;
+      border: none;
+      background: #18181f;
+      box-shadow: 0 0 0 0 #0000;
+      z-index: 10000;
+      animation: iframePop 0.7s cubic-bezier(.4,2,.6,1);
+      display: block;
+    }
+    @keyframes iframePop {
+      0% { transform: scale(0.98) translateY(40px); opacity: 0; }
+      100% { transform: scale(1) translateY(0); opacity: 1; }
+    }
+    .fullscreen-close {
+      position: absolute;
+      top: 24px;
+      right: 36px;
+      z-index: 10001;
+      background: none;
+      border: none;
+      color: #ffd700;
+      font-size: 2.5rem;
+      cursor: pointer;
+      filter: drop-shadow(0 2px 8px #000a);
+      transition: color 0.15s, transform 0.18s cubic-bezier(.4,2,.6,1);
+    }
+    .fullscreen-close:hover {
+      color: #fff;
+      transform: scale(1.18) rotate(8deg);
+    }
+    @media (max-width: 600px) {
+      .launcher-modal { min-width: 90vw; padding: 18px 4vw; }
+      .game-options { flex-direction: column; gap: 18px; }
+      .game-card { min-width: 0; width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <div class="animated-bg">
+    <div class="bg-shape bg-shape1"></div>
+    <div class="bg-shape bg-shape2"></div>
+    <div class="bg-shape bg-shape3"></div>
+  </div>
+  <div class="launcher-modal" id="launcherModal">
+    <button class="close-btn" id="closeBtn" title="Close">&times;</button>
+    <div class="launcher-title">Game Launcher</div>
+    <div class="game-options">
+      <div class="game-card" data-url="HammerBall.html">
+        <div class="game-icon">&#128296;</div>
+        <div class="game-title">HammerBall</div>
+        <div class="game-desc">Construction Pong<br>with Powerups</div>
+      </div>
+      <div class="game-card" data-url="constructionsnake.html">
+        <div class="game-icon">&#128013;</div>
+        <div class="game-title">Construction Snake</div>
+        <div class="game-desc">Classic Snake<br>with a Twist</div>
+      </div>
+    </div>
+  </div>
+  <div class="fullscreen-fade" id="fullscreenFade" tabindex="-1" aria-modal="true" style="display:none">
+    <button class="fullscreen-close" id="fullscreenClose" title="Close Game">&times;</button>
+    <iframe class="fullscreen-iframe" id="fullscreenIframe" allowfullscreen></iframe>
+  </div>
+  <script>
+    function launchGame(url) {
+      // Sparkle effect on click
+      const e = window.event;
+      if (e) {
+        const card = e.currentTarget || e.target.closest('.game-card');
+        if (card) {
+          const rect = card.getBoundingClientRect();
+          const sparkle = document.createElement('div');
+          sparkle.className = 'sparkle';
+          sparkle.style.left = (e.clientX - rect.left - 9) + 'px';
+          sparkle.style.top = (e.clientY - rect.top - 9) + 'px';
+          card.appendChild(sparkle);
+          setTimeout(() => sparkle.remove(), 1200);
+        }
+      }
+      setTimeout(() => {
+        // Show fullscreen modal with iframe
+        document.getElementById('fullscreenFade').style.display = 'flex';
+        setTimeout(() => document.getElementById('fullscreenFade').classList.add('active'), 10);
+        document.getElementById('fullscreenIframe').src = url;
+        document.body.style.overflow = 'hidden';
+        document.getElementById('fullscreenClose').focus();
+      }, 180);
+    }
+    // Attach click handler to each card for sparkle
+    document.querySelectorAll('.game-card').forEach(card => {
+      card.onclick = function(e) {
+        // Instead of using the inline onclick attribute, get the game URL from a data attribute
+        const url = this.dataset.url;
+        launchGame(url);
+      };
+    });
+    document.getElementById('closeBtn').onclick = function() {
+      window.close();
+    };
+    // Fullscreen close logic
+    document.getElementById('fullscreenClose').onclick = function() {
+      document.getElementById('fullscreenFade').classList.remove('active');
+      setTimeout(() => {
+        document.getElementById('fullscreenFade').style.display = 'none';
+        document.getElementById('fullscreenIframe').src = '';
+        document.body.style.overflow = '';
+      }, 400);
+    };
+    // ESC closes fullscreen modal
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        if (document.getElementById('fullscreenFade').classList.contains('active')) {
+          document.getElementById('fullscreenClose').click();
+        } else {
+          window.close();
+        }
+      }
+    });
+    // Random sparkles on background
+    setInterval(() => {
+      const bg = document.querySelector('.animated-bg');
+      if (!bg) return;
+      const sparkle = document.createElement('div');
+      sparkle.className = 'sparkle';
+      sparkle.style.left = Math.random() * window.innerWidth + 'px';
+      sparkle.style.top = Math.random() * window.innerHeight + 'px';
+      sparkle.style.opacity = 0.3 + Math.random() * 0.5;
+      sparkle.style.width = sparkle.style.height = (10 + Math.random() * 18) + 'px';
+      bg.appendChild(sparkle);
+      setTimeout(() => sparkle.remove(), 1200);
+    }, 600);
+  </script>
+</body>
+</html>
