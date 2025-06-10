@@ -1,0 +1,252 @@
+/* Enhanced Leaderboard Styles for Construction Snake */
+
+/* Leaderboard show animation */
+@keyframes leaderboard-show {
+    0% { 
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    100% { 
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Leaderboard Container */
+#leaderboard {
+    background-color: rgba(255, 255, 255, 0.18);
+    background-image: linear-gradient(45deg, rgba(224, 161, 6, 0.05) 25%, transparent 25%, transparent 50%, rgba(224, 161, 6, 0.05) 50%, rgba(224, 161, 6, 0.05) 75%, transparent 75%, transparent);
+    background-size: 40px 40px;
+    border-radius: 12px;
+    padding: 18px;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.25), inset 0 1px 3px rgba(255, 255, 255, 0.3);
+    border: 2px solid rgba(224, 161, 6, 0.8);
+    max-width: 520px;
+    margin: 0 auto;
+    backdrop-filter: blur(5px);
+    animation: leaderboard-show 0.5s ease-out forwards;
+}
+
+#leaderboard h2 {
+    margin-top: 0;
+    color: #e0a106;
+    text-align: center;
+    font-size: 1.5em;
+    padding-bottom: 10px;
+    border-bottom: 2px solid rgba(224, 161, 6, 0.6);
+    margin-bottom: 15px;
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.4);
+    letter-spacing: 0.5px;
+    font-weight: 700;
+}
+
+/* Score Entry Row */
+.score-entry {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 15px;
+    margin-bottom: 10px;
+    background-color: rgba(224, 161, 6, 0.15);
+    border-radius: 6px;
+    font-weight: bold;
+    transition: all 0.2s ease-in-out;
+    position: relative;
+    overflow: hidden;
+    border-left: 4px solid #e0a106;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.score-entry:hover {
+    background-color: rgba(255, 255, 255, 0.25);
+    transform: translateY(-3px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.score-entry:last-child {
+    margin-bottom: 0;
+}
+
+/* Ranking numbers */
+.score-entry::before {
+    content: attr(data-rank);
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 28px;
+    background-color: rgba(224, 161, 6, 0.85);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #000;
+    font-weight: bold;
+    font-size: 1em;
+    box-shadow: inset -2px 0 3px rgba(0, 0, 0, 0.1);
+}
+
+/* Player name styling */
+.score-entry .player-name {
+    color: #000;
+    margin-left: 32px;
+    margin-right: 10px;
+    background-color: rgba(255, 255, 255, 0.9);
+    padding: 6px 14px;
+    border-radius: 12px;
+    box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.15);
+    text-shadow: none;
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-weight: 600;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.score-entry:hover .player-name {
+    transform: scale(1.02);
+    box-shadow: 3px 3px 6px rgba(0, 0, 0, 0.2);
+}
+
+.score-entry small {
+    display: inline-block;
+    color: #555;
+    background-color: rgba(255, 255, 255, 0.75);
+    font-weight: normal;
+    margin-left: 6px;
+    padding: 2px 8px;
+    border-radius: 8px;
+    font-size: 0.8em;
+    vertical-align: middle;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+/* Custom styling for different game modes */
+.score-entry small.classic-mode {
+    background-color: rgba(220, 240, 255, 0.85);
+    color: #3470a3;
+    border: 1px solid rgba(52, 112, 163, 0.3);
+}
+
+.score-entry small.ultra-mode {
+    background-color: rgba(255, 225, 215, 0.85);
+    color: #c23b22;
+    border: 1px solid rgba(194, 59, 34, 0.3);
+}
+
+/* Score value styling */
+.score-entry .player-score {
+    color: #000;
+    font-size: 1.2em;
+    background-color: rgba(255, 255, 255, 0.9);
+    padding: 4px 12px;
+    border-radius: 12px;
+    min-width: 70px;
+    text-align: center;
+    box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+    font-weight: 700;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.score-entry:hover .player-score {
+    transform: scale(1.05);
+    box-shadow: 3px 3px 6px rgba(0, 0, 0, 0.25);
+}
+
+/* Date display */
+.score-entry .score-date {
+    position: absolute;
+    right: 15px;
+    bottom: 2px;
+    font-size: 0.75em;
+    color: rgba(102, 102, 102, 0.8);
+    font-style: italic;
+    background-color: rgba(255, 255, 255, 0.7);
+    padding: 2px 8px;
+    border-radius: 8px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+/* Highlight current player */
+.score-entry.current-player {
+    background-color: rgba(255, 250, 235, 0.5);
+    border-left: 5px solid #ff9900;
+    animation: pulse-glow 2s infinite;
+    box-shadow: 0 2px 8px rgba(255, 153, 0, 0.3);
+}
+.score-entry.current-player .player-name {
+    background-color: rgba(255, 236, 179, 0.95);
+    border: 1px solid rgba(255, 153, 0, 0.6);
+    font-weight: 700;
+}
+
+@keyframes pulse-glow {
+    0% { box-shadow: 0 0 5px rgba(255, 153, 0, 0.3); }
+    50% { box-shadow: 0 0 15px rgba(255, 153, 0, 0.6); }
+    100% { box-shadow: 0 0 5px rgba(255, 153, 0, 0.3); }
+}
+
+/* Loading animation */
+#leaderboard-entries.loading {
+    min-height: 150px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.loading-spinner {
+    width: 48px;
+    height: 48px;
+    border: 4px solid rgba(224, 161, 6, 0.3);
+    border-top: 4px solid #e0a106;
+    border-left: 4px solid #e0a106;
+    border-radius: 50%;
+    animation: spin 1.2s cubic-bezier(0.5, 0.1, 0.5, 0.9) infinite;
+    box-shadow: 0 0 10px rgba(224, 161, 6, 0.2);
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Special styling for first place */
+.score-entry[data-rank="1"] {
+    background-color: rgba(255, 215, 0, 0.15);
+    border-left-color: #ffcc00;
+    box-shadow: 0 3px 8px rgba(255, 204, 0, 0.25);
+    position: relative;
+    overflow: hidden;
+}
+
+.score-entry[data-rank="1"]::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(90deg, 
+                transparent, 
+                rgba(255, 215, 0, 0.1), 
+                transparent);
+    animation: shine 1.5s infinite;
+    z-index: 1;
+    pointer-events: none;
+}
+
+@keyframes shine {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
+
+/* Styling for 2nd and 3rd place */
+.score-entry[data-rank="2"] {
+    background-color: rgba(192, 192, 192, 0.15);
+    border-left-color: #c0c0c0;
+}
+
+.score-entry[data-rank="3"] {
+    background-color: rgba(205, 127, 50, 0.15);
+    border-left-color: #cd7f32;
+}

@@ -52,14 +52,137 @@
             margin-top: 0;
             color: #e0a106;
         }
+        #leaderboard {
+            background-color: rgba(255, 255, 255, 0.15);
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            border: 2px solid rgba(224, 161, 6, 0.7);
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        #leaderboard h2 {
+            margin-top: 0;
+            color: #e0a106;
+            text-align: center;
+            font-size: 1.4em;
+            padding-bottom: 8px;
+            border-bottom: 2px solid rgba(224, 161, 6, 0.5);
+            margin-bottom: 12px;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+        }
         .score-entry {
             display: flex;
             justify-content: space-between;
-            padding: 4px 0;
-            border-bottom: 1px dashed #e0a106;
+            align-items: center;
+            padding: 10px 15px;
+            margin-bottom: 8px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            font-weight: bold;
+            transition: all 0.2s ease-in-out;
+            position: relative;
+            overflow: hidden;
+            border-left: 4px solid #e0a106;
+        }
+        .score-entry:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
         }
         .score-entry:last-child {
-            border-bottom: none;
+            margin-bottom: 0;
+        }
+        .score-entry::before {
+            content: attr(data-rank);
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 28px;
+            background-color: rgba(224, 161, 6, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #000;
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+        .score-entry .player-name {
+            color: #000;
+            margin-left: 32px;
+            margin-right: 10px;
+            background-color: rgba(255, 255, 255, 0.85);
+            padding: 4px 12px;
+            border-radius: 12px;
+            box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.15);
+            text-shadow: none;
+            flex: 1;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .score-entry small {
+            display: inline-block;
+            color: #555;
+            background-color: rgba(255, 255, 255, 0.7);
+            font-weight: normal;
+            margin-left: 5px;
+            padding: 0 6px;
+            border-radius: 8px;
+            font-size: 0.8em;
+            vertical-align: middle;
+        }.score-entry .player-score {
+            color: #000;
+            font-size: 1.2em;
+            background-color: rgba(255, 255, 255, 0.85);
+            padding: 3px 10px;
+            border-radius: 12px;
+            min-width: 60px;
+            text-align: center;
+            box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
+        }
+        .score-entry .score-date {
+            position: absolute;
+            right: 15px;
+            bottom: 2px;
+            font-size: 0.75em;
+            color: rgba(255, 255, 255, 0.6);
+            font-style: italic;
+        }
+        /* Highlight current player entry */
+        .score-entry.current-player {
+            background-color: rgba(255, 250, 235, 0.4);
+            border-left: 4px solid #ff9900;
+            animation: pulse-glow 2s infinite;
+        }
+        .score-entry.current-player .player-name {
+            background-color: rgba(255, 236, 179, 0.9);
+            border: 1px solid rgba(255, 153, 0, 0.5);
+        }
+        @keyframes pulse-glow {
+            0% { box-shadow: 0 0 5px rgba(224, 161, 6, 0.3); }
+            50% { box-shadow: 0 0 15px rgba(224, 161, 6, 0.5); }
+            100% { box-shadow: 0 0 5px rgba(224, 161, 6, 0.3); }
+        }
+        /* Loading animation */
+        #leaderboard-entries.loading {
+            min-height: 150px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(224, 161, 6, 0.3);
+            border-top: 4px solid #e0a106;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
         #main-menu {
             display: flex;
@@ -108,8 +231,11 @@
         <h1 style="color:#e0a106;text-align:center;">🚧 Construction Snake 🚧</h1>
         <div id="main-menu">
             <label for="player-name">Enter your name to play:</label>
-            <input type="text" id="player-name" maxlength="16" placeholder="Your name..." autocomplete="off">
-            <button id="start-btn">Start Game</button>
+            <input type="text" id="player-name" maxlength="16" placeholder="Your name..." autocomplete="off" />
+            <div style="margin:1.2rem 0;display:flex;gap:1.2rem;">
+                <button id="classic-btn">Classic Snake</button>
+                <button id="ultra-btn">Ultra Snake</button>
+            </div>
         </div>
         <div id="difficulty-meter" style="display:none;">
             <div id="difficulty-bar"></div>
@@ -123,7 +249,24 @@
             <div id="leaderboard-entries">Loading...</div>
         </div>
     </div>
-    <script>
+    <script type="module">
+    // --- Firebase Imports ---
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-app.js";
+    import { getFirestore, collection, addDoc, query, orderBy, limit, getDocs, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-firestore.js";    // --- Your Firebase Configuration (copied from admin.html) ---
+    const firebaseConfig = {
+        apiKey: "AIzaSyBVtq6dAEuybJNmTTv8dXBxTVUgw1t0ZMk",
+        authDomain: "cusumano-website.firebaseapp.com",
+        projectId: "cusumano-website",
+        storageBucket: "cusumano-website.firebasestorage.app",
+        messagingSenderId: "20051552210",
+        appId: "1:20051552210:web:7eb3b22baa3fec184e4a0b"
+    };
+    // ----------------------------------------------------
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const leaderboardCollectionName = "snakeLeaderboard"; // Firestore collection name
+
     // --- Construction Snake Game JS ---
     const CELL_SIZE = 32;
     const GRID_SIZE = 25;
@@ -132,7 +275,8 @@
     const SPEED_STEP = 6;
     const MAX_SPEED = 40;
     const DIFFICULTY_BAR_MAX = 100;
-    const LEADERBOARD_SIZE = 7;
+    const LEADERBOARD_SIZE = 6; // Changed from 7 to 6 as requested
+    const POWERUP_DURATION = 48; // Duration in game ticks (quartered from 150, then increased by ~25%)
 
     let snake, direction, nextDirection, food, score, speed, intervalId, running, playerName;
     let obstacles = [];
@@ -140,7 +284,6 @@
     const canvas = document.getElementById('game-canvas');
     const ctx = canvas.getContext('2d');
     const mainMenu = document.getElementById('main-menu');
-    const startBtn = document.getElementById('start-btn');
     const playerNameInput = document.getElementById('player-name');
     const difficultyMeter = document.getElementById('difficulty-meter');
     const difficultyBar = document.getElementById('difficulty-bar');
@@ -148,6 +291,25 @@
     const scoreLabel = document.getElementById('score-label');
     const leaderboard = document.getElementById('leaderboard');
     const leaderboardEntries = document.getElementById('leaderboard-entries');
+    const classicButton = document.getElementById('classic-btn');
+    const ultraButton = document.getElementById('ultra-btn');
+
+    // --- Main Menu Update ---
+    // Remove erroneous raw HTML main menu block from JS
+
+    // --- JS: Add Ultra Snake Mode ---
+    let gameMode = "classic"; // "classic" or "ultra"
+    let powerups = [];
+    // let activePowerup = null; // Replaced for stacking
+    // let powerupTimer = 0; // Replaced for stacking
+    let activePowerups = []; // Array to hold active powerups { type, timer, charges? }
+
+    const POWERUP_TYPES = [
+        { type: "magnet", color: "#4ecaff", icon: "🧲" },
+        { type: "ghost", color: "#b3b3ff", icon: "👻" },
+        { type: "shield", color: "#76e6cd", icon: "🛡️" }, // Cyan-ish for shield
+        { type: "drill", color: "#c0c0c0", icon: "🔩" }   // Silver for drill
+    ];
 
     function resetGame() {
         snake = [
@@ -159,11 +321,18 @@
         nextDirection = 'RIGHT';
         score = 0;
         speed = INITIAL_SPEED;
-        running = true;
         obstacles = [];
+        powerups = [];
+        // activePowerup = null; // Handled by activePowerups
+        // powerupTimer = 0;   // Handled by activePowerups
+        activePowerups = []; // Reset active powerups
         placeFood();
+        if (gameMode === "ultra") placePowerup(); // Initial powerup for ultra
         updateDifficultyBar();
-        scoreLabel.textContent = "Score: 0";
+        scoreLabel.textContent = "Score: " + score;
+        if (intervalId) clearInterval(intervalId); // Clear previous interval if any
+        intervalId = setInterval(gameLoop, speed);
+        running = true;
     }
 
     function placeFood() {
@@ -192,6 +361,46 @@
         obstacles.push(obs);
     }
 
+    function placePowerup() {
+        // Only place a powerup if there isn't one already
+        if (powerups.length > 0) return;
+        let valid = false, p;
+        while (!valid) {
+            p = {
+                x: Math.floor(Math.random() * GRID_SIZE),
+                y: Math.floor(Math.random() * GRID_SIZE),
+                ...POWERUP_TYPES[Math.floor(Math.random() * POWERUP_TYPES.length)]
+            };
+            valid = !snake.some(s => s.x === p.x && s.y === p.y) &&
+                    !obstacles.some(o => o.x === p.x && o.y === p.y) &&
+                    (food.x !== p.x || food.y !== p.y);
+        }
+        powerups.push(p);
+    }
+
+    function drawPowerups() {
+        if (!powerups || powerups.length === 0) return;
+        for (const p of powerups) {
+            const x = p.x * CELL_SIZE + CELL_SIZE / 2;
+            const y = p.y * CELL_SIZE + CELL_SIZE / 2;
+            ctx.save();
+            ctx.beginPath();
+            ctx.arc(x, y, 13, 0, 2 * Math.PI);
+            ctx.fillStyle = p.color;
+            ctx.globalAlpha = 0.7 + 0.3 * Math.sin(Date.now()/200);
+            ctx.shadowColor = p.color;
+            ctx.shadowBlur = 12;
+            ctx.fill();
+            ctx.shadowBlur = 0;
+            ctx.globalAlpha = 1;
+            ctx.font = '20px Segoe UI';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(p.icon, x, y+1);
+            ctx.restore();
+        }
+    }
+
     function drawCell(x, y, color, borderColor = "#bfa14a") {
         ctx.fillStyle = color;
         ctx.fillRect(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
@@ -200,34 +409,270 @@
         ctx.strokeRect(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
     }
 
+    // --- Enhanced Graphics ---
+
+    function drawObstacles() {
+        for (const obs of obstacles) {
+            ctx.save();
+            const cx = obs.x * CELL_SIZE + CELL_SIZE/2;
+            const cy = obs.y * CELL_SIZE + CELL_SIZE/2;
+            // Bomb body with radial gradient for shine
+            let grad = ctx.createRadialGradient(cx-5, cy-5, 4, cx, cy, 13);
+            grad.addColorStop(0, "#444");
+            grad.addColorStop(0.5, "#222");
+            grad.addColorStop(1, "#111");
+            ctx.beginPath();
+            ctx.arc(cx, cy, 13, 0, 2 * Math.PI);
+            ctx.fillStyle = grad;
+            ctx.shadowColor = "#000";
+            ctx.shadowBlur = 10;
+            ctx.fill();
+            ctx.shadowBlur = 0;
+            ctx.strokeStyle = "#888";
+            ctx.lineWidth = 3;
+            ctx.stroke();
+            // Curly fuse
+            ctx.beginPath();
+            ctx.moveTo(cx, cy - 13);
+            for (let i = 0; i < 5; i++) {
+                ctx.lineTo(cx + Math.sin(i + Date.now()/400) * 3, cy - 16 - i * 2.5);
+            }
+            ctx.strokeStyle = "#bfa14a";
+            ctx.lineWidth = 2.5;
+            ctx.stroke();
+            // Animated Spark with glow and flicker
+            ctx.save();
+            const sparkPulse = 0.7 + 0.3 * Math.sin(Date.now()/80);
+            ctx.globalAlpha = sparkPulse;
+            ctx.beginPath();
+            ctx.arc(cx, cy - 28, 4 + Math.abs(Math.sin(Date.now()/120)), 0, 2 * Math.PI);
+            ctx.fillStyle = "#ffec70";
+            ctx.shadowColor = "#ffec70";
+            ctx.shadowBlur = 12 + 6 * Math.abs(Math.sin(Date.now()/120));
+            ctx.fill();
+            ctx.shadowBlur = 0;
+            ctx.globalAlpha = 1;
+            ctx.beginPath();
+            ctx.arc(cx, cy - 28, 1.5 + Math.abs(Math.sin(Date.now()/100)), 0, 2 * Math.PI);
+            ctx.fillStyle = "#ff4e00";
+            ctx.fill();
+            // Tiny sparks
+            for (let s = 0; s < 3; s++) {
+                ctx.save();
+                ctx.globalAlpha = 0.5 + 0.5 * Math.random();
+                ctx.beginPath();
+                ctx.arc(cx + Math.random()*6-3, cy - 28 - Math.random()*6, 0.7 + Math.random()*0.7, 0, 2 * Math.PI);
+                ctx.fillStyle = '#ffec70';
+                ctx.fill();
+                ctx.restore();
+            }
+            ctx.restore();
+            ctx.restore();
+        }
+    }
+
     function drawSnake() {
+        if (!snake || !Array.isArray(snake) || snake.length === 0) return;
+
+        const isGhostActive = gameMode === "ultra" && activePowerups.some(p => p.type === "ghost" && p.timer > 0);
+        const isMagnetActive = gameMode === "ultra" && activePowerups.some(p => p.type === "magnet" && p.timer > 0);
+
         for (let i = 0; i < snake.length; i++) {
-            if (i === 0) {
+            const segment = snake[i];
+            const sx = segment.x * CELL_SIZE;
+            const sy = segment.y * CELL_SIZE;
+            
+            ctx.save();
+
+            if (isGhostActive) {
+                ctx.globalAlpha = 0.6; // Semi-transparent for ghost
+            }
+
+            if (i === 0) { // Head
                 // Head: bulldozer cab
                 ctx.fillStyle = "#e0a106";
-                ctx.fillRect(snake[i].x * CELL_SIZE, snake[i].y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
-                ctx.fillStyle = "#fff";
-                ctx.fillRect(snake[i].x * CELL_SIZE + 8, snake[i].y * CELL_SIZE + 8, 16, 10);
+                ctx.fillRect(sx, sy, CELL_SIZE, CELL_SIZE);
+                // Window
+                ctx.fillStyle = "#b3e6ff";
+                ctx.fillRect(sx + 8, sy + 6, 16, 10);
+                // Grill
+                ctx.strokeStyle = "#bfa14a";
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(sx + 6, sy + 28);
+                ctx.lineTo(sx + 26, sy + 28);
+                ctx.stroke();
+                // Headlights
+                ctx.fillStyle = "#fffbe6";
+                ctx.beginPath();
+                ctx.arc(sx + 6, sy + 30, 3, 0, 2 * Math.PI);
+                ctx.arc(sx + 26, sy + 30, 3, 0, 2 * Math.PI);
+                ctx.fill();
+                // Blade
                 ctx.fillStyle = "#bfa14a";
-                ctx.fillRect(snake[i].x * CELL_SIZE, snake[i].y * CELL_SIZE + 24, CELL_SIZE, 8); // blade
-            } else {
-                // Body: treads
+                ctx.fillRect(sx, sy + 24, CELL_SIZE, 8);
+
+                if (isMagnetActive) {
+                    const headCenterX = sx + CELL_SIZE / 2;
+                    const headCenterY = sy + CELL_SIZE / 2;
+                    const magnetColor = POWERUP_TYPES.find(p => p.type === "magnet").color;
+                    
+                    // Pulsating aura for magnet
+                    const pulse = Math.abs(Math.sin(Date.now() / 200)); // 0 to 1
+                    const auraRadius = CELL_SIZE * (0.6 + pulse * 0.4); // Varies between 0.6 and 1.0 of CELL_SIZE
+                    const auraOpacity = 0.3 + pulse * 0.3; // Varies between 0.3 and 0.6
+
+                    ctx.beginPath();
+                    ctx.arc(headCenterX, headCenterY, auraRadius, 0, 2 * Math.PI);
+                    ctx.fillStyle = magnetColor;
+                    ctx.globalAlpha = isGhostActive ? Math.min(0.6, auraOpacity) : auraOpacity; // Respect ghost transparency
+                    ctx.fill();
+
+                    // Sparkle particles for magnet
+                    const numSparks = 5;
+                    for (let k = 0; k < numSparks; k++) {
+                        const angle = (Date.now() / 300 + (k * Math.PI * 2) / numSparks) % (Math.PI * 2);
+                        const distance = CELL_SIZE * 0.5 + pulse * 8;
+                        const sparkX = headCenterX + Math.cos(angle) * distance;
+                        const sparkY = headCenterY + Math.sin(angle) * distance;
+                        const sparkSize = 1 + pulse * 2;
+                        
+                        ctx.beginPath();
+                        ctx.arc(sparkX, sparkY, sparkSize, 0, 2 * Math.PI);
+                        ctx.fillStyle = magnetColor;
+                        const sparkOpacity = 0.5 + pulse * 0.5;
+                        ctx.globalAlpha = isGhostActive ? Math.min(0.6, sparkOpacity) : sparkOpacity;
+                        ctx.fill();
+                    }
+                }
+
+                // Shield Powerup Visual Effect
+                const isShieldActive = gameMode === "ultra" && activePowerups.some(p => p.type === "shield" && p.timer > 0);
+                if (isShieldActive) {
+                    const headCenterX = sx + CELL_SIZE / 2;
+                    const headCenterY = sy + CELL_SIZE / 2;
+                    const shieldColor = POWERUP_TYPES.find(p => p.type === "shield").color;
+                    const pulse = Math.abs(Math.sin(Date.now() / 250)); // Slower pulse for shield
+                    const shieldRadius = CELL_SIZE * (0.7 + pulse * 0.2); // Slightly larger and less variable
+                    const shieldOpacity = 0.35 + pulse * 0.25;
+
+                    ctx.beginPath();
+                    ctx.arc(headCenterX, headCenterY, shieldRadius, 0, 2 * Math.PI);
+                    ctx.fillStyle = shieldColor;                    // If ghost is also active, ensure shield opacity doesn't exceed ghost's base opacity
+                    let finalShieldOpacity = isGhostActive ? Math.min(ctx.globalAlpha, shieldOpacity) : shieldOpacity;
+                    // If magnet is also active, and ghost is not, ensure shield opacity doesn't make magnet aura invisible
+                    if (isMagnetActive && !isGhostActive) finalShieldOpacity = Math.min(0.6, shieldOpacity); // Fixed: using fixed value instead of undefined auraOpacity
+                    
+                    const originalAlpha = ctx.globalAlpha; // Store current alpha before applying shield
+                    ctx.globalAlpha = finalShieldOpacity;
+                    ctx.fill();
+                    
+                    // Optional: Add a slight border to the shield
+                    ctx.strokeStyle = "rgba(255, 255, 255, 0.5)";
+                    ctx.lineWidth = 1.5;
+                    ctx.stroke();
+                    ctx.globalAlpha = originalAlpha; // Restore original alpha before shield was drawn
+                }
+
+                // Drill Powerup Visual Effect
+                const isDrillActive = gameMode === "ultra" && activePowerups.some(p => p.type === "drill" && p.timer > 0);
+                if (isDrillActive) {
+                    const drillColor = POWERUP_TYPES.find(p => p.type === "drill").color;
+                    const drillSize = CELL_SIZE * 0.4;
+                    const rotation = (Date.now() / 50) % (Math.PI * 2); // Fast rotation
+                    
+                    ctx.save();
+                    ctx.translate(sx + CELL_SIZE / 2, sy + CELL_SIZE / 2); // Move to head center
+                    
+                    // Determine drill position based on snake direction
+                    let drillOffsetX = 0;
+                    let drillOffsetY = 0;
+                    let drillRotationAngle = 0;
+
+                    switch (direction) {
+                        case 'UP': 
+                            drillOffsetY = -CELL_SIZE * 0.4;
+                            drillRotationAngle = 0;
+                            break;
+                        case 'DOWN': 
+                            drillOffsetY = CELL_SIZE * 0.4;
+                            drillRotationAngle = Math.PI;
+                            break;
+                        case 'LEFT': 
+                            drillOffsetX = -CELL_SIZE * 0.4;
+                            drillRotationAngle = -Math.PI / 2;
+                            break;
+                        case 'RIGHT': 
+                            drillOffsetX = CELL_SIZE * 0.4;
+                            drillRotationAngle = Math.PI / 2;
+                            break;
+                    }
+                    ctx.translate(drillOffsetX, drillOffsetY); // Position drill bit
+                    ctx.rotate(drillRotationAngle + rotation); // Orient and spin drill bit
+
+                    // Draw a simple drill bit shape (cone-like)
+                    ctx.beginPath();
+                    ctx.moveTo(0, -drillSize * 0.75); // Tip
+                    ctx.lineTo(-drillSize * 0.3, drillSize * 0.25);
+                    ctx.lineTo(drillSize * 0.3, drillSize * 0.25);
+                    ctx.closePath();
+                    ctx.fillStyle = drillColor;
+                    const originalAlpha = ctx.globalAlpha; // Store current alpha
+                    if (isGhostActive) ctx.globalAlpha = Math.min(originalAlpha, 0.7); // Respect ghost transparency
+                    ctx.fill();
+                    ctx.strokeStyle = "#888";
+                    ctx.lineWidth = 1;
+                    ctx.stroke();
+                    ctx.globalAlpha = originalAlpha; // Restore alpha
+                    ctx.restore();
+                }
+
+            } else { // Body
+                // Body: treads with marks
                 ctx.fillStyle = "#bfa14a";
-                ctx.fillRect(snake[i].x * CELL_SIZE, snake[i].y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+                ctx.fillRect(sx, sy, CELL_SIZE, CELL_SIZE);
                 ctx.fillStyle = "#e0a106";
-                ctx.fillRect(snake[i].x * CELL_SIZE + 4, snake[i].y * CELL_SIZE + 4, 24, 24);
+                ctx.fillRect(sx + 4, sy + 4, 24, 24);
+                // Tread marks
+                ctx.strokeStyle = "#8d7b2f";
+                ctx.lineWidth = 1.2;
+                for (let t = 7; t < 25; t += 5) {
+                    ctx.beginPath();
+                    ctx.moveTo(sx + t, sy + 4);
+                    ctx.lineTo(sx + t, sy + 28);
+                    ctx.stroke();
+                }
             }
-            ctx.strokeStyle = "#8d7b2f";
-            ctx.strokeRect(snake[i].x * CELL_SIZE, snake[i].y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+            
+            // Reset alpha if it was changed for ghost, before drawing border
+            if (isGhostActive) {
+                 ctx.globalAlpha = 1.0; 
+            }
+            ctx.strokeStyle = "#8d7b2f"; // Border color for all segments
+            if (isGhostActive) { // Make border also semi-transparent
+                ctx.globalAlpha = 0.6;
+            }
+            ctx.strokeRect(sx, sy, CELL_SIZE, CELL_SIZE);
+            
+            ctx.restore(); // Restore to original state (clears globalAlpha changes etc.)
         }
     }
 
     function drawFood() {
-        // Draw a traffic cone
+        if (!food || typeof food.x !== 'number' || typeof food.y !== 'number') return;
+        const wobble = Math.sin(Date.now()/180) * 3;
         const x = food.x * CELL_SIZE + CELL_SIZE / 2;
-        const y = food.y * CELL_SIZE + CELL_SIZE / 2;
+        const y = food.y * CELL_SIZE + CELL_SIZE / 2 + wobble;
         ctx.save();
         ctx.translate(x, y);
+        // Glow
+        ctx.beginPath();
+        ctx.arc(0, 0, 16 + 2 * Math.abs(wobble), 0, 2 * Math.PI);
+        ctx.globalAlpha = 0.18 + 0.08 * Math.abs(Math.sin(Date.now()/180));
+        ctx.fillStyle = "#ffec70";
+        ctx.fill();
+        ctx.globalAlpha = 1;
+        // Cone
         ctx.beginPath();
         ctx.moveTo(0, 14);
         ctx.lineTo(-10, -14);
@@ -240,41 +685,29 @@
         ctx.restore();
     }
 
-    function drawObstacles() {
-        for (const obs of obstacles) {
-            // Draw a cartoon bomb
-            ctx.save();
-            const cx = obs.x * CELL_SIZE + CELL_SIZE/2;
-            const cy = obs.y * CELL_SIZE + CELL_SIZE/2;
-            // Bomb body
-            ctx.beginPath();
-            ctx.arc(cx, cy, 13, 0, 2 * Math.PI);
-            ctx.fillStyle = "#222";
-            ctx.shadowColor = "#000";
-            ctx.shadowBlur = 8;
-            ctx.fill();
-            ctx.shadowBlur = 0;
-            ctx.strokeStyle = "#555";
-            ctx.lineWidth = 3;
-            ctx.stroke();
-            // Fuse
-            ctx.beginPath();
-            ctx.moveTo(cx, cy - 13);
-            ctx.lineTo(cx, cy - 22);
-            ctx.strokeStyle = "#bfa14a";
-            ctx.lineWidth = 2.5;
-            ctx.stroke();
-            // Spark
-            ctx.beginPath();
-            ctx.arc(cx, cy - 24, 3, 0, 2 * Math.PI);
-            ctx.fillStyle = "#ffec70";
-            ctx.fill();
-            ctx.beginPath();
-            ctx.arc(cx, cy - 24, 1.2, 0, 2 * Math.PI);
-            ctx.fillStyle = "#ff4e00";
-            ctx.fill();
-            ctx.restore();
+    function drawDifficultyBarShine() {
+        const bar = document.getElementById('difficulty-bar');
+        let shine = document.getElementById('diff-shine');
+        if (!bar.offsetParent) return; // Don't draw if meter is hidden
+
+        if (!shine) {
+            shine = document.createElement('div');
+            shine.id = 'diff-shine';
+            shine.style.position = 'absolute';
+            shine.style.top = '0';
+            shine.style.left = '0';
+            shine.style.height = '100%';
+            shine.style.width = '40px';
+            shine.style.pointerEvents = 'none';
+            shine.style.background = 'linear-gradient(90deg,rgba(255,255,255,0.18) 0%,rgba(255,255,255,0.45) 50%,rgba(255,255,255,0.18) 100%)';
+            shine.style.borderRadius = '14px';
+            shine.style.transition = 'none';
+            bar.parentElement.style.position = 'relative';
+            bar.parentElement.appendChild(shine);
         }
+        // Animate shine left to right
+        const percent = ((Date.now()/10) % 120) / 120;
+        shine.style.left = `calc(${percent * 100}% - 20px)`;
     }
 
     // --- Explosion Animation ---
@@ -295,27 +728,179 @@
         ctx.beginPath();
         ctx.arc(cx, cy, r, 0, 2 * Math.PI);
         ctx.fillStyle = frame % 2 === 0 ? '#ffec70' : '#ff4e00';
+        ctx.shadowColor = '#ffec70';
+        ctx.shadowBlur = 18 - frame;
         ctx.fill();
+        ctx.shadowBlur = 0;
+        // Shockwave ring
+        if (frame < 8) {
+            ctx.beginPath();
+            ctx.arc(cx, cy, r + 12 + frame * 2, 0, 2 * Math.PI);
+            ctx.strokeStyle = 'rgba(255, 238, 112, ' + (0.25 - frame * 0.025) + ')';
+            ctx.lineWidth = 6 - frame * 0.5;
+            ctx.stroke();
+        }
         // Debris
-        for (let i = 0; i < 8; i++) {
-            const angle = (Math.PI * 2 / 8) * i + frame * 0.2;
-            const dr = r + 10 + Math.random() * 8;
+        for (let i = 0; i < 10; i++) {
+            const angle = (Math.PI * 2 / 10) * i + frame * 0.2;
+            const dr = r + 10 + frame * 2 + Math.random() * 8;
+            ctx.save();
             ctx.beginPath();
             ctx.arc(cx + Math.cos(angle) * dr, cy + Math.sin(angle) * dr, 4 + Math.random() * 2, 0, 2 * Math.PI);
-            ctx.fillStyle = '#bfa14a';
+            ctx.fillStyle = frame % 2 === 0 ? '#bfa14a' : '#e0a106';
+            ctx.globalAlpha = 0.7 - frame * 0.06;
             ctx.fill();
+            ctx.restore();
+        }
+        // Sparks
+        for (let i = 0; i < 8; i++) {
+            const angle = (Math.PI * 2 / 8) * i + frame * 0.5;
+            const len = r + 18 + frame * 2;
+            ctx.save();
+            ctx.strokeStyle = '#ff4e00';
+            ctx.globalAlpha = 0.5 - frame * 0.04;
+            ctx.lineWidth = 2.2 - frame * 0.13;
+            ctx.beginPath();
+            ctx.moveTo(cx, cy);
+            ctx.lineTo(cx + Math.cos(angle) * len, cy + Math.sin(angle) * len);
+            ctx.stroke();
+            ctx.restore();
         }
         ctx.restore();
         explosion.frame++;
-        if (explosion.frame > 10) explosion = null;
+        if (explosion.frame > 14) explosion = null;
     }
 
+    // Draw a subtle construction site background pattern on the canvas
+    let bgFrame = 0;
+    function drawBackground() {
+        // Light sand color base
+        ctx.save();
+        ctx.fillStyle = '#e8ddb7';
+        ctx.fillRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
+        // Faint grid lines
+        ctx.strokeStyle = 'rgba(191,161,74,0.07)'; // even fainter
+        ctx.lineWidth = 1;
+        for (let i = 1; i < GRID_SIZE; i++) {
+            ctx.beginPath();
+            ctx.moveTo(i * CELL_SIZE, 0);
+            ctx.lineTo(i * CELL_SIZE, CANVAS_SIZE);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(0, i * CELL_SIZE);
+            ctx.lineTo(CANVAS_SIZE, i * CELL_SIZE);
+            ctx.stroke();
+        }
+        // Slow, subtle tire tracks
+        const tireTrackCount = 3;
+        for (let t = 0; t < tireTrackCount; t++) {
+            // Animate tracks very slowly
+            const phase = (bgFrame/240 + t*0.33) % 1; // much slower
+            const x = 60 + (CANVAS_SIZE-120) * ((t*0.37 + 0.13) % 1);
+            const y = 60 + (CANVAS_SIZE-120) * ((t*0.21 + 0.27) % 1);
+            ctx.save();
+            ctx.globalAlpha = 0.07;
+            ctx.strokeStyle = '#bfa14a';
+            ctx.lineWidth = 8;
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+            ctx.lineTo(x + Math.cos(phase * 2 * Math.PI) * 80, y + Math.sin(phase * 2 * Math.PI) * 80);
+            ctx.stroke();
+            ctx.restore();
+        }
+        // Faint cones
+        for (let i = 0; i < 2; i++) {
+            const bx = 40 + (CANVAS_SIZE-80) * ((i*0.41 + 0.19) % 1);
+            const by = 40 + (CANVAS_SIZE-80) * ((i*0.29 + 0.33) % 1);
+            ctx.save();
+            ctx.globalAlpha = 0.09;
+            ctx.translate(bx, by);
+            ctx.beginPath();
+            ctx.moveTo(0, 12);
+            ctx.lineTo(-8, -12);
+            ctx.lineTo(8, -12);
+            ctx.closePath();
+            ctx.fillStyle = '#ff4e00';
+            ctx.fill();
+            ctx.fillStyle = '#fff';
+            ctx.fillRect(-6, -6, 12, 3);
+            ctx.restore();
+        }
+        ctx.restore();
+        bgFrame++;
+    }
+
+    // --- Animation Frame ---
     function drawGame() {
-        ctx.clearRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
+        drawBackground();
         drawObstacles();
         drawSnake();
         drawFood();
+        drawPowerups();
         drawExplosion();
+        if (difficultyMeter.style.display !== 'none') {
+            drawDifficultyBarShine();
+        }
+
+        // --- Ultra Snake Mode Active Power-up HUD (Stacking) ---
+        if (gameMode === "ultra" && activePowerups.length > 0 && running) {
+            let currentHudY = 20; // Initial Y position for the first HUD item
+            const hudX = 20;
+            const textHeight = 18; // Slightly smaller for stacking
+            const barHeight = 7;
+            const barMaxWidth = 100; // Slightly smaller bar
+            const spacing = 5; // Spacing between text and bar
+            const itemSpacing = 8; // Spacing between stacked HUD items
+
+            for (const activeP of activePowerups) {
+                const powerupDetails = POWERUP_TYPES.find(p => p.type === activeP.type);
+                if (powerupDetails) {
+                    ctx.save();
+                    // Draw Powerup Text (Icon + Name)
+                    ctx.font = `bold ${textHeight - 4}px Segoe UI`; // e.g., "bold 14px Segoe UI"
+                    ctx.fillStyle = powerupDetails.color;
+                    ctx.textAlign = "left";
+                    ctx.textBaseline = "top";
+                    const powerupName = powerupDetails.type.charAt(0).toUpperCase() + powerupDetails.type.slice(1);
+                    ctx.shadowColor = "rgba(0,0,0,0.6)";
+                    ctx.shadowBlur = 2;
+                    ctx.fillText(`${powerupDetails.icon} ${powerupName}`, hudX, currentHudY);
+                    ctx.shadowBlur = 0;
+
+                    // Draw Timer Bar
+                    const timerBarY = currentHudY + textHeight + spacing;
+                    // Background of the timer bar
+                    ctx.fillStyle = "rgba(60, 60, 60, 0.75)";
+                    ctx.fillRect(hudX, timerBarY, barMaxWidth, barHeight);
+
+                    // Foreground (actual time left)
+                    const currentBarWidth = Math.max(0, (activeP.timer / POWERUP_DURATION) * barMaxWidth);
+                    ctx.fillStyle = powerupDetails.color;
+                    ctx.fillRect(hudX, timerBarY, currentBarWidth, barHeight);
+
+                    // Border for the timer bar
+                    ctx.strokeStyle = "rgba(30, 30, 30, 0.85)";
+                    ctx.lineWidth = 1;
+                    ctx.strokeRect(hudX, timerBarY, barMaxWidth, barHeight);
+                    
+                    if (currentBarWidth > 0) {
+                        ctx.strokeStyle = "rgba(255, 255, 255, 0.25)";
+                        ctx.strokeRect(hudX, timerBarY, currentBarWidth, barHeight);
+                    }
+                    ctx.restore();
+                    currentHudY += textHeight + spacing + barHeight + itemSpacing; // Move Y for next item
+                }
+            }
+        }
+    }
+
+    // --- Improved Animation Loop ---
+    function animationLoop(ts) {
+        // Draw at 60fps for smooth animation
+        if (canvas.style.display !== 'none') { // Only draw if canvas is visible
+             drawGame();
+        }
+        requestAnimationFrame(animationLoop);
     }
 
     function updateDifficultyBar() {
@@ -324,7 +909,6 @@
         difficultyBar.style.width = percent + "%";
     }
 
-    let deathByBomb = null;
     function moveSnake() {
         let head = {...snake[0]};
         switch (nextDirection) {
@@ -334,36 +918,93 @@
             case 'DOWN': head.y++; break;
         }
         direction = nextDirection;
-        // Wall collision
         if (head.x < 0 || head.x >= GRID_SIZE || head.y < 0 || head.y >= GRID_SIZE) {
             running = false;
             return;
         }
-        // Self collision
-        if (snake.some(s => s.x === head.x && s.y === head.y)) {
+        // Self-collision check (excluding ghost mode)
+        if (!(gameMode === "ultra" && activePowerups.some(p => p.type === "ghost" && p.timer > 0)) &&
+            snake.slice(1).some(s => s.x === head.x && s.y === head.y)) {
             running = false;
             return;
         }
-        // Obstacle collision (bomb)
+        
+        // Bomb collision check (excluding ghost mode)
         const bomb = obstacles.find(o => o.x === head.x && o.y === head.y);
-        if (bomb) {
+        if (bomb && 
+            !(gameMode === "ultra" && activePowerups.some(p => p.type === "ghost" && p.timer > 0)) &&
+            !(gameMode === "ultra" && activePowerups.some(p => p.type === "shield" && p.timer > 0)) &&
+            !(gameMode === "ultra" && activePowerups.some(p => p.type === "drill" && p.timer > 0)) ) {
             running = false;
             triggerExplosion(bomb.x, bomb.y);
             return;
         }
+
+        // Shield and Drill interaction with bombs
+        if (gameMode === "ultra" && bomb) {
+            const shieldIndex = activePowerups.findIndex(p => p.type === "shield");
+            const drillIndex = activePowerups.findIndex(p => p.type === "drill");
+
+            if (drillIndex !== -1) {
+                // Drill destroys the bomb
+                obstacles = obstacles.filter(o => o.x !== bomb.x || o.y !== bomb.y);
+                triggerExplosion(bomb.x, bomb.y); // Show explosion for destroyed bomb
+                activePowerups[drillIndex].timer = 0; // Consume drill (or decrement charges if implemented)
+                // Potentially add a small "drill used" sound/visual cue here
+            } else if (shieldIndex !== -1) {
+                // Shield protects from the bomb, consumes shield
+                activePowerups[shieldIndex].timer = 0; // Consume shield (or decrement charges)
+                // Potentially add a "shield hit" sound/visual cue here
+                // The bomb remains, but the snake is safe for this hit
+            }
+        }
+
         snake.unshift(head);
-        // Food
+
+        // Magnet Powerup Effect - pulls food towards snake head if active
+        if (gameMode === "ultra" && activePowerups.some(p => p.type === "magnet" && p.timer > 0) && food) {
+            const headPos = snake[0];
+            const foodMagnetRadius = 2; // 2-block radius
+
+            const dx = headPos.x - food.x;
+            const dy = headPos.y - food.y;
+
+            // Check if food is within magnet radius
+            if (Math.abs(dx) <= foodMagnetRadius && Math.abs(dy) <= foodMagnetRadius) {
+                // Only move if food is not already at the head's position
+                if (dx !== 0 || dy !== 0) {
+                    // Prioritize moving along the axis with the larger distance to make the pull more direct
+                    if (Math.abs(dx) > Math.abs(dy)) {
+                        food.x += Math.sign(dx);
+                    } else if (Math.abs(dy) > Math.abs(dx)) {
+                        food.y += Math.sign(dy);
+                    } else { // Distances are equal (and non-zero), or one is zero and the other is non-zero
+                        if (dx !== 0) { // Prefer X movement if distances are equal and dx is non-zero
+                            food.x += Math.sign(dx);
+                        } else if (dy !== 0) { // Otherwise, if dy is non-zero (dx must be zero here if this branch is reached)
+                            food.y += Math.sign(dy);
+                        }
+                    }
+                }
+            }
+        }
+        
+        // Food consumption
         if (head.x === food.x && head.y === food.y) {
             score++;
             scoreLabel.textContent = "Score: " + score;
             placeFood();
-            // Add obstacles as score increases
-            if (score % 5 === 0 && obstacles.length < 20) {
+            if (gameMode === "ultra") placePowerup();
+            // Only place obstacles in Ultra mode
+            if (gameMode === "ultra" && score % 5 === 0 && obstacles.length < 20) {
                 placeObstacle();
             }
-            // Increase speed (difficulty)
-            if (speed > MAX_SPEED) {
-                speed -= SPEED_STEP;
+            // Ensure speed does not go below MAX_SPEED (lower speed value means faster game)
+            const newCalculatedSpeed = speed - SPEED_STEP;
+            const newSpeed = Math.max(MAX_SPEED, newCalculatedSpeed);
+
+            if (newSpeed !== speed) {
+                speed = newSpeed;
                 clearInterval(intervalId);
                 intervalId = setInterval(gameLoop, speed);
             }
@@ -371,12 +1012,40 @@
         } else {
             snake.pop();
         }
+        if (gameMode === "ultra") {
+            const idx = powerups.findIndex(p => p.x === head.x && p.y === head.y);
+            if (idx !== -1) {
+                activatePowerup(powerups[idx]);
+            }
+        }
+    }
+
+    function activatePowerup(powerupToActivate) {
+        const existingPowerup = activePowerups.find(p => p.type === powerupToActivate.type);
+        if (existingPowerup) {
+            existingPowerup.timer = POWERUP_DURATION; // Refresh timer
+        } else {
+            activePowerups.push({ type: powerupToActivate.type, timer: POWERUP_DURATION });
+        }
+        powerups = powerups.filter(p => p.x !== powerupToActivate.x || p.y !== powerupToActivate.y); // Remove collected powerup
+        // console.log(`Activated/Refreshed ${powerupToActivate.type} powerup!`);
+    }
+
+    function updatePowerupEffects() {
+        if (activePowerups.length === 0) return;
+
+        for (let i = activePowerups.length - 1; i >= 0; i--) {
+            activePowerups[i].timer--;
+            if (activePowerups[i].timer <= 0) {
+                // console.log(`${activePowerups[i].type} powerup expired.`);
+                activePowerups.splice(i, 1); // Remove expired powerup
+            }
+        }
     }
 
     function gameLoop() {
         if (!running) {
             if (explosion) {
-                drawGame();
                 setTimeout(gameLoop, 60);
                 return;
             }
@@ -384,98 +1053,180 @@
             return;
         }
         moveSnake();
-        drawGame();
+        if (gameMode === "ultra") {
+            updatePowerupEffects();
+        }
+    }
+
+    function startGame(mode) {
+        playerName = playerNameInput.value.trim() || "Anonymous";
+        gameMode = mode;
+
+        mainMenu.style.display = 'none';
+        canvas.style.display = 'block';
+        difficultyMeter.style.display = 'block';
+        scoreArea.style.display = 'block';
+        leaderboard.style.display = 'block'; // Or hide until game over
+
+        resetGame();
+        // intervalId = setInterval(gameLoop, speed); // Moved to resetGame
+        // running = true; // Set in resetGame
     }
 
     function endGame() {
-        clearInterval(intervalId);
         running = false;
+        clearInterval(intervalId);
         showGameOver();
+        mainMenu.style.display = 'flex'; // Show main menu again
+        canvas.style.display = 'none';
+        difficultyMeter.style.display = 'none';
+        scoreArea.style.display = 'none';
         submitScore(playerName, score);
-        updateLeaderboard();
-        setTimeout(() => {
-            mainMenu.style.display = "flex";
-            difficultyMeter.style.display = "none";
-            canvas.style.display = "none";
-            scoreArea.style.display = "none";
-            leaderboard.style.display = "";
-        }, 1200);
     }
 
     function showGameOver() {
-        ctx.save();
-        ctx.globalAlpha = 0.85;
-        ctx.fillStyle = "#fffbe6";
-        ctx.fillRect(0, CANVAS_SIZE/2 - 80, CANVAS_SIZE, 160);
-        ctx.globalAlpha = 1;
-        ctx.strokeStyle = "#e0a106";
-        ctx.lineWidth = 6;
-        ctx.strokeRect(40, CANVAS_SIZE/2 - 60, CANVAS_SIZE-80, 120);
-        ctx.font = "bold 48px Segoe UI, sans-serif";
-        ctx.fillStyle = "#e0a106";
-        ctx.textAlign = "center";
-        ctx.fillText("🚧 GAME OVER 🚧", CANVAS_SIZE/2, CANVAS_SIZE/2);
-        ctx.font = "bold 28px Segoe UI, sans-serif";
-        ctx.fillStyle = "#bfa14a";
-        ctx.fillText("Score: " + score, CANVAS_SIZE/2, CANVAS_SIZE/2 + 48);
-        ctx.restore();
+        // Placeholder for a more elaborate game over screen
+        console.log(`Game Over. Player: ${playerName}, Score: ${score}, Mode: ${gameMode}`);
     }
 
-    function submitScore(name, score) {
-        let board = JSON.parse(localStorage.getItem("constructionSnakeLeaderboard") || "[]");
-        board.push({ name, score });
-        board.sort((a, b) => b.score - a.score);
-        board = board.slice(0, LEADERBOARD_SIZE);
-        localStorage.setItem("constructionSnakeLeaderboard", JSON.stringify(board));
-    }
-
-    function updateLeaderboard() {
-        let board = JSON.parse(localStorage.getItem("constructionSnakeLeaderboard") || "[]");
-        if (board.length === 0) {
-            leaderboardEntries.innerHTML = "<div>No scores yet.</div>";
+    function submitScore(name, finalScore) {
+        // Don't submit scores of 0 to the database
+        if (finalScore <= 0) {
+            console.log("Score is 0 or less, not submitting to leaderboard");
+            updateLeaderboard(); // Still refresh leaderboard
             return;
         }
-        leaderboardEntries.innerHTML = board.map((entry, i) =>
-            `<div class="score-entry"><span>${i+1}. ${entry.name}</span><span>${entry.score}</span></div>`
-        ).join("");
+        
+        const scoresCollection = collection(db, leaderboardCollectionName);
+        addDoc(scoresCollection, {
+            name: name,
+            score: finalScore,
+            mode: gameMode,
+            timestamp: serverTimestamp() // Use serverTimestamp for consistent timing
+        }).then(() => {
+            console.log("Score submitted to Firebase");
+            updateLeaderboard(); // Refresh leaderboard after submission
+        }).catch(error => {
+            console.error("Error submitting score to Firebase: ", error);
+            // Fallback or error message for the user if needed
+        });    }
+      async function updateLeaderboard() {
+        leaderboardEntries.className = 'loading';
+        leaderboardEntries.innerHTML = '<div class="loading-spinner"></div>'; // Better loading indicator
+        const scoresCollection = collection(db, leaderboardCollectionName);
+        const q = query(scoresCollection, orderBy("score", "desc"), limit(LEADERBOARD_SIZE));
+        
+        try {
+            const querySnapshot = await getDocs(q);
+            leaderboardEntries.className = ''; // Remove loading class
+            leaderboardEntries.innerHTML = ''; // Clear previous entries or loading message
+            
+            if (querySnapshot.empty) {                leaderboardEntries.innerHTML = `
+                    <div style="text-align:center;padding:30px;color:#ffcc33;">
+                        <div style="font-size:38px;margin-bottom:12px;animation: bounce 2s infinite;">🏆</div>
+                        <div style="font-weight:bold;font-size:1.3em;text-shadow:1px 1px 2px rgba(0,0,0,0.3);">No scores yet!</div>
+                        <div style="opacity:0.9;margin-top:8px;background-color:rgba(255,255,255,0.3);display:inline-block;padding:5px 15px;border-radius:10px;">Be the first champion!</div>
+                    </div>
+                    <style>
+                        @keyframes bounce {
+                            0%, 100% { transform: translateY(0); }
+                            50% { transform: translateY(-10px); }
+                        }
+                    </style>`;
+                return;
+            }
+            
+            let rank = 1;
+            querySnapshot.forEach(doc => {
+                const s = doc.data();
+                const entry = document.createElement('div');
+                entry.classList.add('score-entry');
+                entry.setAttribute('data-rank', rank); // Add rank attribute for CSS ::before content
+                
+                // Format score with commas
+                const formattedScore = s.score.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+                
+                // Get timestamp if available
+                let timeAgo = '';
+                if (s.timestamp) {
+                    const date = new Date(s.timestamp.seconds * 1000);
+                    // Simple time ago function
+                    const now = new Date();
+                    const diffMs = now - date;
+                    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+                    
+                    if (diffDays === 0) {
+                        timeAgo = 'today';
+                    } else if (diffDays === 1) {
+                        timeAgo = 'yesterday';
+                    } else if (diffDays < 7) {
+                        timeAgo = `${diffDays} days ago`;
+                    } else {
+                        timeAgo = date.toLocaleDateString();
+                    }
+                }
+                  // Add trophy icon for top 3
+                let trophyIcon = '';
+                if (rank === 1) trophyIcon = '<span style="display:inline-block;width:22px;margin-right:5px;font-size:1.2em;vertical-align:middle;">🏆</span>';
+                else if (rank === 2) trophyIcon = '<span style="display:inline-block;width:22px;margin-right:5px;font-size:1.2em;vertical-align:middle;">🥈</span>';
+                else if (rank === 3) trophyIcon = '<span style="display:inline-block;width:22px;margin-right:5px;font-size:1.2em;vertical-align:middle;">🥉</span>';                const modeClass = s.mode === 'ultra' ? 'ultra-mode' : 'classic-mode';
+                entry.innerHTML = `
+                    <span class="player-name">${trophyIcon}${s.name} <small class="${modeClass}">(${s.mode})</small></span>
+                    <span class="player-score">${formattedScore}</span>
+                    ${timeAgo ? `<span class="score-date">${timeAgo}</span>` : ''}
+                `;
+                
+                // Add extra flair for the current player's score
+                if (s.name === playerName) {
+                    entry.classList.add('current-player');
+                }
+                
+                leaderboardEntries.appendChild(entry);
+                rank++;
+            });
+        } catch (error) {            console.error("Error fetching leaderboard from Firebase: ", error);
+            leaderboardEntries.innerHTML = `
+                <div style="text-align:center;padding:20px;color:#ff6b6b;">
+                    <div style="font-size:24px;margin-bottom:10px;">⚠️</div>
+                    <div>Error loading scores</div>
+                    <div style="font-size:0.9em;opacity:0.7;margin-top:5px;">Please try again later</div>
+                </div>`;
+        }
     }
 
-    // --- Controls ---
-    document.addEventListener('keydown', e => {
-        if (!running) return;
-        switch (e.key) {
-            case 'ArrowLeft': case 'a': case 'A': if (direction !== 'RIGHT') nextDirection = 'LEFT'; break;
-            case 'ArrowRight': case 'd': case 'D': if (direction !== 'LEFT') nextDirection = 'RIGHT'; break;
-            case 'ArrowUp': case 'w': case 'W': if (direction !== 'DOWN') nextDirection = 'UP'; break;
-            case 'ArrowDown': case 's': case 'S': if (direction !== 'UP') nextDirection = 'DOWN'; break;
-        }
-    });
-
-    // --- Menu and Game Start ---
-    startBtn.onclick = () => {
-        playerName = playerNameInput.value.trim();
-        if (!playerName) {
-            alert("Please enter your name!");
-            playerNameInput.focus();
-            return;
-        }
-        mainMenu.style.display = "none";
-        difficultyMeter.style.display = "";
-        canvas.style.display = "";
-        scoreArea.style.display = "";
-        leaderboard.style.display = "";
-        resetGame();
-        drawGame();
-        updateLeaderboard();
-        intervalId = setInterval(gameLoop, speed);
-    };
-
-    // --- Initial Setup ---
     window.onload = () => {
         canvas.width = CANVAS_SIZE;
         canvas.height = CANVAS_SIZE;
-        updateLeaderboard();
+        updateLeaderboard(); // Load leaderboard on page load
+        requestAnimationFrame(animationLoop); // Start drawing loop
+
+        classicButton.addEventListener('click', () => startGame('classic'));
+        ultraButton.addEventListener('click', () => startGame('ultra'));
+
+        document.addEventListener('keydown', e => {
+            if (!running) return;
+            switch (e.key.toLowerCase()) { // Convert to lower case to handle 'W' and 'w' etc.
+                case 'arrowleft':
+                case 'a': // Add 'a' for LEFT
+                    if (direction !== 'RIGHT') nextDirection = 'LEFT'; 
+                    break;
+                case 'arrowright':
+                case 'd': // Add 'd' for RIGHT
+                    if (direction !== 'LEFT') nextDirection = 'RIGHT'; 
+                    break;
+                case 'arrowup':
+                case 'w': // Add 'w' for UP
+                    if (direction !== 'DOWN') nextDirection = 'UP'; 
+                    break;
+                case 'arrowdown':
+                case 's': // Add 's' for DOWN
+                    if (direction !== 'UP') nextDirection = 'DOWN'; 
+                    break;
+            }
+        });
     };
+
+    // --- Construction Snake Game JS End ---
     </script>
 </body>
 </html>
