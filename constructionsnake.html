@@ -1,0 +1,481 @@
+<!-- Construction Snake Game -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=900, initial-scale=1.0">
+    <title>Construction Snake</title>
+    <style>
+        body {
+            background: #f2e6c9 url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?fit=crop&w=800&q=80') no-repeat center center fixed;
+            background-size: cover;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        #game-container {
+            width: 900px;
+            margin: 40px auto;
+            background: rgba(255, 255, 255, 0.95);
+            border: 8px solid #e0a106;
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+            padding: 24px;
+        }
+        #game-canvas {
+            background: #d1c089;
+            display: block;
+            margin: 0 auto 16px auto;
+            border: 4px solid #bfa14a;
+        }
+        #difficulty-meter {
+            width: 100%;
+            height: 28px;
+            background: #eee;
+            border-radius: 14px;
+            margin-bottom: 18px;
+            overflow: hidden;
+            border: 2px solid #e0a106;
+        }
+        #difficulty-bar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #e0a106, #ff4e00);
+            transition: width 0.3s;
+        }
+        #leaderboard {
+            margin-top: 24px;
+            background: #fffbe6;
+            border: 2px solid #e0a106;
+            border-radius: 8px;
+            padding: 12px;
+        }
+        #leaderboard h2 {
+            margin-top: 0;
+            color: #e0a106;
+        }
+        .score-entry {
+            display: flex;
+            justify-content: space-between;
+            padding: 4px 0;
+            border-bottom: 1px dashed #e0a106;
+        }
+        .score-entry:last-child {
+            border-bottom: none;
+        }
+        #main-menu {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 1.2rem;
+            padding: 2.5rem 0 2rem 0;
+        }
+        #main-menu input[type="text"] {
+            font-size: 1.2rem;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            border: 2px solid #e0a106;
+            width: 260px;
+            margin-bottom: 0.5rem;
+        }
+        #main-menu button {
+            font-size: 1.2rem;
+            padding: 0.7rem 2.2rem;
+            background: linear-gradient(90deg,#e0a106,#ff4e00);
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(224,161,6,0.13);
+            transition: transform 0.13s;
+        }
+        #main-menu button:hover {
+            transform: scale(1.06);
+        }
+        #main-menu label {
+            font-size: 1.1rem;
+            color: #bfa14a;
+            font-weight: 500;
+        }
+        @media (max-width: 1000px) {
+            #game-container { width: 98vw; }
+            #game-canvas { width: 98vw !important; height: 98vw !important; max-width: 98vw; max-height: 98vw; }
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <h1 style="color:#e0a106;text-align:center;">🚧 Construction Snake 🚧</h1>
+        <div id="main-menu">
+            <label for="player-name">Enter your name to play:</label>
+            <input type="text" id="player-name" maxlength="16" placeholder="Your name..." autocomplete="off">
+            <button id="start-btn">Start Game</button>
+        </div>
+        <div id="difficulty-meter" style="display:none;">
+            <div id="difficulty-bar"></div>
+        </div>
+        <canvas id="game-canvas" width="800" height="800" style="display:none;"></canvas>
+        <div id="score-area" style="text-align:center;margin:12px 0;display:none;">
+            <span id="score-label">Score: 0</span>
+        </div>
+        <div id="leaderboard" style="display:none;">
+            <h2>Leaderboard</h2>
+            <div id="leaderboard-entries">Loading...</div>
+        </div>
+    </div>
+    <script>
+    // --- Construction Snake Game JS ---
+    const CELL_SIZE = 32;
+    const GRID_SIZE = 25;
+    const CANVAS_SIZE = CELL_SIZE * GRID_SIZE;
+    const INITIAL_SPEED = 120;
+    const SPEED_STEP = 6;
+    const MAX_SPEED = 40;
+    const DIFFICULTY_BAR_MAX = 100;
+    const LEADERBOARD_SIZE = 7;
+
+    let snake, direction, nextDirection, food, score, speed, intervalId, running, playerName;
+    let obstacles = [];
+
+    const canvas = document.getElementById('game-canvas');
+    const ctx = canvas.getContext('2d');
+    const mainMenu = document.getElementById('main-menu');
+    const startBtn = document.getElementById('start-btn');
+    const playerNameInput = document.getElementById('player-name');
+    const difficultyMeter = document.getElementById('difficulty-meter');
+    const difficultyBar = document.getElementById('difficulty-bar');
+    const scoreArea = document.getElementById('score-area');
+    const scoreLabel = document.getElementById('score-label');
+    const leaderboard = document.getElementById('leaderboard');
+    const leaderboardEntries = document.getElementById('leaderboard-entries');
+
+    function resetGame() {
+        snake = [
+            {x: 12, y: 12},
+            {x: 11, y: 12},
+            {x: 10, y: 12}
+        ];
+        direction = 'RIGHT';
+        nextDirection = 'RIGHT';
+        score = 0;
+        speed = INITIAL_SPEED;
+        running = true;
+        obstacles = [];
+        placeFood();
+        updateDifficultyBar();
+        scoreLabel.textContent = "Score: 0";
+    }
+
+    function placeFood() {
+        let valid = false;
+        while (!valid) {
+            food = {
+                x: Math.floor(Math.random() * GRID_SIZE),
+                y: Math.floor(Math.random() * GRID_SIZE)
+            };
+            valid = !snake.some(s => s.x === food.x && s.y === food.y) &&
+                    !obstacles.some(o => o.x === food.x && o.y === food.y);
+        }
+    }
+
+    function placeObstacle() {
+        let valid = false, obs;
+        while (!valid) {
+            obs = {
+                x: Math.floor(Math.random() * GRID_SIZE),
+                y: Math.floor(Math.random() * GRID_SIZE)
+            };
+            valid = !snake.some(s => s.x === obs.x && s.y === obs.y) &&
+                    !obstacles.some(o => o.x === obs.x && o.y === obs.y) &&
+                    (food.x !== obs.x || food.y !== obs.y);
+        }
+        obstacles.push(obs);
+    }
+
+    function drawCell(x, y, color, borderColor = "#bfa14a") {
+        ctx.fillStyle = color;
+        ctx.fillRect(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+        ctx.strokeStyle = borderColor;
+        ctx.lineWidth = 2;
+        ctx.strokeRect(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+    }
+
+    function drawSnake() {
+        for (let i = 0; i < snake.length; i++) {
+            if (i === 0) {
+                // Head: bulldozer cab
+                ctx.fillStyle = "#e0a106";
+                ctx.fillRect(snake[i].x * CELL_SIZE, snake[i].y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+                ctx.fillStyle = "#fff";
+                ctx.fillRect(snake[i].x * CELL_SIZE + 8, snake[i].y * CELL_SIZE + 8, 16, 10);
+                ctx.fillStyle = "#bfa14a";
+                ctx.fillRect(snake[i].x * CELL_SIZE, snake[i].y * CELL_SIZE + 24, CELL_SIZE, 8); // blade
+            } else {
+                // Body: treads
+                ctx.fillStyle = "#bfa14a";
+                ctx.fillRect(snake[i].x * CELL_SIZE, snake[i].y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+                ctx.fillStyle = "#e0a106";
+                ctx.fillRect(snake[i].x * CELL_SIZE + 4, snake[i].y * CELL_SIZE + 4, 24, 24);
+            }
+            ctx.strokeStyle = "#8d7b2f";
+            ctx.strokeRect(snake[i].x * CELL_SIZE, snake[i].y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+        }
+    }
+
+    function drawFood() {
+        // Draw a traffic cone
+        const x = food.x * CELL_SIZE + CELL_SIZE / 2;
+        const y = food.y * CELL_SIZE + CELL_SIZE / 2;
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.beginPath();
+        ctx.moveTo(0, 14);
+        ctx.lineTo(-10, -14);
+        ctx.lineTo(10, -14);
+        ctx.closePath();
+        ctx.fillStyle = "#ff4e00";
+        ctx.fill();
+        ctx.fillStyle = "#fff";
+        ctx.fillRect(-8, -8, 16, 4);
+        ctx.restore();
+    }
+
+    function drawObstacles() {
+        for (const obs of obstacles) {
+            // Draw a cartoon bomb
+            ctx.save();
+            const cx = obs.x * CELL_SIZE + CELL_SIZE/2;
+            const cy = obs.y * CELL_SIZE + CELL_SIZE/2;
+            // Bomb body
+            ctx.beginPath();
+            ctx.arc(cx, cy, 13, 0, 2 * Math.PI);
+            ctx.fillStyle = "#222";
+            ctx.shadowColor = "#000";
+            ctx.shadowBlur = 8;
+            ctx.fill();
+            ctx.shadowBlur = 0;
+            ctx.strokeStyle = "#555";
+            ctx.lineWidth = 3;
+            ctx.stroke();
+            // Fuse
+            ctx.beginPath();
+            ctx.moveTo(cx, cy - 13);
+            ctx.lineTo(cx, cy - 22);
+            ctx.strokeStyle = "#bfa14a";
+            ctx.lineWidth = 2.5;
+            ctx.stroke();
+            // Spark
+            ctx.beginPath();
+            ctx.arc(cx, cy - 24, 3, 0, 2 * Math.PI);
+            ctx.fillStyle = "#ffec70";
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(cx, cy - 24, 1.2, 0, 2 * Math.PI);
+            ctx.fillStyle = "#ff4e00";
+            ctx.fill();
+            ctx.restore();
+        }
+    }
+
+    // --- Explosion Animation ---
+    let explosion = null;
+    function triggerExplosion(x, y) {
+        explosion = { x, y, frame: 0 };
+    }
+    function drawExplosion() {
+        if (!explosion) return;
+        const { x, y, frame } = explosion;
+        const cx = x * CELL_SIZE + CELL_SIZE/2;
+        const cy = y * CELL_SIZE + CELL_SIZE/2;
+        const maxR = 38;
+        const r = Math.min(maxR, frame * 4 + 10);
+        ctx.save();
+        ctx.globalAlpha = 0.7 - frame * 0.07;
+        // Main blast
+        ctx.beginPath();
+        ctx.arc(cx, cy, r, 0, 2 * Math.PI);
+        ctx.fillStyle = frame % 2 === 0 ? '#ffec70' : '#ff4e00';
+        ctx.fill();
+        // Debris
+        for (let i = 0; i < 8; i++) {
+            const angle = (Math.PI * 2 / 8) * i + frame * 0.2;
+            const dr = r + 10 + Math.random() * 8;
+            ctx.beginPath();
+            ctx.arc(cx + Math.cos(angle) * dr, cy + Math.sin(angle) * dr, 4 + Math.random() * 2, 0, 2 * Math.PI);
+            ctx.fillStyle = '#bfa14a';
+            ctx.fill();
+        }
+        ctx.restore();
+        explosion.frame++;
+        if (explosion.frame > 10) explosion = null;
+    }
+
+    function drawGame() {
+        ctx.clearRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
+        drawObstacles();
+        drawSnake();
+        drawFood();
+        drawExplosion();
+    }
+
+    function updateDifficultyBar() {
+        // Difficulty increases as speed increases (lower ms = harder)
+        const percent = Math.min(100, 100 - ((speed - MAX_SPEED) / (INITIAL_SPEED - MAX_SPEED)) * 100);
+        difficultyBar.style.width = percent + "%";
+    }
+
+    let deathByBomb = null;
+    function moveSnake() {
+        let head = {...snake[0]};
+        switch (nextDirection) {
+            case 'LEFT': head.x--; break;
+            case 'RIGHT': head.x++; break;
+            case 'UP': head.y--; break;
+            case 'DOWN': head.y++; break;
+        }
+        direction = nextDirection;
+        // Wall collision
+        if (head.x < 0 || head.x >= GRID_SIZE || head.y < 0 || head.y >= GRID_SIZE) {
+            running = false;
+            return;
+        }
+        // Self collision
+        if (snake.some(s => s.x === head.x && s.y === head.y)) {
+            running = false;
+            return;
+        }
+        // Obstacle collision (bomb)
+        const bomb = obstacles.find(o => o.x === head.x && o.y === head.y);
+        if (bomb) {
+            running = false;
+            triggerExplosion(bomb.x, bomb.y);
+            return;
+        }
+        snake.unshift(head);
+        // Food
+        if (head.x === food.x && head.y === food.y) {
+            score++;
+            scoreLabel.textContent = "Score: " + score;
+            placeFood();
+            // Add obstacles as score increases
+            if (score % 5 === 0 && obstacles.length < 20) {
+                placeObstacle();
+            }
+            // Increase speed (difficulty)
+            if (speed > MAX_SPEED) {
+                speed -= SPEED_STEP;
+                clearInterval(intervalId);
+                intervalId = setInterval(gameLoop, speed);
+            }
+            updateDifficultyBar();
+        } else {
+            snake.pop();
+        }
+    }
+
+    function gameLoop() {
+        if (!running) {
+            if (explosion) {
+                drawGame();
+                setTimeout(gameLoop, 60);
+                return;
+            }
+            endGame();
+            return;
+        }
+        moveSnake();
+        drawGame();
+    }
+
+    function endGame() {
+        clearInterval(intervalId);
+        running = false;
+        showGameOver();
+        submitScore(playerName, score);
+        updateLeaderboard();
+        setTimeout(() => {
+            mainMenu.style.display = "flex";
+            difficultyMeter.style.display = "none";
+            canvas.style.display = "none";
+            scoreArea.style.display = "none";
+            leaderboard.style.display = "";
+        }, 1200);
+    }
+
+    function showGameOver() {
+        ctx.save();
+        ctx.globalAlpha = 0.85;
+        ctx.fillStyle = "#fffbe6";
+        ctx.fillRect(0, CANVAS_SIZE/2 - 80, CANVAS_SIZE, 160);
+        ctx.globalAlpha = 1;
+        ctx.strokeStyle = "#e0a106";
+        ctx.lineWidth = 6;
+        ctx.strokeRect(40, CANVAS_SIZE/2 - 60, CANVAS_SIZE-80, 120);
+        ctx.font = "bold 48px Segoe UI, sans-serif";
+        ctx.fillStyle = "#e0a106";
+        ctx.textAlign = "center";
+        ctx.fillText("🚧 GAME OVER 🚧", CANVAS_SIZE/2, CANVAS_SIZE/2);
+        ctx.font = "bold 28px Segoe UI, sans-serif";
+        ctx.fillStyle = "#bfa14a";
+        ctx.fillText("Score: " + score, CANVAS_SIZE/2, CANVAS_SIZE/2 + 48);
+        ctx.restore();
+    }
+
+    function submitScore(name, score) {
+        let board = JSON.parse(localStorage.getItem("constructionSnakeLeaderboard") || "[]");
+        board.push({ name, score });
+        board.sort((a, b) => b.score - a.score);
+        board = board.slice(0, LEADERBOARD_SIZE);
+        localStorage.setItem("constructionSnakeLeaderboard", JSON.stringify(board));
+    }
+
+    function updateLeaderboard() {
+        let board = JSON.parse(localStorage.getItem("constructionSnakeLeaderboard") || "[]");
+        if (board.length === 0) {
+            leaderboardEntries.innerHTML = "<div>No scores yet.</div>";
+            return;
+        }
+        leaderboardEntries.innerHTML = board.map((entry, i) =>
+            `<div class="score-entry"><span>${i+1}. ${entry.name}</span><span>${entry.score}</span></div>`
+        ).join("");
+    }
+
+    // --- Controls ---
+    document.addEventListener('keydown', e => {
+        if (!running) return;
+        switch (e.key) {
+            case 'ArrowLeft': case 'a': case 'A': if (direction !== 'RIGHT') nextDirection = 'LEFT'; break;
+            case 'ArrowRight': case 'd': case 'D': if (direction !== 'LEFT') nextDirection = 'RIGHT'; break;
+            case 'ArrowUp': case 'w': case 'W': if (direction !== 'DOWN') nextDirection = 'UP'; break;
+            case 'ArrowDown': case 's': case 'S': if (direction !== 'UP') nextDirection = 'DOWN'; break;
+        }
+    });
+
+    // --- Menu and Game Start ---
+    startBtn.onclick = () => {
+        playerName = playerNameInput.value.trim();
+        if (!playerName) {
+            alert("Please enter your name!");
+            playerNameInput.focus();
+            return;
+        }
+        mainMenu.style.display = "none";
+        difficultyMeter.style.display = "";
+        canvas.style.display = "";
+        scoreArea.style.display = "";
+        leaderboard.style.display = "";
+        resetGame();
+        drawGame();
+        updateLeaderboard();
+        intervalId = setInterval(gameLoop, speed);
+    };
+
+    // --- Initial Setup ---
+    window.onload = () => {
+        canvas.width = CANVAS_SIZE;
+        canvas.height = CANVAS_SIZE;
+        updateLeaderboard();
+    };
+    </script>
+</body>
+</html>
