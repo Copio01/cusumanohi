@@ -227,7 +227,7 @@
         // --- Game State ---
         let db, auth;
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        let currentUser = null;
+        let currentUser = null; // Can be { uid, displayName, isAnonymous, isCustomAuth, isLocalGuest, email, chips }
         let currentPlayerName = "Guest";
         let deck = [];
         let dealerHand = [];
@@ -240,68 +240,153 @@
         // --- Helper Functions ---
         const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
+        // --- Hashing Utilities ---
+        const SALT_LENGTH = 16; // Length of the salt in bytes
+
+        function generateSalt() {
+            const arr = new Uint8Array(SALT_LENGTH);
+            crypto.getRandomValues(arr);
+            // Convert byte array to hex string
+            return Array.from(arr).map(b => b.toString(16).padStart(2, '0')).join('');
+        }
+
+        async function hashPassword(password, salt) {
+            const encoder = new TextEncoder();
+            // Combine password and salt before hashing
+            const data = encoder.encode(password + salt);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+            // Convert ArrayBuffer to hex string
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+        }
+
         // --- Firebase Initialization and Auth ---
         function initializeFirebase() {
             // Use __firebase_config global variable provided by the environment
-            const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+            let firebaseConfig = {};
+            if (typeof __firebase_config !== 'undefined' && __firebase_config) {
+                try {
+                    firebaseConfig = JSON.parse(__firebase_config);
+                } catch (e) {
+                    console.error("Error parsing __firebase_config. Make sure it's a valid JSON string. Falling back to placeholder.", e);
+                    if (authSection) authSection.innerHTML = `<p class="text-red-500 text-center">Error: Firebase configuration is invalid. Please check the console.</p>`;
+                }
+            }
+
+            if (!firebaseConfig.apiKey) {
+                firebaseConfig = {
+                    apiKey: "AIzaSyBVtq6dAEuybJNmTTv8dXBxTVUgw1t0ZMk",
+                    authDomain: "cusumano-website.firebaseapp.com",
+                    databaseURL: "https://cusumano-website-default-rtdb.firebaseio.com",
+                    projectId: "cusumano-website",
+                    storageBucket: "cusumano-website.firebasestorage.app",
+                    messagingSenderId: "20051552210",
+                    appId: "1:20051552210:web:7eb3b22baa3fec184e4a0b"
+                };
+                // No warning message here as we are now hardcoding it as a fallback.
+            }
+
+            if (!firebaseConfig.apiKey || firebaseConfig.apiKey === "YOUR_API_KEY") {
+                console.error("Firebase apiKey is missing or is a placeholder. Firebase will not initialize.");
+                if (authSection) authSection.innerHTML = `<p class="text-red-500 text-center">Error: Firebase API key is missing. Please configure Firebase correctly.</p>`;
+                return;
+            }
+
             const app = initializeApp(firebaseConfig);
             auth = getAuth(app);
             db = getFirestore(app);
 
             onAuthStateChanged(auth, async (user) => {
-                if (user && !user.isAnonymous) {
-                    currentUser = user;
-                    const userData = await getUserData(user.uid);
-                    currentPlayerName = userData.displayName || "Player";
-                    playerChips = userData.chips;
+                if (user && user.isAnonymous) { // Firebase anonymous user
+                    // If a custom user was logged in, or a local guest was active, Firebase anonymous takes precedence here if triggered.
+                    // This might happen if signInAnonymously is called elsewhere or if Firebase session persists.
+                    // We prioritize an existing custom auth session.
+                    if (currentUser && currentUser.isCustomAuth) {
+                        console.log("Firebase anonymous user detected, but custom user is active. Ignoring anonymous user.");
+                        return; 
+                    }
+                    // If a local guest session was active, the Firebase anonymous session will replace it.
+                    const firebaseUserData = await getUserDataFromFirebase(user.uid);
+                    currentUser = { 
+                        uid: user.uid, 
+                        displayName: firebaseUserData.displayName || "Guest (Firebase)", 
+                        isAnonymous: true, 
+                        isCustomAuth: false,
+                        isLocalGuest: false, // Explicitly not a local guest
+                        chips: firebaseUserData.chips !== undefined ? firebaseUserData.chips : 100
+                    };
+                    currentPlayerName = currentUser.displayName;
+                    playerChips = currentUser.chips;
                     showUserProfile();
-                } else {
-                    currentUser = null;
-                    currentPlayerName = "Guest";
-                    playerChips = 100;
+                } else if (!user && currentUser && (currentUser.isAnonymous || !currentUser.isCustomAuth && !currentUser.isLocalGuest)) {
+                    // Firebase user signed out (and it wasn't a custom user or local guest that's currently active)
+                    // This case handles when a Firebase Anonymous user signs out.
+                    // If a custom user is active, their state (currentUser.isCustomAuth) persists.
+                    // If a local guest is active, their state (currentUser.isLocalGuest) persists.
+                    // Only reset if no specific local/custom session is active.
+                    if (!(currentUser && (currentUser.isCustomAuth || currentUser.isLocalGuest))) {
+                        currentUser = null;
+                        currentPlayerName = "Guest";
+                        playerChips = 100; // Reset chips for a new session
+                        showAuthForms();
+                    }
+                } else if (!user && !currentUser) {
+                    // No Firebase user and no local/custom user, show auth forms.
+                    // This is the typical initial state or after a full logout.
                     showAuthForms();
                 }
+                // If 'user' is a Firebase regular user (not anonymous, not custom token based), 
+                // and we haven't implemented Firebase email/password, this path is less likely.
+                // If 'currentUser' is already set (e.g. by custom login or local guest), onAuthStateChanged might just confirm state or do nothing if user is null.
             });
 
-            // Sign in using the provided token or anonymously
-            if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                signInWithCustomToken(auth, __initial_auth_token).catch(err => {
-                    console.error("Custom token sign-in failed, trying anonymous:", err);
-                    signInAnonymously(auth);
-                });
-            } else {
-                signInAnonymously(auth);
-            }
+            // REMOVED: Automatic anonymous sign-in on load. User must click a button.
+            // if (!currentUser) {
+            //      signInAnonymously(auth).catch(anonError => {
+            //         console.error("Initial anonymous sign-in failed. Guest play might require Firebase anonymous sign-in to be enabled.", anonError);
+            //     });
+            // }
         }
-
-        async function getUserData(userId) {
+        
+        async function getUserDataFromFirebase(userId) {
             const userDocRef = doc(db, `artifacts/${appId}/users/${userId}/data`, 'profile');
             const userDoc = await getDoc(userDocRef);
             if (userDoc.exists()) {
                 return userDoc.data();
             } else {
-                // For new users, create a document
                 const newUser = {
-                    displayName: auth.currentUser.displayName || auth.currentUser.email?.split('@')[0] || "New Player",
-                    email: auth.currentUser.email,
+                    displayName: "Guest (Anonymous)",
                     chips: 100,
+                    createdAt: new Date().toISOString(),
                 };
-                await setDoc(userDocRef, newUser);
+                // Only set for Firebase anonymous users if they don't have a profile yet
+                await setDoc(userDocRef, newUser, { merge: true });
                 return newUser;
             }
+        }
+
+        async function getCustomUserData(userId) {
+            const userDocRef = doc(db, 'game_users_custom_auth', userId);
+            const userDoc = await getDoc(userDocRef);
+            if (userDoc.exists()) {
+                return { id: userDoc.id, ...userDoc.data() };
+            }
+            return null;
         }
 
         function showUserProfile() {
             authSection.innerHTML = ''; // Clear auth forms
             authSection.classList.add('hidden');
             userProfile.classList.remove('hidden');
-            document.getElementById('profile-name').textContent = currentPlayerName;
-            document.getElementById('profile-chips').textContent = playerChips;
+            // Ensure elements exist before setting textContent
+            const profileNameEl = document.getElementById('profile-name');
+            const profileChipsEl = document.getElementById('profile-chips');
+            if (profileNameEl) profileNameEl.textContent = currentPlayerName;
+            if (profileChipsEl) profileChipsEl.textContent = playerChips;
         }
 
         /**
-         * CORRECTION: This function now dynamically injects a complete, functional
-         * authentication UI with tabs for Login, Sign Up, and Guest play.
+         * Authentication UI with tabs for Login, Sign Up, and Guest play.
          */
         function showAuthForms() {
             userProfile.classList.add('hidden');
@@ -320,8 +405,8 @@
                 <div id="login-tab" class="auth-tab-content active text-left">
                     <div class="space-y-4">
                         <div>
-                            <label for="login-email" class="block text-sm font-medium text-gray-300">Email</label>
-                            <input type="email" id="login-email" class="mt-1 block w-full bg-gray-700 border border-gray-600 rounded-md shadow-sm py-2 px-3 text-white focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" placeholder="you@example.com">
+                            <label for="login-username" class="block text-sm font-medium text-gray-300">Username</label>
+                            <input type="text" id="login-username" class="mt-1 block w-full bg-gray-700 border border-gray-600 rounded-md shadow-sm py-2 px-3 text-white focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" placeholder="Enter your username">
                         </div>
                         <div>
                             <label for="login-password" class="block text-sm font-medium text-gray-300">Password</label>
@@ -340,8 +425,8 @@
                             <input type="text" id="signup-name" class="mt-1 block w-full bg-gray-700 border border-gray-600 rounded-md shadow-sm py-2 px-3 text-white focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" placeholder="Player123">
                         </div>
                         <div>
-                            <label for="signup-email" class="block text-sm font-medium text-gray-300">Email</label>
-                            <input type="email" id="signup-email" class="mt-1 block w-full bg-gray-700 border border-gray-600 rounded-md shadow-sm py-2 px-3 text-white focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" placeholder="you@example.com">
+                            <label for="signup-username" class="block text-sm font-medium text-gray-300">Username</label>
+                            <input type="text" id="signup-username" class="mt-1 block w-full bg-gray-700 border border-gray-600 rounded-md shadow-sm py-2 px-3 text-white focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" placeholder="Choose a username">
                         </div>
                         <div>
                             <label for="signup-password" class="block text-sm font-medium text-gray-300">Password</label>
@@ -354,8 +439,9 @@
                 
                 <!-- Guest Form -->
                  <div id="guest-tab" class="auth-tab-content text-left">
-                     <p class="text-gray-400 mb-4">Play without an account. Your score will not be saved to the leaderboard.</p>
+                     <p class="text-gray-400 mb-4">Play without an account. Your progress will be temporary.</p>
                      <button id="guest-play-btn" class="w-full auth-btn bg-green-600 hover:bg-green-700 text-white">Play as Guest</button>
+                     <p id="guest-message" class="text-sm text-red-400 h-4 mt-2"></p>
                 </div>
             `;
             
@@ -378,48 +464,93 @@
             });
 
             document.getElementById('login-btn').addEventListener('click', async () => {
-                const email = document.getElementById('login-email').value;
+                const username = document.getElementById('login-username').value;
                 const password = document.getElementById('login-password').value;
                 const messageEl = document.getElementById('login-message');
+                messageEl.textContent = ''; // Clear previous messages
+
+                if (!username || !password) {
+                    messageEl.textContent = "Please enter username and password.";
+                    return;
+                }
                 try {
                     messageEl.textContent = 'Logging in...';
-                    await signInWithEmailAndPassword(auth, email, password);
-                    // onAuthStateChanged will handle the UI switch
+                    await handleCustomLogin(username, password);
+                    // On success, handleCustomLogin should update state and call showUserProfile()
                 } catch (error) {
-                    messageEl.textContent = error.message;
+                    console.error("Custom login failed:", error);
+                    messageEl.textContent = error.message || "Login failed. Please check your credentials.";
                 }
             });
 
             document.getElementById('signup-btn').addEventListener('click', async () => {
-                const name = document.getElementById('signup-name').value;
-                const email = document.getElementById('signup-email').value;
+                const displayName = document.getElementById('signup-name').value;
+                const username = document.getElementById('signup-username').value;
                 const password = document.getElementById('signup-password').value;
                 const messageEl = document.getElementById('signup-message');
-                 if (!name || !email || !password) {
+                messageEl.textContent = ''; // Clear previous messages
+
+                if (!displayName || !username || !password) {
                     messageEl.textContent = "Please fill out all fields.";
+                    return;
+                }
+                if (password.length < 6) {
+                    messageEl.textContent = "Password should be at least 6 characters.";
                     return;
                 }
                 try {
                     messageEl.textContent = 'Creating account...';
-                    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-                    
-                    // Explicitly create user data right after signup
-                    currentPlayerName = name;
-                    await updateUserData(100, userCredential.user.uid);
-
-                    // onAuthStateChanged will handle the UI switch
+                    await handleCustomSignUp(username, password, displayName);
+                    // On success, handleCustomSignUp should update state and call showUserProfile()
                 } catch (error) {
-                    messageEl.textContent = error.message;
+                    console.error("Custom sign up failed:", error);
+                    messageEl.textContent = error.message || "Sign up failed. Username might be taken or an error occurred.";
                 }
             });
             
-             document.getElementById('guest-play-btn').onclick = () => {
-                currentPlayerName = "Guest";
-                playerChips = 100;
-                showUserProfile();
-            };
-        }
+            document.getElementById('guest-play-btn').addEventListener('click', async () => {
+                const messageEl = document.getElementById('guest-message');
+                if (messageEl) messageEl.textContent = '';
 
+                // --- MODIFIED FOR LOCAL GUEST ---
+                // No Firebase interaction for local guest mode
+                console.log("Starting local guest mode.");
+                currentUser = {
+                    uid: 'local_guest_' + Date.now(), // Unique temporary ID
+                    displayName: 'Guest (Local Demo)',
+                    isLocalGuest: true,
+                    isAnonymous: false,
+                    isCustomAuth: false,
+                    chips: 100 // Default chips for local guest
+                };
+                currentPlayerName = currentUser.displayName;
+                playerChips = currentUser.chips;
+                
+                showUserProfile(); // Update UI to show profile for guest
+                if (messageEl) messageEl.textContent = "Playing as Guest (Demo Mode). Progress is not saved.";
+                
+                // Original Firebase Anonymous code (now bypassed for local guest):
+                // try {
+                //     if (messageEl) messageEl.textContent = 'Signing in as Guest...';
+                //     await signInAnonymously(auth);
+                //     // onAuthStateChanged will handle the UI switch and user data setup for anonymous user
+                // } catch (error) {
+                //     console.error("Anonymous sign-in failed:", error);
+                //     if (messageEl) {
+                //         if (error.code === 'auth/admin-restricted-operation') {
+                //             messageEl.textContent = "Guest sign-in failed: Anonymous sign-in needs to be enabled in Firebase project settings.";
+                //         } else {
+                //             messageEl.textContent = `Guest sign-in failed: ${error.message}. Please try again.`;
+                //         }
+                //     } else if (authSection) { 
+                //          const errorP = document.createElement('p');
+                //          errorP.className = 'text-red-500 text-center';
+                //          errorP.textContent = `Error: Could not sign in as Guest. ${error.message}`;
+                //          authSection.appendChild(errorP);
+                //     }
+                // }
+            });
+        }
 
         // --- Game Logic ---
         
@@ -593,18 +724,44 @@
 
         async function updateUserData(chips, uid) {
             if (!uid) return;
-            const userDocRef = doc(db, `artifacts/${appId}/users/${uid}/data`, 'profile');
-            // Use set with merge to create or update
-            await setDoc(userDocRef, { chips, displayName: currentPlayerName }, { merge: true });
-             // Leaderboard update
+
+            if (currentUser && currentUser.isLocalGuest) {
+                console.log("Local guest (demo mode): Data not saved to Firestore.");
+                // Optionally, update local guest's chips in the currentUser object if needed for session persistence within the page
+                currentUser.chips = chips; 
+                playerChips = chips; // ensure global playerChips is also up-to-date
+                // No leaderboard update for local guests
+                return;
+            }
+
+            let userProfileDocRef;
+
+            if (currentUser && currentUser.isCustomAuth) {
+                userProfileDocRef = doc(db, 'game_users_custom_auth', uid);
+            } else if (currentUser && currentUser.isAnonymous) { // Firebase Anonymous user
+                userProfileDocRef = doc(db, `artifacts/${appId}/users/${uid}/data`, 'profile');
+            } else {
+                console.warn("updateUserData: No current user or unknown user type.");
+                return; // Or handle as an error
+            }
+            
+            // Ensure displayName is part of the update for custom users if it can change,
+            // or ensure it's set correctly during signup/login.
+            // For Firebase anonymous, displayName is usually managed differently or less critical.
+            await setDoc(userProfileDocRef, { chips, displayName: currentPlayerName }, { merge: true });
+            
+            // Leaderboard update - uses the uid regardless of auth type (but local guests are skipped above)
             const scoreDocRef = doc(db, `artifacts/${appId}/public/data/leaderboard`, uid);
             await setDoc(scoreDocRef, {
-                name: currentPlayerName,
+                name: currentPlayerName, // Ensure this is the correct display name
                 score: chips
-            });
+            }, { merge: true }); // Merge true for leaderboard too
         }
         
         async function fetchLeaderboard() {
+            const leaderboardEntriesEl = document.getElementById('leaderboard-entries');
+            if (!leaderboardEntriesEl) return; // Element might not exist if leaderboard is hidden
+
             const q = query(collection(db, `artifacts/${appId}/public/data/leaderboard`), firestoreOrderBy("score", "desc"), limit(10));
             const querySnapshot = await getDocs(q);
             const entries = [];
@@ -612,15 +769,16 @@
                 entries.push({ id: doc.id, ...doc.data() });
             });
             
-            const leaderboardEntriesEl = document.getElementById('leaderboard-entries');
-            leaderboardEntriesEl.innerHTML = '';
+            leaderboardEntriesEl.innerHTML = ''; // Clear previous entries
             entries.forEach((entry, index) => {
                  const li = document.createElement('li');
-                 li.className = `flex justify-between items-center p-2 rounded ${entry.id === currentUser?.uid ? 'bg-yellow-500/20' : 'bg-gray-700/50'}`;
+                 // Highlight current player on leaderboard
+                 const isCurrentUserEntry = currentUser && entry.id === currentUser.uid;
+                 li.className = `flex justify-between items-center p-2 rounded ${isCurrentUserEntry ? 'bg-yellow-500/30' : 'bg-gray-700/50'}`;
                  li.innerHTML = `
                     <div class="flex items-center">
                         <span class="font-bold text-lg w-8">${index + 1}.</span>
-                        <span>${entry.name}</span>
+                        <span>${entry.name || 'Unnamed Player'}</span>
                     </div>
                     <span class="font-bold text-yellow-400">${entry.score} Chips</span>
                  `;
@@ -662,7 +820,26 @@
         });
 
         document.getElementById('logout-btn').addEventListener('click', () => {
-             signOut(auth);
+             if (currentUser && currentUser.isCustomAuth) {
+                currentUser = null;
+                currentPlayerName = "Guest";
+                playerChips = 100; // Reset chips
+                showAuthForms();
+             } else if (currentUser && currentUser.isLocalGuest) { // Handle local guest logout
+                currentUser = null;
+                currentPlayerName = "Guest";
+                playerChips = 100; // Reset chips
+                showAuthForms();
+             } else if (auth.currentUser) { // Firebase user (likely anonymous if we re-enable that path)
+                signOut(auth).catch(error => console.error("Firebase sign out error", error));
+                // onAuthStateChanged will handle UI update to showAuthForms
+             } else {
+                // Fallback if somehow in a weird state
+                currentUser = null;
+                currentPlayerName = "Guest";
+                playerChips = 100;
+                showAuthForms();
+             }
         });
         
         document.getElementById('betting-chips').addEventListener('click', (e) => {
