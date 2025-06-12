@@ -1578,52 +1578,46 @@
             } else {
                 alert("Split not possible. Ensure two cards of the same value and enough chips.");
             }
-        }
-        async function advanceToNextHandOrDealer() { 
+        }        // --- START OF REPLACEMENT CODE ---
+
+        async function advanceToNextHandOrDealer() {
             activeHandIndex++;
             if (activeHandIndex < playerHands.length) {
                 // There are more hands to play (in case of splits)
-                // Optionally, you can add a brief pause or message
                 await sleep(500);
-                // Auto-play the next hand (hit or stand based on strategy)
-                // For now, let's just show the next hand
                 playerHandsDisplay.querySelectorAll('.player-hand')[activeHandIndex].classList.add('active-hand');
-            } else {                // No more hands, dealer's turn
+            } else {
+                // No more hands, dealer's turn
                 dealerTurn();
             }
         }
-        
+
         async function dealerTurn() {
             // First, reveal the dealer's hidden card
             await revealDealerHiddenCard();
             await sleep(500);
-            
-            // Dealer plays automatically after player stands
-            // Typical rules: Hit until 17 or higher (including soft 17)
+
+            // Dealer hits until 17 or higher
             while (dealerHand.score < 17) {
                 await dealCardToDealer(true);
                 await sleep(300);
             }
-            // After dealer's turn, determine the outcome (win/loss) for the player
+            // After dealer's turn, determine the outcome
             endHand();
         }
 
         async function revealDealerHiddenCard() {
-            // Find the hidden card in the dealer's hand
             const hiddenCard = dealerHand.cards.find(card => !card.isFaceUp);
             if (hiddenCard) {
-                // Find the corresponding card element in the DOM
                 const cardBackElement = dealerCardsEl.querySelector('.card-back');
                 if (cardBackElement) {
-                    // Mark the card as face up
                     hiddenCard.isFaceUp = true;
-                    // Re-render the card as face up
-                    renderCard(cardBackElement.parentElement, hiddenCard, true);                    // Update scores and UI
+                    renderCard(cardBackElement.parentElement, hiddenCard, true);
                     updateScoresAndUI();
                 }
             }
         }
-        
+
         async function endHand() {
             gameControls.classList.add('hidden');
             splitButton.classList.add('hidden');
@@ -1634,7 +1628,7 @@
             playerHands.forEach(hand => {
                 let handWinnings = 0;
                 const handIndex = playerHands.indexOf(hand) + 1;
-                
+
                 if (hand.isBust) {
                     overallResultMessage += `Hand ${handIndex}: Bust! You lose ${hand.bet} chips.\n`;
                 } else if (hand.isBlackjack) {
@@ -1659,29 +1653,29 @@
                     overallResultMessage += `Hand ${handIndex}: Push (${hand.score})! Bet ${hand.bet} returned.\n`;
                     handWinnings = hand.bet;
                 }
-                  playerChips += handWinnings;
+                playerChips += handWinnings;
                 totalWinnings += handWinnings;
             });
-            
+
             const resultMessageEl = document.getElementById('result-message');
             const finalChipsEl = document.getElementById('final-chips');
             if (resultMessageEl) resultMessageEl.textContent = overallResultMessage.trim() || "Game Over!";
             if (finalChipsEl) finalChipsEl.textContent = playerChips;
             updateGlobalChipDisplay();
-            
+
             if (currentUser && currentUser.uid) {
                 await updatePlayerChipsInFirestore(currentUser.uid, playerChips);
             }
-            
+
             await updateLeaderboard(currentPlayerName, playerChips);
-            
+
             gameResultScreen.classList.remove('hidden');
             gameResultScreen.classList.add('active');
         }
 
         async function updateLeaderboard(playerName, chips) {
             if (!db || !currentUser) return;
-            
+
             try {
                 const leaderboardRef = collection(db, "construction21_leaderboard");
                 await setDoc(doc(leaderboardRef, currentUser.uid), {
@@ -1696,45 +1690,51 @@
         }
 
         function checkPerfectPairs(card1, card2) {
-            if (card1.value !== card2.value) return { type: 'None', payout: 0 };
+            if (card1.value !== card2.value) return {
+                type: 'None',
+                payout: 0
+            };
 
             const isRed = (suit) => ['♥', '♦'].includes(suit);
             if (card1.suit === card2.suit) {
-                return { type: 'Perfect Pair', payout: PERFECT_PAIRS_PAYOUTS.perfect };
+                return {
+                    type: 'Perfect Pair',
+                    payout: PERFECT_PAIRS_PAYOUTS.perfect
+                };
             } else if (isRed(card1.suit) === isRed(card2.suit)) {
-                return { type: 'Colored Pair', payout: PERFECT_PAIRS_PAYOUTS.colored };            } else {
-                return { type: 'Mixed Pair', payout: PERFECT_PAIRS_PAYOUTS.mixed };
+                return {
+                    type: 'Colored Pair',
+                    payout: PERFECT_PAIRS_PAYOUTS.colored
+                };
+            } else {
+                return {
+                    type: 'Mixed Pair',
+                    payout: PERFECT_PAIRS_PAYOUTS.mixed
+                };
             }
         }
-        
+
         function check21Plus3(cards) {
             const cardToRank = (card) => {
-               
                 if (['J', 'Q', 'K'].includes(card.value)) {
                     return { J: 11, Q: 12, K: 13 }[card.value];
                 }
-                if (card.value === 'A') return 1; // Ace as 1 for most straights
+                if (card.value === 'A') return 1;
                 return parseInt(card.value);
             };
-            
+
             let ranks = cards.map(cardToRank).sort((a, b) => a - b);
             const suits = cards.map(c => c.suit);
-
             const isFlush = suits.every(s => s === suits[0]);
-            
-            // Check for straight
             let isStraight = false;
-            // Normal consecutive straight
             if (ranks[1] === ranks[0] + 1 && ranks[2] === ranks[1] + 1) {
                 isStraight = true;
+            } else if (ranks[0] === 1 && ranks[1] === 12 && ranks[2] === 13) {
+                isStraight = true;
             }
-            // Special case: Ace can be high in Q-K-A straight
-            else if (ranks[0] === 1 && ranks[1] === 12 && ranks[2] === 13) {
-                isStraight = true; // A-Q-K (treating Ace as 14)
-            }            
             const isThreeOfAKind = ranks[0] === ranks[1] && ranks[1] === ranks[2];
-            const isSuitedTrips = isThreeOfAKind && isFlush; // Same rank AND same suit
-            
+            const isSuitedTrips = isThreeOfAKind && isFlush;
+
             if (isSuitedTrips) return { type: 'Suited Trips', payout: TWENTY_ONE_PLUS_THREE_PAYOUTS.suitedTrips };
             if (isFlush && isStraight) return { type: 'Straight Flush', payout: TWENTY_ONE_PLUS_THREE_PAYOUTS.straightFlush };
             if (isThreeOfAKind) return { type: 'Three of a Kind', payout: TWENTY_ONE_PLUS_THREE_PAYOUTS.threeOfAKind };
@@ -1744,7 +1744,6 @@
             return { type: 'None', payout: 0 };
         }
 
-        // --- Side Bet Logic (Fully Implemented) ---
         function evaluateSideBets() {
             let sideBetWinnings = 0;
             let resultsHTML = '';
@@ -1757,7 +1756,6 @@
                 return;
             }
 
-            // 1. Perfect Pairs Evaluation
             if (currentPPBet > 0) {
                 let pairResult = checkPerfectPairs(playerCard1, playerCard2);
                 if (pairResult.payout > 0) {
@@ -1769,8 +1767,7 @@
                     resultsHTML += `<p class="text-red-300">Perfect Pairs: No winning pair. Lost ${currentPPBet} chips.</p>`;
                 }
             }
-            
-            // 2. 21+3 Evaluation
+
             if (current21Plus3Bet > 0 && dealerUpCard) {
                 const threeCards = [playerCard1, playerCard2, dealerUpCard];
                 let twentyOnePlusThreeResult = check21Plus3(threeCards);
@@ -1778,85 +1775,79 @@
                     const winnings = current21Plus3Bet * twentyOnePlusThreeResult.payout;
                     sideBetWinnings += winnings;
                     playerChips += winnings;
-                    resultsHTML += `<p class="text-green-300">21+3: You made a ${twentyOnePlusThreeResult.type}! Won ${winnings} chips.</p>`;                } else {
+                    resultsHTML += `<p class="text-green-300">21+3: You made a ${twentyOnePlusThreeResult.type}! Won ${winnings} chips.</p>`;
+                } else {
                     resultsHTML += `<p class="text-red-300">21+3: No winning hand. Lost ${current21Plus3Bet} chips.</p>`;
                 }
             }
-            
+
             if (resultsHTML && sideBetResultsEl) {
                 sideBetResultsEl.innerHTML = resultsHTML;
                 sideBetResultsEl.classList.remove('hidden');
             }
-              updateGlobalChipDisplay();
+            updateGlobalChipDisplay();
             if (currentUser && currentUser.uid && sideBetWinnings > 0) {
                 updatePlayerChipsInFirestore(currentUser.uid, playerChips);
             }
         }
 
-        // --- Event Listeners Setup ---
         function setupEventListeners() {
             if (logoutBtn) logoutBtn.addEventListener('click', handleLogout);
             if (playBtn) {
                 playBtn.addEventListener('click', () => {
                     mainMenu.classList.add('hidden');
                     gameCanvas.classList.remove('hidden');
-                    
                     bettingControls.classList.remove('hidden');
                     gameArea.classList.add('hidden');
                     gameResultScreen.classList.add('hidden');
                     gameResultScreen.classList.remove('active');
-
                     clearAllBets();
                     updateGlobalChipDisplay();
                     updateBetAmountDisplays();
                 });
             }
-              // Chip pickup and bet spot placement event listeners
+
             document.addEventListener('click', (e) => {
                 const chipButton = e.target.closest('.chip');
                 if (chipButton && chipButton.classList.contains('pickupable')) {
                     handleChipClick(e);
                     return;
                 }
-                
-                // Handle bet spot clicks for chip placement
                 const betSpot = e.target.closest('.bet-spot');
                 if (betSpot) {
                     handleBetSpotClick(e);
                     return;
                 }
             });
-            
-            // Click outside to put down picked up chip
+
             document.addEventListener('click', (e) => {
-                // If chip is picked up and clicking outside chip bank or betting spots
-                if (isChipPickedUp && 
-                    !e.target.closest('.chip-bank') && 
-                    !e.target.closest('.bet-spot') && 
+                if (isChipPickedUp &&
+                    !e.target.closest('.chip-bank') &&
+                    !e.target.closest('.bet-spot') &&
                     !e.target.closest('.chip.pickupable')) {
                     putDownChip();
                 }
             });
-            
+
             if (clearBetsBtn) clearBetsBtn.addEventListener('click', clearAllBets);
             if (placeBetsDealBtn) placeBetsDealBtn.addEventListener('click', placeBetsAndDeal);
             if (hitBtn) hitBtn.addEventListener('click', hit);
             if (standBtn) standBtn.addEventListener('click', stand);
             if (doubleDownBtn) doubleDownBtn.addEventListener('click', doubleDown);
             if (splitButton) splitButton.addEventListener('click', handleSplit);
-            
+
             if (playAgainBtn) {
                 playAgainBtn.addEventListener('click', () => {
                     gameResultScreen.classList.add('hidden');
                     gameResultScreen.classList.remove('active');
                     bettingControls.classList.remove('hidden');
                     gameArea.classList.add('hidden');
-                    clearAllBets();
-                    updateGlobalChipDisplay();
+                    clearAllBets();                    updateGlobalChipDisplay();
                     updateBetAmountDisplays();
                 });
             }
-              if (returnMenuBtn) {
+            
+            if (returnMenuBtn) {
                 returnMenuBtn.addEventListener('click', () => {
                     gameResultScreen.classList.add('hidden');
                     gameResultScreen.classList.remove('active');
@@ -1867,11 +1858,12 @@
             }
         }
 
-        // --- Initialization ---
         document.addEventListener('DOMContentLoaded', () => {
             initializeFirebase();
             setupEventListeners();
         });
+
+        // --- END OF REPLACEMENT CODE ---
 
     </script>
 </body>
