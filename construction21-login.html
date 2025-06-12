@@ -1,395 +1,417 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Construction 21 — Login</title>
-    <link rel="icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2NCIgaGVpZ2h0PSI2NCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiNlMGExMDYiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBkPSJNMTUuMDUgNWEzIDMgMCAwIDEgNC41IDBIM05NMTUuMDUgNU0xOSA4LjVjMCAxLjUtLjUgMy41LTIgNC41di4wNUgxN2EyIDIgMCAwIDAgLTIgLTIgYSAyIDIgMCAwIDAgLTIgMkgxM3YtNkgxNlY4LjVNOSA2LjVWNE02IDcgTDUuNSAxNC41TWwwIDE1IDguOTkgMy04IGMxLjUgLTRoMmMwIDAuNSAwLjUgMSAwLjUgMnYxSDEwdjNjMCAxIDAgMi40IC0xIDN2XzIgYzAgMC41IDAuMiAwLjUgMC41IDAuNXMwLjUgLTAuMiAwLjUgLTAuNVYyMUg0LjA3bDEuOCAtMTQuMjUgYTEgMSAwIDAgMSAwLjE5IC0wLjA3IHoiLz48L3N2Zz4=" type="image/svg+xml">
-    <link href="css/tailwind.output.css" rel="stylesheet">
-    <style>
-        html, body {
-            min-height: 100vh;
-            width: 100vw;
-            margin: 0;
-            padding: 0;
-        }
-        body {
-            background: radial-gradient(ellipse at 60% 40%, #ffd70033 0%, #23232b 100%),
-                        linear-gradient(135deg, #23232b 0%, #2d2d3a 100%);
-            font-family: 'Segoe UI', Arial, sans-serif;
-            color: #EAEAEA;
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow-x: hidden;
-        }
-        .login-bg-animation {
-            position: fixed;
-            inset: 0;
-            z-index: -1;
-            overflow: hidden;
-            pointer-events: none;
-        }
-        .bg-shape {
-            position: absolute;
-            border-radius: 50%;
-            opacity: 0.13;
-            filter: blur(22px);
-            animation: floatBg 10s ease-in-out infinite alternate;
-        }
-        .bg-shape1 { width: 320px; height: 320px; background: #ffd700; left: 4vw; top: 10vh; animation-delay: 0s; }
-        .bg-shape2 { width: 200px; height: 200px; background: #ff4e00; right: 10vw; top: 36vh; animation-delay: 1.5s; }
-        .bg-shape3 { width: 160px; height: 160px; background: #00cfff; left: 40vw; bottom: 6vh; animation-delay: 3.5s; }
-        @keyframes floatBg {
-            0% { transform: translateY(0) scale(1); }
-            100% { transform: translateY(-28px) scale(1.07); }
-        }
-        .login-container {
-            background: rgba(34,34,44,0.98);
-            backdrop-filter: blur(14px);
-            border-radius: 30px;
-            padding: 2.8rem 2.2rem 2.1rem 2.2rem;
-            box-shadow: 0 8px 40px #000b, 0 0 0 2px #ffd70044;
-            border: 2px solid rgba(255, 215, 0, 0.16);
-            width: 100%;
-            max-width: 430px;
-            margin: 2vw;
-            position: relative;
-            text-align: center;
-        }
-        .login-container::before {
-            content: '';
-            display: block;
-            position: absolute;
-            left: 0; top: 0; right: 0; height: 5px;
-            border-radius: 10px 10px 0 0;
-            background: linear-gradient(90deg,#ffd700,#ff4e00,#00cfff,#ffd700);
-            background-size: 180% 100%;
-            animation: shimmer 3.6s linear infinite;
-        }
-        @keyframes shimmer {
-            0%,100% { background-position: 120% 0; }
-            50% { background-position: -80% 0; }
-        }
-        .game-title {
-            font-size: 2.35rem;
-            font-weight: 900;
-            color: #ffd700;
-            text-shadow: 0 0 18px #ffd70088, 0 2px 4px #222;
-            margin-bottom: 0.7rem;
-            letter-spacing: -0.6px;
-        }
-        .game-subtitle {
-            color: #ffe48b;
-            font-size: 1.09rem;
-            margin-bottom: 2rem;
-            font-weight: 500;
-            letter-spacing: 0.12em;
-            text-shadow: 0 0 3px #23232b88;
-        }
-        .auth-tabs {
-            display: flex;
-            margin-bottom: 2rem;
-            background: #22263a66;
-            border-radius: 10px;
-            padding: 3px;
-        }
-        .auth-tab-btn {
-            flex: 1;
-            padding: 11px 0;
-            background: transparent;
-            color: #bbb;
-            border: none;
-            border-radius: 8px;
-            font-weight: 700;
-            font-size: 1.06rem;
-            cursor: pointer;
-            transition: all 0.25s;
-        }
-        .auth-tab-btn.active {
-            background: #ffd700;
-            color: #242422;
-            box-shadow: 0 3px 10px #ffd70022;
-        }
-        .auth-tab-content { display: none; }
-        .auth-tab-content.active { display: block; }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Construction 21 — Login</title>
+  <link rel="icon" href="https://cusumanohi.com/wp-content/uploads/2022/04/cropped-CusumanoH-Ico-1-32x32.png">
+  <link href="css/tailwind.output.css" rel="stylesheet">
+  <style>
+    html, body { height: 100%; width: 100%; margin: 0; padding: 0; }
+    body {
+      min-height: 100vh;
+      background: linear-gradient(135deg, #23232b 0%, #2d2d3a 100%);
+      font-family: 'Segoe UI', Arial, sans-serif;
+      color: #F8F8E6;
+      display: flex; align-items: center; justify-content: center;
+      overflow-x: hidden;
+    }
+    .login-bg-animation { position: fixed; inset: 0; z-index: -1; pointer-events: none; }
+    .bg-shape { position: absolute; border-radius: 50%; opacity: 0.12; filter: blur(22px); animation: floatBg 10s ease-in-out infinite alternate; }
+    .bg-shape1 { width: 360px; height: 360px; background: #ffd700; left: 3vw; top: 12vh; animation-delay: 0s; }
+    .bg-shape2 { width: 230px; height: 230px; background: #ff4e00; right: 8vw; top: 34vh; animation-delay: 1.5s; }
+    .bg-shape3 { width: 140px; height: 140px; background: #202020; left: 43vw; bottom: 6vh; animation-delay: 3.5s; }
+    @keyframes floatBg { 0% { transform: translateY(0) scale(1);} 100% { transform: translateY(-32px) scale(1.06);} }
 
-        .form-group { margin-bottom: 1.22rem; text-align: left; }
-        .form-label {
-            color: #f9efcf;
-            font-size: 1.04rem;
-            margin-bottom: 0.3rem;
-            font-weight: 600;
-            letter-spacing: 0.01em;
-            display: block;
-        }
-        .form-input {
-            width: 100%;
-            padding: 13px 14px;
-            background: #282b36cc;
-            border: 2px solid #46485e77;
-            border-radius: 10px;
-            color: #fff;
-            font-size: 1rem;
-            transition: border 0.15s, box-shadow 0.2s;
-            box-sizing: border-box;
-        }
-        .form-input:focus {
-            outline: none;
-            border-color: #ffd700;
-            background: #232440f7;
-            box-shadow: 0 0 0 3px #ffd70022;
-        }
-        .form-input::placeholder { color: #b7bbbe; }
+    .branding-bar {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 18px;
+      margin-bottom: 0.7rem;
+    }
+    .branding-logo {
+      background: #ffd700;
+      border-radius: 11px;
+      padding: 3px 11px 1px 8px;
+      box-shadow: 0 2px 8px #0005;
+      font-size: 2rem;
+      font-weight: bold;
+      color: #23232b;
+      letter-spacing: -2px;
+      display: flex; align-items: center; gap: 5px;
+    }
+    .branding-txt { font-size: 1.09rem; color: #ffe48b; font-weight: 700; letter-spacing: 0.12em; }
 
-        .auth-btn {
-            width: 100%;
-            padding: 14px 0;
-            background: linear-gradient(90deg, #ffd700 80%, #ffb700 100%);
-            color: #23232b;
-            border: none;
-            border-radius: 10px;
-            font-weight: 800;
-            font-size: 1.12rem;
-            cursor: pointer;
-            transition: all 0.18s;
-            margin-bottom: 1rem;
-            box-shadow: 0 3px 13px #ffd70021;
-            position: relative;
-            overflow: hidden;
-        }
-        .auth-btn:hover, .auth-btn:focus {
-            background: linear-gradient(90deg,#ffe066,#ffd700);
-            box-shadow: 0 6px 19px #ffd70050, 0 0 0 2px #ffd70044;
-            transform: scale(1.022);
-        }
-        .auth-btn:disabled { opacity: 0.7; cursor: not-allowed; }
-
-        .message {
-            min-height: 1.3rem;
-            font-size: 1rem;
-            font-weight: 500;
-            margin-top: 0.5rem;
-        }
-        .message.error { color: #ff5959; }
-        .message.success { color: #22e99a; }
-        .message.info { color: #38b6ff; }
-
-        .construction-icons {
-            position: absolute;
-            top: 45px; right: 30px;
-            font-size: 2.2rem;
-            opacity: 0.13;
-            pointer-events: none;
-        }
-        .back-to-home {
-            position: absolute;
-            top: 20px;
-            left: 26px;
-            color: #ffd700;
-            text-decoration: none;
-            font-weight: 700;
-            font-size: 1rem;
-            padding: 8px 20px;
-            border-radius: 7px;
-            background: #23232b77;
-            box-shadow: 0 1px 8px #ffd70033;
-            transition: all 0.18s;
-            backdrop-filter: blur(7px);
-            z-index: 11;
-        }
-        .back-to-home:hover { background: #ffd700; color: #23232b; }
-        @media (max-width: 650px) {
-            .login-container { padding: 1.3rem 0.8rem; margin: 0 5px; }
-            .game-title { font-size: 1.7rem; }
-            .construction-icons { top: 19px; font-size: 1.4rem; right: 10px; }
-            .back-to-home { top: 10px; left: 6px; padding: 6px 12px; font-size: 0.94rem; }
-        }
-    </style>
+    .login-container {
+      background: rgba(36,36,36,0.97);
+      backdrop-filter: blur(13px);
+      border-radius: 19px;
+      padding: 2.2rem 1.15rem 1.55rem 1.15rem;
+      box-shadow: 0 6px 34px #000c, 0 0 0 2px #ffd70020;
+      border: 2.2px solid #ffd70033;
+      width: 100%; max-width: 370px; margin: 2vw; text-align: center; position: relative;
+    }
+    .barrier-tape {
+      position: absolute; top: -18px; left: -22px; right: -22px; height: 24px; z-index: 2;
+      background: repeating-linear-gradient(
+        120deg,
+        #23232b 0 16px,
+        #ffd700 16px 32px
+      );
+      border-radius: 11px 11px 0 0;
+      box-shadow: 0 3px 18px #0002;
+      opacity: 0.97;
+      border-bottom: 2.5px solid #000;
+      pointer-events: none;
+    }
+    .game-title {
+      font-size: 2rem; font-weight: 900; color: #ffd700;
+      text-shadow: 0 0 11px #ffd70069, 0 2px 4px #23232b44;
+      margin: 0.4rem 0 0.7rem 0; letter-spacing: -1.3px;
+      display: flex; align-items: center; justify-content: center; gap: 10px;
+    }
+    .game-title .helmet {
+      font-size: 1.24em;
+      filter: drop-shadow(0 2px 2px #0004);
+    }
+    .auth-tabs { display: flex; margin-bottom: 1.12rem; background: #22263a33; border-radius: 10px; padding: 3px; }
+    .auth-tab-btn {
+      flex: 1; padding: 10px 0; background: transparent; color: #bdbdbd;
+      border: none; border-radius: 8px; font-weight: 700; font-size: 1.06rem; cursor: pointer;
+      transition: all 0.22s;
+    }
+    .auth-tab-btn.active {
+      background: #ffd700; color: #23232b; box-shadow: 0 3px 10px #ffd70013;
+    }
+    .auth-tab-content { display: none; }
+    .auth-tab-content.active { display: block; }
+    .form-group { margin-bottom: 1.04rem; text-align: left; }
+    .form-label { color: #f9efcf; font-size: 1.01rem; font-weight: 600; margin-bottom: 0.22rem; display: block; }
+    .form-input-wrap { position: relative; }
+    .form-input {
+      width: 100%; padding: 11px 38px 11px 12px; background: #282b36cc;
+      border: 2px solid #46485e77; border-radius: 9px; color: #fff;
+      font-size: 1rem; transition: border 0.15s, box-shadow 0.19s; box-sizing: border-box;
+    }
+    .form-input:focus {
+      outline: none; border-color: #ffd700;
+      background: #232440fa; box-shadow: 0 0 0 3px #ffd70018;
+    }
+    .form-input::placeholder { color: #b7bbbe; }
+    .show-pass-btn {
+      position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+      background: none; border: none; color: #ffd700cc; font-size: 1.14em;
+      cursor: pointer; padding: 2px 6px; border-radius: 5px; transition: background 0.18s;
+    }
+    .show-pass-btn:focus, .show-pass-btn:hover { background: #ffd70022; }
+    .auth-btn {
+      width: 100%; padding: 13px 0; margin-top: 3px;
+      background: linear-gradient(90deg, #ffd700 80%, #ffb700 100%);
+      color: #23232b; border: none; border-radius: 10px; font-weight: 800;
+      font-size: 1.07rem; cursor: pointer; transition: all 0.17s; margin-bottom: 0.6rem;
+      box-shadow: 0 2px 10px #ffd70013;
+    }
+    .auth-btn:hover, .auth-btn:focus {
+      background: linear-gradient(90deg,#ffe066,#ffd700);
+      box-shadow: 0 6px 19px #ffd70024, 0 0 0 2px #ffd70030;
+      transform: scale(1.017);
+    }
+    .auth-btn:disabled { opacity: 0.65; cursor: not-allowed; }
+    .forgot-link {
+      display: inline-block; font-size: .96em; color: #ffe48b;
+      margin: -4px 0 10px 2px; text-decoration: underline dotted; cursor: pointer;
+      transition: color 0.16s;
+    }
+    .forgot-link:hover, .forgot-link:focus { color: #ffd700; }
+    .message { min-height: 1.3rem; font-size: 0.98rem; font-weight: 500; margin-top: 0.13rem; text-align: left; }
+    .message.error { color: #ff5959; }
+    .message.success { color: #22e99a; }
+    .message.info { color: #38b6ff; }
+    .construction-icons { position: absolute; top: 21px; right: 14px; font-size: 1.1rem; opacity: 0.14; pointer-events: none; }
+    .back-to-home {
+      position: absolute; top: 5px; left: 7px; color: #ffd700; text-decoration: none;
+      font-weight: 700; font-size: .96rem; padding: 6px 13px;
+      border-radius: 6px; background: #23232b53; box-shadow: 0 1px 8px #ffd70010;
+      transition: all 0.18s; z-index: 11;
+    }
+    .back-to-home:hover { background: #ffd700; color: #23232b; }
+    @media (max-width: 650px) {
+      .login-container { padding: 0.85rem 0.5rem; margin: 0 2px; }
+      .branding-logo { font-size: 1.3rem; }
+      .game-title { font-size: 1.11rem; }
+      .branding-bar { gap: 8px; }
+      .barrier-tape { top: -13px; height: 16px; }
+      .back-to-home { font-size: .89rem; padding: 3px 8px; top: 2px; left: 2px;}
+    }
+  </style>
 </head>
 <body>
-    <div class="login-bg-animation">
-        <div class="bg-shape bg-shape1"></div>
-        <div class="bg-shape bg-shape2"></div>
-        <div class="bg-shape bg-shape3"></div>
+  <div class="login-bg-animation">
+    <div class="bg-shape bg-shape1"></div>
+    <div class="bg-shape bg-shape2"></div>
+    <div class="bg-shape bg-shape3"></div>
+  </div>
+  <a href="Games.html" class="back-to-home">← Back to Games</a>
+  <div class="login-container">
+    <div class="barrier-tape"></div>
+    <div class="branding-bar">
+      <span class="branding-logo">
+        <img src="https://cusumanohi.com/wp-content/uploads/2022/04/cropped-CusumanoH-Ico-1-32x32.png" width="28" height="28" style="vertical-align:middle;margin-right:4px;">
+        <span style="letter-spacing:0.01em">CUSUMANO H&I</span>
+      </span>
+      <span class="branding-txt">Blackjack by Cusumano</span>
     </div>
-    <a href="Games.html" class="back-to-home">← Back to Games</a>
-    <div class="login-container">
-        <div class="construction-icons">🔨 🏗️ ⚒️</div>
-        <h1 class="game-title">Construction 21</h1>
-        <div class="game-subtitle">Professional Blackjack Casino Experience</div>
-        <div class="auth-tabs">
-            <button class="auth-tab-btn active" data-tab="login">Login</button>
-            <button class="auth-tab-btn" data-tab="signup">Sign Up</button>
-        </div>
-        <div id="login-tab" class="auth-tab-content active">
-            <div class="form-group">
-                <label class="form-label" for="login-email">Email Address</label>
-                <input type="email" id="login-email" class="form-input" placeholder="Enter your email" required>
-            </div>
-            <div class="form-group">
-                <label class="form-label" for="login-password">Password</label>
-                <input type="password" id="login-password" class="form-input" placeholder="Enter your password" required>
-            </div>
-            <button id="login-btn" class="auth-btn">Login & Play</button>
-            <div id="login-message" class="message"></div>
-        </div>
-        <div id="signup-tab" class="auth-tab-content">
-            <div class="form-group">
-                <label class="form-label" for="signup-name">Display Name</label>
-                <input type="text" id="signup-name" class="form-input" placeholder="Your player name" required>
-            </div>
-            <div class="form-group">
-                <label class="form-label" for="signup-email">Email Address</label>
-                <input type="email" id="signup-email" class="form-input" placeholder="Enter your email" required>
-            </div>
-            <div class="form-group">
-                <label class="form-label" for="signup-password">Password</label>
-                <input type="password" id="signup-password" class="form-input" placeholder="6+ characters" required>
-            </div>
-            <button id="signup-btn" class="auth-btn">Create Account & Play</button>
-            <div id="signup-message" class="message"></div>
-        </div>
+    <div class="game-title">
+      <span>Construction 21</span>
+      <span class="helmet" aria-label="construction helmet">⛑️</span>
     </div>
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-auth.js";
-        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-firestore.js";
+    <div class="construction-icons">🚧 🏗️ ⚒️</div>
+    <div class="auth-tabs" style="margin-top: 6px;">
+      <button class="auth-tab-btn active" data-tab="login" tabindex="0">Login</button>
+      <button class="auth-tab-btn" data-tab="signup" tabindex="0">Sign Up</button>
+    </div>
+    <div id="login-tab" class="auth-tab-content active">
+      <form id="login-form" autocomplete="on">
+        <div class="form-group">
+          <label class="form-label" for="login-email">Email Address</label>
+          <input type="email" id="login-email" class="form-input" placeholder="Enter your email" required autocomplete="username">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="login-password">Password</label>
+          <div class="form-input-wrap">
+            <input type="password" id="login-password" class="form-input" placeholder="Enter your password" required autocomplete="current-password">
+            <button type="button" class="show-pass-btn" tabindex="-1" onclick="togglePassword('login-password', this)" aria-label="Show password">👁️</button>
+          </div>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:7px;">
+          <span></span>
+          <span class="forgot-link" id="forgot-link" tabindex="0">Forgot password?</span>
+        </div>
+        <button id="login-btn" class="auth-btn" type="submit">Login & Play</button>
+        <div id="login-message" class="message"></div>
+      </form>
+      <form id="forgot-form" style="display:none;">
+        <div class="form-group">
+          <label class="form-label" for="forgot-email">Enter your account email to reset password:</label>
+          <input type="email" id="forgot-email" class="form-input" placeholder="Your email" required autocomplete="username">
+        </div>
+        <button id="forgot-btn" class="auth-btn" type="submit">Send Reset Email</button>
+        <button type="button" class="auth-btn" style="background:#46485e;color:#fff;font-weight:600;margin-bottom:0;" id="forgot-cancel-btn">Back to Login</button>
+        <div id="forgot-message" class="message"></div>
+      </form>
+    </div>
+    <div id="signup-tab" class="auth-tab-content">
+      <form id="signup-form" autocomplete="on">
+        <div class="form-group">
+          <label class="form-label" for="signup-name">Display Name</label>
+          <input type="text" id="signup-name" class="form-input" placeholder="Your player name" required autocomplete="name">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="signup-email">Email Address</label>
+          <input type="email" id="signup-email" class="form-input" placeholder="Enter your email" required autocomplete="username">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="signup-password">Password</label>
+          <div class="form-input-wrap">
+            <input type="password" id="signup-password" class="form-input" placeholder="6+ characters" required autocomplete="new-password">
+            <button type="button" class="show-pass-btn" tabindex="-1" onclick="togglePassword('signup-password', this)" aria-label="Show password">👁️</button>
+          </div>
+        </div>
+        <button id="signup-btn" class="auth-btn" type="submit">Create Account & Play</button>
+        <div id="signup-message" class="message"></div>
+      </form>
+    </div>
+  </div>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-app.js";
+    import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-auth.js";
+    import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-firestore.js";
 
-        // Firebase Configuration (storageBucket typo fixed!)
-        const firebaseConfig = {
-            apiKey: "AIzaSyBVtq6dAEuybJNmTTv8dXBxTVUgw1t0ZMk",
-            authDomain: "cusumano-website.firebaseapp.com",
-            projectId: "cusumano-website",
-            storageBucket: "cusumano-website.appspot.com",
-            messagingSenderId: "20051552210",
-            appId: "1:20051552210:web:7eb3b22baa3fec184e4a0b"
-        };
-        let app, auth, db;
-        try {
-            app = initializeApp(firebaseConfig);
-            auth = getAuth(app);
-            db = getFirestore(app);
-        } catch (error) {
-            showMessage(document.getElementById('login-message'), 'Connection error. Please refresh.', 'error');
-        }
+    const firebaseConfig = {
+      apiKey: "AIzaSyBVtq6dAEuybJNmTTv8dXBxTVUgw1t0ZMk",
+      authDomain: "cusumano-website.firebaseapp.com",
+      projectId: "cusumano-website",
+      storageBucket: "cusumano-website.appspot.com",
+      messagingSenderId: "20051552210",
+      appId: "1:20051552210:web:7eb3b22baa3fec184e4a0b"
+    };
+    let app, auth, db;
+    try {
+      app = initializeApp(firebaseConfig);
+      auth = getAuth(app);
+      db = getFirestore(app);
+    } catch (error) {
+      showMessage(document.getElementById('login-message'), 'Connection error. Please refresh.', 'error');
+    }
 
-        // DOM Elements
-        const loginBtn = document.getElementById('login-btn');
-        const signupBtn = document.getElementById('signup-btn');
-        const loginMessage = document.getElementById('login-message');
-        const signupMessage = document.getElementById('signup-message');
-        const authTabs = document.querySelectorAll('.auth-tab-btn');
-        const authTabContents = document.querySelectorAll('.auth-tab-content');
+    const loginBtn = document.getElementById('login-btn');
+    const signupBtn = document.getElementById('signup-btn');
+    const loginMessage = document.getElementById('login-message');
+    const signupMessage = document.getElementById('signup-message');
+    const authTabs = document.querySelectorAll('.auth-tab-btn');
+    const authTabContents = document.querySelectorAll('.auth-tab-content');
+    const loginForm = document.getElementById('login-form');
+    const signupForm = document.getElementById('signup-form');
+    const forgotLink = document.getElementById('forgot-link');
+    const forgotForm = document.getElementById('forgot-form');
+    const forgotBtn = document.getElementById('forgot-btn');
+    const forgotCancelBtn = document.getElementById('forgot-cancel-btn');
+    const forgotMessage = document.getElementById('forgot-message');
 
-        // Tab Switching
-        authTabs.forEach(tab => {
-            tab.addEventListener('click', () => {
-                const targetTab = tab.dataset.tab;
-                authTabs.forEach(t => t.classList.remove('active'));
-                authTabContents.forEach(c => c.classList.remove('active'));
-                tab.classList.add('active');
-                document.getElementById(`${targetTab}-tab`).classList.add('active');
-                loginMessage.textContent = '';
-                signupMessage.textContent = '';
-            });
-        });
+    // Tab Switching
+    authTabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        const targetTab = tab.dataset.tab;
+        authTabs.forEach(t => t.classList.remove('active'));
+        authTabContents.forEach(c => c.classList.remove('active'));
+        tab.classList.add('active');
+        document.getElementById(`${targetTab}-tab`).classList.add('active');
+        loginMessage.textContent = '';
+        signupMessage.textContent = '';
+        document.getElementById('login-form').style.display = '';
+        forgotForm.style.display = 'none';
+        document.getElementById('forgot-message').textContent = '';
+      });
+    });
 
-        // Auth State
-        if (auth) {
-            onAuthStateChanged(auth, async (user) => {
-                if (user) {
-                    try {
-                        const userDocRef = doc(db, "construction21_users", user.uid);
-                        const userDoc = await getDoc(userDocRef);
-                        if (!userDoc.exists()) {
-                            await setDoc(userDocRef, {
-                                displayName: user.displayName || user.email?.split('@')[0] || 'Player',
-                                chips: 100,
-                                email: user.email,
-                                createdAt: new Date(),
-                                lastLogin: new Date()
-                            });
-                        }
-                        sessionStorage.setItem('loginSuccess', 'true');
-                        window.location.href = 'construction21.html';
-                    } catch (error) {
-                        showMessage(loginMessage, 'Error loading user data. Try again.', 'error');
-                    }
-                }
-            });
-        }
+    // Show/hide password toggle
+    window.togglePassword = function(id, btn) {
+      const input = document.getElementById(id);
+      if (input.type === "password") {
+        input.type = "text"; btn.textContent = "🙈";
+      } else {
+        input.type = "password"; btn.textContent = "👁️";
+      }
+    }
 
-        loginBtn.addEventListener('click', async () => {
-            const email = document.getElementById('login-email').value.trim();
-            const password = document.getElementById('login-password').value;
-            if (!email || !password) return showMessage(loginMessage, 'Please fill in all fields.', 'error');
-            if (!email.includes('@')) return showMessage(loginMessage, 'Please enter a valid email.', 'error');
-            if (!auth) return showMessage(loginMessage, 'Authentication unavailable. Refresh.', 'error');
-            setButtonLoading(loginBtn, 'Logging in...');
-            try {
-                await signInWithEmailAndPassword(auth, email, password);
-                showMessage(loginMessage, 'Login successful! Redirecting...', 'success');
-            } catch (error) {
-                setButtonLoading(loginBtn, 'Login & Play', false);
-                showMessage(loginMessage, getErrorMessage(error.code), 'error');
+    // Auth State
+    if (auth) {
+      onAuthStateChanged(auth, async (user) => {
+        if (user) {
+          try {
+            const userDocRef = doc(db, "construction21_users", user.uid);
+            const userDoc = await getDoc(userDocRef);
+            if (!userDoc.exists()) {
+              await setDoc(userDocRef, {
+                displayName: user.displayName || user.email?.split('@')[0] || 'Player',
+                chips: 100,
+                email: user.email,
+                createdAt: new Date(),
+                lastLogin: new Date()
+              });
             }
-        });
+            sessionStorage.setItem('loginSuccess', 'true');
+            window.location.href = 'construction21.html';
+          } catch (error) {
+            showMessage(loginMessage, 'Error loading user data. Try again.', 'error');
+          }
+        }
+      });
+    }
 
-        signupBtn.addEventListener('click', async () => {
-            const name = document.getElementById('signup-name').value.trim();
-            const email = document.getElementById('signup-email').value.trim();
-            const password = document.getElementById('signup-password').value;
-            if (!name || !email || !password) return showMessage(signupMessage, 'Please fill in all fields.', 'error');
-            if (name.length < 2) return showMessage(signupMessage, 'Name must be at least 2 characters.', 'error');
-            if (!email.includes('@')) return showMessage(signupMessage, 'Please enter a valid email.', 'error');
-            if (password.length < 6) return showMessage(signupMessage, 'Password 6+ chars.', 'error');
-            if (!auth || !db) return showMessage(signupMessage, 'Auth unavailable. Refresh.', 'error');
-            setButtonLoading(signupBtn, 'Creating account...');
-            try {
-                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-                const user = userCredential.user;
-                await setDoc(doc(db, "construction21_users", user.uid), {
-                    displayName: name,
-                    chips: 100,
-                    email: email,
-                    createdAt: new Date(),
-                    lastLogin: new Date()
-                });
-                showMessage(signupMessage, 'Account created! Redirecting...', 'success');
-            } catch (error) {
-                setButtonLoading(signupBtn, 'Create Account & Play', false);
-                showMessage(signupMessage, getErrorMessage(error.code), 'error');
-            }
-        });
+    // Login
+    loginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('login-email').value.trim();
+      const password = document.getElementById('login-password').value;
+      if (!email || !password) return showMessage(loginMessage, 'Please fill in all fields.', 'error');
+      if (!email.includes('@')) return showMessage(loginMessage, 'Please enter a valid email.', 'error');
+      if (!auth) return showMessage(loginMessage, 'Authentication unavailable. Refresh.', 'error');
+      setButtonLoading(loginBtn, 'Logging in...');
+      try {
+        await signInWithEmailAndPassword(auth, email, password);
+        showMessage(loginMessage, 'Login successful! Redirecting...', 'success');
+      } catch (error) {
+        setButtonLoading(loginBtn, 'Login & Play', false);
+        showMessage(loginMessage, getErrorMessage(error.code), 'error');
+      }
+    });
 
-        function showMessage(element, message, type) {
-            element.textContent = message;
-            element.className = `message ${type}`;
-        }
-        function setButtonLoading(button, text, loading = true) {
-            button.textContent = text;
-            button.disabled = loading;
-        }
-        function getErrorMessage(code) {
-            switch (code) {
-                case 'auth/user-not-found': return 'No account with this email.';
-                case 'auth/wrong-password': return 'Incorrect password.';
-                case 'auth/email-already-in-use': return 'Email already exists.';
-                case 'auth/weak-password': return 'Password too short.';
-                case 'auth/invalid-email': return 'Invalid email address.';
-                case 'auth/too-many-requests': return 'Too many failed attempts. Try again later.';
-                default: return 'An error occurred. Try again.';
-            }
-        }
-        document.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                const activeTab = document.querySelector('.auth-tab-content.active');
-                if (activeTab.id === 'login-tab') loginBtn.click();
-                else signupBtn.click();
-            }
+    // Signup
+    signupForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const name = document.getElementById('signup-name').value.trim();
+      const email = document.getElementById('signup-email').value.trim();
+      const password = document.getElementById('signup-password').value;
+      if (!name || !email || !password) return showMessage(signupMessage, 'Please fill in all fields.', 'error');
+      if (name.length < 2) return showMessage(signupMessage, 'Name must be at least 2 characters.', 'error');
+      if (!email.includes('@')) return showMessage(signupMessage, 'Please enter a valid email.', 'error');
+      if (password.length < 6) return showMessage(signupMessage, 'Password 6+ chars.', 'error');
+      if (!auth || !db) return showMessage(signupMessage, 'Auth unavailable. Refresh.', 'error');
+      setButtonLoading(signupBtn, 'Creating account...');
+      try {
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
+        await setDoc(doc(db, "construction21_users", user.uid), {
+          displayName: name,
+          chips: 100,
+          email: email,
+          createdAt: new Date(),
+          lastLogin: new Date()
         });
-    </script>
+        showMessage(signupMessage, 'Account created! Redirecting...', 'success');
+      } catch (error) {
+        setButtonLoading(signupBtn, 'Create Account & Play', false);
+        showMessage(signupMessage, getErrorMessage(error.code), 'error');
+      }
+    });
+
+    // Forgot password flow
+    forgotLink.addEventListener('click', () => {
+      loginForm.style.display = 'none';
+      forgotForm.style.display = '';
+      forgotMessage.textContent = '';
+      document.getElementById('forgot-email').value = document.getElementById('login-email').value;
+    });
+    forgotCancelBtn.addEventListener('click', () => {
+      forgotForm.style.display = 'none';
+      loginForm.style.display = '';
+      forgotMessage.textContent = '';
+    });
+    forgotForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('forgot-email').value.trim();
+      if (!email) return showMessage(forgotMessage, 'Please enter your email.', 'error');
+      setButtonLoading(forgotBtn, 'Sending...');
+      try {
+        await sendPasswordResetEmail(auth, email);
+        showMessage(forgotMessage, 'Reset email sent! Check your inbox.', 'success');
+      } catch (error) {
+        setButtonLoading(forgotBtn, 'Send Reset Email', false);
+        showMessage(forgotMessage, getErrorMessage(error.code), 'error');
+      }
+    });
+
+    function showMessage(element, message, type) {
+      element.textContent = message;
+      element.className = `message ${type}`;
+    }
+    function setButtonLoading(button, text, loading = true) {
+      button.textContent = text;
+      button.disabled = loading;
+    }
+    function getErrorMessage(code) {
+      switch (code) {
+        case 'auth/user-not-found': return 'No account with this email.';
+        case 'auth/wrong-password': return 'Incorrect password.';
+        case 'auth/email-already-in-use': return 'Email already exists.';
+        case 'auth/weak-password': return 'Password too short.';
+        case 'auth/invalid-email': return 'Invalid email address.';
+        case 'auth/too-many-requests': return 'Too many failed attempts. Try again later.';
+        default: return 'An error occurred. Try again.';
+      }
+    }
+
+    document.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        const activeTab = document.querySelector('.auth-tab-content.active');
+        if (forgotForm.style.display === '' && forgotForm.offsetParent !== null) {
+          forgotBtn.click();
+        } else if (activeTab.id === 'login-tab') loginBtn.click();
+        else signupBtn.click();
+      }
+    });
+  </script>
 </body>
 </html>

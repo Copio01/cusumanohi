@@ -1,7 +1,27 @@
 import { Construction21Game } from './construction21-logic.js';
 
-let game = new Construction21Game();
-let inPlay = false, outcomeLock = false, resultsCache = null, lastBets = null;
+// ---- Firebase Setup ----
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-app.js";
+import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-auth.js";
+import { getFirestore, doc, getDoc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-firestore.js";
+
+// Your Firebase config
+const firebaseConfig = {
+  apiKey: "AIzaSyBVtq6dAEuybJNmTTv8dXBxTVUgw1t0ZMk",
+  authDomain: "cusumano-website.firebaseapp.com",
+  projectId: "cusumano-website",
+  storageBucket: "cusumano-website.appspot.com",
+  messagingSenderId: "20051552210",
+  appId: "1:20051552210:web:7eb3b22baa3fec184e4a0b"
+};
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+// -- Globals --
+let game = null;
+let inPlay = false, outcomeLock = false, resultsCache = null, lastBets = null, userDocRef = null, userId = null;
+let userDisplayName = "";
 
 const dealerCardsEl = document.getElementById('dealer-cards');
 const playerHandsEl = document.getElementById('player-hands');
@@ -24,6 +44,7 @@ const clearBetsBtn = document.getElementById('clear-bets-btn');
 const newBetBtn = document.getElementById('new-bet-btn');
 const rebetBtn = document.getElementById('rebet-btn');
 const doubleBetBtn = document.getElementById('double-bet-btn');
+const logoutBtn = document.getElementById('logout-btn');
 
 let selectedChip = null;
 let betSpots = {
@@ -33,8 +54,59 @@ let betSpots = {
 };
 const virtualDeckEl = document.getElementById('virtual-deck');
 
-// Utility for animation delays
 const delay = ms => new Promise(r => setTimeout(r, ms));
+
+// ---------- FIREBASE SYNC ----------
+
+async function loadUserDataAndStartGame(user) {
+  userId = user.uid;
+  userDocRef = doc(db, "construction21_users", userId);
+  let chipCount = 100, displayName = user.email;
+  try {
+    const docSnap = await getDoc(userDocRef);
+    if (docSnap.exists()) {
+      chipCount = docSnap.data().chips ?? 100;
+      displayName = docSnap.data().displayName ?? user.email;
+    } else {
+      await setDoc(userDocRef, {
+        displayName: user.email,
+        chips: 100,
+        email: user.email,
+        createdAt: new Date(),
+        lastLogin: new Date()
+      });
+    }
+  } catch (e) {
+    showStatusToast("Couldn't load chips from server", true);
+  }
+  userDisplayName = displayName;
+  if (profileNameEl) profileNameEl.textContent = userDisplayName;
+  game = new Construction21Game(chipCount);
+  updateChipsDisplay();
+  setupEventHandlers();
+  updateBetsUI();
+  resetAllHandsAndUI();
+  updateActionBarState();
+  showInPlayButtons(false);
+  hideEndButtons();
+}
+
+async function saveChipsToFirebase() {
+  if (!userDocRef) return;
+  try {
+    await updateDoc(userDocRef, {
+      chips: game.chips,
+      lastLogin: new Date()
+    });
+  } catch (e) {
+    showStatusToast("Couldn't save chips!", true);
+  }
+}
+
+function updateChipsDisplay() {
+  if (profileChipsEl) profileChipsEl.textContent = game.chips;
+  if (centerChipsAmountEl) centerChipsAmountEl.textContent = game.chips;
+}
 
 // ---------- Utility Functions ----------
 function getVirtualDeckPos() {
@@ -128,7 +200,6 @@ async function animateDealCard(hand, faceUp, isDealer, cardIndex) {
   await delay(550);
 }
 async function dealOpeningCards() {
-  // Standard BJ: Player card 1 (face up) → Dealer card 1 (face up) → Player card 2 (face up) → Dealer card 2 (face down)
   await animateDealCard(game.playerHands[0], true, false, 0);
   await animateDealCard(game.dealerHand, true, true, 0);
   await animateDealCard(game.playerHands[0], true, false, 1);
@@ -154,6 +225,8 @@ function setupEventHandlers() {
         animateChipToBetSpot(type, selectedChip, spot, getBetStackCount(type));
         game.placeBet(type === 'plus3' ? 'plus3' : type, selectedChip);
         updateBetsUI();
+        updateChipsDisplay();
+        saveChipsToFirebase();
         showStatusToast(`Bet ${selectedChip} placed on ${type === 'main' ? 'Main' : type === 'pp' ? 'P / P' : '21+3'}`);
       } else {
         showStatusToast('Not enough chips!', true);
@@ -167,15 +240,15 @@ function setupEventHandlers() {
   doubleBtn.addEventListener('click', () => handlePlayerAction('double'));
   splitBtn.addEventListener('click', () => handlePlayerAction('split'));
   if (insuranceBtn) insuranceBtn.addEventListener('click', () => handlePlayerAction('insurance'));
-  if (clearBetsBtn) clearBetsBtn.addEventListener('click', () => { if (!inPlay) { game.clearBets(); updateBetsUI(); showStatusToast('Bets cleared!'); }});
+  if (clearBetsBtn) clearBetsBtn.addEventListener('click', () => { if (!inPlay) { game.clearBets(); updateBetsUI(); updateChipsDisplay(); saveChipsToFirebase(); showStatusToast('Bets cleared!'); } });
 
-  // End-of-round buttons:
   newBetBtn.addEventListener('click', () => {
     hideEndButtons();
     resetAllHandsAndUI();
     game.clearBets();
     updateBetsUI();
     updateChipsDisplay();
+    saveChipsToFirebase();
     updateHandsUI();
     updateActionBarState();
     showInPlayButtons(false);
@@ -211,6 +284,13 @@ function setupEventHandlers() {
       startRound();
     }
   });
+
+  if (logoutBtn) {
+    logoutBtn.addEventListener('click', async () => {
+      await signOut(auth);
+      window.location.href = "construction21-login.html";
+    });
+  }
 }
 
 function getBetStackCount(type) {
@@ -303,11 +383,6 @@ function showStatusToast(msg, isError = false) {
   statusToast.classList.add('active');
   statusToast.style.color = isError ? '#ff4e4e' : '#ffd700';
   setTimeout(() => statusToast.classList.remove('active'), 2000);
-}
-
-function updateChipsDisplay() {
-  if (profileChipsEl) profileChipsEl.textContent = game.chips;
-  if (centerChipsAmountEl) centerChipsAmountEl.textContent = game.chips;
 }
 
 function showActionBar(opts) {
@@ -483,7 +558,6 @@ async function startRound() {
   updateHandsUI(); updateActionBarState(); updateChipsDisplay(); updateBetsUI();
   hideEndButtons();
 
-  // Animated initial dealing
   await dealOpeningCards();
 
   if (canBuyInsurance()) {
@@ -586,17 +660,11 @@ function nextHandOrSettle() {
   }
 }
 
-// Dealer plays out per blackjack rules (dealer stands on all 17s, hits below 17)
+// Dealer logic: Stand on all 17s (including soft 17), hit below 17
 async function dealerPlayOut() {
   let dealerScore = game.calculateScore(game.dealerHand.cards);
-  while (
-    dealerScore < 17 ||
-    (dealerScore === 17 &&
-      game.isSoft17 && typeof game.isSoft17 === 'function' &&
-      game.isSoft17(game.dealerHand.cards) &&
-      !game.dealerStandsOnSoft17)
-  ) {
-    await delay(700); // More realistic delay for dealer play
+  while (dealerScore < 17) {
+    await delay(700);
     game.dealCard(game.dealerHand, true);
     updateHandsUI();
     dealerScore = game.calculateScore(game.dealerHand.cards);
@@ -604,7 +672,7 @@ async function dealerPlayOut() {
 }
 
 async function settleAndEndRound() {
-  // Flip all dealer cards
+  // Reveal dealer cards
   game.dealerHand.cards.forEach(card => { card.isFaceUp = true; });
   updateHandsUI();
 
@@ -612,7 +680,10 @@ async function settleAndEndRound() {
 
   inPlay = false; outcomeLock = true;
   const results = game.settleHands();
-  updateChipsDisplay(); updateBetsUI(); updateHandsUI(results);
+  updateChipsDisplay();
+  saveChipsToFirebase();
+  updateBetsUI();
+  updateHandsUI(results);
 
   results.forEach((res, idx) => {
     setTimeout(() => {
@@ -655,13 +726,11 @@ function hideEndButtons() {
   doubleBetBtn.style.display = 'none';
 }
 
-// --- Init ---
-document.addEventListener('DOMContentLoaded', () => {
-  setupEventHandlers();
-  updateBetsUI();
-  updateChipsDisplay();
-  resetAllHandsAndUI();
-  updateActionBarState();
-  showInPlayButtons(false);
-  hideEndButtons();
+// ---- Firebase Auth Init ----
+onAuthStateChanged(auth, (user) => {
+  if (!user) {
+    window.location.href = "construction21-login.html";
+    return;
+  }
+  loadUserDataAndStartGame(user);
 });
