@@ -7,9 +7,7 @@
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
-
-    <style>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">    <style>
         :root {
             --primary-color: #0a4d68;
             --secondary-color: #088395;
@@ -20,12 +18,39 @@
             --white: #ffffff;
             --danger-color: #e63946;
             --success-color: #2a9d8f;
+            --warning-color: #f5a623;
             --glass-bg: rgba(255,255,255,0.75);
             --glass-blur: 16px;
             --shadow-md: 0 8px 32px rgba(10,77,104,0.10);
             --shadow-lg: 0 16px 48px rgba(10,77,104,0.18);
             --font-heading: 'Poppins', sans-serif;
             --font-body: 'Roboto', sans-serif;
+        }
+        
+        .offline-message {
+            position: fixed;
+            top: 1rem;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 9999;
+            background: var(--white);
+            border: 2px solid var(--warning-color);
+            border-radius: 8px;
+            padding: 12px 24px;
+            box-shadow: var(--shadow-md);
+            animation: fadeIn 0.5s ease-out;
+            max-width: 90%;
+        }
+        
+        .offline-message .warning-text {
+            color: var(--warning-color);
+            font-weight: bold;
+            margin-right: 8px;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translate(-50%, -20px); }
+            to { opacity: 1; transform: translate(-50%, 0); }
         }
         body {
             margin: 0;
@@ -584,28 +609,211 @@
         </div>
     </div>
 
-    <script type="module">
-        // --- Firebase Imports ---
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-auth.js";
-        import { getFirestore, collection, addDoc, deleteDoc, doc, onSnapshot, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-firestore.js";
-        import { getStorage, ref, uploadBytesResumable, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-storage.js";
+    <script type="module">        // --- Firebase Imports (Fixed with stable version 9.22.0) ---
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+        import { 
+            getAuth, 
+            signInWithEmailAndPassword, 
+            onAuthStateChanged, 
+            signOut,
+            setPersistence,
+            browserLocalPersistence 
+        } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+        import { 
+            getFirestore, 
+            collection, 
+            addDoc, 
+            deleteDoc, 
+            doc, 
+            onSnapshot, 
+            setDoc, 
+            getDoc,
+            enableIndexedDbPersistence,
+            CACHE_SIZE_UNLIMITED 
+        } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+        import { 
+            getStorage, 
+            ref, 
+            uploadBytesResumable, 
+            getDownloadURL, 
+            deleteObject 
+        } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-storage.js";
 
-        // --- Your Firebase Configuration ---
+        // --- Your Firebase Configuration (Fixed storage bucket URL) ---
         const firebaseConfig = {
             apiKey: "AIzaSyBVtq6dAEuybJNmTTv8dXBxTVUgw1t0ZMk",
             authDomain: "cusumano-website.firebaseapp.com",
             projectId: "cusumano-website",
-            storageBucket: "cusumano-website.firebasestorage.app",
+            storageBucket: "cusumano-website.appspot.com", // Fixed URL
             messagingSenderId: "20051552210",
             appId: "1:20051552210:web:7eb3b22baa3fec184e4a0b"
         };
-        // ----------------------------------------------------
-
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-        const storage = getStorage(app);
+        // ----------------------------------------------------        // Initialize Firebase with enhanced error handling and retry logic
+        let app, auth, db, storage;
+        let connectionRetries = 0;
+        const MAX_RETRIES = 3;
+        let firebaseListeners = {};
+        
+        function initializeFirebase() {
+            try {
+                app = initializeApp(firebaseConfig);
+                auth = getAuth(app);
+                db = getFirestore(app);
+                storage = getStorage(app);
+                
+                // Set auth persistence to local for better reliability
+                setPersistence(auth, browserLocalPersistence)
+                    .catch(error => {
+                        console.error("Auth persistence error:", error);
+                        // Continue without persistence - authentication might still work
+                    });
+                
+                // Enable offline persistence for Firestore with advanced settings
+                enableIndexedDbPersistence(db, {cacheSizeBytes: CACHE_SIZE_UNLIMITED})
+                    .catch(error => {
+                        if (error.code === 'failed-precondition') {
+                            console.warn("Firestore persistence unavailable: Multiple tabs open");
+                            // Continue without persistence - this isn't fatal
+                        } else if (error.code === 'unimplemented') {
+                            console.warn("Firestore persistence unavailable: Browser not supported");
+                            // Try to implement local fallbacks
+                            setupOfflineFallbacks();
+                        } else {
+                            console.error("Firestore persistence error:", error);
+                            setupOfflineFallbacks();
+                        }
+                    });
+                
+                // Set up network status monitoring
+                window.addEventListener('online', handleOnlineStatus);
+                window.addEventListener('offline', handleOfflineStatus);
+                
+                console.log("Firebase initialized successfully");
+                connectionRetries = 0;
+                
+                // Remove offline message if it exists
+                const existingMsg = document.querySelector('.offline-message');
+                if (existingMsg) existingMsg.remove();
+                
+                // Setup auth listener after successful initialization
+                setTimeout(setupAuthListener, 500);
+            } catch (error) {
+                connectionRetries++;
+                console.error(`Firebase initialization error (attempt ${connectionRetries}/${MAX_RETRIES}):`, error);
+                
+                if (connectionRetries < MAX_RETRIES) {
+                    const retryDelay = Math.pow(2, connectionRetries) * 1000; // Exponential backoff: 2s, 4s, 8s
+                    console.log(`Retrying Firebase initialization in ${retryDelay/1000}s...`);
+                    setTimeout(initializeFirebase, retryDelay);
+                } else {
+                    console.error("Firebase initialization failed after max retries");
+                    setupOfflineFallbacks();
+                    showOfflineMessage("Firebase connection issues. Limited functionality available.");
+                }
+            }
+        }
+        
+        function handleOnlineStatus() {
+            console.log("Application is online");
+            const existingMsg = document.querySelector('.offline-message');
+            if (existingMsg) existingMsg.remove();
+            
+            // Retry any failed operations
+            if (db) {
+                loadHeroBanner();
+            } else if (connectionRetries >= MAX_RETRIES) {
+                // If we previously failed completely, try initialization again
+                connectionRetries = 0;
+                initializeFirebase();
+            }
+        }
+        
+        function handleOfflineStatus() {
+            console.log("Application is offline");
+            showOfflineMessage("You are currently offline. Limited functionality available.");
+        }
+          function setupOfflineFallbacks() {
+            console.log("Setting up offline fallbacks");
+            
+            // Check for cached data and set up UI to show offline state
+            const cachedBanner = localStorage.getItem('cached_heroBanner');
+            const cachedContent = localStorage.getItem('cached_siteContent');
+              // Set up local cache expiration (24 hours)
+            const CACHE_EXPIRY = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+            
+            // Try-catch entire localStorage operations in case private browsing mode is enabled
+            try {
+                // Clean up expired cache entries
+                Object.keys(localStorage).forEach(key => {
+                    if (key.startsWith('cached_')) {
+                        try {
+                            const data = JSON.parse(localStorage.getItem(key));
+                            if (data.timestamp && (new Date().getTime() - data.timestamp > CACHE_EXPIRY)) {
+                                console.log(`Removing expired cache entry: ${key}`);
+                                localStorage.removeItem(key);
+                            }
+                        } catch (e) {
+                            console.warn(`Error processing cache entry ${key}:`, e);
+                            // Remove corrupt cache entries
+                            try {
+                                localStorage.removeItem(key);
+                            } catch (removeErr) {
+                                console.error("Failed to remove corrupt cache entry:", removeErr);
+                            }
+                        }
+                    }
+                });
+            } catch (storageError) {
+                // Handle case where localStorage is completely unavailable
+                console.warn("LocalStorage unavailable - operating in no-cache mode:", storageError);
+            }
+            
+            // Add visual indicator for offline mode
+            document.body.classList.add('offline-mode');
+            
+            // Allow basic admin panel navigation with cached data
+            showOfflineMessage("Operating in offline mode. Some functions are limited until connection is restored.");
+        }
+          // Clean up all Firebase listeners when needed (e.g., page unload or logout)
+        function cleanupFirebaseListeners() {
+            // Unsubscribe from any listeners stored in the global firebaseListeners object
+            Object.values(firebaseListeners).forEach(unsubscribe => {
+                if (typeof unsubscribe === 'function') {
+                    try {
+                        unsubscribe();
+                    } catch (e) {
+                        console.error("Error unsubscribing:", e);
+                    }
+                }
+            });
+            
+            // Also check for any legacy listeners stored in the window._firebaseListeners object
+            if (window._firebaseListeners) {
+                Object.values(window._firebaseListeners).forEach(unsubscribe => {
+                    if (typeof unsubscribe === 'function') {
+                        try {
+                            unsubscribe();
+                        } catch (e) {
+                            console.error("Error unsubscribing from legacy listener:", e);
+                        }
+                    }
+                });
+                window._firebaseListeners = {};
+            }
+            
+            firebaseListeners = {};
+        }
+          initializeFirebase();
+        
+        // Add page cleanup handlers for when the user leaves or refreshes the page
+        window.addEventListener('beforeunload', () => {
+            try {
+                cleanupFirebaseListeners();
+                console.log("Firebase listeners cleaned up before page unload");
+            } catch (e) {
+                console.error("Error during page unload cleanup:", e);
+            }
+        });
 
         const loginScreen = document.getElementById('login-screen');
         const adminDashboard = document.getElementById('admin-dashboard');
@@ -656,31 +864,143 @@
             { name: 'Briefcase', value: 'briefcase', svg: '<svg width="36" height="36" fill="none" stroke="#0a4d68" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"></rect><path d="M16 3v4"></path><path d="M8 3v4"></path></svg>' },
             { name: 'Award', value: 'award', svg: '<svg width="36" height="36" fill="none" stroke="#0a4d68" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="12" cy="8" r="7"></circle><polyline points="8.21 13.89 7 23 12 20.13 17 23 15.79 13.88"></polyline></svg>' }
         ];
-        const serviceIconSVGs = Object.fromEntries(iconOptions.map(opt => [opt.value, opt.svg]));
-
-        // --- Firebase logic ---
-        onAuthStateChanged(auth, user => {
-            if (user) {
-                loginScreen.style.display = 'none';
-                adminDashboard.style.display = 'flex';
-                setupImageListener();
-                setupHeroBannerListener();
-                setupLogoListener();
-            } else {
-                adminDashboard.style.display = 'none';
-                loginScreen.style.display = 'block';
+        const serviceIconSVGs = Object.fromEntries(iconOptions.map(opt => [opt.value, opt.svg]));        // Function to display offline message
+        function showOfflineMessage(message = "Connection issues detected. Some functions may be limited.") {
+            // Remove any existing messages first
+            const existingMsg = document.querySelector('.offline-message');
+            if (existingMsg) existingMsg.remove();
+            
+            const offlineEl = document.createElement('div');
+            offlineEl.className = 'offline-message';
+            offlineEl.innerHTML = `
+                <div style="display:flex;align-items:center;font-size:0.9rem;
+                            background:#fff;border:1px solid #f5a623;border-radius:4px;padding:10px 20px;
+                            box-shadow:0 2px 10px rgba(0,0,0,0.2);">
+                    <span style="color:#f5a623;font-weight:bold;">⚠️</span>
+                    <span style="margin-left:8px;">${message}</span>
+                    <button id="dismiss-offline-msg" style="margin-left:12px;background:none;border:none;font-size:1rem;cursor:pointer;color:#aaa;">&times;</button>
+                </div>
+            `;
+            document.body.appendChild(offlineEl);
+            
+            // Add event listener to dismiss button
+            document.getElementById('dismiss-offline-msg').addEventListener('click', () => {
+                offlineEl.remove();
+            });
+            
+            // Auto-hide after 10 seconds if we're actually online
+            if (navigator.onLine) {
+                setTimeout(() => {
+                    if (document.body.contains(offlineEl)) {
+                        offlineEl.style.opacity = '0';
+                        setTimeout(() => {
+                            if (document.body.contains(offlineEl)) {
+                                offlineEl.remove();
+                            }
+                        }, 500);
+                    }
+                }, 10000);
             }
-        });
+        }
+        
+        // --- Firebase logic with better error handling ---
+        function setupAuthListener() {
+            if (!auth) {
+                console.error("Auth not initialized");
+                return;
+            }
+
+            onAuthStateChanged(auth, user => {
+                try {
+                    if (user) {
+                        loginScreen.style.display = 'none';
+                        adminDashboard.style.display = 'flex';
+                        
+                        // Setup all listeners with error handling
+                        try { setupImageListener(); } catch (e) { console.error("Image listener error:", e); }
+                        try { setupHeroBannerListener(); } catch (e) { console.error("Banner listener error:", e); }
+                        try { setupLogoListener(); } catch (e) { console.error("Logo listener error:", e); }
+                    } else {
+                        adminDashboard.style.display = 'none';
+                        loginScreen.style.display = 'block';
+                    }
+                } catch (error) {
+                    console.error("Auth state change processing error:", error);
+                }
+            }, error => {
+                console.error("Auth state observer error:", error);
+                loginScreen.style.display = 'block';
+                showOfflineMessage();
+            });
+        }
+        
+        // Call this after Firebase init
+        setTimeout(setupAuthListener, 500);
 
         loginBtn.addEventListener('click', () => {
+            loginError.style.display = 'none';
             const email = document.getElementById('email').value;
             const pass = document.getElementById('password').value;
-            signInWithEmailAndPassword(auth, email, pass).catch(err => { loginError.style.display = 'block'; });
-        });
-
-        logoutBtn.addEventListener('click', (e) => {
+            
+            if (!email || !pass) {
+                loginError.textContent = "Please enter both email and password.";
+                loginError.style.display = 'block';
+                return;
+            }
+            
+            if (!auth) {
+                loginError.textContent = "Authentication service unavailable. Please try again later.";
+                loginError.style.display = 'block';
+                return;
+            }
+            
+            loginBtn.disabled = true;
+            loginBtn.textContent = "Logging in...";
+            
+            signInWithEmailAndPassword(auth, email, pass)
+                .then(userCredential => {
+                    // Success handled by onAuthStateChanged
+                    loginBtn.textContent = "Login";
+                    loginBtn.disabled = false;
+                })
+                .catch(err => {
+                    console.error("Login error:", err.code, err.message);
+                    loginBtn.textContent = "Login";
+                    loginBtn.disabled = false;
+                    
+                    // More helpful error messages
+                    if (err.code === 'auth/invalid-credential' || err.code === 'auth/user-not-found' || 
+                        err.code === 'auth/wrong-password') {
+                        loginError.textContent = "Invalid email or password. Please try again.";
+                    } else if (err.code === 'auth/network-request-failed') {
+                        loginError.textContent = "Network connection issue. Please check your internet connection.";
+                    } else {
+                        loginError.textContent = "Login failed: " + (err.message || "Unknown error");
+                    }
+                    loginError.style.display = 'block';
+                });
+        });        logoutBtn.addEventListener('click', (e) => {
             if (confirm('Are you sure you want to log out?')) {
-                signOut(auth);
+                try {
+                    // First clean up any active Firebase listeners
+                    cleanupFirebaseListeners();
+                    
+                    // Clear any cached user-specific data before logging out
+                    // Don't clear cached images as they can be reused on next login
+                    
+                    // Log out
+                    signOut(auth).catch(error => {
+                        console.error("Error during logout:", error);
+                        // Attempt to force reload if logout fails
+                        if (confirm("Logout encountered an error. Would you like to refresh the page?")) {
+                            window.location.reload();
+                        }
+                    });
+                } catch (e) {
+                    console.error("Error during logout process:", e);
+                    alert("There was an issue during logout. The page will be refreshed.");
+                    window.location.reload();
+                }
             }
         });
         uploadBtn.addEventListener('click', () => imageUploadInput.click());
@@ -695,35 +1015,135 @@
                 passwordInput.type = 'password';
                 togglePasswordBtn.textContent = '👁️';
             }
-        });
+        });        function setupImageListener() {
+            if (!db) {
+                console.error("Firestore not initialized");
+                galleryContainer.innerHTML = '<div class="error-message">Database connection not available.</div>';
+                return;
+            }
+            
+            try {
+                const imagesCol = collection(db, 'sliderImages');
+                const unsubscribe = onSnapshot(imagesCol, (snapshot) => {
+                    try {
+                        galleryContainer.innerHTML = '';
+                        imageCount.textContent = `Total Images: ${snapshot.size}`;
+                        
+                        if (snapshot.empty) {
+                            galleryContainer.innerHTML = '<div class="empty-gallery">No images available. Upload images using the button above.</div>';
+                            return;
+                        }
+                        
+                        snapshot.docs.forEach(doc => {
+                            try {
+                                const imgData = doc.data();
+                                const card = document.createElement('div');
+                                card.className = 'img-card';
+                                
 
-        function setupImageListener() {
-            const imagesCol = collection(db, 'sliderImages');
-            onSnapshot(imagesCol, (snapshot) => {
-                galleryContainer.innerHTML = '';
-                imageCount.textContent = `Total Images: ${snapshot.size}`;
-                snapshot.docs.forEach(doc => {
-                    const imgData = doc.data();
-                    const card = document.createElement('div');
-                    card.className = 'img-card';
-                    card.innerHTML = `<img src="${imgData.url}" alt="Slider Image"><button class="delete-btn" data-id="${doc.id}" data-path="${imgData.path}">&times;</button>`;
-                    galleryContainer.appendChild(card);
+                                // Create image with error handling
+                                const img = document.createElement('img');
+                                img.alt = "Slider Image";
+                                img.onerror = () => {
+                                    img.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 24 24" fill="none" stroke="%23f5a623" stroke-width="2"><path d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>';
+                                    img.style.padding = '20px';
+                                    img.style.background = '#f8f9fa';
+                                };
+                                img.src = imgData.url;
+                                
+                                // Delete button
+                                const deleteBtn = document.createElement('button');
+                                deleteBtn.className = 'delete-btn';
+                                deleteBtn.innerHTML = '&times;';
+                                deleteBtn.dataset.id = doc.id;
+                                deleteBtn.dataset.path = imgData.path || '';
+                                
+                                // Add elements to card
+                                card.appendChild(img);
+                                card.appendChild(deleteBtn);
+                                galleryContainer.appendChild(card);
+                            } catch (err) {
+                                console.error("Error rendering image card:", err);
+                            }
+                        });
+                    } catch (error) {
+                        console.error("Error processing snapshot:", error);
+                        galleryContainer.innerHTML = '<div class="error-message">Error loading images.</div>';
+                    }
+                }, error => {
+                    console.error("Snapshot listener error:", error);
+                    galleryContainer.innerHTML = '<div class="error-message">Error connecting to database. Please check your connection.</div>';
                 });
-            });
+                
+                // Store unsubscribe function to clean up
+                window._firebaseListeners = window._firebaseListeners || {};
+                window._firebaseListeners.images = unsubscribe;
+            } catch (error) {
+                console.error("setupImageListener error:", error);
+                galleryContainer.innerHTML = '<div class="error-message">Failed to set up image gallery.</div>';
+            }
         }
 
         function setupHeroBannerListener() {
-            const heroBannerDoc = doc(db, 'siteContent', 'main');
-            onSnapshot(heroBannerDoc, (doc) => {
-                const data = doc.data();
-                currentHeroBanner.innerHTML = data.heroBanner ? `<img src="${data.heroBanner}" alt="Current Hero Banner" style="max-width:100%; border-radius:8px;">` : 'No hero banner set.';
-            });
+            if (!db) {
+                console.error("Firestore not initialized");
+                return;
+            }
+            
+            try {
+                const heroBannerDoc = doc(db, 'siteContent', 'main');
+                const unsubscribe = onSnapshot(heroBannerDoc, (docSnap) => {
+                    try {
+                        if (docSnap.exists()) {
+                            const data = docSnap.data();
+                            if (data.heroBanner) {
+                                // Create image with error handling
+                                const img = new Image();
+                                img.onload = function() {
+                                    currentHeroBanner.innerHTML = '';
+                                    currentHeroBanner.appendChild(img);
+                                };
+                                img.onerror = function() {
+                                    currentHeroBanner.innerHTML = '<em>Error loading image.</em>';
+                                };
+                                img.src = data.heroBanner;
+                                img.alt = "Current Hero Banner";
+                                img.style.cssText = "max-width:100%; border-radius:8px;";
+                            } else {
+                                currentHeroBanner.innerHTML = '<em>No hero banner set.</em>';
+                            }
+                        } else {
+                            currentHeroBanner.innerHTML = '<em>Hero banner configuration not found.</em>';
+                        }
+                    } catch (error) {
+                        console.error("Error processing hero banner data:", error);
+                        currentHeroBanner.innerHTML = '<em>Error loading hero banner.</em>';
+                    }
+                }, error => {
+                    console.error("Hero banner listener error:", error);
+                    currentHeroBanner.innerHTML = '<em>Connection error. Please refresh the page.</em>';
+                });
+                
+                // Store unsubscribe function
+                window._firebaseListeners = window._firebaseListeners || {};
+                window._firebaseListeners.heroBanner = unsubscribe;
+            } catch (error) {
+                console.error("setupHeroBannerListener error:", error);
+            }
         }
 
         function setupLogoListener() {
-            const logoDoc = doc(db, 'siteContent', 'main');
-            onSnapshot(logoDoc, (docSnap) => {
-                const data = docSnap.data();
+            if (!db) {
+                console.error("Firestore not initialized");
+                return;
+            }
+            
+            try {
+                const logoDoc = doc(db, 'siteContent', 'main');
+                const unsubscribe = onSnapshot(logoDoc, (docSnap) => {
+                    try {
+                        if (docSnap.exists()) {
+                            const data = docSnap.data();
                 if (data && data.logoUrl) {
                     currentLogoImage.innerHTML = `<img src="${data.logoUrl}" alt="Current Logo" style="max-width:180px;max-height:120px;border-radius:8px;box-shadow:0 2px 8px rgba(10,77,104,0.10);margin-bottom:0.5rem;">`;
                 } else {
@@ -798,28 +1218,187 @@
                     });
                 }
             );
-        });
-
-        // Load current hero banner image from Firestore
-        async function loadHeroBanner() {
+        });        // Load current hero banner image from Firestore with enhanced retry logic and error handling
+        async function loadHeroBanner(retryCount = 0) {
+            // Helper function for displaying cached data
+            const loadFromCache = (showCacheMessage = true) => {
+                const cachedData = localStorage.getItem('cached_heroBanner');
+                if (cachedData) {
+                    try {
+                        const data = JSON.parse(cachedData);
+                        // Check if cache is fresh enough (less than 24 hours old)
+                        const isCacheFresh = data.timestamp && 
+                            (new Date().getTime() - data.timestamp < 24 * 60 * 60 * 1000);
+                        
+                        if (data.heroBannerUrl) {
+                            // Only show "cached" indicator if explicitly requested AND cache isn't fresh
+                            displayHeroBannerFromUrl(
+                                data.heroBannerUrl, 
+                                showCacheMessage && !isCacheFresh
+                            );
+                            return true;
+                        }
+                    } catch (e) {
+                        console.error("Error parsing cached hero banner data:", e);
+                    }
+                }
+                return false;
+            };
+            
+            // If Firebase not initialized, try to use cached data
+            if (!db) {
+                console.error("Firestore not initialized");
+                currentHeroBanner.innerHTML = '<em>Database connection not available.</em>';
+                
+                if (loadFromCache(true)) {
+                    return;
+                }
+                return;
+            }
+            
             try {
+                // Show loading indicator for better UX
+                if (retryCount === 0) {
+                    currentHeroBanner.innerHTML = '<em>Loading hero banner...</em>';
+                    
+                    // Immediately show cached version while waiting for fresh data (if available)
+                    loadFromCache(false);
+                }
+                
                 const docRef = doc(db, 'siteContent', 'main');
                 const docSnap = await getDoc(docRef);
+                
                 if (docSnap.exists()) {
                     const data = docSnap.data();
+                    
+                    // Cache the data for offline use with timestamp
+                    try {
+                        localStorage.setItem('cached_heroBanner', JSON.stringify({
+                            heroBannerUrl: data.heroBannerUrl || null,
+                            timestamp: new Date().getTime()
+                        }));
+                    } catch (e) {
+                        console.warn("Could not cache hero banner data:", e);
+                    }
+                    
                     if (data.heroBannerUrl) {
-                        currentHeroBanner.innerHTML = `<img src="${data.heroBannerUrl}" alt="Current Hero Banner" style="max-width:100%;max-height:180px;border-radius:8px;box-shadow:0 2px 8px rgba(10,77,104,0.10);margin-bottom:0.5rem;">`;
+                        // Use helper function to display banner
+                        displayHeroBannerFromUrl(data.heroBannerUrl, false);
                     } else {
                         currentHeroBanner.innerHTML = '<em>No hero banner image set.</em>';
                     }
+                } else {
+                    // Document doesn't exist
+                    currentHeroBanner.innerHTML = '<em>No hero banner configuration found.</em>';
                 }
-            } catch (e) {
-                currentHeroBanner.innerHTML = '<em>Error loading hero banner.</em>';
+            } catch (error) {
+                console.error("Error loading hero banner:", error);
+                
+                // Check for specific Firebase errors to handle appropriately
+                if (error.name === "FirebaseError") {
+                    if (error.code === "permission-denied" || error.code === "unauthenticated") {
+                        // Auth error - may need to refresh tokens
+                        currentHeroBanner.innerHTML = 
+                            `<em>Authentication error. You may need to log in again.</em>
+                             <button onclick="signOut(auth).then(() => { window.location.reload(); })" style="display:block;margin-top:8px;padding:4px 10px;background:#e63946;color:white;border:none;border-radius:4px;cursor:pointer;">
+                                Log Out
+                             </button>`;
+                        return;
+                    } else if (error.code === "unavailable" || error.code === "resource-exhausted") {
+                        // Server-side transient issue - these should definitely retry
+                        console.log("Transient server issue. Will retry with higher priority.");
+                        setTimeout(() => loadHeroBanner(retryCount + 1), 800);
+                        return;
+                    }
+                }
+                
+                // Network or other error - try to retry
+                const MAX_RETRIES = 3;
+                if (retryCount < MAX_RETRIES) {
+                    // Retry with exponential backoff
+                    const delay = Math.pow(2, retryCount) * 1000; // 1s, 2s, 4s
+                    console.log(`Retrying loadHeroBanner (attempt ${retryCount + 1}/${MAX_RETRIES}) in ${delay/1000}s...`);
+                    setTimeout(() => loadHeroBanner(retryCount + 1), delay);
+                } else {
+                    // Try to use cached data after max retries
+                    if (loadFromCache(true)) {
+                        return;
+                    }
+                    
+                    // Display error after max retries with more user-friendly message
+                    currentHeroBanner.innerHTML = 
+                        `<div style="padding:10px;background:#fff3cd;border:1px solid #ffeeba;border-radius:4px;">
+                            <em>Unable to load hero banner. Connection issue detected.</em>
+                            <button onclick="loadHeroBanner(0)" style="display:block;margin-top:8px;padding:4px 10px;background:#088395;color:white;border:none;border-radius:4px;cursor:pointer;">
+                                Try Again
+                            </button>
+                        </div>`;
+                        
+                    // Show offline message to notify of connection problems
+                    showOfflineMessage("Connection issues detected. Some functions may be limited.");
+                }
             }
         }
+          // Helper function to display hero banner from URL with enhanced error handling
+        function displayHeroBannerFromUrl(url, isFromCache = false) {
+            // Create image with comprehensive error handling
+            const img = new Image();
+            
+            // Set a timeout to detect slow-loading images
+            const loadingTimeout = setTimeout(() => {
+                if (!img.complete) {
+                    // Add loading indicator if image is taking time
+                    const loadingIndicator = document.createElement('div');
+                    loadingIndicator.className = 'loading-indicator';
+                    loadingIndicator.innerHTML = '<em>Loading image...</em>';
+                    // Only show loading indicator if currentHeroBanner is empty or just contains loading text
+                    if (currentHeroBanner.childElementCount === 0 || 
+                        (currentHeroBanner.childElementCount === 1 && 
+                         currentHeroBanner.firstChild.nodeName === 'EM')) {
+                        currentHeroBanner.innerHTML = '';
+                        currentHeroBanner.appendChild(loadingIndicator);
+                    }
+                }
+            }, 500); // Show loading indicator if image takes more than 500ms to load
+            
+            img.onload = function() {
+                clearTimeout(loadingTimeout);
+                currentHeroBanner.innerHTML = '';
+                currentHeroBanner.appendChild(img);
+                
+                if (isFromCache) {
+                    const cacheNote = document.createElement('div');
+                    cacheNote.innerHTML = '<small style="color:#6c757d;"><i>Showing cached version</i></small>';
+                    currentHeroBanner.appendChild(cacheNote);
+                }
+            };
+            
+            img.onerror = function() {
+                clearTimeout(loadingTimeout);
+                console.error(`Failed to load image: ${url}`);
+                
+                if (isFromCache) {
+                    // If cached image fails, try to load fresh version
+                    currentHeroBanner.innerHTML = '<em>Cached image unavailable. Attempting to refresh...</em>';
+                    loadHeroBanner(0); 
+                } else {
+                    currentHeroBanner.innerHTML = 
+                        `<div style="padding:8px;background:#f8d7da;border:1px solid #f5c6cb;border-radius:4px;color:#721c24;">
+                            <em>Error loading banner image.</em>
+                            <button onclick="loadHeroBanner(0)" style="display:block;margin-top:6px;padding:3px 8px;background:#088395;color:white;border:none;border-radius:3px;cursor:pointer;font-size:0.8rem;">
+                                Try Again
+                            </button>
+                        </div>`;
+                }
+            };
+            
+            img.src = url;
+            img.alt = "Current Hero Banner";
+            img.style.cssText = "max-width:100%;max-height:180px;border-radius:8px;box-shadow:0 2px 8px rgba(10,77,104,0.10);margin-bottom:0.5rem;";
+        }
 
-        // Initial load
-        loadHeroBanner();
+        // Initial load with slight delay to ensure Firebase is ready
+        setTimeout(() => loadHeroBanner(), 500);
 
         heroUploadBtn.addEventListener('click', () => heroImageUploadInput.click());
 

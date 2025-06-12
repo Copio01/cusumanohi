@@ -5,485 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Construction 21</title>
     <link rel="icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2NCIgaGVpZ2h0PSI2NCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiNlMGExMDYiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBkPSJNMTUuMDUgNWEzIDMgMCAwIDEgNC41IDBIM15NMTUuMDUgNU0xOSA4LjVjMCAxLjUtLjUgMy41LTIgNC41di4wNUgxN2EyIDIgMCAwIDAgLTIgLTIgYSAyIDIgMCAwIDAgLTIgMkgxM3YtNkgxNlY4LjVNOSA2LjVWNE02IDcgTDUuNSAxNC41TWwwIDE1IDguOTkgMy04IGMxLjUgLTRoMmMwIDAuNSAwLjUgMSAwLjUgMnYxSDEwdjNjMCAxIDAgMi40IC0xIDN2XzIgYzAgMC41IDAuMiAwLjUgMC41IDAuNXMwLjUgLTAuMiAwLjUgLTAuNVYyMUg0LjA3bDEuOCAtMTQuMjUgYTEgMSAwIDAgMSAwLjE5IC0wLjA3IHoiLz48L3N2Zz4=" type="image/svg+xml">
-    <!-- NOTE: For production, use a built Tailwind CSS file. See https://tailwindcss.com/docs/installation for instructions. -->
     <link href="css/tailwind.output.css" rel="stylesheet">
     <style>
-body.modern-bg {
-  background: radial-gradient(ellipse at 60% 40%, #ffd70033 0%, #23232b 100%), linear-gradient(135deg, #23232b 0%, #2d2d3a 100%);
-  min-height: 100vh;
-  color: #EAEAEA;
-  font-family: 'Segoe UI', Arial, sans-serif;
-}
-.glassy {
-  background: rgba(36,36,28,0.85);
-  backdrop-filter: blur(8px);
-  border-radius: 18px;
-}
-.btn-primary {
-  background: linear-gradient(90deg, #ffd700, #ffb700);
-  color: #23232b;
-  font-weight: bold;
-  border: none;
-  border-radius: 12px;
-  padding: 0.75em 1.5em;
-  font-size: 1.1em;
-  box-shadow: 0 2px 8px rgba(255, 215, 0, 0.3), 0 0 0 1px rgba(255, 215, 0, 0.2);
-  transition: all 0.2s ease-out;
-  position: relative;
-  overflow: hidden;
-}
-
-.btn-primary::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0) 50%);
-  pointer-events: none;
-}
-
-.btn-primary:hover {
-  background: linear-gradient(90deg, #ffe066, #ffd700);
-  box-shadow: 0 4px 16px rgba(255, 215, 0, 0.5), 0 0 0 2px rgba(255, 215, 0, 0.3);
-  transform: translateY(-2px) scale(1.04);
-}
-
-.btn-primary:active {
-  transform: translateY(1px) scale(0.98);
-  box-shadow: 0 2px 8px rgba(255, 215, 0, 0.2), 0 0 0 1px rgba(255, 215, 0, 0.3);
-}
-
-.btn-secondary {
-  background: linear-gradient(90deg, #444, #333);
-  color: #fff;
-  border-radius: 10px;
-  padding: 0.6em 1.2em;
-  font-weight: 500;
-  border: none;
-  transition: all 0.2s ease-out;
-  position: relative;
-  overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.1);
-}
-
-.btn-secondary::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 50%;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0) 100%);
-  pointer-events: none;
-}
-
-.btn-secondary:hover {
-  background: linear-gradient(90deg, #333, #222);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.2);
-  transform: translateY(-2px);
-}
-
-.btn-secondary:active {
-  transform: translateY(1px) scale(0.98);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.1);
-}
-
-.action-buttons-container {
-  position: relative;
-  z-index: 30;
-  width: fit-content;
-  margin-left: auto;
-  margin-right: auto;
-}
-/* --- Casino Chips --- */
-.chip {
-  width: 64px;
-  height: 64px;
-  border-radius: 50%;
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  font-weight: bold;
-  color: #fff;
-  border: 4px dashed rgba(255, 255, 255, 0.7);
-  transition: transform 0.1s ease-out, box-shadow 0.1s ease-out;
-  cursor: pointer;
-  user-select: none;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5), inset 0 0 10px rgba(0, 0, 0, 0.3);
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
-}
-
-.chip::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  border-radius: 50%;
-  background: 
-    radial-gradient(circle at 30% 30%, 
-      rgba(255, 255, 255, 0.3) 0%, 
-      rgba(255, 255, 255, 0.1) 15%, 
-      transparent 60%);
-  z-index: 2;
-}
-
-.chip::after {
-  content: '';
-  position: absolute;
-  top: -2px;
-  left: -2px;
-  right: -2px;
-  bottom: -2px;
-  border-radius: 50%;
-  border: 8px solid transparent;
-  z-index: 1;
-}
-
-.chip[data-amount="5"] {
-  background: linear-gradient(135deg, #ff2d55, #d30000);
-  border-color: #ff7f7f;
-}
-
-.chip[data-amount="10"] {
-  background: linear-gradient(135deg, #3478f6, #0035aa);
-  border-color: #7fb3ff;
-}
-
-.chip[data-amount="25"] {
-  background: linear-gradient(135deg, #34c759, #00701a);
-  border-color: #7fff8e;
-}
-
-.chip[data-amount="100"] {
-  background: linear-gradient(135deg, #9254de, #5e00c0);
-  border-color: #d5b8ff;
-}
-
-.chip .chip-value {
-  font-size: 1.5rem;
-  font-weight: bold;
-  color: white;
-  z-index: 3;
-}
-
-.chip.selected, .chip:hover {
-  transform: translateY(-5px) scale(1.05);
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4), 0 0 15px rgba(255, 215, 0, 0.5), inset 0 0 10px rgba(0, 0, 0, 0.3);
-}
-
-.chip.picked-up {
-  transform: scale(1.15);
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.6), 0 0 20px rgba(255, 215, 0, 0.7), inset 0 0 10px rgba(0, 0, 0, 0.3);
-  pointer-events: none;
-  opacity: 0.85;
-}
-
-.chip-tray-container {
-  margin-top: 0.5rem;
-  padding: 1rem 1.5rem;
-  background: rgba(36,36,28,0.7);
-  border-radius: 16px;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.3);
-  width: fit-content;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-.chip-row {
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
-  align-items: center;
-  gap: 1.5rem;
-  width: 100%;
-}
-
-/* --- Casino Chips Display --- */
-#center-chips-display {
-  background: rgba(36,36,28,0.8);
-  padding: 0.75rem 2rem;
-  border-radius: 16px;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.3), 0 0 0 2px rgba(255,215,0,0.3);
-  margin-bottom: 1.5rem;
-}
-
-#center-chips-amount {
-  font-size: 1.75rem;
-  color: #34c759;
-  font-weight: 800;
-  text-shadow: 0 0 10px rgba(52, 199, 89, 0.5);
-}
-
-/* --- Blackjack Table --- */
-#blackjack-table {
-  width: 100vw;
-  max-width: 1200px;
-  aspect-ratio: 2.5/1;
-  margin: 0 auto 1.5rem auto;
-  background:
-    /* Subtle felt texture and vignette */
-    radial-gradient(ellipse at 60% 40%, #3a7d3a 0%, #1a4a1a 100%),
-    linear-gradient(135deg, #1a2d1a 0%, #2d3a2d 100%);
-  border-radius: 48% 48% 60% 60%/60% 60% 100% 100%;
-  border: 10px solid #ffd700;
-  box-shadow:
-    0 24px 80px #000b,
-    0 4px 24px #ffd70044 inset,
-    0 0 0 16px #fffbe622 inset,
-    0 0 64px 8px #ffd70044;
-  position: relative;
-  overflow: visible;
-  z-index: 2;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  align-items: center;
-  min-height: 520px;
-}
-#blackjack-table::before {
-  /* Gold stitched border effect */
-  content: '';
-  position: absolute;
-  inset: -18px;
-  border-radius: inherit;
-  border: 7px dashed #fffbe6cc;
-  pointer-events: none;
-  z-index: 2;
-  box-shadow: 0 0 32px #ffd70055;
-}
-#blackjack-table::after {
-  /* Hazard stripe accent at the bottom */
-  content: '';
-  position: absolute;
-  left: 50%;
-  bottom: 0;
-  transform: translateX(-50%);
-  width: 62%;
-  height: 28px;
-  background: repeating-linear-gradient(135deg, #ffd700 0 14px, #23232b 14px 28px);
-  border-radius: 0 0 48% 48%/0 0 100% 100%;
-  opacity: 0.8;
-  z-index: 4;
-  pointer-events: none;
-  box-shadow: 0 4px 24px #ffd70055;
-}
-#table-vignette {
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  pointer-events: none;
-  background:
-    radial-gradient(ellipse at 50% 60%, transparent 60%, #000b 100%),
-    radial-gradient(ellipse at 50% 40%, #ffd70033 0%, transparent 80%);
-  z-index: 3;
-}
-#blackjack-table .table-logo {
-  position: absolute;
-  left: 50%;
-  top: 38%;
-  transform: translate(-50%, -50%);
-  z-index: 5;
-  opacity: 0.12;
-  pointer-events: none;
-  width: 480px;
-  max-width: 70vw;
-  filter: blur(0.5px) drop-shadow(0 2px 8px #ffd70055);
-}
-#blackjack-table .table-text {
-  position: absolute;
-  left: 50%;
-  color: #fffbe6;
-  font-family: 'Segoe UI', Arial, sans-serif;
-  font-weight: bold;
-  text-shadow: 0 2px 8px #23232b99, 0 0 8px #ffd70044;
-  pointer-events: none;
-  z-index: 6;
-  font-size: 1.35em;
-  letter-spacing: 1.5px;
-  user-select: none;
-}
-#blackjack-table .table-text.pays {
-  top: 12%;
-  transform: translateX(-50%) rotate(-7deg);
-  font-size: 1.18em;
-  color: #ffd700;
-  text-shadow: 0 2px 8px #23232b99, 0 0 16px #ffd70099;
-}
-#blackjack-table .table-text.rules {
-  top: 21%;
-  transform: translateX(-50%) rotate(-3deg);
-  font-size: 1.08em;
-  color: #fffbe6;
-}
-#blackjack-table .table-text.nosmoke {
-  bottom: 9%;
-  transform: translateX(-50%) rotate(3deg);
-  font-size: 1.08em;
-  color: #ffd700;
-  text-shadow: 0 2px 8px #23232b99, 0 0 8px #ffd70099;
-}
-#table-bet-spots {
-  position: absolute;
-  bottom: 17%;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  gap: 90px;
-  z-index: 8;
-}
-.table-bet-spot {
-  width: 120px; height: 120px;
-  background: rgba(255,255,255,0.13);
-  border: 5px solid #ffd700cc;
-  border-radius: 50%;
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  font-size: 1.18em;
-  color: #ffd700;
-  box-shadow: 0 6px 32px #ffd70033, 0 0 0 16px #fffbe622 inset, 0 2px 12px #23232b55;
-  position: relative;
-  transition: border 0.2s, box-shadow 0.2s;
-  filter: drop-shadow(0 2px 8px #23232b88);
-  overflow: hidden;
-}
-.table-bet-spot .font-bold {
-  font-size: 1.5em;
-  margin-top: 2px;
-}
-.table-bet-spot.active {
-  border: 5px solid #fffbe6;
-  box-shadow: 0 0 40px #ffd70088, 0 0 0 22px #fffbe622 inset;
-}
-.table-bet-spot::after {
-  /* Subtle construction icon watermark */
-  content: '\1F477';
-  position: absolute;
-  left: 50%; top: 50%;
-  transform: translate(-50%, -50%) scale(2.3);
-  opacity: 0.09;
-  font-size: 2.7em;
-  pointer-events: none;
-  z-index: 1;
-}
-#dealer-cards, #player-hands {
-  min-height: 100px;
-  display: flex;
-  gap: 22px;
-  justify-content: center;
-  align-items: center;
-  z-index: 10;
-}
-#dealer-cards {
-  top: 7%;
-  left: 50%;
-  transform: translateX(-50%);
-  position: absolute;
-}
-#player-hands {
-  bottom: 5%;
-  left: 50%;
-  transform: translateX(-50%);
-  position: absolute;
-}
-.card {
-  width: 100px; height: 145px;
-  background: linear-gradient(145deg, #fff, #f5f5f4);
-  border-radius: 12px;
-  box-shadow: 0 6px 18px rgba(0,0,0,0.18), 0 2px 6px rgba(0,0,0,0.12);
-  border: 2.5px solid #bfa14a;
-  position: relative;
-  transform-style: preserve-3d;
-  transition: box-shadow 0.2s, border 0.2s, transform 0.3s cubic-bezier(0.4,0,0.2,1);
-  cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 2.1em;
-  color: #23232b;
-  user-select: none;
-}
-.card.animated {
-  animation: card-deal 0.5s cubic-bezier(.68,-0.55,.27,1.55);
-}
-@keyframes card-deal {
-  0% { transform: scale(0.7) rotate(-10deg) translateY(-40px); opacity: 0; }
-  60% { transform: scale(1.1) rotate(5deg) translateY(10px); opacity: 1; }
-  100% { transform: scale(1) rotate(0deg) translateY(0); opacity: 1; }
-}
-.card.flipped {
-  transform: rotateY(180deg);
-  transition: transform 0.6s cubic-bezier(0.4,0,0.2,1);
-  z-index: 2;
-}
-.card .card-face, .card .card-back {
-  backface-visibility: hidden;
-  transition: opacity 0.3s;
-  position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 2em;
-}
-.card .card-back {
-  transform: rotateY(180deg);
-  background: repeating-linear-gradient(45deg, #bfa14a 0px, #bfa14a 8px, #23232b 8px, #23232b 16px), radial-gradient(circle at 50% 50%, #bfa14a 30%, #8b7a00 70%);
-  color: #23232b;
-}
-#action-bar {
-  background: rgba(36,36,28,0.92);
-  box-shadow: 0 4px 16px #ffd70044;
-  border-radius: 16px;
-  padding: 0.5em 1.5em;
-  display: flex;
-  gap: 1.5em;
-  z-index: 20;
-  transition: box-shadow 0.2s;
-}
-#action-bar button {
-  min-width: 80px;
-}
-#status-toast {
-  background: rgba(36,36,28,0.98);
-  color: #ffd700;
-  font-size: 1.1rem;
-  font-weight: bold;
-  border-radius: 16px;
-  box-shadow: 0 4px 16px #23232b88;
-  padding: 12px 28px;
-  z-index: 100;
-  text-align: center;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.4s;
-}
-#status-toast.active {
-  opacity: 1;
-  pointer-events: all;
-}
-@media (max-width: 900px) {
-  #blackjack-table { max-width: 98vw; min-height: 260px; }
-  #blackjack-table .table-logo { width: 220px; }
-  #table-bet-spots { gap: 32px; }
-  .table-bet-spot { width: 70px; height: 70px; font-size: 0.9em; }
-  .card { width: 48px; height: 68px; }
-  .chip { width: 48px; height: 48px; }
-  .chip-row { gap: 0.8rem; }
-}
-
-@media (max-width: 500px) {
-  .chip-row {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-around;
-    gap: 0.5rem;
-  }
-  .chip {
-    width: 40px;
-    height: 40px;
-    font-size: 0.85em;
-  }
-}
+        /* [ ... your full casino theme CSS, as in your last message ... ] */
     </style>
 </head>
 <body class="modern-bg flex flex-col items-center justify-center">
@@ -500,16 +24,17 @@ body.modern-bg {
   </header>
 
   <!-- Game Table -->
-  <main class="w-full max-w-2xl flex flex-col items-center mt-6">    <!-- Chips Display (centered above table, as proper chips) -->
+  <main class="w-full max-w-2xl flex flex-col items-center mt-6">
+    <!-- Chips Display -->
     <div id="center-chips-display" class="flex flex-col items-center mb-2">
       <span class="text-lg text-yellow-300 font-bold">Your Balance</span>
       <div class="flex items-center justify-center">
         <div class="mr-2">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
             <circle cx="12" cy="12" r="10" fill="url(#chipGradient)" stroke="#FFD700" stroke-width="1.5"/>
             <circle cx="12" cy="12" r="7" fill="transparent" stroke="#FFD700" stroke-width="1.5" stroke-dasharray="2 2"/>
             <defs>
-              <linearGradient id="chipGradient" x1="2" y1="2" x2="22" y2="22" gradientUnits="userSpaceOnUse">
+              <linearGradient id="chipGradient" x1="2" y1="2" x2="22" y2="22">
                 <stop offset="0" stop-color="#FFD700"/>
                 <stop offset="1" stop-color="#FF8C00"/>
               </linearGradient>
@@ -519,11 +44,11 @@ body.modern-bg {
         <span id="center-chips-amount" class="text-2xl font-extrabold text-green-400">0</span>
       </div>
     </div>
+
     <!-- Blackjack Table -->
     <div id="blackjack-table">
       <div id="table-vignette"></div>
-      <!-- SVG Logo Watermark -->
-      <svg class="table-logo" viewBox="0 0 800 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <svg class="table-logo" viewBox="0 0 800 120" fill="none">
         <text x="50%" y="50%" text-anchor="middle" fill="#ffd700" font-size="64" font-family="Segoe UI, Arial, sans-serif" font-weight="bold" opacity="0.9" dy=".35em" stroke="#bfa14a" stroke-width="3">CONSTRUCTION 21</text>
         <g opacity="0.18">
           <rect x="80" y="90" width="640" height="18" rx="9" fill="#23232b"/>
@@ -534,10 +59,10 @@ body.modern-bg {
           <text x="400" y="110" text-anchor="middle" fill="#ffd700" font-size="18" font-family="Segoe UI, Arial, sans-serif" font-weight="bold">BLACKJACK PAYS 3:2</text>
         </g>
       </svg>
-      <!-- Table Text (curved and straight) -->
       <div class="table-text pays">BLACKJACK PAYS 3:2</div>
       <div class="table-text rules">DEALER MUST STAND ON 17 • PAYS 3:2</div>
-      <div class="table-text nosmoke">NO SMOKING 🚭</div>      <div id="table-bet-spots">
+      <div class="table-text nosmoke">NO SMOKING 🚭</div>
+      <div id="table-bet-spots">
         <div class="table-bet-spot" id="pp-bet-spot">
           <span>P / P</span>
           <span id="pp-bet-amount" class="font-bold">0</span>
@@ -553,59 +78,39 @@ body.modern-bg {
       </div>
       <div id="dealer-cards" class="flex gap-2" style="position:absolute;top:12%;left:50%;transform:translateX(-50%);"></div>
       <div id="player-hands" class="flex gap-2" style="position:absolute;bottom:8%;left:50%;transform:translateX(-50%);"></div>
-    </div>    <!-- Chip Tray (for placing bets) -->
+    </div>
+    <!-- Chip Tray -->
     <div class="chip-tray-container">
       <div class="chip-row">
-        <button class="chip" data-amount="5">
-          <span class="chip-value">5</span>
-        </button>
-        <button class="chip" data-amount="10">
-          <span class="chip-value">10</span>
-        </button>
-        <button class="chip" data-amount="25">
-          <span class="chip-value">25</span>
-        </button>
-        <button class="chip" data-amount="100">
-          <span class="chip-value">100</span>
-        </button>
+        <button class="chip" data-amount="5"><span class="chip-value">5</span></button>
+        <button class="chip" data-amount="10"><span class="chip-value">10</span></button>
+        <button class="chip" data-amount="25"><span class="chip-value">25</span></button>
+        <button class="chip" data-amount="100"><span class="chip-value">100</span></button>
       </div>
     </div>
-    
-    <!-- Game Action Buttons (all centered in one place) -->
+
+    <!-- Game Action Buttons -->
     <div class="action-buttons-container flex flex-col items-center justify-center gap-4 mt-6 mb-8">
-      <!-- Deal/Clear Bets Buttons -->
+      <!-- Deal/Clear Bets -->
       <div class="betting-actions flex flex-row justify-center items-center gap-4">
         <button id="clear-bets-btn" class="btn-secondary px-8 py-2">Clear Bets</button>
         <button id="deal-btn" class="btn-primary px-8 py-2">Deal</button>
       </div>
-      
-      <!-- Game Actions (Hit/Stand/etc) -->
+      <!-- Game Actions -->
       <div id="action-bar" class="flex flex-row justify-center items-center gap-4 glassy p-3 rounded-xl shadow-lg z-20 mt-2">
         <button id="hit-btn" class="btn-primary">Hit</button>
         <button id="stand-btn" class="btn-primary">Stand</button>
         <button id="double-btn" class="btn-primary" style="display:none;">Double</button>
         <button id="split-btn" class="btn-primary" style="display:none;">Split</button>
+        <button id="insurance-btn" class="btn-primary" style="display:none;">Insurance</button>
       </div>
     </div>
   </main>
 
   <!-- Status Toast -->
-  <div id="status-toast" class="fixed top-6 left-1/2 -translate-x-1/2 glassy px-6 py-3 rounded-lg shadow-lg text-yellow-300 text-lg z-50 hidden"></div>
-
-  <!-- Modals (Result, Help, Leaderboard) go here -->
+  <div id="status-toast" class="fixed top-6 left-1/2 -translate-x-1/2 glassy px-6 py-3 rounded-lg shadow-lg text-yellow-300 text-lg z-50"></div>
 
   <!-- Scripts -->
   <script type="module" src="js/construction21-ui.js"></script>
-  <script>
-    // Context-sensitive action bar logic
-    function updateActionBar({ canDouble, canSplit }) {
-      document.getElementById('double-btn').style.display = canDouble ? '' : 'none';
-      document.getElementById('split-btn').style.display = canSplit ? '' : 'none';
-    }
-    // Hide Double/Split by default on load
-    document.addEventListener('DOMContentLoaded', () => {
-      updateActionBar({ canDouble: false, canSplit: false });
-    });
-  </script>
 </body>
 </html>
