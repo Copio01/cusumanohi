@@ -288,13 +288,9 @@
         <div class="bg-shape bg-shape3"></div>
     </div>
     <div id="game-container" class="p-4 mx-auto max-w-4xl">
-        <h1 class="text-4xl font-bold text-center text-yellow-400 mb-8 drop-shadow-lg">🔨 Construction 21 🔨</h1>
-        <!-- Main Menu -->
+        <h1 class="text-4xl font-bold text-center text-yellow-400 mb-8 drop-shadow-lg">🔨 Construction 21 🔨</h1>        <!-- Main Menu -->
         <div id="main-menu" class="bg-gray-800/90 p-8 rounded-2xl shadow-2xl text-center max-w-lg mx-auto mb-8">
-            <div id="auth-section">
-                 <!-- Auth content will be injected by JS -->
-            </div>
-            <div id="user-profile" class="hidden">
+            <div id="user-profile">
                 <h3 class="text-2xl mb-2">Welcome, <span id="profile-name" class="font-bold text-yellow-400"></span>!</h3>
                 <div class="text-lg mb-4">Your Chips: <span id="profile-chips" class="font-bold"></span></div>
                 <div class="flex flex-col sm:flex-row gap-2 justify-center">
@@ -302,7 +298,7 @@
                   <button id="logout-btn" class="secondary-btn bg-gray-600 hover:bg-gray-700 text-white w-full sm:w-auto">Logout</button>
                 </div>
             </div>
-        </div>        <!-- Game Canvas -->
+        </div><!-- Game Canvas -->
         <div id="game-canvas" class="hidden mt-4">
             <div class="card-table">
                 <!-- Betting Spots -->
@@ -410,17 +406,13 @@
             <h2 class="text-2xl font-bold text-center mb-4 text-yellow-400">Top Players</h2>
             <ul id="leaderboard-entries" class="space-y-2"></ul>
         </div>
-    </div>
-    <script type="module">
-        // Firebase Imports
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, onAuthStateChanged, signOut, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, updateDoc, collection, query, getDocs, limit, orderBy as firestoreOrderBy } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-        
-        // --- DOM Elements ---
+    </div>    <script type="module">        // Firebase Imports - Updated to latest version for consistency
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc, updateDoc, collection, query, getDocs, limit, orderBy as firestoreOrderBy } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-firestore.js";
+          // --- DOM Elements ---
         const mainMenu = document.getElementById('main-menu');
         const gameCanvas = document.getElementById('game-canvas');
-        const authSection = document.getElementById('auth-section');
         const userProfile = document.getElementById('user-profile');
         const dealerCardsEl = document.getElementById('dealer-cards');
         const dealerScoreEl = document.getElementById('dealer-score-display'); // Adjusted ID
@@ -495,47 +487,70 @@
             try {
                 if (typeof __firebase_config !== 'undefined' && __firebase_config) {
                     firebaseConfig = JSON.parse(__firebase_config);
-                } else {
-                    // Removed console.warn about config fallback for cleaner production logs
+                } else {                    // Use complete Firebase configuration for consistency
                     firebaseConfig = {
                         apiKey: "AIzaSyBVtq6dAEuybJNmTTv8dXBxTVUgw1t0ZMk",
                         authDomain: "cusumano-website.firebaseapp.com",
                         projectId: "cusumano-website",
+                        storageBucket: "cusumano-website.firebasestorage.app",
+                        messagingSenderId: "20051552210",
+                        appId: "1:20051552210:web:7eb3b22baa3fec184e4a0b"
                     };
-                }
-            } catch (e) {
+                }            } catch (e) {
                 console.error("Could not initialize Firebase.", e);
-                authSection.innerHTML = `<p class="text-red-500">Error: Firebase configuration is invalid.</p>`;
+                // Redirect to login page if Firebase config is invalid
+                alert('Firebase connection failed. Please check your internet connection and try again.');
+                window.location.href = 'construction21-login.html';
                 return;
             }
-            const app = initializeApp(firebaseConfig);
-            auth = getAuth(app);
-            db = getFirestore(app);
+            
+            try {
+                const app = initializeApp(firebaseConfig);
+                auth = getAuth(app);
+                db = getFirestore(app);        
+                console.log('Firebase initialized successfully for Construction 21 game');
+            } catch (error) {
+                console.error("Firebase initialization error:", error);
+                alert('Failed to connect to game services. Please refresh the page.');
+                window.location.href = 'construction21-login.html';
+                return;
+            }
 
             onAuthStateChanged(auth, async (user) => {
                 if (user) {
                     await setupUserSession(user);
                 } else {
+                    // Redirect to login page if not authenticated
                     currentUser = null;
-                    showAuthForms();
+                    window.location.href = 'construction21-login.html';
                 }
             });
-        }
-
-        async function setupUserSession(user) {
-            const userDocRef = doc(db, "game_users_custom_auth", user.uid);
-            const userDoc = await getDoc(userDocRef);
-            
-            if (userDoc.exists()) {
-                const userData = userDoc.data();
-                currentUser = { uid: user.uid, displayName: userData.displayName, chips: userData.chips };
-                currentPlayerName = currentUser.displayName;
-                playerChips = currentUser.chips;
-                showUserProfile();
-                updateGlobalChipDisplay(); // Update chips on profile
-            } else {
-                // This case should ideally not happen if sign up ensures doc creation
-                console.error("User data not found in Firestore, logging out.");
+        }        async function setupUserSession(user) {
+            try {
+                if (!db || !user) {
+                    console.error("Database or user not available");
+                    window.location.href = 'construction21-login.html';
+                    return;
+                }
+                
+                const userDocRef = doc(db, "game_users_custom_auth", user.uid);
+                const userDoc = await getDoc(userDocRef);
+                
+                if (userDoc.exists()) {
+                    const userData = userDoc.data();
+                    currentUser = { uid: user.uid, displayName: userData.displayName, chips: userData.chips };
+                    currentPlayerName = currentUser.displayName;
+                    playerChips = currentUser.chips;
+                    showUserProfile();
+                    updateGlobalChipDisplay(); // Update chips on profile
+                } else {
+                    // This case should ideally not happen if sign up ensures doc creation
+                    console.error("User data not found in Firestore, logging out.");
+                    handleLogout();
+                }
+            } catch (error) {
+                console.error("Error setting up user session:", error);
+                alert('Error loading your game data. Please try logging in again.');
                 handleLogout();
             }
         }
@@ -548,95 +563,32 @@
             return userDoc.exists() ? userDoc.data() : null;
         }
         
-        function showAuthForms() {
-            authSection.classList.remove('hidden');
-            userProfile.classList.add('hidden');
-            gameCanvas.classList.add('hidden');
-            mainMenu.classList.remove('hidden');
-            // Reset any game state if user lands here
-            bettingControls.classList.add('hidden');
-            gameArea.classList.add('hidden');
-            gameResultScreen.classList.add('hidden');
-            authSection.innerHTML = `
-                <div class="border-b border-gray-600 mb-4">
-                    <nav class="-mb-px flex space-x-4" aria-label="Tabs">
-                        <button data-tab="login" class="auth-tab-btn whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm">Login</button>
-                        <button data-tab="signup" class="auth-tab-btn whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm">Sign Up</button>
-                    </nav>
-                </div>
-                <div id="login-tab" class="auth-tab-content space-y-4">
-                    <input type="email" id="login-email" placeholder="Email" class="w-full bg-gray-700 p-2 rounded">
-                    <input type="password" id="login-password" placeholder="Password" class="w-full bg-gray-700 p-2 rounded">
-                    <button id="login-btn" class="auth-btn bg-indigo-600 hover:bg-indigo-700 w-full">Login</button>
-                    <p id="login-message" class="text-sm text-red-400 h-4"></p>
-                </div>
-                <div id="signup-tab" class="auth-tab-content space-y-4">
-                    <input type="text" id="signup-name" placeholder="Display Name" class="w-full bg-gray-700 p-2 rounded">
-                    <input type="email" id="signup-email" placeholder="Email" class="w-full bg-gray-700 p-2 rounded">
-                    <input type="password" id="signup-password" placeholder="Password (6+ characters)" class="w-full bg-gray-700 p-2 rounded">
-                    <button id="signup-btn" class="auth-btn bg-indigo-600 hover:bg-indigo-700 w-full">Create Account</button>
-                    <p id="signup-message" class="text-sm text-red-400 h-4"></p>
-                </div>`;
-            const tabs = authSection.querySelectorAll('.auth-tab-btn');
-            const contents = authSection.querySelectorAll('.auth-tab-content');
-            tabs[0].classList.add('active');
-            contents[0].classList.add('active');
-            tabs.forEach(tab => {
-                tab.addEventListener('click', () => {
-                    tabs.forEach(t => t.classList.remove('active'));
-                    contents.forEach(c => c.classList.remove('active'));
-                    tab.classList.add('active');
-                    document.getElementById(`${tab.dataset.tab}-tab`).classList.add('active');
-                });
-            });
-            document.getElementById('login-btn').addEventListener('click', handleLogin);
-            document.getElementById('signup-btn').addEventListener('click', handleSignUp);
-        }
-
-        async function handleLogin() {
-            const email = document.getElementById('login-email').value;
-            const password = document.getElementById('login-password').value;
-            const messageEl = document.getElementById('login-message');
-            messageEl.textContent = 'Logging in...';
-            try {
-                await signInWithEmailAndPassword(auth, email, password);
-            } catch (error) {
-                messageEl.textContent = error.message;
-            }
-        }
+        // Legacy authentication functions removed - authentication now handled by separate login page
         
-        async function handleSignUp() {
-            const name = document.getElementById('signup-name').value;
-            const email = document.getElementById('signup-email').value;
-            const password = document.getElementById('signup-password').value;
-            const messageEl = document.getElementById('signup-message');
-            if (!name) { messageEl.textContent = "Display name is required."; return; }
-            messageEl.textContent = 'Creating account...';
-            try {
-                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-                const user = userCredential.user;
-                await setDoc(doc(db, "game_users_custom_auth", user.uid), {
-                    displayName: name,
-                    chips: 100 // Changed from 1000 to 100
-                });
-                messageEl.textContent = 'Success! Logging in...';
-            } catch (error) {
-                 messageEl.textContent = error.message;
-            }
-        }
-
         function showUserProfile() {
             mainMenu.classList.remove('hidden');
-            authSection.classList.add('hidden');
             userProfile.classList.remove('hidden');
             gameCanvas.classList.add('hidden'); // Ensure game canvas is hidden initially
             document.getElementById('profile-name').textContent = currentPlayerName;
             updateGlobalChipDisplay();
-        }
-
-        async function handleLogout() {
-            await signOut(auth);
-            // No need to explicitly call showAuthForms, onAuthStateChanged will handle it.
+            
+            // Show login success message if coming from login page
+            if (sessionStorage.getItem('loginSuccess')) {
+                sessionStorage.removeItem('loginSuccess');
+                // Could add a welcome message here if desired
+            }
+        }        async function handleLogout() {
+            try {
+                if (auth) {
+                    await signOut(auth);
+                    console.log('User logged out successfully');
+                }
+                // User will be redirected to login page by onAuthStateChanged
+            } catch (error) {
+                console.error('Error during logout:', error);
+                // Force redirect even if signOut fails
+                window.location.href = 'construction21-login.html';
+            }
         }
 
         async function updatePlayerChipsInFirestore(userId, newChipAmount) {

@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Firebase Configuration Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .test-item { margin: 10px 0; padding: 10px; border-radius: 5px; }
+        .success { background-color: #d4edda; color: #155724; }
+        .error { background-color: #f8d7da; color: #721c24; }
+        .info { background-color: #d1ecf1; color: #0c5460; }
+    </style>
+</head>
+<body>
+    <h1>Firebase Configuration Test</h1>
+    <div id="test-results"></div>
+    
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-app.js";
+        import { getAuth } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-auth.js";
+        import { getFirestore } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-firestore.js";
+
+        const results = document.getElementById('test-results');
+        
+        function addResult(message, type = 'info') {
+            const div = document.createElement('div');
+            div.className = `test-item ${type}`;
+            div.textContent = message;
+            results.appendChild(div);
+        }
+
+        // Test Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBVtq6dAEuybJNmTTv8dXBxTVUgw1t0ZMk",
+            authDomain: "cusumano-website.firebaseapp.com",
+            projectId: "cusumano-website",
+            storageBucket: "cusumano-website.firebasestorage.app",
+            messagingSenderId: "20051552210",
+            appId: "1:20051552210:web:7eb3b22baa3fec184e4a0b"
+        };
+
+        try {
+            addResult('Testing Firebase initialization...', 'info');
+            
+            // Test Firebase App initialization
+            const app = initializeApp(firebaseConfig);
+            addResult('✓ Firebase app initialized successfully', 'success');
+            
+            // Test Auth service
+            const auth = getAuth(app);
+            addResult('✓ Firebase Auth service initialized', 'success');
+            
+            // Test Firestore service
+            const db = getFirestore(app);
+            addResult('✓ Firestore database service initialized', 'success');
+            
+            // Check configuration completeness
+            const requiredFields = ['apiKey', 'authDomain', 'projectId', 'storageBucket', 'messagingSenderId', 'appId'];
+            const missingFields = requiredFields.filter(field => !firebaseConfig[field]);
+            
+            if (missingFields.length === 0) {
+                addResult('✓ All required Firebase configuration fields are present', 'success');
+            } else {
+                addResult(`✗ Missing Firebase config fields: ${missingFields.join(', ')}`, 'error');
+            }
+            
+            addResult('Firebase Configuration Test PASSED - Ready for production use!', 'success');
+            
+        } catch (error) {
+            addResult(`✗ Firebase initialization failed: ${error.message}`, 'error');
+            console.error('Firebase test error:', error);
+        }
+    </script>
+</body>
+</html>

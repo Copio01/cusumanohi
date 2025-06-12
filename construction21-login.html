@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Construction 21 - Login</title>
+    <link rel="icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2NCIgaGVpZ2h0PSI2NCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiNlMGExMDYiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBkPSJNMTUuMDUgNWEzIDMgMCAwIDEgNC41IDBIM05NMTUuMDUgNU0xOSA4LjVjMCAxLjUtLjUgMy41LTIgNC41di4wNUgxN2EyIDIgMCAwIDAgLTIgLTIgYSAyIDIgMCAwIDAgLTIgMkgxM3YtNkgxNlY4LjVNOSA2LjVWNE02IDcgTDUuNSAxNC41TWwwIDE1IDguOTkgMy04IGMxLjUgLTRoMmMwIDAuNSAwLjUgMSAwLjUgMnYxSDEwdjNjMCAxIDAgMi40IC0xIDN2XzIgYzAgMC5xIDAuMiAwLjUgMC41IDAuNXMwLjUgLTAuMiAwLjUgLTAuNVYyMUg0LjA3bDEuOCAtMTQuMjUgYTEgMSAwIDAgMSAwLjE5IC0wLjA3IHoiLz48L3N2Zz4=" type="image/svg+xml">
+    <link href="css/tailwind.output.css" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: radial-gradient(ellipse at 60% 40%, #ffd70033 0%, #23232b 100%), linear-gradient(135deg, #23232b 0%, #2d2d3a 100%);
+            font-family: 'Segoe UI', Arial, sans-serif;
+            min-height: 100vh;
+            color: #EAEAEA;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .animated-bg {
+            position: fixed; 
+            inset: 0; 
+            z-index: -1; 
+            pointer-events: none; 
+            overflow: hidden;
+        }
+        
+        .bg-shape {
+            position: absolute; 
+            border-radius: 50%; 
+            opacity: 0.18; 
+            filter: blur(18px); 
+            animation: floatBg 8s ease-in-out infinite alternate;
+        }
+        
+        .bg-shape1 { 
+            width: 340px; 
+            height: 340px; 
+            background: #ffd700; 
+            left: 8vw; 
+            top: 10vh; 
+            animation-delay: 0s; 
+        }
+        
+        .bg-shape2 { 
+            width: 220px; 
+            height: 220px; 
+            background: #ff4e00; 
+            right: 10vw; 
+            top: 30vh; 
+            animation-delay: 2s; 
+        }
+        
+        .bg-shape3 { 
+            width: 180px; 
+            height: 180px; 
+            background: #00cfff; 
+            left: 30vw; 
+            bottom: 8vh; 
+            animation-delay: 4s; 
+        }
+        
+        @keyframes floatBg {
+            0% { transform: translateY(0) scale(1); }
+            100% { transform: translateY(-25px) scale(1.05); }
+        }
+        
+        .login-container {
+            background: rgba(17, 24, 39, 0.95);
+            backdrop-filter: blur(16px);
+            border-radius: 24px;
+            padding: 3rem 2.5rem;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25), 
+                        0 0 0 1px rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(191, 161, 74, 0.3);
+            max-width: 450px;
+            width: 100%;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .login-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #ffd700, #ff4e00, #00cfff, #ffd700);
+            background-size: 200% 100%;
+            animation: shimmer 3s ease-in-out infinite;
+        }
+        
+        @keyframes shimmer {
+            0%, 100% { background-position: 200% 0; }
+            50% { background-position: -200% 0; }
+        }
+        
+        .game-title {
+            font-size: 3rem;
+            font-weight: 800;
+            color: #ffd700;
+            text-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+            margin-bottom: 0.5rem;
+            letter-spacing: -1px;
+        }
+        
+        .game-subtitle {
+            color: #94a3b8;
+            font-size: 1.1rem;
+            margin-bottom: 2.5rem;
+            font-weight: 500;
+        }
+        
+        .auth-tabs {
+            display: flex;
+            margin-bottom: 2rem;
+            background: rgba(55, 65, 81, 0.5);
+            border-radius: 12px;
+            padding: 4px;
+        }
+        
+        .auth-tab-btn {
+            flex: 1;
+            padding: 12px 16px;
+            background: transparent;
+            color: #9ca3af;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .auth-tab-btn.active {
+            background: #ffd700;
+            color: #1f2937;
+            box-shadow: 0 4px 12px rgba(255, 215, 0, 0.3);
+        }
+        
+        .auth-tab-content {
+            display: none;
+        }
+        
+        .auth-tab-content.active {
+            display: block;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+            text-align: left;
+        }
+        
+        .form-label {
+            display: block;
+            color: #e5e7eb;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            font-size: 0.95rem;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            background: rgba(55, 65, 81, 0.7);
+            border: 2px solid rgba(75, 85, 99, 0.5);
+            border-radius: 12px;
+            color: #fff;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            box-sizing: border-box;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #ffd700;
+            box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.1);
+            background: rgba(55, 65, 81, 0.9);
+        }
+        
+        .form-input::placeholder {
+            color: #9ca3af;
+        }
+        
+        .auth-btn {
+            width: 100%;
+            padding: 14px 24px;
+            background: linear-gradient(135deg, #ffd700 0%, #e0a106 100%);
+            color: #1f2937;
+            border: none;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 1rem;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .auth-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(255, 215, 0, 0.3);
+        }
+        
+        .auth-btn:active {
+            transform: translateY(0);
+        }
+        
+        .auth-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .message {
+            min-height: 1.25rem;
+            font-size: 0.9rem;
+            font-weight: 500;
+            margin-top: 0.5rem;
+        }
+        
+        .message.error {
+            color: #ef4444;
+        }
+        
+        .message.success {
+            color: #10b981;
+        }
+        
+        .message.info {
+            color: #3b82f6;
+        }
+        
+        .construction-icons {
+            position: absolute;
+            top: 50%;
+            right: -30px;
+            transform: translateY(-50%);
+            font-size: 4rem;
+            opacity: 0.1;
+            pointer-events: none;
+        }
+        
+        .back-to-home {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: #94a3b8;
+            text-decoration: none;
+            font-weight: 600;
+            padding: 8px 16px;
+            border-radius: 8px;
+            background: rgba(55, 65, 81, 0.5);
+            transition: all 0.3s ease;
+            backdrop-filter: blur(8px);
+        }
+        
+        .back-to-home:hover {
+            color: #ffd700;
+            background: rgba(55, 65, 81, 0.8);
+        }
+        
+        @media (max-width: 640px) {
+            .login-container {
+                margin: 20px;
+                padding: 2rem 1.5rem;
+            }
+            
+            .game-title {
+                font-size: 2.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="animated-bg">
+        <div class="bg-shape bg-shape1"></div>
+        <div class="bg-shape bg-shape2"></div>
+        <div class="bg-shape bg-shape3"></div>
+    </div>
+    
+    <a href="Games.html" class="back-to-home">← Back to Games</a>
+    
+    <div class="login-container">
+        <div class="construction-icons">🔨⚒️🏗️</div>
+        
+        <h1 class="game-title">🔨 Construction 21</h1>
+        <p class="game-subtitle">Professional Blackjack Casino Experience</p>
+        
+        <div class="auth-tabs">
+            <button class="auth-tab-btn active" data-tab="login">Login</button>
+            <button class="auth-tab-btn" data-tab="signup">Sign Up</button>
+        </div>
+        
+        <div id="login-tab" class="auth-tab-content active">
+            <div class="form-group">
+                <label class="form-label" for="login-email">Email Address</label>
+                <input type="email" id="login-email" class="form-input" placeholder="Enter your email" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="login-password">Password</label>
+                <input type="password" id="login-password" class="form-input" placeholder="Enter your password" required>
+            </div>
+            <button id="login-btn" class="auth-btn">Login & Play</button>
+            <div id="login-message" class="message"></div>
+        </div>
+        
+        <div id="signup-tab" class="auth-tab-content">
+            <div class="form-group">
+                <label class="form-label" for="signup-name">Display Name</label>
+                <input type="text" id="signup-name" class="form-input" placeholder="Your player name" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="signup-email">Email Address</label>
+                <input type="email" id="signup-email" class="form-input" placeholder="Enter your email" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="signup-password">Password</label>
+                <input type="password" id="signup-password" class="form-input" placeholder="6+ characters" required>
+            </div>
+            <button id="signup-btn" class="auth-btn">Create Account & Play</button>
+            <div id="signup-message" class="message"></div>
+        </div>
+    </div>
+    
+    <!-- Firebase Scripts -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-firestore.js";
+
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBVtq6dAEuybJNmTTv8dXBxTVUgw1t0ZMk",
+            authDomain: "cusumano-website.firebaseapp.com",
+            projectId: "cusumano-website",
+            storageBucket: "cusumano-website.firebasestorage.app",
+            messagingSenderId: "20051552210",
+            appId: "1:20051552210:web:7eb3b22baa3fec184e4a0b"
+        };        // Initialize Firebase with error handling
+        let app, auth, db;
+        try {
+            app = initializeApp(firebaseConfig);
+            auth = getAuth(app);
+            db = getFirestore(app);
+            console.log('Firebase initialized successfully for Construction 21 login');
+        } catch (error) {
+            console.error('Firebase initialization failed:', error);
+            showMessage(loginMessage, 'Connection error. Please refresh the page.', 'error');
+        }
+
+        // DOM Elements
+        const loginBtn = document.getElementById('login-btn');
+        const signupBtn = document.getElementById('signup-btn');
+        const loginMessage = document.getElementById('login-message');
+        const signupMessage = document.getElementById('signup-message');
+        const authTabs = document.querySelectorAll('.auth-tab-btn');
+        const authTabContents = document.querySelectorAll('.auth-tab-content');
+
+        // Tab Switching
+        authTabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                const targetTab = tab.dataset.tab;
+                
+                // Update active tab
+                authTabs.forEach(t => t.classList.remove('active'));
+                authTabContents.forEach(c => c.classList.remove('active'));
+                
+                tab.classList.add('active');
+                document.getElementById(`${targetTab}-tab`).classList.add('active');
+                
+                // Clear messages
+                loginMessage.textContent = '';
+                signupMessage.textContent = '';
+            });
+        });        // Authentication State Listener with proper error handling
+        if (auth) {
+            onAuthStateChanged(auth, async (user) => {
+                if (user) {
+                    // User is signed in, check if they have game data
+                    try {
+                        const userDocRef = doc(db, "game_users_custom_auth", user.uid);
+                        const userDoc = await getDoc(userDocRef);
+                        
+                        if (userDoc.exists()) {
+                            // Redirect to game with success message
+                            sessionStorage.setItem('loginSuccess', 'true');
+                            window.location.href = 'construction21.html';
+                        } else {
+                            // User exists but no game data, create it
+                            await setDoc(userDocRef, {
+                                displayName: user.displayName || user.email?.split('@')[0] || 'Player',
+                                chips: 100
+                            });
+                            sessionStorage.setItem('loginSuccess', 'true');
+                            window.location.href = 'construction21.html';
+                        }
+                    } catch (error) {
+                        console.error("Error checking user data:", error);
+                        showMessage(loginMessage, 'Error loading user data. Please try again.', 'error');
+                    }
+                }
+            });
+        }        // Login Handler with improved validation
+        loginBtn.addEventListener('click', async () => {
+            const email = document.getElementById('login-email').value.trim();
+            const password = document.getElementById('login-password').value;
+            
+            if (!email || !password) {
+                showMessage(loginMessage, 'Please fill in all fields.', 'error');
+                return;
+            }
+            
+            if (!email.includes('@')) {
+                showMessage(loginMessage, 'Please enter a valid email address.', 'error');
+                return;
+            }
+            
+            if (!auth) {
+                showMessage(loginMessage, 'Authentication service not available. Please refresh the page.', 'error');
+                return;
+            }
+            
+            setButtonLoading(loginBtn, 'Logging in...');
+            
+            try {
+                await signInWithEmailAndPassword(auth, email, password);
+                showMessage(loginMessage, 'Login successful! Redirecting...', 'success');
+            } catch (error) {
+                setButtonLoading(loginBtn, 'Login & Play', false);
+                console.error('Login error:', error);
+                showMessage(loginMessage, getErrorMessage(error.code), 'error');
+            }
+        });        // Signup Handler with improved validation
+        signupBtn.addEventListener('click', async () => {
+            const name = document.getElementById('signup-name').value.trim();
+            const email = document.getElementById('signup-email').value.trim();
+            const password = document.getElementById('signup-password').value;
+            
+            if (!name || !email || !password) {
+                showMessage(signupMessage, 'Please fill in all fields.', 'error');
+                return;
+            }
+            
+            if (name.length < 2) {
+                showMessage(signupMessage, 'Display name must be at least 2 characters long.', 'error');
+                return;
+            }
+            
+            if (!email.includes('@')) {
+                showMessage(signupMessage, 'Please enter a valid email address.', 'error');
+                return;
+            }
+            
+            if (password.length < 6) {
+                showMessage(signupMessage, 'Password must be at least 6 characters long.', 'error');
+                return;
+            }
+            
+            if (!auth || !db) {
+                showMessage(signupMessage, 'Authentication service not available. Please refresh the page.', 'error');
+                return;
+            }
+            
+            setButtonLoading(signupBtn, 'Creating account...');
+            
+            try {
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                const user = userCredential.user;
+                
+                // Create user document with game data
+                await setDoc(doc(db, "game_users_custom_auth", user.uid), {
+                    displayName: name,
+                    chips: 100,
+                    createdAt: new Date(),
+                    email: email
+                });
+                
+                showMessage(signupMessage, 'Account created! Redirecting...', 'success');
+            } catch (error) {
+                setButtonLoading(signupBtn, 'Create Account & Play', false);
+                console.error('Signup error:', error);
+                showMessage(signupMessage, getErrorMessage(error.code), 'error');
+            }
+        });
+
+        // Utility Functions
+        function showMessage(element, message, type) {
+            element.textContent = message;
+            element.className = `message ${type}`;
+        }
+
+        function setButtonLoading(button, text, loading = true) {
+            button.textContent = text;
+            button.disabled = loading;
+        }
+
+        function getErrorMessage(errorCode) {
+            switch (errorCode) {
+                case 'auth/user-not-found':
+                    return 'No account found with this email address.';
+                case 'auth/wrong-password':
+                    return 'Incorrect password. Please try again.';
+                case 'auth/email-already-in-use':
+                    return 'An account with this email already exists.';
+                case 'auth/weak-password':
+                    return 'Password should be at least 6 characters long.';
+                case 'auth/invalid-email':
+                    return 'Please enter a valid email address.';
+                case 'auth/too-many-requests':
+                    return 'Too many failed attempts. Please try again later.';
+                default:
+                    return 'An error occurred. Please try again.';
+            }
+        }
+
+        // Enter key support
+        document.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                const activeTab = document.querySelector('.auth-tab-content.active');
+                if (activeTab.id === 'login-tab') {
+                    loginBtn.click();
+                } else {
+                    signupBtn.click();
+                }
+            }
+        });
+    </script>
+</body>
+</html>
