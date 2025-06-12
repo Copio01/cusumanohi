@@ -1,7 +1,7 @@
 import { Construction21Game } from './construction21-logic.js';
 
 let game = new Construction21Game();
-let inPlay = false, outcomeLock = false, resultsCache = null, lastBets = null, uiLocked = false;
+let inPlay = false, outcomeLock = false, resultsCache = null, lastBets = null;
 
 const dealerCardsEl = document.getElementById('dealer-cards');
 const playerHandsEl = document.getElementById('player-hands');
@@ -33,15 +33,17 @@ let betSpots = {
 };
 const virtualDeckEl = document.getElementById('virtual-deck');
 
-// ----------------- Utility functions -----------------
+// Utility for animation delays
+const delay = ms => new Promise(r => setTimeout(r, ms));
+
+// ---------- Utility Functions ----------
 function getVirtualDeckPos() {
   const rect = virtualDeckEl.getBoundingClientRect();
   return { left: rect.left + rect.width / 2, top: rect.top + rect.height / 2 };
 }
 
-function renderCard(card, flipMode = false) {
-  // FlipMode enables rendering for a card flip animation
-  if (!card.isFaceUp && !card.flipping && !flipMode) {
+function renderCard(card) {
+  if (!card.isFaceUp && !card.flipping) {
     return `<span style="font-size:1.6em;">🂠</span>`;
   }
   const val = card.value;
@@ -119,19 +121,25 @@ function resetAllHandsAndUI() {
   if (playerHandsEl) playerHandsEl.innerHTML = '';
 }
 
-// --- Animation Lock ---
-function lockUI(lock = true) {
-  uiLocked = lock;
-  actionBar.style.pointerEvents = lock ? 'none' : '';
-  chipTray.style.pointerEvents = lock ? 'none' : '';
-  dealBtn.disabled = lock;
+// --- Animated Card Dealing ---
+async function animateDealCard(hand, faceUp, isDealer, cardIndex) {
+  game.dealCard(hand, faceUp);
+  updateHandsUI();
+  await delay(550);
+}
+async function dealOpeningCards() {
+  // Standard BJ: Player card 1 (face up) → Dealer card 1 (face up) → Player card 2 (face up) → Dealer card 2 (face down)
+  await animateDealCard(game.playerHands[0], true, false, 0);
+  await animateDealCard(game.dealerHand, true, true, 0);
+  await animateDealCard(game.playerHands[0], true, false, 1);
+  await animateDealCard(game.dealerHand, false, true, 1);
 }
 
 // --- Event handlers and UI logic ---
 function setupEventHandlers() {
   chipTray.querySelectorAll('.chip').forEach(chip => {
     chip.addEventListener('click', () => {
-      if (inPlay || uiLocked) return;
+      if (inPlay) return;
       selectedChip = parseInt(chip.dataset.amount);
       chipTray.querySelectorAll('.chip').forEach(c => c.classList.remove('selected'));
       chip.classList.add('selected');
@@ -140,7 +148,7 @@ function setupEventHandlers() {
 
   Object.entries(betSpots).forEach(([type, spot]) => {
     spot.addEventListener('click', (ev) => {
-      if (inPlay || uiLocked) return;
+      if (inPlay) return;
       if (!selectedChip) return;
       if (game.canPlaceBet(selectedChip)) {
         animateChipToBetSpot(type, selectedChip, spot, getBetStackCount(type));
@@ -153,13 +161,13 @@ function setupEventHandlers() {
     });
   });
 
-  dealBtn.addEventListener('click', async () => { if (!inPlay && !uiLocked) await startRound(); });
-  hitBtn.addEventListener('click', () => { if (!uiLocked) handlePlayerAction('hit'); });
-  standBtn.addEventListener('click', () => { if (!uiLocked) handlePlayerAction('stand'); });
-  doubleBtn.addEventListener('click', () => { if (!uiLocked) handlePlayerAction('double'); });
-  splitBtn.addEventListener('click', () => { if (!uiLocked) handlePlayerAction('split'); });
-  if (insuranceBtn) insuranceBtn.addEventListener('click', () => { if (!uiLocked) handlePlayerAction('insurance'); });
-  if (clearBetsBtn) clearBetsBtn.addEventListener('click', () => { if (!inPlay && !uiLocked) { game.clearBets(); updateBetsUI(); showStatusToast('Bets cleared!'); }});
+  dealBtn.addEventListener('click', () => { if (!inPlay) startRound(); });
+  hitBtn.addEventListener('click', () => handlePlayerAction('hit'));
+  standBtn.addEventListener('click', () => handlePlayerAction('stand'));
+  doubleBtn.addEventListener('click', () => handlePlayerAction('double'));
+  splitBtn.addEventListener('click', () => handlePlayerAction('split'));
+  if (insuranceBtn) insuranceBtn.addEventListener('click', () => handlePlayerAction('insurance'));
+  if (clearBetsBtn) clearBetsBtn.addEventListener('click', () => { if (!inPlay) { game.clearBets(); updateBetsUI(); showStatusToast('Bets cleared!'); }});
 
   // End-of-round buttons:
   newBetBtn.addEventListener('click', () => {
@@ -172,7 +180,7 @@ function setupEventHandlers() {
     updateActionBarState();
     showInPlayButtons(false);
   });
-  rebetBtn.addEventListener('click', async () => {
+  rebetBtn.addEventListener('click', () => {
     hideEndButtons();
     if (lastBets) {
       resetAllHandsAndUI();
@@ -180,9 +188,9 @@ function setupEventHandlers() {
       Object.keys(lastBets).forEach(k => { if (lastBets[k] > 0) game.bets[k] = lastBets[k]; });
       updateBetsUI();
     }
-    await startRound();
+    startRound();
   });
-  doubleBetBtn.addEventListener('click', async () => {
+  doubleBetBtn.addEventListener('click', () => {
     hideEndButtons();
     if (lastBets) {
       let ok = true;
@@ -200,12 +208,11 @@ function setupEventHandlers() {
         if (lastBets[k] > 0) game.bets[k] = lastBets[k] * 2;
       });
       updateBetsUI();
-      await startRound();
+      startRound();
     }
   });
 }
 
-// Returns stack count for chip visual stacking
 function getBetStackCount(type) {
   if (type === 'main') return Math.floor(game.bets.main / (selectedChip || 1));
   if (type === 'pp') return Math.floor(game.bets.pp / (selectedChip || 1));
@@ -213,7 +220,6 @@ function getBetStackCount(type) {
   return 0;
 }
 
-// --- Animate chips flying to bet spots and stacking ---
 function animateChipToBetSpot(type, amount, spot, stackCount) {
   const chip = chipTray.querySelector(`.chip[data-amount="${amount}"]`);
   if (!chip) return;
@@ -233,42 +239,17 @@ function animateChipToBetSpot(type, amount, spot, stackCount) {
   const stackOffsetY = -stackCount * 8;
   const x = spotRect.left + spotRect.width / 2 - (chipRect.left + chipRect.width / 2);
   const y = spotRect.top + spotRect.height / 2 - (chipRect.top + chipRect.height / 2) + stackOffsetY;
-  clone.style.transition = 'transform 0.6s cubic-bezier(.68,-0.55,.27,1.55), opacity 0.5s';
-  clone.style.transform = `translate(${x}px, ${y}px) scale(1.2)`;
-  clone.style.opacity = 0.97;
+  clone.style.transition = 'transform 0.45s cubic-bezier(.68,-0.55,.27,1.55), opacity 0.5s';
+  clone.style.transform = `translate(${x}px, ${y}px) scale(1.3)`;
+  clone.style.opacity = 0.95;
 
   setTimeout(() => {
     clone.remove();
     spot.classList.add('bet-pulse');
-    setTimeout(() => spot.classList.remove('bet-pulse'), 400);
-  }, 660);
+    setTimeout(() => spot.classList.remove('bet-pulse'), 300);
+  }, 460);
 }
 
-// --- Card dealing animation: one at a time, flying from deck ---
-// Returns a promise that resolves after the card is dealt and shown
-async function animateDealCard(hand, faceUp, handType, cardIdx) {
-  // Logically deal the card in the model
-  game.dealCard(hand, faceUp);
-  updateHandsUI();
-  // (You could enhance: animate .card from virtualDeckEl to hand)
-  await new Promise(resolve => setTimeout(resolve, 800));
-}
-
-// Sequential dealing per standard blackjack order
-async function dealOpeningCards() {
-  lockUI(true);
-  // Player card 1
-  await animateDealCard(game.playerHands[0], true, 'player', 0);
-  // Dealer card 1
-  await animateDealCard(game.dealerHand, true, 'dealer', 0);
-  // Player card 2
-  await animateDealCard(game.playerHands[0], true, 'player', 1);
-  // Dealer card 2 (face down)
-  await animateDealCard(game.dealerHand, false, 'dealer', 1);
-  lockUI(false);
-}
-
-// --- UI update functions ---
 function updateBetsUI() {
   mainBetAmountEl.textContent = game.bets.main;
   ppBetAmountEl.textContent = game.bets.pp;
@@ -276,7 +257,6 @@ function updateBetsUI() {
   updateBetChipsVisual();
 }
 
-// --- Stacked Chips on Bet Spots ---
 function updateBetChipsVisual() {
   Object.values(betSpots).forEach(spot => {
     const toRemove = spot.querySelectorAll('.bet-visual-chip');
@@ -350,30 +330,18 @@ function showInPlayButtons(show) {
   clearBetsBtn.style.display = show ? 'none' : '';
 }
 
-// --- Advanced card and hand rendering with casino-like style and badges ---
-// Supports card flip for dealer's hidden card
 function updateHandsUI(resultData = null) {
-  // --- Dealer cards ---
   dealerCardsEl.innerHTML = '';
+  playerHandsEl.innerHTML = '';
+
+  // --- Dealer cards ---
   const dealerHandRect = dealerCardsEl.getBoundingClientRect();
   const virtualDeck = getVirtualDeckPos();
 
   game.dealerHand.cards.forEach((card, idx) => {
     const cardEl = document.createElement('div');
-    // Flip logic for dealer's second card (the hole card)
-    let isHoleCard = idx === 1;
-    let showFlip = isHoleCard && !card.isFaceUp;
-    if (showFlip) {
-      cardEl.className = 'card card-flip';
-      cardEl.innerHTML = `
-        <div class="card-flip-inner ${card.flipping ? 'is-flipped' : ''}">
-          <div class="card-front">${renderCard(card, true)}</div>
-          <div class="card-back"><span style="font-size:1.6em;">🂠</span></div>
-        </div>`;
-    } else {
-      cardEl.className = 'card';
-      cardEl.innerHTML = renderCard(card);
-    }
+    cardEl.className = 'card';
+    cardEl.innerHTML = renderCard(card);
     cardEl.style.position = 'absolute';
     dealerCardsEl.appendChild(cardEl);
 
@@ -386,7 +354,7 @@ function updateHandsUI(resultData = null) {
       cardEl.style.left = `${idx * 34}px`;
       cardEl.style.top = `0px`;
       cardEl.style.opacity = 1;
-    }, 40 + idx * 260);
+    }, 40 + idx * 210);
 
     setTimeout(() => {
       cardEl.style.position = '';
@@ -394,11 +362,10 @@ function updateHandsUI(resultData = null) {
       cardEl.style.top = '';
       cardEl.classList.remove('card-deal-animate');
       cardEl.style.opacity = '';
-    }, 440 + idx * 260);
+    }, 340 + idx * 210);
   });
 
   // --- Player hands ---
-  playerHandsEl.innerHTML = '';
   game.playerHands.forEach((hand, hIdx) => {
     const handDiv = document.createElement('div');
     handDiv.className = 'player-hand';
@@ -453,13 +420,10 @@ function updateHandsUI(resultData = null) {
       resultBanner.className = 'result-banner';
       handDiv.appendChild(resultBanner);
 
-      setTimeout(() => resultBanner.classList.add('show'), 20);
-      setTimeout(() => resultBanner.classList.remove('show'), 1200);
       setTimeout(() => {
         if (resultBanner && resultBanner.parentNode) resultBanner.parentNode.removeChild(resultBanner);
-      }, 1800);
+      }, 1400);
     }
-
     playerHandsEl.appendChild(handDiv);
   });
 
@@ -519,6 +483,7 @@ async function startRound() {
   updateHandsUI(); updateActionBarState(); updateChipsDisplay(); updateBetsUI();
   hideEndButtons();
 
+  // Animated initial dealing
   await dealOpeningCards();
 
   if (canBuyInsurance()) {
@@ -530,7 +495,7 @@ async function startRound() {
 }
 
 function handlePlayerAction(action) {
-  if (outcomeLock || uiLocked) return;
+  if (outcomeLock) return;
   const hand = game.getActiveHand();
   if (!hand || !inPlay) return;
 
@@ -623,39 +588,25 @@ function nextHandOrSettle() {
 
 // Dealer plays out per blackjack rules (dealer stands on all 17s, hits below 17)
 async function dealerPlayOut() {
-  lockUI(true);
+  let dealerScore = game.calculateScore(game.dealerHand.cards);
   while (
-    game.calculateScore(game.dealerHand.cards) < 17 ||
-    (game.calculateScore(game.dealerHand.cards) === 17 &&
+    dealerScore < 17 ||
+    (dealerScore === 17 &&
       game.isSoft17 && typeof game.isSoft17 === 'function' &&
       game.isSoft17(game.dealerHand.cards) &&
       !game.dealerStandsOnSoft17)
   ) {
-    await new Promise(r => setTimeout(r, 950));
+    await delay(700); // More realistic delay for dealer play
     game.dealCard(game.dealerHand, true);
     updateHandsUI();
+    dealerScore = game.calculateScore(game.dealerHand.cards);
   }
-  lockUI(false);
 }
 
 async function settleAndEndRound() {
-  lockUI(true);
-
-  // Flip all dealer cards, with flip animation for hole card
-  let dealerSecond = game.dealerHand.cards[1];
-  if (dealerSecond && !dealerSecond.isFaceUp) {
-    dealerSecond.flipping = true;
-    dealerSecond.isFaceUp = true;
-    updateHandsUI();
-    setTimeout(() => {
-      dealerSecond.flipping = false;
-      updateHandsUI();
-    }, 520);
-    await new Promise(r => setTimeout(r, 600));
-  } else {
-    game.dealerHand.cards.forEach(card => { card.isFaceUp = true; });
-    updateHandsUI();
-  }
+  // Flip all dealer cards
+  game.dealerHand.cards.forEach(card => { card.isFaceUp = true; });
+  updateHandsUI();
 
   await dealerPlayOut();
 
@@ -689,9 +640,8 @@ async function settleAndEndRound() {
     showStatusToast("Place your bets for the next round!");
     showInPlayButtons(false);
     updateActionBarState();
-    lockUI(false);
     outcomeLock = false;
-  }, 1700 + results.length * 700);
+  }, 1500 + results.length * 700);
 }
 
 function showEndButtons() {
