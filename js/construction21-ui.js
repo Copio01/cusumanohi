@@ -204,6 +204,7 @@ async function dealOpeningCards() {
   await animateDealCard(game.dealerHand, true, true, 0);
   await animateDealCard(game.playerHands[0], true, false, 1);
   await animateDealCard(game.dealerHand, false, true, 1);
+  updateActionBarState(); // <-- ENSURE action bar is updated after opening deal!
 }
 
 // --- Event handlers and UI logic ---
@@ -558,7 +559,7 @@ async function startRound() {
   updateHandsUI(); updateActionBarState(); updateChipsDisplay(); updateBetsUI();
   hideEndButtons();
 
-  await dealOpeningCards();
+  await dealOpeningCards(); // <-- Updates action bar state after initial deal!
 
   if (canBuyInsurance()) {
     showStatusToast("Insurance available: Dealer shows Ace.");
