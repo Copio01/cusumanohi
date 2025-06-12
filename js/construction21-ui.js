@@ -28,8 +28,14 @@ let betSpots = {
   pp: document.getElementById('pp-bet-spot'),
   plus3: document.getElementById('plus3-bet-spot'),
 };
+const virtualDeckEl = document.getElementById('virtual-deck');
 
-// --- Helper: current hand utilities ---
+function getVirtualDeckPos() {
+  const rect = virtualDeckEl.getBoundingClientRect();
+  return { left: rect.left + rect.width / 2, top: rect.top + rect.height / 2 };
+}
+
+// --- Hand utilities ---
 function canSplitCurrentHand() {
   const hand = game.getActiveHand();
   return (
@@ -50,7 +56,6 @@ function canDoubleCurrentHand() {
   );
 }
 function canBuyInsurance() {
-  // Only on the first decision, after deal, if dealer upcard is Ace and insurance not already placed
   return (
     inPlay &&
     game.dealerHand.cards.length &&
@@ -69,7 +74,6 @@ function canHitCurrentHand() {
   );
 }
 function isAllHandsDone() {
-  // All hands finished: either bust, stood, or doubled
   return (
     game.activeHandIndex >= game.playerHands.length ||
     !inPlay
@@ -88,10 +92,11 @@ function setupEventHandlers() {
   });
 
   Object.entries(betSpots).forEach(([type, spot]) => {
-    spot.addEventListener('click', () => {
+    spot.addEventListener('click', (ev) => {
       if (inPlay) return;
       if (!selectedChip) return;
       if (game.canPlaceBet(selectedChip)) {
+        animateChipToBetSpot(type, selectedChip, spot, getBetStackCount(type));
         game.placeBet(type === 'plus3' ? 'plus3' : type, selectedChip);
         updateBetsUI();
         showStatusToast(`Bet ${selectedChip} placed on ${type === 'main' ? 'Main' : type === 'pp' ? 'P / P' : '21+3'}`);
@@ -102,7 +107,6 @@ function setupEventHandlers() {
   });
 
   dealBtn.addEventListener('click', () => { if (!inPlay) startRound(); });
-
   hitBtn.addEventListener('click', () => handlePlayerAction('hit'));
   standBtn.addEventListener('click', () => handlePlayerAction('stand'));
   doubleBtn.addEventListener('click', () => handlePlayerAction('double'));
@@ -111,11 +115,94 @@ function setupEventHandlers() {
   if (clearBetsBtn) clearBetsBtn.addEventListener('click', () => { if (!inPlay) { game.clearBets(); updateBetsUI(); showStatusToast('Bets cleared!'); }});
 }
 
+// Returns stack count for chip visual stacking
+function getBetStackCount(type) {
+  if (type === 'main') return Math.floor(game.bets.main / (selectedChip || 1));
+  if (type === 'pp') return Math.floor(game.bets.pp / (selectedChip || 1));
+  if (type === 'plus3') return Math.floor(game.bets.plus3 / (selectedChip || 1));
+  return 0;
+}
+
+// --- Animate chips flying to bet spots and stacking ---
+function animateChipToBetSpot(type, amount, spot, stackCount) {
+  const chip = chipTray.querySelector(`.chip[data-amount="${amount}"]`);
+  if (!chip) return;
+  const clone = chip.cloneNode(true);
+  clone.classList.add('chip-flying');
+  document.body.appendChild(clone);
+
+  // Position calculations
+  const chipRect = chip.getBoundingClientRect();
+  const spotRect = spot.getBoundingClientRect();
+  clone.style.position = 'fixed';
+  clone.style.left = chipRect.left + chipRect.width / 2 - chip.offsetWidth / 2 + 'px';
+  clone.style.top = chipRect.top + chipRect.height / 2 - chip.offsetHeight / 2 + 'px';
+  clone.style.zIndex = 9999;
+  clone.style.pointerEvents = 'none';
+
+  void clone.offsetWidth;
+  const stackOffsetY = -stackCount * 8;
+  const x = spotRect.left + spotRect.width / 2 - (chipRect.left + chipRect.width / 2);
+  const y = spotRect.top + spotRect.height / 2 - (chipRect.top + chipRect.height / 2) + stackOffsetY;
+  clone.style.transition = 'transform 0.45s cubic-bezier(.68,-0.55,.27,1.55), opacity 0.5s';
+  clone.style.transform = `translate(${x}px, ${y}px) scale(1.3)`;
+  clone.style.opacity = 0.95;
+
+  setTimeout(() => {
+    clone.remove();
+    spot.classList.add('bet-pulse');
+    setTimeout(() => spot.classList.remove('bet-pulse'), 300);
+  }, 460);
+}
+
 // --- UI update functions ---
 function updateBetsUI() {
   mainBetAmountEl.textContent = game.bets.main;
   ppBetAmountEl.textContent = game.bets.pp;
   plus3BetAmountEl.textContent = game.bets.plus3;
+  updateBetChipsVisual();
+}
+
+// --- Stacked Chips on Bet Spots ---
+function updateBetChipsVisual() {
+  Object.values(betSpots).forEach(spot => {
+    const toRemove = spot.querySelectorAll('.bet-visual-chip');
+    toRemove.forEach(n => n.remove());
+    let chipContainer = spot.querySelector('.bet-spot-chips');
+    if (!chipContainer) {
+      chipContainer = document.createElement('div');
+      chipContainer.className = 'bet-spot-chips';
+      spot.appendChild(chipContainer);
+    }
+    chipContainer.innerHTML = '';
+  });
+  [
+    { type: 'main', spot: betSpots.main, bet: game.bets.main },
+    { type: 'pp', spot: betSpots.pp, bet: game.bets.pp },
+    { type: 'plus3', spot: betSpots.plus3, bet: game.bets.plus3 }
+  ].forEach(({type, spot, bet}) => {
+    let chipVals = [100, 25, 10, 5];
+    let chips = [];
+    let amt = bet;
+    for (let v of chipVals) {
+      let count = Math.floor(amt / v);
+      amt -= count * v;
+      for (let i = 0; i < count; i++) chips.push(v);
+    }
+    let chipContainer = spot.querySelector('.bet-spot-chips');
+    chips.forEach((v, i) => {
+      const chipDiv = document.createElement('div');
+      chipDiv.className = `chip bet-visual-chip`;
+      chipDiv.dataset.amount = v;
+      chipDiv.style.position = 'absolute';
+      chipDiv.style.left = `${48 + (i % 3) * 8}px`;
+      chipDiv.style.top = `${52 - i * 10}px`;
+      chipDiv.style.zIndex = 200 + i;
+      chipDiv.innerHTML = `<span class="chip-value">${v}</span>`;
+      chipContainer.appendChild(chipDiv);
+    });
+    spot.style.position = 'relative';
+  });
 }
 
 function showStatusToast(msg, isError = false) {
@@ -150,44 +237,108 @@ function showInPlayButtons(show) {
   clearBetsBtn.style.display = show ? 'none' : '';
 }
 
-// --- Core hand and card rendering, with multi-hand support ---
+// --- Render cards for dealer and player hands, with animation and fanning ---
 function updateHandsUI() {
-  // Dealer hand
+  // --- Dealer cards ---
   dealerCardsEl.innerHTML = '';
+  const dealerHandRect = dealerCardsEl.getBoundingClientRect();
+  const virtualDeck = getVirtualDeckPos();
+
   game.dealerHand.cards.forEach((card, idx) => {
     const cardEl = document.createElement('div');
     cardEl.className = 'card';
     cardEl.innerHTML = card.isFaceUp ? `${card.value}${card.suit}` : `<span style="font-size:1.3em;">🂠</span>`;
+    cardEl.style.position = 'absolute';
     dealerCardsEl.appendChild(cardEl);
+
+    cardEl.style.opacity = 0;
+    cardEl.style.left = `${virtualDeck.left - dealerHandRect.left}px`;
+    cardEl.style.top = `${virtualDeck.top - dealerHandRect.top}px`;
+
+    setTimeout(() => {
+      cardEl.classList.add('card-deal-animate');
+      cardEl.style.left = `${idx * 34}px`;
+      cardEl.style.top = `0px`;
+      cardEl.style.opacity = 1;
+    }, 40 + idx * 210);
+
+    setTimeout(() => {
+      cardEl.style.position = '';
+      cardEl.style.left = '';
+      cardEl.style.top = '';
+      cardEl.classList.remove('card-deal-animate');
+      cardEl.style.opacity = '';
+    }, 340 + idx * 210);
   });
 
-  // Player hands (show all, highlight active)
+  // --- Player hands ---
   playerHandsEl.innerHTML = '';
-  game.playerHands.forEach((hand, idx) => {
+  game.playerHands.forEach((hand, hIdx) => {
     const handDiv = document.createElement('div');
     handDiv.className = 'player-hand';
-    if (idx === game.activeHandIndex && inPlay) handDiv.classList.add('active-hand');
-    hand.cards.forEach(card => {
+    if (hIdx === game.activeHandIndex && inPlay) handDiv.classList.add('active-hand');
+    handDiv.style.display = 'inline-block';
+    handDiv.style.margin = '0 16px';
+
+    // Fan the cards in a .hand-cards flexbox
+    const handCardsDiv = document.createElement('div');
+    handCardsDiv.className = 'hand-cards';
+    const n = hand.cards.length;
+    const fanGap = Math.min(38, 180 / n);
+
+    hand.cards.forEach((card, idx) => {
       const cardDiv = document.createElement('div');
       cardDiv.className = 'card';
       cardDiv.innerHTML = `${card.value}${card.suit}`;
-      handDiv.appendChild(cardDiv);
+      cardDiv.style.transform = `translateX(${fanGap * (idx - (n - 1) / 2)}px) rotate(${(idx - (n - 1) / 2) * 7}deg)`;
+      cardDiv.style.zIndex = 10 + idx;
+
+      // Animate deal from virtual deck
+      cardDiv.style.position = 'absolute';
+      const handRect = playerHandsEl.getBoundingClientRect();
+      const deckPos = getVirtualDeckPos();
+      cardDiv.style.opacity = 0;
+      cardDiv.style.left = `${deckPos.left - handRect.left}px`;
+      cardDiv.style.top = `${deckPos.top - handRect.top}px`;
+
+      setTimeout(() => {
+        cardDiv.classList.add('card-deal-animate');
+        cardDiv.style.left = `${fanGap * (idx - (n - 1) / 2) + 36}px`;
+        cardDiv.style.top = `0px`;
+        cardDiv.style.opacity = 1;
+      }, 60 + (hIdx * 2 + idx) * 180);
+
+      setTimeout(() => {
+        cardDiv.style.position = '';
+        cardDiv.style.left = '';
+        cardDiv.style.top = '';
+        cardDiv.classList.remove('card-deal-animate');
+        cardDiv.style.opacity = '';
+        handCardsDiv.appendChild(cardDiv);
+      }, 340 + (hIdx * 2 + idx) * 180);
     });
+
+    handDiv.appendChild(handCardsDiv);
+
+    // Hand info
     let tagStr = `<span>Bet: ${hand.bet}</span> <span>Score: ${game.calculateScore(hand.cards)}</span>`;
     if (hand.isSplit) tagStr += ' <span class="side-bet-label">Split</span>';
     if (hand.isDoubled) tagStr += ' <span class="side-bet-label">Double</span>';
-    handDiv.innerHTML += `<div class="hand-info">${tagStr}</div>`;
+    const handInfo = document.createElement('div');
+    handInfo.className = 'hand-info';
+    handInfo.innerHTML = tagStr;
+    handDiv.appendChild(handInfo);
+
     playerHandsEl.appendChild(handDiv);
   });
 
-  // Show insurance indicator if bought
+  // Insurance, side bet indicators
   if (game.bets.insurance > 0 && inPlay) {
     let ins = document.createElement('div');
     ins.className = 'insurance-label';
     ins.textContent = `Insurance bet: ${game.bets.insurance}`;
     playerHandsEl.appendChild(ins);
   }
-  // Show side bet indicators if placed
   if (game.bets.pp > 0 && !inPlay) {
     let label = document.createElement('div');
     label.className = 'side-bet-label';
@@ -233,7 +384,7 @@ function startRound() {
 
   for (let i = 0; i < 2; i++) {
     game.dealCard(game.playerHands[0], true);
-    game.dealCard(game.dealerHand, i === 0); // Only first dealer card face up
+    game.dealCard(game.dealerHand, i === 0);
   }
   updateHandsUI(); updateActionBarState(); updateChipsDisplay(); updateBetsUI();
 
@@ -252,6 +403,7 @@ function handlePlayerAction(action) {
 
   if (action === 'hit') {
     game.dealCard(hand, true);
+    updateHandsUI();
     if (game.isBust(hand.cards)) {
       showStatusToast("Bust!");
       nextHandOrSettle();
@@ -263,6 +415,7 @@ function handlePlayerAction(action) {
   } else if (action === 'double') {
     if (canDoubleCurrentHand() && game.doubleDown()) {
       showStatusToast("Bet doubled, one card only.");
+      updateHandsUI();
       if (game.isBust(hand.cards)) {
         showStatusToast("Bust!");
       }
@@ -272,6 +425,7 @@ function handlePlayerAction(action) {
     }
   } else if (action === 'split') {
     if (canSplitCurrentHand() && game.splitHand()) {
+      animateSplitCardMove();
       showStatusToast("Hand split.");
       updateHandsUI();
       updateActionBarState();
@@ -280,7 +434,6 @@ function handlePlayerAction(action) {
       showStatusToast("Cannot split!", true);
     }
   } else if (action === 'insurance') {
-    // Insurance is always up to half main bet
     let insuranceAmt = Math.ceil(game.bets.main / 2);
     if (canBuyInsurance() && game.placeInsurance(insuranceAmt)) {
       showStatusToast("Insurance bought.");
@@ -296,8 +449,35 @@ function handlePlayerAction(action) {
   }
 }
 
+function animateSplitCardMove() {
+  const handEls = playerHandsEl.querySelectorAll('.player-hand');
+  if (handEls.length < 2) return;
+  const fromHand = handEls[game.activeHandIndex];
+  const toHand = handEls[game.activeHandIndex + 1];
+  const fromCard = fromHand.querySelector('.card:last-child');
+  if (!fromCard || !toHand) return;
+
+  const cardRect = fromCard.getBoundingClientRect();
+  const toRect = toHand.getBoundingClientRect();
+  const clone = fromCard.cloneNode(true);
+  clone.classList.add('card-fly');
+  document.body.appendChild(clone);
+
+  clone.style.position = 'fixed';
+  clone.style.left = cardRect.left + 'px';
+  clone.style.top = cardRect.top + 'px';
+  clone.style.zIndex = 10000;
+  void clone.offsetWidth;
+
+  const x = toRect.left - cardRect.left + 44;
+  const y = toRect.top - cardRect.top + 4;
+  clone.style.transition = 'transform 0.32s cubic-bezier(.68,-0.55,.27,1.55)';
+  clone.style.transform = `translate(${x}px, ${y}px) scale(1.08)`;
+
+  setTimeout(() => clone.remove(), 350);
+}
+
 function nextHandOrSettle() {
-  // Advance to next hand, or finish if done
   game.activeHandIndex += 1;
   if (game.activeHandIndex >= game.playerHands.length) {
     settleAndEndRound();
@@ -309,11 +489,10 @@ function nextHandOrSettle() {
 }
 
 function settleAndEndRound() {
-  inPlay = false; outcomeLock = true; 
+  inPlay = false; outcomeLock = true;
   const results = game.settleHands();
   updateChipsDisplay(); updateBetsUI(); updateHandsUI();
 
-  // Show result toasts
   results.forEach((res, idx) => {
     setTimeout(() => {
       let txt;
@@ -326,9 +505,8 @@ function settleAndEndRound() {
     }, 900 + idx * 700);
   });
 
-  // Insurance payout
   setTimeout(() => {
-    if (game.bets.insurance === 0) return; // Insurance always cleared after settlement
+    if (game.bets.insurance === 0) return;
     if (game.isBlackjack(game.dealerHand.cards)) {
       showStatusToast("Insurance paid!");
     } else {
