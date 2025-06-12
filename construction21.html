@@ -1560,6 +1560,7 @@
             await dealCard(hand, playerCardArea, false);
         }
         async function dealCardToDealer(isFaceUp) {            const dealerCardArea = dealerCardsEl;
+           
             await dealCard(dealerHand, dealerCardArea, isFaceUp);
         }
         
@@ -1969,6 +1970,12 @@
                     showUserProfile();
                 });
             }
+            
+            // Add direct event listeners to chips as a fallback
+            const chipButtons = document.querySelectorAll('.chip.pickupable');
+            chipButtons.forEach(chip => {
+                chip.addEventListener('click', handleChipClick);
+            });
         }        document.addEventListener('DOMContentLoaded', () => {
             initializeFirebase();
             setupEventListeners();
