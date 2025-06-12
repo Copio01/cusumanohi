@@ -23,26 +23,6 @@
     .bg-shape3 { width: 140px; height: 140px; background: #202020; left: 43vw; bottom: 6vh; animation-delay: 3.5s; }
     @keyframes floatBg { 0% { transform: translateY(0) scale(1);} 100% { transform: translateY(-32px) scale(1.06);} }
 
-    .branding-bar {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 18px;
-      margin-bottom: 0.7rem;
-    }
-    .branding-logo {
-      background: #ffd700;
-      border-radius: 11px;
-      padding: 3px 11px 1px 8px;
-      box-shadow: 0 2px 8px #0005;
-      font-size: 2rem;
-      font-weight: bold;
-      color: #23232b;
-      letter-spacing: -2px;
-      display: flex; align-items: center; gap: 5px;
-    }
-    .branding-txt { font-size: 1.09rem; color: #ffe48b; font-weight: 700; letter-spacing: 0.12em; }
-
     .login-container {
       background: rgba(36,36,36,0.97);
       backdrop-filter: blur(13px);
@@ -136,13 +116,30 @@
       transition: all 0.18s; z-index: 11;
     }
     .back-to-home:hover { background: #ffd700; color: #23232b; }
+    .watermark-howard {
+      position: fixed;
+      bottom: 17px;
+      right: 24px;
+      font-size: 1.03rem;
+      color: #fff;
+      text-shadow:
+        0 0 7px #fff,
+        0 0 14px #fff,
+        0 0 24px #fff,
+        0 0 28px #fff9;
+      opacity: 0.84;
+      letter-spacing: 0.05em;
+      z-index: 33333;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      pointer-events: none;
+      user-select: none;
+    }
     @media (max-width: 650px) {
       .login-container { padding: 0.85rem 0.5rem; margin: 0 2px; }
-      .branding-logo { font-size: 1.3rem; }
       .game-title { font-size: 1.11rem; }
-      .branding-bar { gap: 8px; }
       .barrier-tape { top: -13px; height: 16px; }
       .back-to-home { font-size: .89rem; padding: 3px 8px; top: 2px; left: 2px;}
+      .watermark-howard { right: 8px; bottom: 7px; font-size: .95rem; }
     }
   </style>
 </head>
@@ -155,13 +152,7 @@
   <a href="Games.html" class="back-to-home">← Back to Games</a>
   <div class="login-container">
     <div class="barrier-tape"></div>
-    <div class="branding-bar">
-      <span class="branding-logo">
-        <img src="https://cusumanohi.com/wp-content/uploads/2022/04/cropped-CusumanoH-Ico-1-32x32.png" width="28" height="28" style="vertical-align:middle;margin-right:4px;">
-        <span style="letter-spacing:0.01em">CUSUMANO H&I</span>
-      </span>
-      <span class="branding-txt">Blackjack by Cusumano</span>
-    </div>
+    <div style="height:20px;"></div>
     <div class="game-title">
       <span>Construction 21</span>
       <span class="helmet" aria-label="construction helmet">⛑️</span>
@@ -223,11 +214,11 @@
       </form>
     </div>
   </div>
+  <div class="watermark-howard">howard powered</div>
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-app.js";
     import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-auth.js";
     import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-firestore.js";
-
     const firebaseConfig = {
       apiKey: "AIzaSyBVtq6dAEuybJNmTTv8dXBxTVUgw1t0ZMk",
       authDomain: "cusumano-website.firebaseapp.com",
