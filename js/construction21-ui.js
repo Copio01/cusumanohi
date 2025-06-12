@@ -653,7 +653,11 @@ function animateSplitCardMove() {
 function nextHandOrSettle() {
   game.activeHandIndex += 1;
   if (game.activeHandIndex >= game.playerHands.length) {
-    settleAndEndRound();
+    // Only settle if not already started!
+    if (!outcomeLock && inPlay) {
+      inPlay = false; // No further player actions allowed
+      settleAndEndRound();
+    }
   } else {
     updateHandsUI();
     updateActionBarState();
@@ -661,25 +665,15 @@ function nextHandOrSettle() {
   }
 }
 
-// Dealer logic: Stand on all 17s (including soft 17), hit below 17
-async function dealerPlayOut() {
-  let dealerScore = game.calculateScore(game.dealerHand.cards);
-  while (dealerScore < 17) {
-    await delay(700);
-    game.dealCard(game.dealerHand, true);
-    updateHandsUI();
-    dealerScore = game.calculateScore(game.dealerHand.cards);
-  }
-}
-
 async function settleAndEndRound() {
-  // Reveal dealer cards
+  outcomeLock = true; // Prevent multiple triggers
+
+  // Reveal all dealer cards before play out
   game.dealerHand.cards.forEach(card => { card.isFaceUp = true; });
   updateHandsUI();
 
   await dealerPlayOut();
 
-  inPlay = false; outcomeLock = true;
   const results = game.settleHands();
   updateChipsDisplay();
   saveChipsToFirebase();
