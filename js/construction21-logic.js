@@ -1,39 +1,64 @@
+// construction21-logic.js
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-app.js";
+import {
+    getFirestore, doc, getDoc, setDoc, runTransaction
+} from "https://www.gstatic.com/firebasejs/11.9.0/firebase-firestore.js";
+
+// Only initialize Firebase once (safe to run multiple times in modules)
+const firebaseConfig = {
+    apiKey: "AIzaSyBVtq6dAEuybJNmTTv8dXBxTVUgw1t0ZMk",
+    authDomain: "cusumano-website.firebaseapp.com",
+    projectId: "cusumano-website",
+    storageBucket: "cusumano-website.appspot.com",
+    messagingSenderId: "20051552210",
+    appId: "1:20051552210:web:7eb3b22baa3fec184e4a0b"
+};
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
 export class Construction21Game {
     constructor(userId) {
         this.suits = ['♥', '♦', '♠', '♣'];
         this.values = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
         this.PERFECT_PAIRS_PAYOUTS = { perfect: 25, colored: 12, mixed: 6 };
         this.TWENTY_ONE_PLUS_THREE_PAYOUTS = { suitedTrips: 100, straightFlush: 40, threeOfAKind: 30, straight: 10, flush: 5 };
-        this.userId = userId || null; // Set when you have auth user
-        this.db = getFirestore();
+        this.userId = userId || null;
+        this.db = db;
         this.resetGame(100);
     }
 
+    // ---- CHIP STORAGE ----
+
     async loadChipsFromFirebase() {
         if (!this.userId) return;
-        const userDoc = doc(this.db, "construction21_users", this.userId);
-        const docSnap = await getDoc(userDoc);
+        const userDocRef = doc(this.db, "construction21_users", this.userId);
+        const docSnap = await getDoc(userDocRef);
         if (docSnap.exists()) {
             this.chips = docSnap.data().chips || 100;
         } else {
             this.chips = 100;
-            await setDoc(userDoc, { chips: this.chips });
+            await setDoc(userDocRef, { chips: this.chips });
         }
     }
 
     async saveChipsToFirebase() {
         if (!this.userId) return;
-        const userDoc = doc(this.db, "construction21_users", this.userId);
-        await runTransaction(this.db, async (transaction) => {
-            const docSnap = await transaction.get(userDoc);
-            if (!docSnap.exists()) throw "User doc missing!";
-            transaction.update(userDoc, { chips: this.chips });
-        }).catch(async (e) => {
-            await setDoc(userDoc, { chips: this.chips });
-        });
+        const userDocRef = doc(this.db, "construction21_users", this.userId);
+        try {
+            await runTransaction(this.db, async (transaction) => {
+                const docSnap = await transaction.get(userDocRef);
+                if (!docSnap.exists()) throw "User doc missing!";
+                transaction.update(userDocRef, { chips: this.chips });
+            });
+        } catch (e) {
+            // If transaction fails, set directly (should not happen unless brand new)
+            await setDoc(userDocRef, { chips: this.chips }, { merge: true });
+        }
     }
 
-    // Reset game state (but doesn't auto-load from Firebase)
+    // ---- GAME LOGIC ----
+
     resetGame(startingChips = 100) {
         this.deck = [];
         this.dealerHand = { cards: [], score: 0, isBlackjack: false };
@@ -41,7 +66,6 @@ export class Construction21Game {
         this.activeHandIndex = 0;
         this.chips = startingChips;
         this.bets = { main: 0, pp: 0, plus3: 0, insurance: 0 };
-        // do not auto-save here; only save on user interaction!
     }
 
     createDeck() {
@@ -89,12 +113,14 @@ export class Construction21Game {
     canPlaceBet(amount) {
         return this.chips >= amount;
     }
+
     placeBet(type, amount) {
         if (!this.canPlaceBet(amount)) return false;
         this.chips -= amount;
         this.bets[type] += amount;
         return true;
     }
+
     clearBets() {
         this.chips += this.bets.main + this.bets.pp + this.bets.plus3 + (this.bets.insurance || 0);
         this.bets = { main: 0, pp: 0, plus3: 0, insurance: 0 };
@@ -107,6 +133,7 @@ export class Construction21Game {
         if (isRed(card1.suit) === isRed(card2.suit)) return { type: 'Colored Pair', payout: this.PERFECT_PAIRS_PAYOUTS.colored };
         return { type: 'Mixed Pair', payout: this.PERFECT_PAIRS_PAYOUTS.mixed };
     }
+
     check21Plus3(cards) {
         const cardToRank = c => c.value === 'A' ? 1 : (['J','Q','K'].includes(c.value) ? {J:11,Q:12,K:13}[c.value] : parseInt(c.value));
         let ranks = cards.map(cardToRank).sort((a,b)=>a-b);
@@ -132,7 +159,6 @@ export class Construction21Game {
 
     shouldDealerHit() {
         const dealerScore = this.calculateScore(this.dealerHand.cards);
-        // Dealer stands on all 17 by default, but allow soft 17 override
         if (dealerScore < 17) return true;
         if (
             dealerScore === 17 &&
