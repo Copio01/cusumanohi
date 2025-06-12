@@ -1785,11 +1785,11 @@
                 sideBetResultsEl.innerHTML = resultsHTML;
                 sideBetResultsEl.classList.remove('hidden');
             }
-            
-            updateGlobalChipDisplay();
+              updateGlobalChipDisplay();
             if (currentUser && currentUser.uid && sideBetWinnings > 0) {
                 updatePlayerChipsInFirestore(currentUser.uid, playerChips);
-            }        }
+            }
+        }
 
         // --- Event Listeners Setup ---
         function setupEventListeners() {
@@ -1854,8 +1854,7 @@
                     updateBetAmountDisplays();
                 });
             }
-            
-            if (returnMenuBtn) {
+              if (returnMenuBtn) {
                 returnMenuBtn.addEventListener('click', () => {
                     gameResultScreen.classList.add('hidden');
                     gameResultScreen.classList.remove('active');
