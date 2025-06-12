@@ -21,7 +21,6 @@ const profileChipsEl = document.getElementById('profile-chips');
 const centerChipsAmountEl = document.getElementById('center-chips-amount');
 const profileNameEl = document.getElementById('profile-name');
 const clearBetsBtn = document.getElementById('clear-bets-btn');
-
 const newBetBtn = document.getElementById('new-bet-btn');
 const rebetBtn = document.getElementById('rebet-btn');
 const doubleBetBtn = document.getElementById('double-bet-btn');
@@ -34,12 +33,12 @@ let betSpots = {
 };
 const virtualDeckEl = document.getElementById('virtual-deck');
 
+// ----------------- Utility functions -----------------
 function getVirtualDeckPos() {
   const rect = virtualDeckEl.getBoundingClientRect();
   return { left: rect.left + rect.width / 2, top: rect.top + rect.height / 2 };
 }
 
-// Card rendering: suit symbol and colored value
 function renderCard(card) {
   if (!card.isFaceUp && !card.flipping) {
     return `<span style="font-size:1.6em;">🂠</span>`;
@@ -107,6 +106,18 @@ function isAllHandsDone() {
   );
 }
 
+// --- Reset UI and State for new round ---
+function resetAllHandsAndUI() {
+  game.dealerHand = { cards: [], score: 0, isBlackjack: false, hasInsurance: false };
+  game.playerHands = [];
+  game.activeHandIndex = 0;
+  inPlay = false;
+  outcomeLock = false;
+  resultsCache = null;
+  if (dealerCardsEl) dealerCardsEl.innerHTML = '';
+  if (playerHandsEl) playerHandsEl.innerHTML = '';
+}
+
 // --- Event handlers and UI logic ---
 function setupEventHandlers() {
   chipTray.querySelectorAll('.chip').forEach(chip => {
@@ -144,6 +155,7 @@ function setupEventHandlers() {
   // End-of-round buttons:
   newBetBtn.addEventListener('click', () => {
     hideEndButtons();
+    resetAllHandsAndUI();
     game.clearBets();
     updateBetsUI();
     updateChipsDisplay();
@@ -154,6 +166,7 @@ function setupEventHandlers() {
   rebetBtn.addEventListener('click', () => {
     hideEndButtons();
     if (lastBets) {
+      resetAllHandsAndUI();
       game.clearBets();
       Object.keys(lastBets).forEach(k => { if (lastBets[k] > 0) game.bets[k] = lastBets[k]; });
       updateBetsUI();
@@ -172,6 +185,7 @@ function setupEventHandlers() {
         showEndButtons();
         return;
       }
+      resetAllHandsAndUI();
       game.clearBets();
       Object.keys(lastBets).forEach(k => {
         if (lastBets[k] > 0) game.bets[k] = lastBets[k] * 2;
@@ -443,6 +457,7 @@ function startRound() {
     showStatusToast('Place a main bet to start!', true);
     return;
   }
+  resetAllHandsAndUI(); // Always clean start!
   inPlay = true; outcomeLock = false; resultsCache = null;
   showInPlayButtons(true); enableDealAndClear(false);
 
@@ -561,9 +576,28 @@ function nextHandOrSettle() {
   }
 }
 
-function settleAndEndRound() {
-  // Flip only the dealer's cards
+// Dealer plays out per blackjack rules (dealer stands on all 17s, hits below 17)
+// Async for animation/UX smoothness
+async function dealerPlayOut() {
+  while (
+    game.calculateScore(game.dealerHand.cards) < 17 ||
+    (game.calculateScore(game.dealerHand.cards) === 17 &&
+      game.isSoft17 && typeof game.isSoft17 === 'function' &&
+      game.isSoft17(game.dealerHand.cards) &&
+      !game.dealerStandsOnSoft17)
+  ) {
+    await new Promise(r => setTimeout(r, 550));
+    game.dealCard(game.dealerHand, true);
+    updateHandsUI();
+  }
+}
+
+async function settleAndEndRound() {
+  // Flip all dealer cards
   game.dealerHand.cards.forEach(card => { card.isFaceUp = true; });
+  updateHandsUI();
+
+  await dealerPlayOut();
 
   inPlay = false; outcomeLock = true;
   const results = game.settleHands();
@@ -615,7 +649,7 @@ document.addEventListener('DOMContentLoaded', () => {
   setupEventHandlers();
   updateBetsUI();
   updateChipsDisplay();
-  updateHandsUI();
+  resetAllHandsAndUI();
   updateActionBarState();
   showInPlayButtons(false);
   hideEndButtons();
