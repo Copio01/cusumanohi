@@ -93,6 +93,24 @@ body.modern-bg {
   transform: translateY(-5px) scale(1.07);
   box-shadow: 0 8px 16px rgba(0,0,0,0.4), 0 0 15px rgba(255,215,0,0.5), inset 0 0 10px rgba(0,0,0,0.3);
 }
+/* Sparkle / shine effect on chips */
+.chip::after {
+  content: "";
+  position: absolute;
+  width: 60%; height: 26%;
+  left: 20%; top: 8%;
+  background: linear-gradient(90deg, #fff7 50%, transparent 90%);
+  border-radius: 60% 60% 80% 80%/90% 90% 40% 40%;
+  opacity: 0.75;
+  pointer-events: none;
+  filter: blur(1.2px);
+  transition: opacity 0.2s, filter 0.2s;
+}
+.chip.selected::after, .chip:hover::after {
+  opacity: 1;
+  filter: blur(0.7px) brightness(1.13);
+}
+
 .chip-row {
   display: flex;
   flex-direction: row;
@@ -131,6 +149,7 @@ body.modern-bg {
   aspect-ratio: 2.5/1;
   margin: 0 auto 1.5rem auto;
   background:
+    repeating-linear-gradient(135deg, #385f38 0 3px, #305730 3px 7px), /* felt */
     radial-gradient(ellipse at 60% 40%, #3a7d3a 0%, #1a4a1a 100%),
     linear-gradient(135deg, #1a2d1a 0%, #2d3a2d 100%);
   border-radius: 48% 48% 60% 60%/60% 60% 100% 100%;
@@ -148,6 +167,25 @@ body.modern-bg {
   justify-content: flex-end;
   align-items: center;
   min-height: 520px;
+}
+/* Table "mat" lighting effect for dealer and player area */
+.table-area-dealer {
+  position: absolute;
+  top: 2.5%; left: 50%; transform: translateX(-50%);
+  width: 420px; height: 180px;
+  background: radial-gradient(ellipse at 50% 45%, #ffd70022 0, transparent 70%);
+  z-index: 1; pointer-events: none;
+  border-radius: 38% 38% 38% 38% / 58% 58% 38% 38%;
+  filter: blur(2.5px);
+}
+.table-area-player {
+  position: absolute;
+  bottom: 1.2%; left: 50%; transform: translateX(-50%);
+  width: 440px; height: 170px;
+  background: radial-gradient(ellipse at 50% 60%, #34c75922 0, transparent 80%);
+  z-index: 1; pointer-events: none;
+  border-radius: 40% 40% 44% 44% / 55% 55% 45% 45%;
+  filter: blur(3.2px);
 }
 #virtual-deck {
   position: absolute;
@@ -177,7 +215,9 @@ body.modern-bg {
   transform: translateX(-50%);
   width: 62%;
   height: 28px;
-  background: repeating-linear-gradient(135deg, #ffd700 0 14px, #23232b 14px 28px);
+  background: 
+    repeating-linear-gradient(135deg, #ffd700 0 14px, #23232b 14px 28px),
+    linear-gradient(0deg, #ffd70011 0%, transparent 100%);
   border-radius: 0 0 48% 48%/0 0 100% 100%;
   opacity: 0.8;
   z-index: 4;
@@ -328,6 +368,17 @@ body.modern-bg {
   min-width: 160px;
   vertical-align: top;
   margin: 0 16px;
+  transition: box-shadow 0.25s, border 0.2s, filter 0.22s, opacity 0.15s;
+}
+.player-hand.active-hand {
+  box-shadow: 0 0 28px 6px #ffd70088, 0 2px 24px #ffd70055;
+  border: 2.5px solid #ffd700ee;
+  filter: brightness(1.06) drop-shadow(0 0 16px #ffd70066);
+  opacity: 1;
+}
+.player-hand:not(.active-hand) {
+  opacity: 0.89;
+  filter: grayscale(0.06) brightness(0.95);
 }
 .hand-cards {
   display: flex;
@@ -336,11 +387,15 @@ body.modern-bg {
   min-width: 140px;
   z-index: 1;
 }
-.active-hand {
-  border: 2.5px solid #ffd700cc;
-  box-shadow: 0 2px 24px #ffd70044;
-  border-radius: 12px;
+.hand-cards .card {
+  transition: transform 0.33s cubic-bezier(.68,-0.55,.27,1.55), box-shadow 0.22s;
+  animation: cardIn 0.36s cubic-bezier(.68,-0.55,.27,1.55) backwards;
 }
+@keyframes cardIn {
+  from { opacity: 0; transform: translateY(32px) scale(0.89);}
+  to   { opacity: 1; transform: none;}
+}
+
 .card {
   width: 100px; height: 145px;
   background: linear-gradient(145deg, #fff, #f5f5f4);
@@ -378,6 +433,48 @@ body.modern-bg {
   box-shadow: 0 8px 32px #0008;
   pointer-events: none;
 }
+
+/* Result banners with animated flair by outcome */
+.result-banner {
+  opacity: 0;
+  transform: translateY(-28px) scale(0.9);
+  background: #222c;
+  color: #ffd700;
+  font-weight: bold;
+  padding: 8px 24px;
+  border-radius: 18px;
+  position: absolute;
+  left: 50%; top: -38px;
+  transform: translate(-50%, -28px) scale(0.9);
+  font-size: 1.1em;
+  pointer-events: none;
+  box-shadow: 0 6px 22px #ffd70033, 0 2px 6px #23232b66;
+  z-index: 10;
+  transition: opacity 0.45s cubic-bezier(.68,-0.55,.27,1.55), transform 0.45s cubic-bezier(.68,-0.55,.27,1.55);
+}
+.result-banner.show {
+  opacity: 1;
+  transform: translate(-50%, 0) scale(1.06);
+}
+.result-banner.win {
+  background: linear-gradient(90deg, #e2ff7a 60%, #ffd700 120%);
+  color: #23232b;
+  box-shadow: 0 2px 18px #34c75955, 0 4px 8px #ffd700aa;
+}
+.result-banner.bust {
+  background: linear-gradient(90deg, #c0392b99 0%, #ffd70011 100%);
+  color: #fff;
+  box-shadow: 0 2px 18px #c0392b77, 0 4px 8px #ffd70044;
+}
+.result-banner.push {
+  background: linear-gradient(90deg, #434343 80%, #ffd70022 120%);
+  color: #ffd700;
+}
+.result-banner.dealer_bj {
+  background: linear-gradient(90deg, #9254de 80%, #ffd70022 120%);
+  color: #fff;
+}
+
 #action-bar {
   background: rgba(36,36,28,0.92);
   box-shadow: 0 4px 16px #ffd70044;
@@ -425,6 +522,15 @@ body.modern-bg {
   60% { box-shadow: 0 0 0 16px #ffd70033; }
   100% { box-shadow: 0 0 0 0 #ffd70000; }
 }
+/* Accessibility - visually hidden text */
+.sr-only {
+  position: absolute;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip: rect(0,0,0,0);
+  border: 0;
+}
 @media (max-width: 900px) {
   #blackjack-table { max-width: 98vw; min-height: 260px; }
   #blackjack-table .table-logo { width: 220px; }
@@ -433,10 +539,13 @@ body.modern-bg {
   .card { width: 48px; height: 68px; }
   .chip { width: 48px; height: 48px; }
   .chip-row { gap: 0.8rem; }
+  .table-area-dealer { width: 220px; height: 92px; }
+  .table-area-player { width: 238px; height: 89px; }
 }
 @media (max-width: 500px) {
   .chip-row { flex-direction: row; justify-content: space-around; gap: 0.5rem; }
   .chip { width: 40px; height: 40px; font-size: 0.85em; }
+  .result-banner, #status-toast { font-size: 1em !important; padding: 6px 12px; }
 }
     </style>
 </head>
@@ -477,6 +586,8 @@ body.modern-bg {
 
     <!-- Blackjack Table -->
     <div id="blackjack-table">
+      <div class="table-area-dealer"></div>
+      <div class="table-area-player"></div>
       <div id="virtual-deck"></div>
       <div id="table-vignette"></div>
       <svg class="table-logo" viewBox="0 0 800 120" fill="none">
@@ -517,10 +628,10 @@ body.modern-bg {
     <!-- Chip Tray -->
     <div class="chip-tray-container">
       <div class="chip-row">
-        <button class="chip" data-amount="5"><span class="chip-value">5</span></button>
-        <button class="chip" data-amount="10"><span class="chip-value">10</span></button>
-        <button class="chip" data-amount="25"><span class="chip-value">25</span></button>
-        <button class="chip" data-amount="100"><span class="chip-value">100</span></button>
+        <button class="chip" data-amount="5"><span class="chip-value">5</span><span class="sr-only">Bet 5 chips</span></button>
+        <button class="chip" data-amount="10"><span class="chip-value">10</span><span class="sr-only">Bet 10 chips</span></button>
+        <button class="chip" data-amount="25"><span class="chip-value">25</span><span class="sr-only">Bet 25 chips</span></button>
+        <button class="chip" data-amount="100"><span class="chip-value">100</span><span class="sr-only">Bet 100 chips</span></button>
       </div>
     </div>
 
@@ -540,10 +651,10 @@ body.modern-bg {
         <button id="insurance-btn" class="btn-primary" style="display:none;">Insurance</button>
       </div>
       <div id="end-round-buttons" style="display:flex;gap:1.5em;justify-content:center;margin:16px 0;">
-  <button id="new-bet-btn" class="btn-primary" style="display:none;">New Bet</button>
-  <button id="rebet-btn" class="btn-primary" style="display:none;">Re-bet</button>
-  <button id="double-bet-btn" class="btn-primary" style="display:none;">2x Bet</button>
-</div>
+        <button id="new-bet-btn" class="btn-primary" style="display:none;">New Bet</button>
+        <button id="rebet-btn" class="btn-primary" style="display:none;">Re-bet</button>
+        <button id="double-bet-btn" class="btn-primary" style="display:none;">2x Bet</button>
+      </div>
     </div>
   </main>
 
