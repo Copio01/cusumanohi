@@ -1,0 +1,11 @@
+{
+  "name": "cusumanohi",
+  "version": "1.0.0",
+  "description": "Modern Construction 21 Blackjack web app with Tailwind CSS integration.",
+  "scripts": {
+    "build:css": "tailwindcss -i ./css/tailwind.css -o ./css/tailwind.output.css --minify"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.3.3"
+  }
+}
