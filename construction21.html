@@ -533,7 +533,7 @@
                     return;
                 }
                 
-                const userDocRef = doc(db, "game_users_custom_auth", user.uid);
+                const userDocRef = doc(db, "construction21_users", user.uid);
                 const userDoc = await getDoc(userDocRef);
                 
                 if (userDoc.exists()) {
@@ -541,6 +541,10 @@
                     currentUser = { uid: user.uid, displayName: userData.displayName, chips: userData.chips };
                     currentPlayerName = currentUser.displayName;
                     playerChips = currentUser.chips;
+                    
+                    // Update last login
+                    await setDoc(userDocRef, { lastLogin: new Date() }, { merge: true });
+                    
                     showUserProfile();
                     updateGlobalChipDisplay(); // Update chips on profile
                 } else {
@@ -589,16 +593,17 @@
                 // Force redirect even if signOut fails
                 window.location.href = 'construction21-login.html';
             }
-        }
-
-        async function updatePlayerChipsInFirestore(userId, newChipAmount) {
+        }        async function updatePlayerChipsInFirestore(userId, newChipAmount) {
             if (!userId) {
                 console.error("User ID not available for Firestore update.");
                 return;
             }
-            const userDocRef = doc(db, "game_users_custom_auth", userId);
+            const userDocRef = doc(db, "construction21_users", userId);
             try {
-                await updateDoc(userDocRef, { chips: newChipAmount });
+                await updateDoc(userDocRef, { 
+                    chips: newChipAmount,
+                    lastUpdated: new Date()
+                });
             } catch (error) {
                 console.error("Error updating chips in Firestore: ", error);
             }
@@ -1113,17 +1118,16 @@
 
             gameResultScreen.classList.remove('hidden');
             gameResultScreen.classList.add('active');
-        }
-
-        async function updateLeaderboard(playerName, chips) {
+        }        async function updateLeaderboard(playerName, chips) {
             if (!db || !currentUser) return;
             
             try {
-                const leaderboardRef = collection(db, "leaderboard");
+                const leaderboardRef = collection(db, "construction21_leaderboard");
                 await setDoc(doc(leaderboardRef, currentUser.uid), {
                     name: playerName,
                     chips: chips,
-                    timestamp: new Date()
+                    timestamp: new Date(),
+                    userId: currentUser.uid
                 });
             } catch (error) {
                 console.error("Error updating leaderboard:", error);

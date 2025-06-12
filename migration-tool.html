@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Firestore Data Migration Tool</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background: #f5f5f5; }
+        .container { max-width: 800px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .status { padding: 10px; margin: 10px 0; border-radius: 5px; }
+        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .warning { background: #fff3cd; color: #856404; border: 1px solid #ffeaa7; }
+        .info { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+        button { background: #007bff; color: white; border: none; padding: 12px 24px; border-radius: 5px; cursor: pointer; margin: 5px; }
+        button:hover { background: #0056b3; }
+        button:disabled { background: #ccc; cursor: not-allowed; }
+        pre { background: #f8f9fa; padding: 15px; border-radius: 5px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Construction 21 Database Migration Tool</h1>
+        <p>This tool helps migrate data from the old collection structure to the new Firebase Auth-based structure.</p>
+        
+        <div id="status-area"></div>
+        
+        <button id="checkDataBtn">Check Current Data</button>
+        <button id="migrateBtn" disabled>Migrate Data</button>
+        <button id="testConnectionBtn">Test Firebase Connection</button>
+        
+        <div id="data-display" style="margin-top: 20px;"></div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-app.js";
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-auth.js";
+        import { getFirestore, collection, getDocs, doc, setDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-firestore.js";
+
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBVtq6dAEuybJNmTTv8dXBxTVUgw1t0ZMk",
+            authDomain: "cusumano-website.firebaseapp.com",
+            projectId: "cusumano-website",
+            storageBucket: "cusumano-website.firebasestorage.app",
+            messagingSenderId: "20051552210",
+            appId: "1:20051552210:web:7eb3b22baa3fec184e4a0b"
+        };
+
+        let app, auth, db;
+        
+        function addStatus(message, type = 'info') {
+            const statusArea = document.getElementById('status-area');
+            const div = document.createElement('div');
+            div.className = `status ${type}`;
+            div.innerHTML = `<strong>[${new Date().toLocaleTimeString()}]</strong> ${message}`;
+            statusArea.appendChild(div);
+            statusArea.scrollTop = statusArea.scrollHeight;
+        }
+
+        async function initializeFirebase() {
+            try {
+                app = initializeApp(firebaseConfig);
+                auth = getAuth(app);
+                db = getFirestore(app);
+                
+                // Sign in anonymously for admin tasks
+                await signInAnonymously(auth);
+                
+                addStatus('Firebase initialized successfully', 'success');
+                return true;
+            } catch (error) {
+                addStatus(`Firebase initialization failed: ${error.message}`, 'error');
+                return false;
+            }
+        }
+
+        async function checkCurrentData() {
+            if (!db) {
+                addStatus('Firebase not initialized', 'error');
+                return;
+            }
+
+            try {
+                // Check old collection
+                const oldCollection = collection(db, 'game_users_custom_auth');
+                const oldSnapshot = await getDocs(oldCollection);
+                
+                addStatus(`Found ${oldSnapshot.size} documents in old collection 'game_users_custom_auth'`, oldSnapshot.size > 0 ? 'warning' : 'info');
+                
+                // Check new collection
+                const newCollection = collection(db, 'construction21_users');
+                const newSnapshot = await getDocs(newCollection);
+                
+                addStatus(`Found ${newSnapshot.size} documents in new collection 'construction21_users'`, 'info');
+                
+                // Display old data
+                if (oldSnapshot.size > 0) {
+                    const dataDisplay = document.getElementById('data-display');
+                    let html = '<h3>Data in old collection:</h3><pre>';
+                    oldSnapshot.forEach(doc => {
+                        html += `${doc.id}: ${JSON.stringify(doc.data(), null, 2)}\n\n`;
+                    });
+                    html += '</pre>';
+                    dataDisplay.innerHTML = html;
+                    
+                    document.getElementById('migrateBtn').disabled = false;
+                } else {
+                    addStatus('No data to migrate', 'info');
+                }
+                
+            } catch (error) {
+                addStatus(`Error checking data: ${error.message}`, 'error');
+            }
+        }
+
+        async function migrateData() {
+            if (!db) {
+                addStatus('Firebase not initialized', 'error');
+                return;
+            }
+
+            try {
+                const oldCollection = collection(db, 'game_users_custom_auth');
+                const oldSnapshot = await getDocs(oldCollection);
+                
+                if (oldSnapshot.empty) {
+                    addStatus('No data to migrate', 'warning');
+                    return;
+                }
+
+                let migrated = 0;
+                let errors = 0;
+
+                for (const oldDoc of oldSnapshot.docs) {
+                    try {
+                        const oldData = oldDoc.data();
+                        
+                        // Transform data for new structure
+                        const newData = {
+                            displayName: oldData.displayName || 'Player',
+                            chips: oldData.chips || 100,
+                            email: oldData.email || null,
+                            createdAt: oldData.createdAt || new Date(),
+                            lastLogin: new Date(),
+                            migratedFrom: 'game_users_custom_auth',
+                            migratedAt: new Date()
+                        };
+
+                        // Create document in new collection with same ID
+                        const newDocRef = doc(db, 'construction21_users', oldDoc.id);
+                        await setDoc(newDocRef, newData);
+                        
+                        migrated++;
+                        addStatus(`Migrated user: ${oldData.displayName || oldDoc.id}`, 'success');
+                        
+                    } catch (error) {
+                        errors++;
+                        addStatus(`Error migrating ${oldDoc.id}: ${error.message}`, 'error');
+                    }
+                }
+
+                addStatus(`Migration complete: ${migrated} successful, ${errors} errors`, migrated > 0 ? 'success' : 'warning');
+                
+                if (migrated > 0 && errors === 0) {
+                    addStatus('All data migrated successfully! You can now update your Firestore rules.', 'success');
+                }
+                
+            } catch (error) {
+                addStatus(`Migration failed: ${error.message}`, 'error');
+            }
+        }
+
+        // Event listeners
+        document.getElementById('testConnectionBtn').addEventListener('click', async () => {
+            addStatus('Testing Firebase connection...', 'info');
+            const success = await initializeFirebase();
+            if (success) {
+                addStatus('Firebase connection successful!', 'success');
+            }
+        });
+
+        document.getElementById('checkDataBtn').addEventListener('click', async () => {
+            if (!db) {
+                await initializeFirebase();
+            }
+            await checkCurrentData();
+        });
+
+        document.getElementById('migrateBtn').addEventListener('click', async () => {
+            if (confirm('Are you sure you want to migrate the data? This will copy data to the new collection structure.')) {
+                await migrateData();
+            }
+        });
+
+        // Initialize on load
+        addStatus('Migration tool loaded. Click "Test Firebase Connection" to begin.', 'info');
+    </script>
+</body>
+</html>

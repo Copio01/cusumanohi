@@ -384,7 +384,7 @@
                 if (user) {
                     // User is signed in, check if they have game data
                     try {
-                        const userDocRef = doc(db, "game_users_custom_auth", user.uid);
+                        const userDocRef = doc(db, "construction21_users", user.uid);
                         const userDoc = await getDoc(userDocRef);
                         
                         if (userDoc.exists()) {
@@ -395,7 +395,10 @@
                             // User exists but no game data, create it
                             await setDoc(userDocRef, {
                                 displayName: user.displayName || user.email?.split('@')[0] || 'Player',
-                                chips: 100
+                                chips: 100,
+                                email: user.email,
+                                createdAt: new Date(),
+                                lastLogin: new Date()
                             });
                             sessionStorage.setItem('loginSuccess', 'true');
                             window.location.href = 'construction21.html';
@@ -406,7 +409,7 @@
                     }
                 }
             });
-        }        // Login Handler with improved validation
+        }// Login Handler with improved validation
         loginBtn.addEventListener('click', async () => {
             const email = document.getElementById('login-email').value.trim();
             const password = document.getElementById('login-password').value;
@@ -472,13 +475,13 @@
             try {
                 const userCredential = await createUserWithEmailAndPassword(auth, email, password);
                 const user = userCredential.user;
-                
-                // Create user document with game data
-                await setDoc(doc(db, "game_users_custom_auth", user.uid), {
+                  // Create user document with game data
+                await setDoc(doc(db, "construction21_users", user.uid), {
                     displayName: name,
                     chips: 100,
+                    email: email,
                     createdAt: new Date(),
-                    email: email
+                    lastLogin: new Date()
                 });
                 
                 showMessage(signupMessage, 'Account created! Redirecting...', 'success');

@@ -1,0 +1,67 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // --- Website Content Rules ---
+    match /sliderImages/{docId} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+    
+    match /siteContent/{docId} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+    
+    // --- Game Leaderboard Rules (Public Read/Write) ---
+    match /snakeLeaderboard/{docId} {
+      allow read: if true;
+      allow write: if true;
+    }
+    
+    match /hammerballLeaderboard/{docId} {
+      allow read: if true;
+      allow write: if true;
+    }
+
+    // --- Construction 21 Game Rules (Firebase Auth Users) ---
+    
+    // User game data for Construction 21 - using Firebase Auth
+    match /construction21_users/{userId} {
+      // Allow authenticated users to read/write their own data
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+      
+      // Allow reading for leaderboard purposes (but limit sensitive data)
+      allow read: if request.auth != null;
+    }
+    
+    // Construction 21 Leaderboard
+    match /construction21_leaderboard/{userId} {
+      // Allow authenticated users to read leaderboard
+      allow read: if request.auth != null;
+      
+      // Allow authenticated users to update their own leaderboard entry
+      allow write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // --- Legacy Rules (if needed for backwards compatibility) ---
+    // Remove these once you've migrated existing data
+    match /game_users_custom_auth/{userId} {
+      // Temporarily allow reads for data migration
+      allow read: if request.auth != null;
+      // Prevent new writes to old collection
+      allow write: if false;
+    }
+    
+    // --- Artifacts Rules (if using for other games) ---
+    match /artifacts/{appId}/users/{userId}/{data=**} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    match /artifacts/{appId}/public/data/leaderboard/{userId} {
+      allow read: if request.auth != null; 
+      allow write: if request.auth != null && request.auth.uid == userId;
+    }
+  }
+}
