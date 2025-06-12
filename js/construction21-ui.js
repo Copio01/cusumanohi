@@ -665,6 +665,17 @@ function nextHandOrSettle() {
   }
 }
 
+// Dealer logic: Stand on all 17s (including soft 17), hit below 17
+async function dealerPlayOut() {
+  let dealerScore = game.calculateScore(game.dealerHand.cards);
+  while (dealerScore < 17) {
+    await delay(700);
+    game.dealCard(game.dealerHand, true);
+    updateHandsUI();
+    dealerScore = game.calculateScore(game.dealerHand.cards);
+  }
+}
+
 async function settleAndEndRound() {
   outcomeLock = true; // Prevent multiple triggers
 
