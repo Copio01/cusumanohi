@@ -273,3 +273,6 @@ document.addEventListener('DOMContentLoaded', () => {
   updateActionBarState();
   showInPlayButtons(false);
 });
+// This file handles the UI interactions for the Construction 21 game.
+// It initializes the game, sets up event handlers, and updates the UI based on game state.
+// The logic for the game itself is handled in construction21-logic.js, which this file interacts with.

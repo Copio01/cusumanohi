@@ -1,5 +1,5 @@
-// Construction21Game: Pure game logic for Construction 21 (Blackjack)
-// No DOM or UI code here!
+// construction21-logic.js
+// Pure game logic for Construction 21 (Blackjack)
 
 export class Construction21Game {
     constructor() {
@@ -17,8 +17,6 @@ export class Construction21Game {
         this.activeHandIndex = 0;
         this.chips = startingChips;
         this.bets = { main: 0, pp: 0, plus3: 0 };
-        this.pickedUpChip = null;
-        this.isChipPickedUp = false;
     }
 
     createDeck() {
@@ -61,7 +59,7 @@ export class Construction21Game {
         return parseInt(card.value);
     }
 
-    // Betting
+    // Betting logic
     canPlaceBet(amount) { return this.chips >= amount; }
     placeBet(type, amount) {
         if (!this.canPlaceBet(amount)) return false;
@@ -98,5 +96,61 @@ export class Construction21Game {
         return { type:'None', payout:0 };
     }
 
-    // ...add more logic as needed (splitting, double down, etc.)
+    // Evaluate blackjack, bust, win, push, etc.
+    isBlackjack(cards) {
+        return cards.length === 2 && this.calculateScore(cards) === 21;
+    }
+    isBust(cards) {
+        return this.calculateScore(cards) > 21;
+    }
+
+    // Settlement logic for round
+    settleHands() {
+        const dealerScore = this.calculateScore(this.dealerHand.cards);
+        this.dealerHand.score = dealerScore;
+        let results = [];
+
+        this.playerHands.forEach(hand => {
+            const playerScore = this.calculateScore(hand.cards);
+            hand.score = playerScore;
+
+            let result = { outcome: '', payout: 0 };
+
+            if (this.isBust(hand.cards)) {
+                result.outcome = 'bust';
+                result.payout = 0;
+            } else if (this.isBlackjack(hand.cards) && !this.isBlackjack(this.dealerHand.cards)) {
+                result.outcome = 'blackjack';
+                result.payout = hand.bet * 2.5; // pays 3:2
+                this.chips += result.payout;
+            } else if (this.isBlackjack(this.dealerHand.cards) && !this.isBlackjack(hand.cards)) {
+                result.outcome = 'dealer_blackjack';
+                result.payout = 0;
+            } else if (dealerScore > 21 || playerScore > dealerScore) {
+                result.outcome = 'win';
+                result.payout = hand.bet * 2;
+                this.chips += result.payout;
+            } else if (playerScore === dealerScore) {
+                result.outcome = 'push';
+                result.payout = hand.bet;
+                this.chips += result.payout;
+            } else {
+                result.outcome = 'lose';
+                result.payout = 0;
+            }
+            results.push(result);
+        });
+
+        // Settle side bets (if implemented in UI)
+        // e.g., checkPerfectPairs, check21Plus3
+
+        // Clear main and side bets after settlement
+        this.bets = { main: 0, pp: 0, plus3: 0 };
+
+        return results; // Array of {outcome, payout} per hand
+    }
+
+    // (Optional) For UI: expose current dealer/player hand, activeHandIndex, etc.
+
+    // TODO: Add methods for splitting, doubling, insurance, etc. if desired.
 }
