@@ -1,7 +1,7 @@
 import { Construction21Game } from './construction21-logic.js';
 
 let game = new Construction21Game();
-let inPlay = false, outcomeLock = false, resultsCache = null;
+let inPlay = false, outcomeLock = false, resultsCache = null, lastBets = null;
 
 const dealerCardsEl = document.getElementById('dealer-cards');
 const playerHandsEl = document.getElementById('player-hands');
@@ -21,6 +21,10 @@ const profileChipsEl = document.getElementById('profile-chips');
 const centerChipsAmountEl = document.getElementById('center-chips-amount');
 const profileNameEl = document.getElementById('profile-name');
 const clearBetsBtn = document.getElementById('clear-bets-btn');
+
+const newBetBtn = document.getElementById('new-bet-btn');
+const rebetBtn = document.getElementById('rebet-btn');
+const doubleBetBtn = document.getElementById('double-bet-btn');
 
 let selectedChip = null;
 let betSpots = {
@@ -136,6 +140,46 @@ function setupEventHandlers() {
   splitBtn.addEventListener('click', () => handlePlayerAction('split'));
   if (insuranceBtn) insuranceBtn.addEventListener('click', () => handlePlayerAction('insurance'));
   if (clearBetsBtn) clearBetsBtn.addEventListener('click', () => { if (!inPlay) { game.clearBets(); updateBetsUI(); showStatusToast('Bets cleared!'); }});
+
+  // End-of-round buttons:
+  newBetBtn.addEventListener('click', () => {
+    hideEndButtons();
+    game.clearBets();
+    updateBetsUI();
+    updateChipsDisplay();
+    updateHandsUI();
+    updateActionBarState();
+    showInPlayButtons(false);
+  });
+  rebetBtn.addEventListener('click', () => {
+    hideEndButtons();
+    if (lastBets) {
+      game.clearBets();
+      Object.keys(lastBets).forEach(k => { if (lastBets[k] > 0) game.bets[k] = lastBets[k]; });
+      updateBetsUI();
+    }
+    startRound();
+  });
+  doubleBetBtn.addEventListener('click', () => {
+    hideEndButtons();
+    if (lastBets) {
+      let ok = true;
+      Object.keys(lastBets).forEach(k => {
+        if (lastBets[k] * 2 > game.chips) ok = false;
+      });
+      if (!ok) {
+        showStatusToast('Not enough chips for 2x bet!', true);
+        showEndButtons();
+        return;
+      }
+      game.clearBets();
+      Object.keys(lastBets).forEach(k => {
+        if (lastBets[k] > 0) game.bets[k] = lastBets[k] * 2;
+      });
+      updateBetsUI();
+      startRound();
+    }
+  });
 }
 
 // Returns stack count for chip visual stacking
@@ -316,30 +360,9 @@ function updateHandsUI(resultData = null) {
       cardDiv.innerHTML = renderCard(card);
       cardDiv.style.transform = `translateX(${fanGap * (idx - (n - 1) / 2)}px) rotate(${(idx - (n - 1) / 2) * 7}deg)`;
       cardDiv.style.zIndex = 10 + idx;
+      cardDiv.style.position = '';
 
-      // Animate deal from virtual deck
-      cardDiv.style.position = 'absolute';
-      const handRect = playerHandsEl.getBoundingClientRect();
-      const deckPos = getVirtualDeckPos();
-      cardDiv.style.opacity = 0;
-      cardDiv.style.left = `${deckPos.left - handRect.left}px`;
-      cardDiv.style.top = `${deckPos.top - handRect.top}px`;
-
-      setTimeout(() => {
-        cardDiv.classList.add('card-deal-animate');
-        cardDiv.style.left = `${fanGap * (idx - (n - 1) / 2) + 36}px`;
-        cardDiv.style.top = `0px`;
-        cardDiv.style.opacity = 1;
-      }, 60 + (hIdx * 2 + idx) * 180);
-
-      setTimeout(() => {
-        cardDiv.style.position = '';
-        cardDiv.style.left = '';
-        cardDiv.style.top = '';
-        cardDiv.classList.remove('card-deal-animate');
-        cardDiv.style.opacity = '';
-        handCardsDiv.appendChild(cardDiv);
-      }, 340 + (hIdx * 2 + idx) * 180);
+      handCardsDiv.appendChild(cardDiv);
     });
 
     handDiv.appendChild(handCardsDiv);
@@ -363,23 +386,11 @@ function updateHandsUI(resultData = null) {
         case 'blackjack': case 'win': resultText = 'WIN'; break;
         case 'push': resultText = 'PUSH'; break;
         case 'bust': resultText = 'BUST'; break;
-        case 'dealer_blackjack': resultText = 'DEALER BLACKJACK'; break;
-        default: resultText = 'DEALER WINS';
+        case 'dealer_blackjack': resultText = 'DEALER BJ'; break;
+        default: resultText = 'LOSE';
       }
       const resultBanner = document.createElement('div');
       resultBanner.textContent = resultText;
-      resultBanner.style.position = 'absolute';
-      resultBanner.style.left = '50%';
-      resultBanner.style.top = '-24px';
-      resultBanner.style.transform = 'translateX(-50%)';
-      resultBanner.style.padding = '4px 16px';
-      resultBanner.style.background = 'rgba(36,36,28,0.97)';
-      resultBanner.style.color = resultText === 'WIN' ? '#34c759' : (resultText === 'PUSH' ? '#ffd700' : '#ff4e4e');
-      resultBanner.style.fontWeight = 'bold';
-      resultBanner.style.fontSize = '1.07em';
-      resultBanner.style.borderRadius = '9px';
-      resultBanner.style.zIndex = 99;
-      resultBanner.style.boxShadow = '0 2px 12px #000a';
       resultBanner.className = 'result-banner';
       handDiv.appendChild(resultBanner);
 
@@ -435,6 +446,8 @@ function startRound() {
   inPlay = true; outcomeLock = false; resultsCache = null;
   showInPlayButtons(true); enableDealAndClear(false);
 
+  lastBets = { ...game.bets }; // Save bets for re-bet/double
+
   game.createDeck(); game.shuffleDeck();
   let playerBet = game.bets.main;
   game.dealerHand = { cards: [], score: 0, isBlackjack: false, hasInsurance: false };
@@ -453,6 +466,7 @@ function startRound() {
   } else if (insuranceBtn) {
     insuranceBtn.style.display = 'none';
   }
+  hideEndButtons();
 }
 
 function handlePlayerAction(action) {
@@ -548,12 +562,11 @@ function nextHandOrSettle() {
 }
 
 function settleAndEndRound() {
-  // Flip all dealer cards face up for final rendering and result
+  // Flip only the dealer's cards
   game.dealerHand.cards.forEach(card => { card.isFaceUp = true; });
 
   inPlay = false; outcomeLock = true;
   const results = game.settleHands();
-
   updateChipsDisplay(); updateBetsUI(); updateHandsUI(results);
 
   results.forEach((res, idx) => {
@@ -578,11 +591,23 @@ function settleAndEndRound() {
   }, 800 + results.length * 700);
 
   setTimeout(() => {
+    showEndButtons();
     showStatusToast("Place your bets for the next round!");
     showInPlayButtons(false);
     updateActionBarState();
     outcomeLock = false;
   }, 1500 + results.length * 700);
+}
+
+function showEndButtons() {
+  newBetBtn.style.display = '';
+  rebetBtn.style.display = '';
+  doubleBetBtn.style.display = '';
+}
+function hideEndButtons() {
+  newBetBtn.style.display = 'none';
+  rebetBtn.style.display = 'none';
+  doubleBetBtn.style.display = 'none';
 }
 
 // --- Init ---
@@ -593,4 +618,5 @@ document.addEventListener('DOMContentLoaded', () => {
   updateHandsUI();
   updateActionBarState();
   showInPlayButtons(false);
+  hideEndButtons();
 });
