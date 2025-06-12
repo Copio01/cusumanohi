@@ -1517,9 +1517,9 @@
                 gameControls.classList.add('hidden');
                 doubleDownBtn.classList.add('hidden');
                 await sleep(500);
-                dealerTurn();
-            }
-        }async function doubleDown() { 
+                dealerTurn();        }
+        
+        async function doubleDown() { 
             // Double down doubles the bet and gives exactly one more card
             const currentHand = playerHands[activeHandIndex];
             if (playerChips >= currentHand.bet && currentHand.cards.length === 2) {
@@ -1536,7 +1536,9 @@
                 // After doubling down, automatically stand
                 stand();
             } else {
-                alert("Cannot double down. Need enough chips and exactly 2 cards.");        }
+                alert("Cannot double down. Need enough chips and exactly 2 cards.");
+            }
+        }
         
         async function handleSplit() {
             // Splitting is only allowed if the initial two cards are of the same value
