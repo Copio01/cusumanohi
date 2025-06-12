@@ -31,7 +31,8 @@
         }
         #game-container {
             width: 100%; max-width: 800px; margin: 0 auto; padding: 20px;
-        }        /* --- Construction 21 Card & Table Theme --- */
+        }
+        /* --- Construction 21 Card & Table Theme --- */
         .card {
             width: 140px; height: 200px; 
             background: linear-gradient(145deg, #ffffff, #f5f5f4);
@@ -75,7 +76,8 @@
                 transform: translateX(0) translateY(0) rotateY(0deg) scale(1); 
                 opacity: 1; 
             }
-        }        .card .card-face {
+        }
+        .card .card-face {
             width: 100%; height: 100%;
             display: flex; flex-direction: column; justify-content: space-between;
             box-sizing: border-box; padding: 12px; 
@@ -137,7 +139,8 @@
             content: "\1F528"; font-size: 64px; color: #23232b; 
             text-shadow: 0 2px 4px rgba(255,255,255,0.3), 0 0 8px #bfa14a; 
             filter: drop-shadow(0 2px 6px rgba(0,0,0,0.3));
-        }        /* --- Table Area --- */
+        }
+        /* --- Table Area --- */
         .card-table {
             display: flex; flex-direction: column; gap: 30px; padding: 32px 24px;
             background: 
@@ -211,7 +214,8 @@
         }
         .cards {
             display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; min-height: 120px; align-items: center; padding: 10px;
-        }        /* --- Betting Chips --- */
+        }
+        /* --- Betting Chips --- */
         .chip {
             width: 70px; height: 70px; border-radius: 50%; 
             display: flex; align-items: center; justify-content: center;
@@ -237,7 +241,8 @@
             transform: translateY(-4px) scale(1.05);
             box-shadow: 0 8px 20px rgba(0,0,0,0.4), 
                         inset 0 2px 4px rgba(255,255,255,0.4);
-        }        .chip:active {
+        }
+        .chip:active {
             transform: translateY(-2px) scale(1.02);
             box-shadow: 0 4px 12px rgba(0,0,0,0.5);
         }
@@ -267,7 +272,8 @@
         .chip-25 { 
             background: conic-gradient(from 90deg, #708090, #4F5F6F, #708090, #4F5F6F);
             border: 3px solid #4F5F6F;
-        }        .chip-100 { 
+        }
+        .chip-100 { 
             background: conic-gradient(from 135deg, #2F4F4F, #1C3030, #2F4F4F, #1C3030);
             border: 3px solid #1C3030;
         }
@@ -446,7 +452,10 @@
             <h2 class="text-2xl font-bold text-center mb-4 text-yellow-400">Top Players</h2>
             <ul id="leaderboard-entries" class="space-y-2"></ul>
         </div>
-    </div>    <script type="module">        // Firebase Imports - Updated to latest version for consistency
+    </div>
+    
+    <script type="module">
+        // Firebase Imports - Updated to latest version for consistency
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-auth.js";
         import { getFirestore, doc, getDoc, setDoc, updateDoc, collection, query, getDocs, limit, orderBy as firestoreOrderBy } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-firestore.js";
@@ -463,9 +472,10 @@
         const sideBetResultsEl = document.getElementById('side-bet-results');
         const hitBtn = document.getElementById('hit-btn');
         const standBtn = document.getElementById('stand-btn');
-        // const doubleDownBtn = document.getElementById('double-down-btn'); // Already commented or removed
-        const splitButton = document.getElementById('split-btn');
-        const gameArea = document.getElementById('game-area');        // Betting UI Elements
+        // const doubleDownBtn = document.getElementById('double-down-btn'); // Already commented or removed        const splitButton = document.getElementById('split-btn');
+        const gameArea = document.getElementById('game-area');
+        
+        // Betting UI Elements
         const playerChipBalanceEl = document.getElementById('player-chip-balance');
         const currentMainBetDisplayEl = document.getElementById('current-main-bet-display');
         const currentPpBetDisplayEl = document.getElementById('current-pp-bet-display');
@@ -532,9 +542,9 @@
                         projectId: "cusumano-website",
                         storageBucket: "cusumano-website.firebasestorage.app",
                         messagingSenderId: "20051552210",
-                        appId: "1:20051552210:web:7eb3b22baa3fec184e4a0b"
-                    };
-                }            } catch (e) {
+                        appId: "1:20051552210:web:7eb3b22baa3fec184e4a0b"                    };
+                }
+            } catch (e) {
                 console.error("Could not initialize Firebase.", e);
                 // Redirect to login page if Firebase config is invalid
                 alert('Firebase connection failed. Please check your internet connection and try again.');
@@ -563,7 +573,9 @@
                     window.location.href = 'construction21-login.html';
                 }
             });
-        }        async function setupUserSession(user) {
+        }
+        
+        async function setupUserSession(user) {
             try {
                 if (!db || !user) {
                     console.error("Database or user not available");
@@ -619,7 +631,9 @@
                 sessionStorage.removeItem('loginSuccess');
                 // Could add a welcome message here if desired
             }
-        }        async function handleLogout() {
+        }
+        
+        async function handleLogout() {
             try {
                 if (auth) {
                     await signOut(auth);
@@ -631,7 +645,9 @@
                 // Force redirect even if signOut fails
                 window.location.href = 'construction21-login.html';
             }
-        }        async function updatePlayerChipsInFirestore(userId, newChipAmount) {
+        }
+        
+        async function updatePlayerChipsInFirestore(userId, newChipAmount) {
             if (!userId) {
                 console.error("User ID not available for Firestore update.");
                 return;
@@ -653,7 +669,9 @@
             if (playerChipBalanceEl) { // Betting screen chip display
                 playerChipBalanceEl.textContent = playerChips;
             }
-        }        function updateBetAmountDisplays() {
+        }
+        
+        function updateBetAmountDisplays() {
             // Update new bet type selector displays
             const mainBetDisplay = document.getElementById('main-bet-display');
             const ppBetDisplay = document.getElementById('pp-bet-display');
@@ -752,7 +770,9 @@
             if (card.value === 'A') return 1;
             if (['K', 'Q', 'J'].includes(card.value)) return 10;
             return parseInt(card.value);
-        }        function handleChipClick(event) {
+        }
+        
+        function handleChipClick(event) {
             // Fix: Find the chip button element regardless of what was actually clicked
             const chipButton = event.target.closest('.chip');
             if (!chipButton) return;
@@ -857,9 +877,10 @@
 
             bettingControls.classList.add('hidden');
             gameArea.classList.remove('hidden');
-            gameControls.classList.remove('hidden'); // Show Hit/Stand etc.
-            sideBetResultsEl.classList.add('hidden'); // Ensure side bet results are hidden initially
-            sideBetResultsEl.innerHTML = '';
+            gameControls.classList.remove('hidden'); // Show Hit/Stand etc.            if (sideBetResultsEl) {
+                sideBetResultsEl.classList.add('hidden'); // Ensure side bet results are hidden initially
+                sideBetResultsEl.innerHTML = '';
+            }
 
 
             await initiateGameRoundDeal(); // This will handle deck creation, dealing, etc.
@@ -876,17 +897,21 @@
             // playerChips are updated when bets are placed.
             
             // Clear UI elements
-            dealerCardsEl.innerHTML = '';
-            playerHandsDisplay.innerHTML = '';
+            dealerCardsEl.innerHTML = '';            playerHandsDisplay.innerHTML = '';
             if (dealerScoreEl) dealerScoreEl.textContent = '0';
             // Player score display is per hand, handled in createPlayerHandDisplay
 
             gameControls.classList.add('hidden');
             splitButton.classList.add('hidden');
-            sideBetResultsEl.classList.add('hidden').innerHTML = '';
+            if (sideBetResultsEl) {
+                sideBetResultsEl.classList.add('hidden');
+                sideBetResultsEl.innerHTML = '';
+            }
             gameResultScreen.classList.add('hidden');
-            document.getElementById('result-message').textContent = '';
-            document.getElementById('final-chips').textContent = '0';
+            const resultMessageEl = document.getElementById('result-message');
+            const finalChipsEl = document.getElementById('final-chips');
+            if (resultMessageEl) resultMessageEl.textContent = '';
+            if (finalChipsEl) finalChipsEl.textContent = '0';
         }
 
         async function initiateGameRoundDeal() { 
@@ -1024,7 +1049,9 @@
             playerHandsDisplay.appendChild(handDiv);
             hand.element = cardsContainer; // So dealCard can find where to put cards
             return handDiv;
-        }        async function dealCard(handObj, cardsContainerEl, isHidden = false) { 
+        }
+        
+        async function dealCard(handObj, cardsContainerEl, isHidden = false) { 
             const cardData = deck.pop();
             handObj.cards.push(cardData);
             
@@ -1186,13 +1213,14 @@
                     overallResultMessage += `Hand ${handIndex}: Push (${hand.score})! Bet ${hand.bet} returned.\n`;
                     handWinnings = hand.bet;
                 }
-                
-                playerChips += handWinnings;
+                  playerChips += handWinnings;
                 totalWinnings += handWinnings;
             });
-
-            document.getElementById('result-message').textContent = overallResultMessage.trim() || "Game Over!";
-            document.getElementById('final-chips').textContent = playerChips;
+            
+            const resultMessageEl = document.getElementById('result-message');
+            const finalChipsEl = document.getElementById('final-chips');
+            if (resultMessageEl) resultMessageEl.textContent = overallResultMessage.trim() || "Game Over!";
+            if (finalChipsEl) finalChipsEl.textContent = playerChips;
             updateGlobalChipDisplay();
             
             if (currentUser && currentUser.uid) {
@@ -1200,10 +1228,12 @@
             }
             
             await updateLeaderboard(currentPlayerName, playerChips);
-
+            
             gameResultScreen.classList.remove('hidden');
             gameResultScreen.classList.add('active');
-        }        async function updateLeaderboard(playerName, chips) {
+        }
+
+        async function updateLeaderboard(playerName, chips) {
             if (!db || !currentUser) return;
             
             try {
@@ -1292,10 +1322,9 @@
                     resultsHTML += `<p class="text-green-300">21+3: You made a ${twentyOnePlusThreeResult.type}! Won ${winnings} chips.</p>`;
                 } else {
                     resultsHTML += `<p class="text-red-300">21+3: No winning hand. Lost ${current21Plus3Bet} chips.</p>`;
-                }
-            }
+                }            }
             
-            if (resultsHTML) {
+            if (resultsHTML && sideBetResultsEl) {
                 sideBetResultsEl.innerHTML = resultsHTML;
                 sideBetResultsEl.classList.remove('hidden');
             }
@@ -1303,7 +1332,8 @@
             updateGlobalChipDisplay();
             if (currentUser && currentUser.uid && sideBetWinnings > 0) {
                 updatePlayerChipsInFirestore(currentUser.uid, playerChips);
-            }        }
+            }
+        }
 
         function handleBetTypeSelection(betTypeBtn) {
             // Remove active class from all bet type buttons
@@ -1341,7 +1371,9 @@
                     updateGlobalChipDisplay();
                     updateBetAmountDisplays();
                 });
-            }            // Chip button event listeners - Enhanced delegation approach
+            }
+            
+            // Chip button event listeners - Enhanced delegation approach
             document.addEventListener('click', (e) => {
                 const chipButton = e.target.closest('.chip');
                 if (chipButton) {
