@@ -721,14 +721,29 @@
         <div id="leaderboard" class="mt-6 p-4 rounded-lg shadow-lg hidden max-w-md mx-auto">
             <h2 class="text-2xl font-bold text-center mb-4 text-yellow-400">Top Players</h2>
             <ul id="leaderboard-entries" class="space-y-2"></ul>
+            <div class="text-center mt-3">
+                <button id="refresh-leaderboard" class="px-4 py-1 bg-yellow-700/50 hover:bg-yellow-600/80 text-white text-sm rounded transition">
+                    <span class="mr-1">↻</span> Refresh Leaderboard
+                </button>
+            </div>
         </div>
     </div>
     
-    <script type="module">
-        // Firebase Imports - Updated to latest version for consistency
+    <script type="module">        // Firebase Imports - Updated to latest version for consistency
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, updateDoc, collection, query, getDocs, limit, orderBy as firestoreOrderBy } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-firestore.js";
+        import { 
+            getFirestore, 
+            doc, 
+            getDoc, 
+            setDoc, 
+            updateDoc, 
+            collection, 
+            query, 
+            getDocs, 
+            limit, 
+            orderBy as firestoreOrderBy 
+        } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-firestore.js";
           // --- DOM Elements ---
         const mainMenu = document.getElementById('main-menu');
         const gameCanvas = document.getElementById('game-canvas');
@@ -858,12 +873,13 @@
                 
                 const userDocRef = doc(db, "construction21_users", user.uid);
                 const userDoc = await getDoc(userDocRef);
-                
-                if (userDoc.exists()) {
+                  if (userDoc.exists()) {
                     const userData = userDoc.data();
-                    currentUser = { uid: user.uid, displayName: userData.displayName, chips: userData.chips };
+                    currentUser = { uid: user.uid, displayName: userData.displayName || user.email || 'Player', chips: userData.chips || 100 };
                     currentPlayerName = currentUser.displayName;
                     playerChips = currentUser.chips;
+                    
+                    console.log("User data loaded:", currentUser);
                     
                     // Update last login
                     await setDoc(userDocRef, { lastLogin: new Date() }, { merge: true });
@@ -880,19 +896,16 @@
                 alert('Error loading your game data. Please try logging in again.');
                 handleLogout();
             }
-        }
-
-        async function getUserDataFromFirestore(userId) {
-            // This function is now mostly incorporated into setupUserSession, can be removed or kept for other uses.
-            // For now, let's assume setupUserSession is the primary way user data is fetched.
-            const userDocRef = doc(db, "game_users_custom_auth", userId);
+        }        async function getUserDataFromFirestore(userId) {
+            // This function is now mostly incorporated into setupUserSession, can be kept for other uses.
+            // For now, setupUserSession is the primary way user data is fetched.
+            const userDocRef = doc(db, "construction21_users", userId);
             const userDoc = await getDoc(userDocRef);
             return userDoc.exists() ? userDoc.data() : null;
         }
         
         // Legacy authentication functions removed - authentication now handled by separate login page
-        
-        function showUserProfile() {
+          function showUserProfile() {
             mainMenu.classList.remove('hidden');
             userProfile.classList.remove('hidden');
             gameCanvas.classList.add('hidden'); // Ensure game canvas is hidden initially
@@ -904,6 +917,83 @@
                 sessionStorage.removeItem('loginSuccess');
                 // Could add a welcome message here if desired
             }
+            
+            // Load leaderboard data
+            loadLeaderboard();
+        }        async function loadLeaderboard() {
+            if (!db) {
+                console.error("Cannot load leaderboard - Firestore not initialized");
+                return Promise.reject("Firestore not initialized");
+            }
+            
+            try {
+                console.log("Loading leaderboard data...");
+                const leaderboardEl = document.getElementById('leaderboard');
+                const leaderboardEntriesEl = document.getElementById('leaderboard-entries');
+                
+                if (!leaderboardEl || !leaderboardEntriesEl) {
+                    console.error("Leaderboard elements not found in DOM");
+                    return;
+                }
+                
+                leaderboardEl.classList.remove('hidden');
+                
+                // Set leaderboard title with user email or name
+                const leaderboardTitle = leaderboardEl.querySelector('h2');
+                if (leaderboardTitle) {
+                    const displayName = currentUser ? (currentUser.displayName || currentUser.email || 'Player') : 'Player';
+                    leaderboardTitle.textContent = `Top Players for ${displayName}`;
+                }
+                
+                // Show loading state
+                leaderboardEntriesEl.innerHTML = '<li class="text-yellow-400">Loading leaderboard data...</li>';
+                
+                // Load leaderboard data from Firestore
+                const leaderboardRef = collection(db, "construction21_leaderboard");
+                const q = query(leaderboardRef, firestoreOrderBy("chips", "desc"), limit(5));
+                const querySnapshot = await getDocs(q);
+                
+                // Clear existing entries
+                leaderboardEntriesEl.innerHTML = '';
+                
+                if (querySnapshot.empty) {
+                    console.log("No leaderboard data found");
+                    leaderboardEntriesEl.innerHTML = '<li class="text-gray-400">No leaderboard data yet. Play games to add your score!</li>';
+                    return;
+                }
+                
+                console.log(`Found ${querySnapshot.size} leaderboard entries`);
+                  // Convert to array for easier ranking
+                const leaderboardData = [];
+                querySnapshot.forEach((doc) => {
+                    leaderboardData.push({
+                        id: doc.id,
+                        ...doc.data()
+                    });
+                });
+                
+                // Add rank numbers and highlight current user
+                leaderboardData.forEach((entry, index) => {
+                    const rank = index + 1;
+                    const isCurrentUser = currentUser && entry.userId === currentUser.uid;
+                    
+                    const listItem = document.createElement('li');
+                    listItem.className = `flex justify-between items-center ${isCurrentUser ? 'bg-yellow-800/40' : 'bg-gray-800/60'} p-2 rounded`;
+                    listItem.innerHTML = `
+                        <span class="flex items-center">
+                            <span class="font-bold mr-2">#${rank}</span>
+                            <span>${entry.name || 'Anonymous'}</span>
+                            ${isCurrentUser ? '<span class="ml-2 text-xs text-yellow-300">(You)</span>' : ''}
+                        </span>
+                        <span class="font-bold text-yellow-400">${entry.chips} chips</span>
+                    `;
+                    leaderboardEntriesEl.appendChild(listItem);
+                });
+            } catch (error) {                console.error("Error loading leaderboard:", error);
+                leaderboardEntriesEl.innerHTML = '<li class="text-red-500">Error loading leaderboard data. Please try again later.</li>';
+                return Promise.reject(error);
+            }
+            return Promise.resolve();
         }
         
         async function handleLogout() {
@@ -1671,19 +1761,30 @@
 
             gameResultScreen.classList.remove('hidden');
             gameResultScreen.classList.add('active');
-        }
-
-        async function updateLeaderboard(playerName, chips) {
-            if (!db || !currentUser) return;
+        }        async function updateLeaderboard(playerName, chips) {
+            if (!db) {
+                console.error("Firestore database not initialized");
+                return;
+            }
+            
+            if (!currentUser) {
+                console.error("No user is logged in, cannot update leaderboard");
+                return;
+            }
 
             try {
+                console.log(`Updating leaderboard for ${playerName} with ${chips} chips`);
                 const leaderboardRef = collection(db, "construction21_leaderboard");
                 await setDoc(doc(leaderboardRef, currentUser.uid), {
-                    name: playerName,
-                    chips: chips,
+                    name: playerName || currentUser.email || 'Player',
+                    chips: chips || 0,
                     timestamp: new Date(),
                     userId: currentUser.uid
                 });
+                console.log("Leaderboard successfully updated");
+                
+                // Force refresh the displayed leaderboard
+                loadLeaderboard();
             } catch (error) {
                 console.error("Error updating leaderboard:", error);
             }
@@ -1793,6 +1894,18 @@
 
         function setupEventListeners() {
             if (logoutBtn) logoutBtn.addEventListener('click', handleLogout);
+            
+            // Add event listener for refresh leaderboard button
+            const refreshLeaderboardBtn = document.getElementById('refresh-leaderboard');
+            if (refreshLeaderboardBtn) {
+                refreshLeaderboardBtn.addEventListener('click', () => {
+                    refreshLeaderboardBtn.textContent = '↻ Refreshing...';
+                    loadLeaderboard().then(() => {
+                        refreshLeaderboardBtn.innerHTML = '<span class="mr-1">↻</span> Refresh Leaderboard';
+                    });
+                });
+            }
+            
             if (playBtn) {
                 playBtn.addEventListener('click', () => {
                     mainMenu.classList.add('hidden');

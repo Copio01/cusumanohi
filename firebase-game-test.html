@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Construction 21 Firebase Game Test</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .section {
+            margin-bottom: 30px;
+            padding: 15px;
+            border-radius: 8px;
+            background: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h2 {
+            color: #333;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 10px;
+        }
+        pre {
+            background: #f9f9f9;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+        .success { color: green; }
+        .error { color: red; }
+        button {
+            background: #4285f4;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px 0;
+        }
+        button:hover {
+            background: #3b78e7;
+        }
+        .test-item {
+            display: flex;
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        .test-name {
+            flex: 1;
+        }
+        .test-result {
+            text-align: right;
+            font-weight: bold;
+            width: 80px;
+        }
+        #leaderboard {
+            list-style: none;
+            padding: 0;
+        }
+        #leaderboard li {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px;
+            margin-bottom: 4px;
+            background: #f0f0f0;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Construction 21 Firebase Game Test</h1>
+    
+    <div class="section">
+        <h2>Firebase Connection Status</h2>
+        <div id="firebase-status">Testing connection...</div>
+        <button id="test-connection">Test Connection</button>
+    </div>
+    
+    <div class="section">
+        <h2>Authentication</h2>
+        <div id="auth-status">Not logged in</div>
+        <div id="user-details"></div>
+        <button id="login">Login with Test Account</button>
+        <button id="logout">Logout</button>
+    </div>
+    
+    <div class="section">
+        <h2>User Data</h2>
+        <div id="user-data-status">No data loaded</div>
+        <pre id="user-data-display">No user data available</pre>
+        <div>
+            <button id="get-user-data">Get User Data</button>
+            <button id="update-user-chips-add">Add 100 Chips</button>
+            <button id="update-user-chips-subtract">Subtract 50 Chips</button>
+        </div>
+    </div>
+    
+    <div class="section">
+        <h2>Leaderboard Test</h2>
+        <ul id="leaderboard">Loading leaderboard...</ul>
+        <button id="load-leaderboard">Load Leaderboard</button>
+        <button id="update-leaderboard">Update My Leaderboard Entry</button>
+    </div>
+    
+    <div class="section">
+        <h2>Game Flow Simulation</h2>
+        <div id="game-simulation-status">Ready to simulate</div>
+        <div>
+            <button id="simulate-win">Simulate Win (+100 chips)</button>
+            <button id="simulate-loss">Simulate Loss (-50 chips)</button>
+        </div>
+    </div>
+    
+    <div class="section">
+        <h2>Collection Information</h2>
+        <div id="collection-info">
+            <p>Users Collection: <span id="users-collection-name">construction21_users</span></p>
+            <p>Leaderboard Collection: <span id="leaderboard-collection-name">construction21_leaderboard</span></p>
+            <button id="check-collections">Check Collections</button>
+        </div>
+    </div>
+    
+    <div class="section">
+        <h2>Test Results</h2>
+        <div id="test-results"></div>
+        <button id="run-all-tests">Run All Tests</button>
+    </div>
+
+    <script type="module">
+        // Import Firebase
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.0.0/firebase-app.js';
+        import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.0.0/firebase-auth.js';
+        import { getFirestore, collection, doc, getDoc, getDocs, setDoc, updateDoc, query, orderBy, limit } from 'https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore.js';
+        
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBmlRdOi-PFTlZ3ypqPKrABT0vYj9iDdgk", 
+            authDomain: "constructionsnake.firebaseapp.com",
+            projectId: "constructionsnake",
+            storageBucket: "constructionsnake.appspot.com",
+            messagingSenderId: "324569447373",
+            appId: "1:324569447373:web:f28be844b706106b98b73c"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        
+        // Collection names - centralized for easy testing/changing
+        const USERS_COLLECTION = "construction21_users";
+        const LEADERBOARD_COLLECTION = "construction21_leaderboard";
+        
+        let currentUser = null;
+        
+        // Update UI elements with collection names
+        document.getElementById('users-collection-name').textContent = USERS_COLLECTION;
+        document.getElementById('leaderboard-collection-name').textContent = LEADERBOARD_COLLECTION;
+        
+        // Authentication state observer
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                currentUser = user;
+                document.getElementById('auth-status').innerHTML = `<span class="success">Logged in as: ${user.email}</span>`;
+                document.getElementById('user-details').innerHTML = `
+                    <strong>User ID:</strong> ${user.uid}<br>
+                    <strong>Email:</strong> ${user.email}<br>
+                    <strong>Display Name:</strong> ${user.displayName || 'Not set'}<br>
+                `;
+                document.getElementById('login').disabled = true;
+                document.getElementById('logout').disabled = false;
+            } else {
+                currentUser = null;
+                document.getElementById('auth-status').innerHTML = `<span class="error">Not logged in</span>`;
+                document.getElementById('user-details').innerHTML = '';
+                document.getElementById('login').disabled = false;
+                document.getElementById('logout').disabled = true;
+                document.getElementById('user-data-display').textContent = 'No user data available';
+            }
+        });
+        
+        // Test connection
+        document.getElementById('test-connection').addEventListener('click', async () => {
+            const statusEl = document.getElementById('firebase-status');
+            statusEl.innerHTML = 'Testing Firebase connection...';
+            
+            try {
+                // Test Firestore connection by trying to access a collection
+                const testQuery = query(collection(db, USERS_COLLECTION), limit(1));
+                await getDocs(testQuery);
+                statusEl.innerHTML = '<span class="success">Firebase connection successful!</span>';
+            } catch (error) {
+                statusEl.innerHTML = `<span class="error">Firebase connection failed: ${error.message}</span>`;
+                console.error('Firebase connection error:', error);
+            }
+        });
+        
+        // Login with test account
+        document.getElementById('login').addEventListener('click', async () => {
+            try {
+                // You can create a test account in Firebase Auth or use an existing one
+                // Use environment variables or a secure method to store credentials in production
+                await signInWithEmailAndPassword(auth, "test@example.com", "testpassword123");
+            } catch (error) {
+                document.getElementById('auth-status').innerHTML = `<span class="error">Login failed: ${error.message}</span>`;
+                console.error('Login error:', error);
+            }
+        });
+        
+        // Logout
+        document.getElementById('logout').addEventListener('click', async () => {
+            try {
+                await signOut(auth);
+            } catch (error) {
+                console.error('Logout error:', error);
+            }
+        });
+        
+        // Get user data
+        document.getElementById('get-user-data').addEventListener('click', async () => {
+            if (!currentUser) {
+                document.getElementById('user-data-status').innerHTML = '<span class="error">You must be logged in</span>';
+                return;
+            }
+            
+            try {
+                document.getElementById('user-data-status').textContent = 'Loading user data...';
+                const userDocRef = doc(db, USERS_COLLECTION, currentUser.uid);
+                const userDoc = await getDoc(userDocRef);
+                
+                if (userDoc.exists()) {
+                    const userData = userDoc.data();
+                    document.getElementById('user-data-display').textContent = JSON.stringify(userData, null, 2);
+                    document.getElementById('user-data-status').innerHTML = '<span class="success">User data loaded</span>';
+                } else {
+                    document.getElementById('user-data-display').textContent = 'User document does not exist';
+                    document.getElementById('user-data-status').innerHTML = '<span class="error">User document not found</span>';
+                }
+            } catch (error) {
+                document.getElementById('user-data-status').innerHTML = `<span class="error">Error loading user data: ${error.message}</span>`;
+                console.error('User data error:', error);
+            }
+        });
+        
+        // Add chips
+        document.getElementById('update-user-chips-add').addEventListener('click', async () => {
+            if (!currentUser) {
+                document.getElementById('user-data-status').innerHTML = '<span class="error">You must be logged in</span>';
+                return;
+            }
+            
+            try {
+                document.getElementById('user-data-status').textContent = 'Updating chips...';
+                const userDocRef = doc(db, USERS_COLLECTION, currentUser.uid);
+                const userDoc = await getDoc(userDocRef);
+                
+                if (userDoc.exists()) {
+                    const userData = userDoc.data();
+                    const currentChips = userData.chips || 0;
+                    const newChips = currentChips + 100;
+                    
+                    await updateDoc(userDocRef, { 
+                        chips: newChips,
+                        lastUpdated: new Date()
+                    });
+                    
+                    document.getElementById('user-data-status').innerHTML = `<span class="success">Added 100 chips! New total: ${newChips}</span>`;
+                    
+                    // Update display
+                    document.getElementById('get-user-data').click();
+                } else {
+                    document.getElementById('user-data-status').innerHTML = '<span class="error">User document not found</span>';
+                }
+            } catch (error) {
+                document.getElementById('user-data-status').innerHTML = `<span class="error">Error updating chips: ${error.message}</span>`;
+                console.error('Update chips error:', error);
+            }
+        });
+        
+        // Subtract chips
+        document.getElementById('update-user-chips-subtract').addEventListener('click', async () => {
+            if (!currentUser) {
+                document.getElementById('user-data-status').innerHTML = '<span class="error">You must be logged in</span>';
+                return;
+            }
+            
+            try {
+                document.getElementById('user-data-status').textContent = 'Updating chips...';
+                const userDocRef = doc(db, USERS_COLLECTION, currentUser.uid);
+                const userDoc = await getDoc(userDocRef);
+                
+                if (userDoc.exists()) {
+                    const userData = userDoc.data();
+                    const currentChips = userData.chips || 0;
+                    const newChips = Math.max(0, currentChips - 50); // Ensure chips don't go below 0
+                    
+                    await updateDoc(userDocRef, { 
+                        chips: newChips,
+                        lastUpdated: new Date()
+                    });
+                    
+                    document.getElementById('user-data-status').innerHTML = `<span class="success">Subtracted 50 chips! New total: ${newChips}</span>`;
+                    
+                    // Update display
+                    document.getElementById('get-user-data').click();
+                } else {
+                    document.getElementById('user-data-status').innerHTML = '<span class="error">User document not found</span>';
+                }
+            } catch (error) {
+                document.getElementById('user-data-status').innerHTML = `<span class="error">Error updating chips: ${error.message}</span>`;
+                console.error('Update chips error:', error);
+            }
+        });
+        
+        // Load leaderboard
+        document.getElementById('load-leaderboard').addEventListener('click', async () => {
+            const leaderboardEl = document.getElementById('leaderboard');
+            leaderboardEl.innerHTML = 'Loading leaderboard...';
+            
+            try {
+                const leaderboardRef = collection(db, LEADERBOARD_COLLECTION);
+                const q = query(leaderboardRef, orderBy("chips", "desc"), limit(5));
+                const querySnapshot = await getDocs(q);
+                
+                if (querySnapshot.empty) {
+                    leaderboardEl.innerHTML = '<li>No leaderboard data available</li>';
+                    return;
+                }
+                
+                leaderboardEl.innerHTML = '';
+                querySnapshot.forEach((doc) => {
+                    const data = doc.data();
+                    const listItem = document.createElement('li');
+                    listItem.innerHTML = `
+                        <span>${data.name || 'Anonymous'}</span>
+                        <span>${data.chips} chips</span>
+                    `;
+                    leaderboardEl.appendChild(listItem);
+                });
+            } catch (error) {
+                leaderboardEl.innerHTML = `<li class="error">Error loading leaderboard: ${error.message}</li>`;
+                console.error('Leaderboard error:', error);
+            }
+        });
+        
+        // Update leaderboard
+        document.getElementById('update-leaderboard').addEventListener('click', async () => {
+            if (!currentUser) {
+                alert('You must be logged in to update the leaderboard');
+                return;
+            }
+            
+            try {
+                // First get current user data
+                const userDocRef = doc(db, USERS_COLLECTION, currentUser.uid);
+                const userDoc = await getDoc(userDocRef);
+                
+                if (!userDoc.exists()) {
+                    alert('User data not found');
+                    return;
+                }
+                
+                const userData = userDoc.data();
+                const playerChips = userData.chips || 100;
+                const playerName = userData.displayName || currentUser.email || 'Player';
+                
+                // Update leaderboard entry
+                const leaderboardRef = collection(db, LEADERBOARD_COLLECTION);
+                await setDoc(doc(leaderboardRef, currentUser.uid), {
+                    name: playerName,
+                    chips: playerChips,
+                    timestamp: new Date(),
+                    userId: currentUser.uid
+                });
+                
+                alert(`Leaderboard updated with ${playerChips} chips for ${playerName}`);
+                
+                // Reload leaderboard
+                document.getElementById('load-leaderboard').click();
+            } catch (error) {
+                console.error('Error updating leaderboard:', error);
+                alert(`Error updating leaderboard: ${error.message}`);
+            }
+        });
+        
+        // Simulate a game win
+        document.getElementById('simulate-win').addEventListener('click', async () => {
+            if (!currentUser) {
+                alert('You must be logged in to simulate a game');
+                return;
+            }
+            
+            try {
+                document.getElementById('game-simulation-status').textContent = 'Simulating win...';
+                
+                // Step 1: Get current chips
+                const userDocRef = doc(db, USERS_COLLECTION, currentUser.uid);
+                const userDoc = await getDoc(userDocRef);
+                
+                if (!userDoc.exists()) {
+                    throw new Error('User data not found');
+                }
+                
+                const userData = userDoc.data();
+                const currentChips = userData.chips || 100;
+                const newChips = currentChips + 100;
+                const playerName = userData.displayName || currentUser.email || 'Player';
+                
+                // Step 2: Update user's chips
+                await updateDoc(userDocRef, { 
+                    chips: newChips,
+                    lastUpdated: new Date()
+                });
+                
+                // Step 3: Update leaderboard
+                const leaderboardRef = collection(db, LEADERBOARD_COLLECTION);
+                await setDoc(doc(leaderboardRef, currentUser.uid), {
+                    name: playerName,
+                    chips: newChips,
+                    timestamp: new Date(),
+                    userId: currentUser.uid
+                });
+                
+                document.getElementById('game-simulation-status').innerHTML = `
+                    <span class="success">Win simulated! Added 100 chips. New total: ${newChips}</span>`;
+                
+                // Step 4: Refresh displays
+                document.getElementById('get-user-data').click();
+                document.getElementById('load-leaderboard').click();
+                
+            } catch (error) {
+                document.getElementById('game-simulation-status').innerHTML = `
+                    <span class="error">Error simulating win: ${error.message}</span>`;
+                console.error('Simulation error:', error);
+            }
+        });
+        
+        // Simulate a game loss
+        document.getElementById('simulate-loss').addEventListener('click', async () => {
+            if (!currentUser) {
+                alert('You must be logged in to simulate a game');
+                return;
+            }
+            
+            try {
+                document.getElementById('game-simulation-status').textContent = 'Simulating loss...';
+                
+                // Step 1: Get current chips
+                const userDocRef = doc(db, USERS_COLLECTION, currentUser.uid);
+                const userDoc = await getDoc(userDocRef);
+                
+                if (!userDoc.exists()) {
+                    throw new Error('User data not found');
+                }
+                
+                const userData = userDoc.data();
+                const currentChips = userData.chips || 100;
+                const newChips = Math.max(0, currentChips - 50); // Never go below 0
+                const playerName = userData.displayName || currentUser.email || 'Player';
+                
+                // Step 2: Update user's chips
+                await updateDoc(userDocRef, { 
+                    chips: newChips,
+                    lastUpdated: new Date()
+                });
+                
+                // Step 3: Update leaderboard
+                const leaderboardRef = collection(db, LEADERBOARD_COLLECTION);
+                await setDoc(doc(leaderboardRef, currentUser.uid), {
+                    name: playerName,
+                    chips: newChips,
+                    timestamp: new Date(),
+                    userId: currentUser.uid
+                });
+                
+                document.getElementById('game-simulation-status').innerHTML = `
+                    <span class="success">Loss simulated! Subtracted 50 chips. New total: ${newChips}</span>`;
+                
+                // Step 4: Refresh displays
+                document.getElementById('get-user-data').click();
+                document.getElementById('load-leaderboard').click();
+                
+            } catch (error) {
+                document.getElementById('game-simulation-status').innerHTML = `
+                    <span class="error">Error simulating loss: ${error.message}</span>`;
+                console.error('Simulation error:', error);
+            }
+        });
+        
+        // Check collections
+        document.getElementById('check-collections').addEventListener('click', async () => {
+            const infoElement = document.getElementById('collection-info');
+            
+            try {
+                infoElement.innerHTML = '<p>Checking collections...</p>';
+                let info = `
+                    <p>Users Collection: <span id="users-collection-name">${USERS_COLLECTION}</span></p>
+                    <p>Leaderboard Collection: <span id="leaderboard-collection-name">${LEADERBOARD_COLLECTION}</span></p>
+                `;
+                
+                // Check users collection
+                const usersQuery = query(collection(db, USERS_COLLECTION), limit(1));
+                const usersSnapshot = await getDocs(usersQuery);
+                info += `<p class="success">Users collection exists: ${!usersSnapshot.empty ? 'Has data' : 'Empty'}</p>`;
+                
+                // Check leaderboard collection
+                const leaderboardQuery = query(collection(db, LEADERBOARD_COLLECTION), limit(1));
+                const leaderboardSnapshot = await getDocs(leaderboardQuery);
+                info += `<p class="success">Leaderboard collection exists: ${!leaderboardSnapshot.empty ? 'Has data' : 'Empty'}</p>`;
+                
+                info += '<button id="check-collections">Check Collections</button>';
+                infoElement.innerHTML = info;
+                
+                // Re-attach event listener
+                document.getElementById('check-collections').addEventListener('click', () => {
+                    document.getElementById('check-collections').click();
+                });
+                
+            } catch (error) {
+                infoElement.innerHTML = `
+                    <p>Error checking collections: ${error.message}</p>
+                    <p>Users Collection: <span>${USERS_COLLECTION}</span></p>
+                    <p>Leaderboard Collection: <span>${LEADERBOARD_COLLECTION}</span></p>
+                    <button id="check-collections">Check Collections</button>
+                `;
+                
+                // Re-attach event listener
+                document.getElementById('check-collections').addEventListener('click', () => {
+                    document.getElementById('check-collections').click();
+                });
+                console.error('Collection check error:', error);
+            }
+        });
+        
+        // Run all tests
+        document.getElementById('run-all-tests').addEventListener('click', async () => {
+            const resultsEl = document.getElementById('test-results');
+            resultsEl.innerHTML = '<p>Running tests...</p>';
+            
+            let testResults = [];
+            
+            // Test 1: Firebase Connection
+            try {
+                const testQuery = query(collection(db, USERS_COLLECTION), limit(1));
+                await getDocs(testQuery);
+                testResults.push({ name: 'Firebase Connection', result: 'PASS' });
+            } catch (error) {
+                testResults.push({ name: 'Firebase Connection', result: 'FAIL', error });
+            }
+            
+            // Test 2: Authentication (depends on being logged in)
+            if (currentUser) {
+                testResults.push({ name: 'Authentication', result: 'PASS' });
+            } else {
+                testResults.push({ name: 'Authentication', result: 'SKIP', message: 'Not logged in' });
+            }
+            
+            // Further tests only if logged in
+            if (currentUser) {
+                // Test 3: User Data
+                try {
+                    const userDocRef = doc(db, USERS_COLLECTION, currentUser.uid);
+                    const userDoc = await getDoc(userDocRef);
+                    if (userDoc.exists()) {
+                        testResults.push({ name: 'User Data Access', result: 'PASS' });
+                    } else {
+                        testResults.push({ 
+                            name: 'User Data Access', 
+                            result: 'FAIL', 
+                            message: 'User document does not exist' 
+                        });
+                    }
+                } catch (error) {
+                    testResults.push({ name: 'User Data Access', result: 'FAIL', error });
+                }
+                
+                // Test 4: Leaderboard
+                try {
+                    const leaderboardRef = collection(db, LEADERBOARD_COLLECTION);
+                    const q = query(leaderboardRef, limit(1));
+                    await getDocs(q);
+                    testResults.push({ name: 'Leaderboard Access', result: 'PASS' });
+                } catch (error) {
+                    testResults.push({ name: 'Leaderboard Access', result: 'FAIL', error });
+                }
+                
+                // Test 5: Update User Data
+                try {
+                    const userDocRef = doc(db, USERS_COLLECTION, currentUser.uid);
+                    await updateDoc(userDocRef, { lastTestRun: new Date() });
+                    testResults.push({ name: 'Update User Data', result: 'PASS' });
+                } catch (error) {
+                    testResults.push({ name: 'Update User Data', result: 'FAIL', error });
+                }
+            }
+            
+            // Display test results
+            resultsEl.innerHTML = '';
+            testResults.forEach(test => {
+                const div = document.createElement('div');
+                div.className = 'test-item';
+                let resultClass = '';
+                switch(test.result) {
+                    case 'PASS': resultClass = 'success'; break;
+                    case 'FAIL': resultClass = 'error'; break;
+                    default: resultClass = '';
+                }
+                
+                div.innerHTML = `
+                    <div class="test-name">${test.name}</div>
+                    <div class="test-result ${resultClass}">${test.result}</div>
+                `;
+                resultsEl.appendChild(div);
+                
+                if (test.message || test.error) {
+                    const msgDiv = document.createElement('div');
+                    msgDiv.style.fontSize = '0.85em';
+                    msgDiv.style.marginBottom = '8px';
+                    msgDiv.textContent = test.message || test.error.message;
+                    resultsEl.appendChild(msgDiv);
+                }
+            });
+        });
+        
+        // Auto-run the connection test on page load
+        document.getElementById('test-connection').click();
+    </script>
+</body>
+</html>
