@@ -35,6 +35,29 @@ function getVirtualDeckPos() {
   return { left: rect.left + rect.width / 2, top: rect.top + rect.height / 2 };
 }
 
+// Card rendering: suit symbol and colored value
+function renderCard(card) {
+  if (!card.isFaceUp && !card.flipping) {
+    return `<span style="font-size:1.6em;">🂠</span>`;
+  }
+  const val = card.value;
+  const suit = card.suit;
+  let suitIcon, color;
+  switch (suit) {
+    case '♠': suitIcon = '♠'; color = '#23232b'; break;
+    case '♣': suitIcon = '♣'; color = '#23232b'; break;
+    case '♥': suitIcon = '♥'; color = '#c0392b'; break;
+    case '♦': suitIcon = '♦'; color = '#c0392b'; break;
+    default: suitIcon = suit; color = '#23232b';
+  }
+  return `
+    <div style="display:flex;flex-direction:column;align-items:center;width:100%;height:100%;justify-content:center">
+      <div style="font-size:1.15em;font-weight:bold;color:${color};line-height:1.1">${val}</div>
+      <div style="font-size:2.05em;color:${color};margin-top:-2px">${suitIcon}</div>
+    </div>
+  `;
+}
+
 // --- Hand utilities ---
 function canSplitCurrentHand() {
   const hand = game.getActiveHand();
@@ -131,7 +154,6 @@ function animateChipToBetSpot(type, amount, spot, stackCount) {
   clone.classList.add('chip-flying');
   document.body.appendChild(clone);
 
-  // Position calculations
   const chipRect = chip.getBoundingClientRect();
   const spotRect = spot.getBoundingClientRect();
   clone.style.position = 'fixed';
@@ -237,8 +259,8 @@ function showInPlayButtons(show) {
   clearBetsBtn.style.display = show ? 'none' : '';
 }
 
-// --- Render cards for dealer and player hands, with animation and fanning ---
-function updateHandsUI() {
+// --- Advanced card and hand rendering with casino-like style and badges ---
+function updateHandsUI(resultData = null) {
   // --- Dealer cards ---
   dealerCardsEl.innerHTML = '';
   const dealerHandRect = dealerCardsEl.getBoundingClientRect();
@@ -247,7 +269,7 @@ function updateHandsUI() {
   game.dealerHand.cards.forEach((card, idx) => {
     const cardEl = document.createElement('div');
     cardEl.className = 'card';
-    cardEl.innerHTML = card.isFaceUp ? `${card.value}${card.suit}` : `<span style="font-size:1.3em;">🂠</span>`;
+    cardEl.innerHTML = renderCard(card);
     cardEl.style.position = 'absolute';
     dealerCardsEl.appendChild(cardEl);
 
@@ -279,17 +301,19 @@ function updateHandsUI() {
     if (hIdx === game.activeHandIndex && inPlay) handDiv.classList.add('active-hand');
     handDiv.style.display = 'inline-block';
     handDiv.style.margin = '0 16px';
+    handDiv.style.position = 'relative';
 
     // Fan the cards in a .hand-cards flexbox
     const handCardsDiv = document.createElement('div');
     handCardsDiv.className = 'hand-cards';
+    handCardsDiv.style.position = 'relative';
     const n = hand.cards.length;
     const fanGap = Math.min(38, 180 / n);
 
     hand.cards.forEach((card, idx) => {
       const cardDiv = document.createElement('div');
       cardDiv.className = 'card';
-      cardDiv.innerHTML = `${card.value}${card.suit}`;
+      cardDiv.innerHTML = renderCard(card);
       cardDiv.style.transform = `translateX(${fanGap * (idx - (n - 1) / 2)}px) rotate(${(idx - (n - 1) / 2) * 7}deg)`;
       cardDiv.style.zIndex = 10 + idx;
 
@@ -320,14 +344,49 @@ function updateHandsUI() {
 
     handDiv.appendChild(handCardsDiv);
 
-    // Hand info
+    // Hand info: score, bet, split, doubled, blackjack badge
     let tagStr = `<span>Bet: ${hand.bet}</span> <span>Score: ${game.calculateScore(hand.cards)}</span>`;
     if (hand.isSplit) tagStr += ' <span class="side-bet-label">Split</span>';
     if (hand.isDoubled) tagStr += ' <span class="side-bet-label">Double</span>';
+    if (hand.cards.length === 2 && game.calculateScore(hand.cards) === 21) {
+      tagStr += ' <span style="color:#ffd700;font-weight:bold;background:rgba(0,0,0,0.08);padding:1px 8px;border-radius:10px;margin-left:6px;">Blackjack!</span>';
+    }
     const handInfo = document.createElement('div');
     handInfo.className = 'hand-info';
     handInfo.innerHTML = tagStr;
     handDiv.appendChild(handInfo);
+
+    // Per-hand result banners (only after resultData is passed)
+    if (resultData && resultData[hIdx]) {
+      let resultText = '';
+      switch (resultData[hIdx].outcome) {
+        case 'blackjack': case 'win': resultText = 'WIN'; break;
+        case 'push': resultText = 'PUSH'; break;
+        case 'bust': resultText = 'BUST'; break;
+        case 'dealer_blackjack': resultText = 'DEALER BLACKJACK'; break;
+        default: resultText = 'DEALER WINS';
+      }
+      const resultBanner = document.createElement('div');
+      resultBanner.textContent = resultText;
+      resultBanner.style.position = 'absolute';
+      resultBanner.style.left = '50%';
+      resultBanner.style.top = '-24px';
+      resultBanner.style.transform = 'translateX(-50%)';
+      resultBanner.style.padding = '4px 16px';
+      resultBanner.style.background = 'rgba(36,36,28,0.97)';
+      resultBanner.style.color = resultText === 'WIN' ? '#34c759' : (resultText === 'PUSH' ? '#ffd700' : '#ff4e4e');
+      resultBanner.style.fontWeight = 'bold';
+      resultBanner.style.fontSize = '1.07em';
+      resultBanner.style.borderRadius = '9px';
+      resultBanner.style.zIndex = 99;
+      resultBanner.style.boxShadow = '0 2px 12px #000a';
+      resultBanner.className = 'result-banner';
+      handDiv.appendChild(resultBanner);
+
+      setTimeout(() => {
+        if (resultBanner && resultBanner.parentNode) resultBanner.parentNode.removeChild(resultBanner);
+      }, 1400);
+    }
 
     playerHandsEl.appendChild(handDiv);
   });
@@ -489,9 +548,13 @@ function nextHandOrSettle() {
 }
 
 function settleAndEndRound() {
+  // Flip all dealer cards face up for final rendering and result
+  game.dealerHand.cards.forEach(card => { card.isFaceUp = true; });
+
   inPlay = false; outcomeLock = true;
   const results = game.settleHands();
-  updateChipsDisplay(); updateBetsUI(); updateHandsUI();
+
+  updateChipsDisplay(); updateBetsUI(); updateHandsUI(results);
 
   results.forEach((res, idx) => {
     setTimeout(() => {
