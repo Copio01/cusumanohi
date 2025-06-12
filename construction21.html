@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Construction 21</title>
     <link rel="icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2NCIgaGVpZ2h0PSI2NCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiNlMGExMDYiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBkPSJNMTUuMDUgNWEzIDMgMCAwIDEgNC41IDBIM15NMTUuMDUgNU0xOSA4LjVjMCAxLjUtLjUgMy41LTIgNC41di4wNUgxN2EyIDIgMCAwIDAgLTIgLTIgYSAyIDIgMCAwIDAgLTIgMkgxM3YtNkgxNlY4LjVNOSA2LjVWNE02IDcgTDUuNSAxNC41TWwwIDE1IDguOTkgMy04IGMxLjUgLTRoMmMwIDAuNSAwLjUgMSAwLjUgMnYxSDEwdjNjMCAxIDAgMi40IC0xIDN2XzIgYzAgMC41IDAuMiAwLjUgMC41IDAuNXMwLjUgLTAuMiAwLjUgLTAuNVYyMUg0LjA3bDEuOCAtMTQuMjUgYTEgMSAwIDAgMSAwLjE5IC0wLjA3IHoiLz48L3N2Zz4=" type="image/svg+xml">
-    <!-- NOTE: The Tailwind CSS CDN is for development and demonstration. For production, a proper build setup is recommended. -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- NOTE: For production, use a built Tailwind CSS file. See https://tailwindcss.com/docs/installation for instructions. -->
+    <link href="css/tailwind.output.css" rel="stylesheet">
     <style>
         body {
             margin: 0;
@@ -274,7 +274,7 @@
                 if (typeof __firebase_config !== 'undefined' && __firebase_config) {
                     firebaseConfig = JSON.parse(__firebase_config);
                 } else {
-                    console.warn("Firebase config not provided by environment. Using hardcoded fallback.");
+                    // Removed console.warn about config fallback for cleaner production logs
                     firebaseConfig = {
                         apiKey: "AIzaSyBVtq6dAEuybJNmTTv8dXBxTVUgw1t0ZMk",
                         authDomain: "cusumano-website.firebaseapp.com",
@@ -487,15 +487,13 @@
                               (ranks[0] === 2 && ranks[1] === 3 && ranks.includes(11));
             
             const isThreeOfAKind = ranks[0] === ranks[1] && ranks[1] === ranks[2];
-            
-            if (isFlush && isThreeOfAKind) return { type: 'Suited Trips', payout: TWENTY_ONE_PLUS_THREE_PAYOUTS.suitedTrips };
             if (isFlush && isStraight) return { type: 'Straight Flush', payout: TWENTY_ONE_PLUS_THREE_PAYOUTS.straightFlush };
             if (isThreeOfAKind) return { type: 'Three of a Kind', payout: TWENTY_ONE_PLUS_THREE_PAYOUTS.threeOfAKind };
             if (isStraight) return { type: 'Straight', payout: TWENTY_ONE_PLUS_THREE_PAYOUTS.straight };
             if (isFlush) return { type: 'Flush', payout: TWENTY_ONE_PLUS_THREE_PAYOUTS.flush };
 
             return { type: 'None', payout: 0 };
-        }
+                    }
         
         // --- UI & Event Listeners ---
         function setupEventListeners() { /* Unchanged */ }
