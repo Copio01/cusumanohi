@@ -31,134 +31,254 @@
         }
         #game-container {
             width: 100%; max-width: 800px; margin: 0 auto; padding: 20px;
-        }
-        .card-table {
-            display: flex; flex-direction: column; gap: 30px; padding: 20px;
-            background: linear-gradient(135deg, #05392d 0%, #083f2e 100%);
-            border-radius: 15px;
-            box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.3), 0 10px 30px rgba(0, 0, 0, 0.5);
-            border: 6px solid #05392d;
-        }
-        .dealer-area, .player-area {
-            display: flex; flex-direction: column; align-items: center;
-            background: rgba(0,0,0,0.15); padding: 20px; border-radius: 12px;
-            box-shadow: inset 0 0 15px rgba(0,0,0,0.2);
-        }
-        .hand-label {
-            color: white; font-size: 18px; margin-bottom: 12px; font-weight: bold;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.3); background: rgba(255,215,0,0.15);
-            padding: 5px 15px; border-radius: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-        }
-        .cards {
-            display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; min-height: 180px; align-items: center; padding: 10px;
-        }
+        }        /* --- Construction 21 Card & Table Theme --- */
         .card {
-            width: 120px; height: 170px; background: #f5f5f4; border-radius: 12px;
-            box-shadow: 0 4px 16px rgba(80, 80, 80, 0.18), 0 1.5px 0 #bfa14a inset;
-            border: 2.5px solid #bfa14a; /* Construction gold border */
+            width: 140px; height: 200px; 
+            background: linear-gradient(145deg, #ffffff, #f5f5f4);
+            border-radius: 16px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15), 
+                        0 2px 4px rgba(0,0,0,0.1),
+                        inset 0 1px 0 rgba(255,255,255,0.8);
+            border: 3px solid #bfa14a;
             position: relative;
             transform-style: preserve-3d;
-            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s, border-color 0.2s;
+            transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+            cursor: pointer;
         }
         .card.dealing {
-            animation: dealCard 0.5s cubic-bezier(0.215, 0.61, 0.355, 1) forwards;
-            box-shadow: 0 8px 24px 0 #bfa14a44, 0 4px 15px rgba(80,80,80,0.18);
+            animation: dealCard 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+            box-shadow: 0 8px 25px rgba(191,161,74,0.4), 
+                        0 4px 12px rgba(0,0,0,0.2);
             border-color: #e0b800;
         }
         .card:hover {
-            box-shadow: 0 8px 24px 0 #bfa14a33, 0 4px 15px rgba(80,80,80,0.18);
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 12px 30px rgba(191,161,74,0.3), 
+                        0 6px 20px rgba(0,0,0,0.15);
             border-color: #e0b800;
-            z-index: 2;
+            z-index: 10;
         }
-        .card .card-face {
+        @keyframes dealCard {
+            0% { 
+                transform: translateX(-200px) translateY(-100px) rotateY(180deg) scale(0.8); 
+                opacity: 0; 
+            }
+            30% { 
+                transform: translateX(-50px) translateY(-30px) rotateY(90deg) scale(0.9); 
+                opacity: 0.7; 
+            }
+            70% { 
+                transform: translateX(10px) translateY(-5px) rotateY(15deg) scale(1.05); 
+                opacity: 0.9; 
+            }
+            100% { 
+                transform: translateX(0) translateY(0) rotateY(0deg) scale(1); 
+                opacity: 1; 
+            }
+        }        .card .card-face {
+            width: 100%; height: 100%;
             display: flex; flex-direction: column; justify-content: space-between;
-            box-sizing: border-box; padding: 10px; background: #f5f5f4;
-            border-radius: 12px; border: none;
-            position: relative;
+            box-sizing: border-box; padding: 12px; 
+            background: linear-gradient(145deg, #ffffff, #f8f8f8);
+            border-radius: 14px; border: none;
+            position: absolute; top: 0; left: 0;
         }
         .card .corner {
-            display: flex; flex-direction: column; align-items: center; font-weight: bold; line-height: 1;
-            font-size: 1.1rem; letter-spacing: 0.5px; color: #bfa14a;
-            text-shadow: 0 1px 0 #fffbe6;
+            display: flex; flex-direction: column; align-items: center; 
+            font-weight: bold; line-height: 1.1;
+            font-size: 1.2rem; letter-spacing: 0.5px; 
+            text-shadow: 0 1px 2px rgba(0,0,0,0.1);
         }
         .card .top-left {
-            align-self: flex-start; margin-top: 2px; margin-left: 2px;
+            align-self: flex-start; margin-top: 4px; margin-left: 4px;
         }
         .card .bottom-right {
-            align-self: flex-end; margin-bottom: 2px; margin-right: 2px; transform: rotate(180deg);
+            align-self: flex-end; margin-bottom: 4px; margin-right: 4px; 
+            transform: rotate(180deg);
         }
         .card .value {
-            font-size: 26px; font-weight: 700; margin-bottom: 2px; color: #23232b;
+            font-size: 28px; font-weight: 800; margin-bottom: 2px; 
+            color: #2c2c2c; text-shadow: 0 1px 2px rgba(0,0,0,0.1);
         }
         .card .suit {
-            font-size: 28px; margin-bottom: 2px; color: #bfa14a;
+            font-size: 32px; margin-bottom: 2px; 
+            filter: drop-shadow(0 1px 2px rgba(0,0,0,0.2));
+        }
+        .card .suit.red { color: #dc2626; }
+        .card .suit.black { color: #1f2937; }
+        .card .center {
+            position: absolute; top: 50%; left: 50%; 
+            transform: translate(-50%, -50%);
+            display: flex; align-items: center; justify-content: center;
         }
         .card .center-suit {
-            font-size: 64px; opacity: 0.85; color: #bfa14a;
+            font-size: 80px; opacity: 0.15; 
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
         }
         .card .face-design {
-            font-size: 54px; opacity: 0.92; color: #bfa14a;
+            font-size: 64px; opacity: 0.9; 
+            filter: drop-shadow(0 2px 6px rgba(0,0,0,0.2));
         }
-        .card .face-K::after { content: '👷‍♂️'; }
-        .card .face-Q::after { content: '👷‍♀️'; }
-        .card .face-J::after { content: '🏗️'; }
-        .card .face-A { font-size: 80px; }
+        .card .face-K .face-design::after { content: '👷‍♂️'; }
+        .card .face-Q .face-design::after { content: '👷‍♀️'; }
+        .card .face-J .face-design::after { content: '🏗️'; }
+        .card .face-A .center-suit { font-size: 100px; opacity: 0.8; }
         .card .card-back {
-            background: repeating-linear-gradient(135deg, #23232b 0px, #23232b 12px, #bfa14a 12px, #bfa14a 24px);
-            transform: rotateY(180deg); display: flex; align-items: center; justify-content: center;
-            border-radius: 12px;
+            width: 100%; height: 100%;
+            background: 
+                repeating-linear-gradient(45deg, #bfa14a 0px, #bfa14a 8px, #23232b 8px, #23232b 16px),
+                radial-gradient(circle at 50% 50%, #bfa14a 30%, #8b7a00 70%);
+            transform: rotateY(180deg); 
+            display: flex; align-items: center; justify-content: center;
+            border-radius: 14px; position: absolute; top: 0; left: 0;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
         }
-        .card .card-back::after { content: "\1F528"; font-size: 54px; color: #bfa14a; text-shadow: 0 1px 0 #fffbe6, 0 0 2px #23232b; }
-        .card .corner { display: flex; flex-direction: column; align-items: center; font-weight: bold; line-height: 1; }
-        .card .top-left { align-self: flex-start; }
-        .card .bottom-right { align-self: flex-end; transform: rotate(180deg); }
-        .card .value { font-size: 22px; }
-        .card .suit { font-size: 24px; }
-        .card .center-suit, .card .face-design { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
-        .card .center-suit { font-size: 60px; }
-        .card .face-design { font-size: 48px; }
-        .card .face-K::after { content: '👷‍♂️'; }
-        .card .face-Q::after { content: '👷‍♀️'; }
-        .card .face-J::after { content: '🏗️'; }
-        .card .face-A { font-size: 72px; }
-        @keyframes dealCard {
-            from { transform: translateY(-300px) translateX(400px) rotate(180deg) scale(0.3); opacity: 0; }
-            60% { transform: translateY(10px) translateX(-10px) rotate(8deg) scale(1.08); opacity: 1; }
-            to { transform: translateY(0) translateX(0) rotate(0deg) scale(1); opacity: 1; }
+        .card .card-back::after { 
+            content: "\1F528"; font-size: 64px; color: #23232b; 
+            text-shadow: 0 2px 4px rgba(255,255,255,0.3), 0 0 8px #bfa14a; 
+            filter: drop-shadow(0 2px 6px rgba(0,0,0,0.3));
+        }        /* --- Table Area --- */
+        .card-table {
+            display: flex; flex-direction: column; gap: 30px; padding: 32px 24px;
+            background: 
+                radial-gradient(ellipse at center, #2d5a2d 0%, #1a4a1a 100%),
+                linear-gradient(135deg, #1a2d1a 0%, #2d3a2d 100%);
+            border-radius: 24px;
+            box-shadow: 0 12px 40px rgba(0,0,0,0.3), 
+                        0 4px 12px rgba(191,161,74,0.2),
+                        inset 0 1px 0 rgba(255,255,255,0.1);
+            border: 4px solid #bfa14a;
+            position: relative;
         }
-        .card.dealing { animation: dealCard 0.5s cubic-bezier(0.215, 0.61, 0.355, 1) forwards; }
-        .control-btn, .auth-btn, .primary-btn, .secondary-btn {
-            padding: 12px 24px; border-radius: 8px; font-size: 16px; font-weight: bold;
-            cursor: pointer; transition: all 0.2s; border: none;
+        .card-table::before {
+            content: '';
+            position: absolute; inset: 8px; 
+            border-radius: 20px;
+            border: 2px dashed rgba(191,161,74,0.3);
+            pointer-events: none;
         }
-        .control-btn:disabled { background: #9ca3af; cursor: not-allowed; transform: none; box-shadow: none; opacity: 0.6; }
+
+        /* --- Betting Spots on Table --- */
+        .betting-area {
+            display: flex; justify-content: center; gap: 20px; 
+            margin: 20px 0; flex-wrap: wrap;
+        }
+        .bet-spot {
+            position: relative; width: 120px; height: 120px;
+            border-radius: 50%; border: 3px solid #bfa14a;
+            background: radial-gradient(circle at 30% 30%, 
+                rgba(191,161,74,0.3) 0%, 
+                rgba(191,161,74,0.1) 70%, 
+                transparent 100%);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            box-shadow: inset 0 2px 8px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+        }
+        .bet-spot:hover { 
+            border-color: #e0b800; 
+            box-shadow: inset 0 2px 8px rgba(0,0,0,0.3), 
+                        0 0 20px rgba(191,161,74,0.4);
+        }
+        .bet-spot-label {
+            font-size: 12px; font-weight: bold; color: #bfa14a;
+            text-align: center; line-height: 1.2; margin-bottom: 4px;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+        }
+        .bet-amount {
+            font-size: 16px; font-weight: bold; color: #fff;
+            background: rgba(0,0,0,0.4); padding: 2px 8px; 
+            border-radius: 12px; min-height: 20px;
+        }
+        .chip-stack {
+            position: absolute; bottom: -10px; left: 50%;
+            transform: translateX(-50%); display: flex; flex-direction: column-reverse;
+            align-items: center;
+        }
+        .chip-in-stack {
+            width: 50px; height: 50px; border-radius: 50%;
+            margin-top: -8px; transition: all 0.2s ease;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+        }
+        .dealer-area, .player-area {
+            display: flex; flex-direction: column; align-items: center;
+            background: rgba(36,36,28,0.18); padding: 18px; border-radius: 14px;
+            box-shadow: 0 2px 8px #bfa14a22 inset;
+        }
+        .hand-label {
+            color: #fffbe6; font-size: 18px; margin-bottom: 12px; font-weight: bold;
+            text-shadow: 0 2px 4px #23232b88; background: #bfa14a33;
+            padding: 5px 15px; border-radius: 20px; box-shadow: 0 2px 5px #23232b22;
+        }
+        .cards {
+            display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; min-height: 120px; align-items: center; padding: 10px;
+        }        /* --- Betting Chips --- */
         .chip {
-            width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
-            font-weight: bold; font-size: 18px; color: white; margin: 5px; cursor: pointer;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.3); position: relative; text-shadow: 0 1px 2px rgba(0,0,0,0.5);
-            border: 2px solid rgba(255,255,255,0.3); transition: transform 0.15s, box-shadow 0.15s;
+            width: 70px; height: 70px; border-radius: 50%; 
+            display: flex; align-items: center; justify-content: center;
+            font-weight: bold; font-size: 16px; color: #fffbe6; margin: 8px; cursor: pointer;
+            position: relative; text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+            transition: all 0.2s cubic-bezier(0.4, 0.0, 0.2, 1);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3), 
+                        inset 0 2px 4px rgba(255,255,255,0.3),
+                        inset 0 -2px 4px rgba(0,0,0,0.2);
         }
-        .chip:hover { transform: translateY(-3px); box-shadow: 0 6px 12px rgba(0,0,0,0.4); }
-        .chip-5 { background: linear-gradient(135deg, #f55 0%, #900 100%); }
-        .chip-10 { background: linear-gradient(135deg, #55f 0%, #006 100%); }
-        .chip-25 { background: linear-gradient(135deg, #5f5 0%, #060 100%); }
-        .chip-100 { background: linear-gradient(135deg, #000 0%, #333 100%); }
+        .chip::before {
+            content: '';
+            position: absolute; inset: 6px; border-radius: 50%;
+            border: 2px dashed rgba(255,255,255,0.4);
+            opacity: 0.7;
+        }
+        .chip::after {
+            content: '';
+            position: absolute; inset: 12px; border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.6), transparent 70%);
+        }
+        .chip:hover { 
+            transform: translateY(-4px) scale(1.05);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.4), 
+                        inset 0 2px 4px rgba(255,255,255,0.4);
+        }
+        .chip:active {
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+        }
+        
+        /* Construction themed chip colors */
+        .chip-5 { 
+            background: conic-gradient(from 0deg, #bfa14a, #8b7a00, #bfa14a, #8b7a00);
+            border: 3px solid #8b7a00;
+        }
+        .chip-10 { 
+            background: conic-gradient(from 45deg, #8B4513, #5D2D0A, #8B4513, #5D2D0A);
+            border: 3px solid #5D2D0A;
+        }
+        .chip-25 { 
+            background: conic-gradient(from 90deg, #708090, #4F5F6F, #708090, #4F5F6F);
+            border: 3px solid #4F5F6F;
+        }
+        .chip-100 { 
+            background: conic-gradient(from 135deg, #2F4F4F, #1C3030, #2F4F4F, #1C3030);
+            border: 3px solid #1C3030;
+        }
+        /* --- Result Screen --- */
         #game-result-screen {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(30, 41, 59, 0.95); backdrop-filter: blur(5px);
+            background: rgba(36, 36, 28, 0.97); backdrop-filter: blur(5px);
             z-index: 20; display: flex; flex-direction: column; align-items: center; justify-content: center;
             gap: 1.5rem; opacity: 0; pointer-events: none; transition: opacity 0.4s;
-            border-radius: 15px;
+            border-radius: 18px;
         }
         #game-result-screen.active { opacity: 1; pointer-events: all; }
+        /* --- Leaderboard --- */
         #leaderboard {
-             background: rgba(17, 24, 39, 0.8);
+             background: rgba(36, 36, 28, 0.92);
              backdrop-filter: blur(5px);
-             border: 1px solid rgba(255,255,255,0.1);
+             border: 2px solid #bfa14a;
         }
+        /* --- Auth Tabs --- */
         .auth-tab-content { display: none; }
         .auth-tab-content.active { display: block; }
-        .auth-tab-btn.active { background-color: #4f46e5; color: white; }
+        .auth-tab-btn.active { background-color: #bfa14a; color: #23232b; }
     </style>
 </head>
 <body class="bg-gray-900 text-white">
@@ -182,47 +302,93 @@
                   <button id="logout-btn" class="secondary-btn bg-gray-600 hover:bg-gray-700 text-white w-full sm:w-auto">Logout</button>
                 </div>
             </div>
-        </div>
-        <!-- Game Canvas -->
+        </div>        <!-- Game Canvas -->
         <div id="game-canvas" class="hidden mt-4">
             <div class="card-table">
+                <!-- Betting Spots -->
+                <div class="betting-area">
+                    <div class="bet-spot" id="main-bet-spot">
+                        <div class="bet-spot-label">MAIN BET</div>
+                        <div class="bet-amount" id="main-bet-amount">0</div>
+                        <div class="chip-stack" id="main-bet-stack"></div>
+                    </div>
+                    <div class="bet-spot" id="pp-bet-spot">
+                        <div class="bet-spot-label">PERFECT<br>PAIRS</div>
+                        <div class="bet-amount" id="pp-bet-amount">0</div>
+                        <div class="chip-stack" id="pp-bet-stack"></div>
+                    </div>
+                    <div class="bet-spot" id="plus3-bet-spot">
+                        <div class="bet-spot-label">21+3</div>
+                        <div class="bet-amount" id="plus3-bet-amount">0</div>
+                        <div class="chip-stack" id="plus3-bet-stack"></div>
+                    </div>
+                </div>
+                
                 <div class="dealer-area">
-                    <div class="hand-label">Dealer's Hand: <span id="dealer-score">0</span></div>
+                    <div class="hand-label">Dealer's Hand: <span id="dealer-score-display">0</span></div>
                     <div id="dealer-cards" class="cards"></div>
                 </div>
                 <div class="player-area">
-                    <div class="hand-label">Your Hand: <span id="player-score">0</span></div>
+                    <div class="hand-label">Your Hand: <span id="player-score-display">0</span></div>
                     <div id="player-hands-display" class="cards"></div>
                 </div>
-                <div id="betting-controls" class="mt-6 space-y-4 bg-gray-900/80 p-6 rounded-xl shadow-lg max-w-md mx-auto">
-                    <h3 class="text-lg font-semibold mb-2 text-yellow-300">Place Your Bets</h3>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div class="flex flex-col items-start">
-                            <label for="bet-amount" class="text-sm mb-1">Main Bet:</label>
-                            <input type="number" id="bet-amount" value="10" min="1" class="p-2 border border-gray-400 rounded w-full text-black">
-                            <span class="text-xs mt-1">Current: <span id="current-bet">0</span></span>
+                <div id="betting-controls" class="mt-6 space-y-6 bg-gray-900/80 p-6 rounded-xl shadow-lg max-w-lg mx-auto">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-xl font-semibold text-yellow-300">Place Your Bets</h3>
+                        <div class="text-lg">Your Chips: <span id="player-chip-balance" class="font-bold text-yellow-400">0</span></div>
+                    </div>
+
+                    <!-- Main Bet -->
+                    <div class="bet-section space-y-2">
+                        <div class="flex justify-between items-center">
+                            <label class="text-md font-medium">Main Bet:</label>
+                            <span class="text-lg font-bold text-white">Current: <span id="current-main-bet-display">0</span></span>
                         </div>
-                        <div class="flex flex-col items-start">
-                            <label for="perfect-pairs-bet" class="text-sm mb-1">Perfect Pairs:</label>
-                            <input type="number" id="perfect-pairs-bet" value="0" min="0" class="p-2 border border-gray-400 rounded w-full text-black">
-                            <span class="text-xs mt-1">Current: <span id="current-pp-bet">0</span></span>
-                        </div>
-                        <div class="flex flex-col items-start">
-                            <label for="twenty-one-plus-three-bet" class="text-sm mb-1">21+3:</label>
-                            <input type="number" id="twenty-one-plus-three-bet" value="0" min="0" class="p-2 border border-gray-400 rounded w-full text-black">
-                            <span class="text-xs mt-1">Current: <span id="current-21plus3-bet">0</span></span>
+                        <div id="main-bet-chips" class="chip-selection flex flex-wrap justify-center gap-2">
+                            <button type="button" class="chip chip-5" data-bet-type="main" data-amount="5">5</button>
+                            <button type="button" class="chip chip-10" data-bet-type="main" data-amount="10">10</button>
+                            <button type="button" class="chip chip-25" data-bet-type="main" data-amount="25">25</button>
+                            <button type="button" class="chip chip-100" data-bet-type="main" data-amount="100">100</button>
                         </div>
                     </div>
-                    <button id="place-bet-btn" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded w-full mt-2">Place Bet</button>
+
+                    <!-- Perfect Pairs Bet -->
+                    <div class="bet-section space-y-2">
+                        <div class="flex justify-between items-center">
+                            <label class="text-md font-medium">Perfect Pairs Bet:</label>
+                            <span class="text-lg font-bold text-white">Current: <span id="current-pp-bet-display">0</span></span>
+                        </div>
+                        <div id="pp-bet-chips" class="chip-selection flex flex-wrap justify-center gap-2">
+                            <button type="button" class="chip chip-5" data-bet-type="pp" data-amount="5">5</button>
+                            <button type="button" class="chip chip-10" data-bet-type="pp" data-amount="10">10</button>
+                            <button type="button" class="chip chip-25" data-bet-type="pp" data-amount="25">25</button>
+                            <button type="button" class="chip chip-100" data-bet-type="pp" data-amount="100">100</button>
+                        </div>
+                    </div>
+
+                    <!-- 21+3 Bet -->
+                    <div class="bet-section space-y-2">
+                        <div class="flex justify-between items-center">
+                            <label class="text-md font-medium">21+3 Bet:</label>
+                            <span class="text-lg font-bold text-white">Current: <span id="current-21plus3-bet-display">0</span></span>
+                        </div>
+                        <div id="twentyone-plus-three-bet-chips" class="chip-selection flex flex-wrap justify-center gap-2">
+                            <button type="button" class="chip chip-5" data-bet-type="21plus3" data-amount="5">5</button>
+                            <button type="button" class="chip chip-10" data-bet-type="21plus3" data-amount="10">10</button>
+                            <button type="button" class="chip chip-25" data-bet-type="21plus3" data-amount="25">25</button>
+                            <button type="button" class="chip chip-100" data-bet-type="21plus3" data-amount="100">100</button>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col sm:flex-row gap-3 mt-6">
+                        <button id="clear-bets-btn" class="secondary-btn bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-4 rounded w-full sm:w-auto flex-grow">Clear All Bets</button>
+                        <button id="place-bets-deal-btn" class="primary-btn bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded w-full sm:w-auto flex-grow">Place Bets & Deal</button>
+                    </div>
                 </div>
-                <div id="game-area" class="hidden mt-4">
-                    <h2 class="text-xl font-bold">Dealer's Hand</h2>
-                    <div id="dealer-score" class="text-lg">Score: 0</div>
-                    <div id="dealer-cards" class="flex space-x-2 mt-2 min-h-[100px]"></div>
-                    <h2 class="text-xl font-bold mt-4">Your Hand(s)</h2>
-                    <div id="side-bet-results" class="hidden my-2 p-2 border rounded bg-blue-100 text-blue-800"></div>
-                    <div id="player-hands-display" class="mt-2 space-y-4"></div>
-                    <div id="game-controls" class="mt-4 space-x-2 hidden">
+                <div id="game-area" class="hidden mt-4 p-4 bg-gray-800/70 rounded-xl">
+                    <!-- Dealer and Player card areas are already defined above, game-area is for controls and messages -->
+                    <div id="side-bet-results" class="hidden my-2 p-3 border rounded-lg bg-blue-900/70 text-blue-200 border-blue-500"></div>
+                    <div id="game-controls" class="mt-4 flex flex-wrap justify-center gap-3 hidden">
                         <button id="hit-btn" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Hit</button>
                         <button id="stand-btn" class="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded">Stand</button>
                         <button id="split-btn" class="bg-purple-500 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded hidden">Split</button>
@@ -257,7 +423,7 @@
         const authSection = document.getElementById('auth-section');
         const userProfile = document.getElementById('user-profile');
         const dealerCardsEl = document.getElementById('dealer-cards');
-        const dealerScoreEl = document.getElementById('dealer-score');
+        const dealerScoreEl = document.getElementById('dealer-score-display'); // Adjusted ID
         const bettingControls = document.getElementById('betting-controls');
         const gameControls = document.getElementById('game-controls');
         const gameResultScreen = document.getElementById('game-result-screen');
@@ -265,22 +431,43 @@
         const sideBetResultsEl = document.getElementById('side-bet-results');
         const hitBtn = document.getElementById('hit-btn');
         const standBtn = document.getElementById('stand-btn');
-        const doubleDownBtn = document.getElementById('double-down-btn');
+        // const doubleDownBtn = document.getElementById('double-down-btn'); // Already commented or removed
         const splitButton = document.getElementById('split-btn');
+        const gameArea = document.getElementById('game-area');        // Betting UI Elements
+        const playerChipBalanceEl = document.getElementById('player-chip-balance');
+        const currentMainBetDisplayEl = document.getElementById('current-main-bet-display');
+        const currentPpBetDisplayEl = document.getElementById('current-pp-bet-display');
+        const current21plus3BetDisplayEl = document.getElementById('current-21plus3-bet-display');
+        const clearBetsBtn = document.getElementById('clear-bets-btn');
+        const placeBetsDealBtn = document.getElementById('place-bets-deal-btn');
+        const allChipButtons = document.querySelectorAll('.chip');
+        const playBtn = document.getElementById('play-btn');
+        const logoutBtn = document.getElementById('logout-btn');
+        const playAgainBtn = document.getElementById('play-again-btn');
+        const returnMenuBtn = document.getElementById('return-menu-btn');
+
+        // Betting Spots on Table
+        const mainBetAmountEl = document.getElementById('main-bet-amount');
+        const ppBetAmountEl = document.getElementById('pp-bet-amount');
+        const plus3BetAmountEl = document.getElementById('plus3-bet-amount');
+        const mainBetStackEl = document.getElementById('main-bet-stack');
+        const ppBetStackEl = document.getElementById('pp-bet-stack');
+        const plus3BetStackEl = document.getElementById('plus3-bet-stack');
+
 
         // --- Game State ---
         let db, auth;
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        // const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id'; // Already commented or removed
         let currentUser = null; 
         let currentPlayerName = "Guest";
         let deck = [];
         let dealerHand = {};
         let playerHands = [];
         let activeHandIndex = 0;
-        let playerChips = 100; // Changed from 1000 to 100
-        let currentBet = 0;
-        let perfectPairsBetAmount = 0;
-        let twentyOnePlusThreeBetAmount = 0;
+        let playerChips = 100;
+        let currentMainBet = 0; // Renamed from currentBet
+        let currentPPBet = 0; // Renamed from perfectPairsBetAmount
+        let current21Plus3Bet = 0; // Renamed from twentyOnePlusThreeBetAmount
 
         const suits = ['♥', '♦', '♠', '♣'];
         const values = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
@@ -336,15 +523,26 @@
         }
 
         async function setupUserSession(user) {
-            const userData = await getUserDataFromFirestore(user.uid);
-            if (!userData) { return; }
-            currentUser = { uid: user.uid, displayName: userData.displayName, chips: userData.chips };
-            currentPlayerName = currentUser.displayName;
-            playerChips = currentUser.chips;
-            showUserProfile();
+            const userDocRef = doc(db, "game_users_custom_auth", user.uid);
+            const userDoc = await getDoc(userDocRef);
+            
+            if (userDoc.exists()) {
+                const userData = userDoc.data();
+                currentUser = { uid: user.uid, displayName: userData.displayName, chips: userData.chips };
+                currentPlayerName = currentUser.displayName;
+                playerChips = currentUser.chips;
+                showUserProfile();
+                updateGlobalChipDisplay(); // Update chips on profile
+            } else {
+                // This case should ideally not happen if sign up ensures doc creation
+                console.error("User data not found in Firestore, logging out.");
+                handleLogout();
+            }
         }
 
         async function getUserDataFromFirestore(userId) {
+            // This function is now mostly incorporated into setupUserSession, can be removed or kept for other uses.
+            // For now, let's assume setupUserSession is the primary way user data is fetched.
             const userDocRef = doc(db, "game_users_custom_auth", userId);
             const userDoc = await getDoc(userDocRef);
             return userDoc.exists() ? userDoc.data() : null;
@@ -355,6 +553,10 @@
             userProfile.classList.add('hidden');
             gameCanvas.classList.add('hidden');
             mainMenu.classList.remove('hidden');
+            // Reset any game state if user lands here
+            bettingControls.classList.add('hidden');
+            gameArea.classList.add('hidden');
+            gameResultScreen.classList.add('hidden');
             authSection.innerHTML = `
                 <div class="border-b border-gray-600 mb-4">
                     <nav class="-mb-px flex space-x-4" aria-label="Tabs">
@@ -427,70 +629,552 @@
             mainMenu.classList.remove('hidden');
             authSection.classList.add('hidden');
             userProfile.classList.remove('hidden');
+            gameCanvas.classList.add('hidden'); // Ensure game canvas is hidden initially
             document.getElementById('profile-name').textContent = currentPlayerName;
-            updateChipDisplay();
+            updateGlobalChipDisplay();
         }
 
         async function handleLogout() {
             await signOut(auth);
+            // No need to explicitly call showAuthForms, onAuthStateChanged will handle it.
+        }
+
+        async function updatePlayerChipsInFirestore(userId, newChipAmount) {
+            if (!userId) {
+                console.error("User ID not available for Firestore update.");
+                return;
+            }
+            const userDocRef = doc(db, "game_users_custom_auth", userId);
+            try {
+                await updateDoc(userDocRef, { chips: newChipAmount });
+            } catch (error) {
+                console.error("Error updating chips in Firestore: ", error);
+            }
         }
         
-        // --- Game Logic (Core) ---
-        function resetGameState() { /* Unchanged */ }
-        async function startNewHand() { /* Unchanged */ }
-        function createDeck() { /* Unchanged */ }
-        function calculateScore(cards) { /* Unchanged */ }
-        function updateScoresAndUI() { /* Unchanged */ }
-        function createPlayerHandDisplay(hand, index) { /* Unchanged */ }
-        async function dealCard(hand, cardsContainer, isHidden = false) { /* Unchanged */ }
-        async function dealCardToPlayer(hand) { /* Unchanged */ }
-        async function dealCardToDealer(isFaceUp) { /* Unchanged */ }
-        async function hit() { /* Unchanged */ }
-        async function stand() { /* Unchanged */ }
-        async function doubleDown() { /* Unchanged */ }
-        async function handleSplit() { /* Unchanged */ }
-        async function advanceToNextHandOrDealer() { /* Unchanged */ }
-        async function dealerTurn() { /* Unchanged */ }
-        async function endHand() { /* Unchanged */ }
-        
-        // --- Side Bet Logic (Fully Implemented) ---
-        function evaluateSideBets() {
-            let sideBetWinnings = 0;
-            let resultsHTML = '';
-            const playerCard1 = playerHands[0].cards[0];
-            const playerCard2 = playerHands[0].cards[1];
-            const dealerUpCard = dealerHand.cards.find(card => card); // First dealer card
+        // --- Betting Logic ---
+        function updateGlobalChipDisplay() {
+            document.getElementById('profile-chips').textContent = playerChips;
+            if (playerChipBalanceEl) { // Betting screen chip display
+                playerChipBalanceEl.textContent = playerChips;
+            }
+        }        function updateBetAmountDisplays() {
+            if (currentMainBetDisplayEl) currentMainBetDisplayEl.textContent = currentMainBet;
+            if (currentPpBetDisplayEl) currentPpBetDisplayEl.textContent = currentPPBet;
+            if (current21plus3BetDisplayEl) current21plus3BetDisplayEl.textContent = current21Plus3Bet;
+            
+            // Update betting spots on table
+            if (mainBetAmountEl) mainBetAmountEl.textContent = currentMainBet;
+            if (ppBetAmountEl) ppBetAmountEl.textContent = currentPPBet;
+            if (plus3BetAmountEl) plus3BetAmountEl.textContent = current21Plus3Bet;
+            
+            // Update visual chip stacks
+            updateChipStacks();
+        }
 
-            // 1. Perfect Pairs Evaluation
-            if (perfectPairsBetAmount > 0) {
-                let pairResult = checkPerfectPairs(playerCard1, playerCard2);
-                if (pairResult.payout > 0) {
-                    const winnings = perfectPairsBetAmount * pairResult.payout;
-                    sideBetWinnings += winnings + perfectPairsBetAmount;
-                    resultsHTML += `<p>Perfect Pairs: You hit a ${pairResult.type}! Win ${winnings}.</p>`;
-                } else {
-                    resultsHTML += `<p>Perfect Pairs: No pair. Lost bet.</p>`;
+        function updateChipStacks() {
+            updateChipStack(mainBetStackEl, currentMainBet);
+            updateChipStack(ppBetStackEl, currentPPBet);
+            updateChipStack(plus3BetStackEl, current21Plus3Bet);
+        }
+
+        function updateChipStack(stackElement, amount) {
+            if (!stackElement) return;
+            stackElement.innerHTML = '';
+            
+            const chipCounts = {};
+            let remaining = amount;
+            
+            // Break down amount into chip denominations
+            [100, 25, 10, 5].forEach(denom => {
+                if (remaining >= denom) {
+                    chipCounts[denom] = Math.floor(remaining / denom);
+                    remaining -= chipCounts[denom] * denom;
                 }
+            });
+            
+            // Create visual chip stack
+            Object.entries(chipCounts).forEach(([denom, count]) => {
+                for (let i = 0; i < Math.min(count, 5); i++) { // Max 5 chips per denomination
+                    const chipEl = document.createElement('div');
+                    chipEl.className = `chip-in-stack chip-${denom}`;
+                    chipEl.style.background = getChipBackground(denom);
+                    stackElement.appendChild(chipEl);
+                }
+            });
+        }
+
+        function getChipBackground(denomination) {
+            switch(denomination) {
+                case '5': return 'conic-gradient(from 0deg, #bfa14a, #8b7a00, #bfa14a, #8b7a00)';
+                case '10': return 'conic-gradient(from 45deg, #8B4513, #5D2D0A, #8B4513, #5D2D0A)';
+                case '25': return 'conic-gradient(from 90deg, #708090, #4F5F6F, #708090, #4F5F6F)';
+                case '100': return 'conic-gradient(from 135deg, #2F4F4F, #1C3030, #2F4F4F, #1C3030)';
+                default: return 'conic-gradient(from 0deg, #bfa14a, #8b7a00, #bfa14a, #8b7a00)';
+            }
+        }
+
+        function renderCard(cardElement, cardData, isFaceUp = true) {
+            if (!isFaceUp) {
+                cardElement.innerHTML = '<div class="card-face card-back"></div>';
+                return;
+            }
+
+            const suitColor = ['♥', '♦'].includes(cardData.suit) ? 'red' : 'black';
+            const isAce = cardData.value === 'A';
+            const isFace = ['J', 'Q', 'K'].includes(cardData.value);
+            
+            let faceContent = '';
+            if (isFace) {
+                faceContent = `<div class="center"><div class="face-design face-${cardData.value}"></div></div>`;
+            } else if (isAce) {
+                faceContent = `<div class="center face-A"><div class="center-suit ${suitColor}">${cardData.suit}</div></div>`;
+            } else {
+                faceContent = `<div class="center"><div class="center-suit ${suitColor}">${cardData.suit}</div></div>`;
+            }
+
+            cardElement.innerHTML = `
+                <div class="card-face">
+                    <div class="corner top-left">
+                        <div class="value">${cardData.value}</div>
+                        <div class="suit ${suitColor}">${cardData.suit}</div>
+                    </div>
+                    ${faceContent}
+                    <div class="corner bottom-right">
+                        <div class="value">${cardData.value}</div>
+                        <div class="suit ${suitColor}">${cardData.suit}</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function getCardNumericValue(card) {
+            if (card.value === 'A') return 1;
+            if (['K', 'Q', 'J'].includes(card.value)) return 10;
+            return parseInt(card.value);
+        }
+
+        function handleChipClick(event) {
+            const chipButton = event.currentTarget; // Use currentTarget for delegated events if any
+            const betType = chipButton.dataset.betType;
+            const amount = parseInt(chipButton.dataset.amount);
+
+            const totalStagedBet = currentMainBet + currentPPBet + current21Plus3Bet;
+
+            if (totalStagedBet + amount > playerChips) {
+                // Optionally, provide user feedback e.g., shake animation or subtle message
+                // For now, just don't add if it exceeds total chips
+                console.warn("Cannot add chip, total bet would exceed player chips.");
+                // alert("Not enough chips to increase this bet further."); // Can be too intrusive
+                return;
             }
             
-            // 2. 21+3 Evaluation
-            if (twentyOnePlusThreeBetAmount > 0 && dealerUpCard) {
-                const threeCards = [playerCard1, playerCard2, dealerUpCard];
-                let pokerResult = check21Plus3(threeCards);
-                if (pokerResult.payout > 0) {
-                    const winnings = twentyOnePlusThreeBetAmount * pokerResult.payout;
-                    sideBetWinnings += winnings + twentyOnePlusThreeBetAmount;
-                    resultsHTML += `<p>21+3: You hit a ${pokerResult.type}! Win ${winnings}.</p>`;
+            if (playerChips >= amount) { // Check if player has enough for this single chip
+                switch (betType) {
+                    case 'main':
+                        currentMainBet += amount;
+                        break;
+                    case 'pp':
+                        currentPPBet += amount;
+                        break;
+                    case '21plus3':
+                        current21Plus3Bet += amount;
+                        break;
+                }
+                updateBetAmountDisplays();
+            } else {
+                 // alert("Not enough chips for this specific chip value."); // Can be too intrusive
+                 console.warn("Not enough chips for this specific chip value.");
+            }
+        }
+
+        function clearAllBets() {
+            currentMainBet = 0;
+            currentPPBet = 0;
+            current21Plus3Bet = 0;
+            updateBetAmountDisplays();
+        }
+
+        async function placeBetsAndDeal() {
+            const totalBet = currentMainBet + currentPPBet + current21Plus3Bet;
+
+            if (currentMainBet <= 0) {
+                alert("Main bet must be greater than 0.");
+                return;
+            }
+            if (totalBet > playerChips) {
+                alert("Total bet cannot exceed your available chips.");
+                return;
+            }
+
+            playerChips -= totalBet;
+            updateGlobalChipDisplay();
+            if (currentUser && currentUser.uid) {
+                await updatePlayerChipsInFirestore(currentUser.uid, playerChips);
+            }
+
+            bettingControls.classList.add('hidden');
+            gameArea.classList.remove('hidden');
+            gameControls.classList.remove('hidden'); // Show Hit/Stand etc.
+            sideBetResultsEl.classList.add('hidden'); // Ensure side bet results are hidden initially
+            sideBetResultsEl.innerHTML = '';
+
+
+            await initiateGameRoundDeal(); // This will handle deck creation, dealing, etc.
+        }
+
+
+        // --- Game Logic (Core) ---
+        function resetGameState() { 
+            deck = [];
+            dealerHand = { cards: [], score: 0, isBlackjack: false };
+            playerHands = [];
+            activeHandIndex = 0;
+            // Bets (currentMainBet, currentPPBet, current21Plus3Bet) are set before this via betting UI
+            // playerChips are updated when bets are placed.
+            
+            // Clear UI elements
+            dealerCardsEl.innerHTML = '';
+            playerHandsDisplay.innerHTML = '';
+            if (dealerScoreEl) dealerScoreEl.textContent = '0';
+            // Player score display is per hand, handled in createPlayerHandDisplay
+
+            gameControls.classList.add('hidden');
+            splitButton.classList.add('hidden');
+            sideBetResultsEl.classList.add('hidden').innerHTML = '';
+            gameResultScreen.classList.add('hidden');
+            document.getElementById('result-message').textContent = '';
+            document.getElementById('final-chips').textContent = '0';
+        }
+
+        async function initiateGameRoundDeal() { 
+            resetGameState(); // Resets cards, scores, but not bets for this round
+            createDeck();
+            shuffleDeck();
+
+            // Create the initial player hand
+            playerHands.push({ cards: [], score: 0, isBlackjack: false, bet: currentMainBet, element: null, scoreElement: null, statusElement: null });
+            activeHandIndex = 0;
+
+            // Initial deal: Player gets two cards, Dealer gets one face up, one face down
+            await dealCardToPlayer(playerHands[activeHandIndex]);
+            await sleep(200);
+            await dealCardToDealer(false); // Dealer's hidden card
+            await sleep(200);
+            await dealCardToPlayer(playerHands[activeHandIndex]);
+            await sleep(200);
+            await dealCardToDealer(true);  // Dealer's face-up card
+
+            updateScoresAndUI();
+            evaluateSideBets(); // Evaluate side bets after initial cards are dealt
+
+            // Check for player Blackjack immediately
+            if (playerHands[activeHandIndex].isBlackjack) {
+                // If dealer also has blackjack, it's a push (for main bet)
+                // Otherwise, player wins 3:2 on main bet
+                // Side bets are resolved independently
+                // For simplicity, let's assume dealerTurn will handle dealer blackjack check
+                // and endHand will resolve payouts.
+                // If player has BJ, their turn is over for this hand.
+                if (dealerHand.isBlackjack) { // Check if dealer's upcard and hole card make BJ
+                     // Reveal dealer's hole card if not already
+                    const hiddenCard = dealerCardsEl.querySelector('.card-back');
+                    if (hiddenCard) {
+                        const cardData = dealerHand.cards.find(c => !c.isFaceUp);
+                        if(cardData) {
+                            renderCard(hiddenCard.parentElement, cardData, false); // Render face up
+                            cardData.isFaceUp = true;
+                        }
+                    }
+                    updateScoresAndUI(); // Update dealer score if BJ
+                }
+                stand(); // Auto-stand on Blackjack
+            } else {
+                gameControls.classList.remove('hidden');
+                // Enable/disable split based on initial hand
+                if (playerHands[activeHandIndex].cards.length === 2 && 
+                    getCardNumericValue(playerHands[activeHandIndex].cards[0]) === getCardNumericValue(playerHands[activeHandIndex].cards[1]) &&
+                    playerChips >= playerHands[activeHandIndex].bet) {
+                    splitButton.classList.remove('hidden');
                 } else {
-                    resultsHTML += `<p>21+3: No winning hand. Lost bet.</p>`;
+                    splitButton.classList.add('hidden');
                 }
             }
+        }
+        
+        function createDeck() { 
+            deck = [];
+            suits.forEach(suit => {
+                values.forEach(value => {
+                    deck.push({ suit, value, isFaceUp: false });
+                });
+            });
+        }
+
+        function shuffleDeck() {
+            for (let i = deck.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [deck[i], deck[j]] = [deck[j], deck[i]];
+            }
+        }
+
+        function calculateScore(cards) {
+            let score = 0;
+            let aceCount = 0;
+            cards.forEach(card => {
+                if (card.value === 'A') {
+                    aceCount++;
+                    score += 11; // Initially count Ace as 11
+                } else if (['K', 'Q', 'J'].includes(card.value)) {
+                    score += 10;
+                } else {
+                    score += parseInt(card.value);
+                }
+            });
+            // Adjust for Aces if score is over 21
+            while (score > 21 && aceCount > 0) {
+                score -= 10;
+                aceCount--;
+            }
+            return score;
+        }
+
+        function updateScoresAndUI() {
+            dealerHand.score = calculateScore(dealerHand.cards);
+            playerHands.forEach(hand => {
+                hand.score = calculateScore(hand.cards);
+            });
+            // Update dealer score display (only the first one, as dealer has one card hidden)
+            dealerScoreEl.textContent = dealerHand.score;
+
+            // Update all player hand displays
+            playerHandsDisplay.innerHTML = '';
+            playerHands.forEach((hand, index) => {
+                createPlayerHandDisplay(hand, index);
+            });
+        }
+
+        function createPlayerHandDisplay(hand, index) { 
+            const handDiv = document.createElement('div');
+            handDiv.className = 'player-hand mb-4 p-3 bg-gray-700/50 rounded-lg shadow';
+            handDiv.dataset.handIndex = index;
+
+            const handLabel = document.createElement('h3');
+            handLabel.className = 'text-lg font-semibold mb-2 text-yellow-300';
+            handLabel.textContent = playerHands.length > 1 ? `Hand ${index + 1} (Bet: ${hand.bet})` : `Your Hand (Bet: ${hand.bet})`;
             
-            if (resultsHTML) {
-                playerChips += sideBetWinnings;
-                updateChipDisplay();
-                sideBetResultsEl.innerHTML = resultsHTML;
-                sideBetResultsEl.classList.remove('hidden');
+            const scoreDisplay = document.createElement('div');
+            scoreDisplay.className = 'text-md mb-1';
+            scoreDisplay.innerHTML = `Score: <span class="font-bold player-score-value">0</span>`;
+            hand.scoreElement = scoreDisplay.querySelector('.player-score-value');
+
+            const statusDisplay = document.createElement('div'); // For Bust/Blackjack messages per hand
+            statusDisplay.className = 'text-sm font-medium hand-status';
+            hand.statusElement = statusDisplay;
+
+            const cardsContainer = document.createElement('div');
+            cardsContainer.className = 'cards flex flex-wrap justify-center gap-2 min-h-[125px]'; // Adjusted min-height
+            
+            handDiv.appendChild(handLabel);
+            handDiv.appendChild(scoreDisplay);
+            handDiv.appendChild(statusDisplay);
+            handDiv.appendChild(cardsContainer);
+            playerHandsDisplay.appendChild(handDiv);
+            hand.element = cardsContainer; // So dealCard can find where to put cards
+            return handDiv;
+        }        async function dealCard(handObj, cardsContainerEl, isHidden = false) { 
+            const cardData = deck.pop();
+            handObj.cards.push(cardData);
+            
+            const cardElement = document.createElement('div');
+            cardElement.className = 'card dealing';
+            
+            if (isHidden) {
+                renderCard(cardElement, cardData, false);
+                cardData.isFaceUp = false;
+            } else {
+                renderCard(cardElement, cardData, true);
+                cardData.isFaceUp = true;
+            }
+            
+            cardsContainerEl.appendChild(cardElement);
+            
+            // Remove dealing class after animation
+            setTimeout(() => {
+                cardElement.classList.remove('dealing');
+            }, 800);
+            
+            // Update scores and UI after each card is dealt
+            updateScoresAndUI();
+            await sleep(400); // Brief pause for dealing animation
+        }
+        async function dealCardToPlayer(hand) { 
+            const playerCardArea = hand.element;
+            await dealCard(hand, playerCardArea, false);
+        }
+        async function dealCardToDealer(isFaceUp) { 
+            const dealerCardArea = dealerCardsEl;
+            await dealCard(dealerHand, dealerCardArea, isFaceUp);
+        }
+        async function hit() { 
+            // Hitting is only allowed for the active player hand
+            await dealCardToPlayer(playerHands[activeHandIndex]);
+            // After hitting, we check the score. If bust, we end the hand.
+            if (playerHands[activeHandIndex].score > 21) {
+                // Bust logic
+                playerHands[activeHandIndex].isBust = true;
+                endHand();
+            }
+        }
+        async function stand() { 
+            // Move to the next hand if available, otherwise start dealer's turn
+            activeHandIndex++;
+            if (activeHandIndex < playerHands.length) {
+                // Switch to next hand
+                playerHandsDisplay.querySelectorAll('.player-hand')[activeHandIndex].classList.add('active-hand');
+                // Optionally, you can auto-hit for the dealer after a short delay
+                await sleep(500);
+                // dealerTurn();
+            } else {
+                // No more player hands, dealer's turn
+                // Hide game controls, show dealer turn message if needed
+                gameControls.classList.add('hidden');
+                // Optionally, you can add a message like "Dealer's Turn..."
+                await sleep(500);
+                dealerTurn();
+            }
+        }
+        async function doubleDown() { 
+            // Double the main bet amount
+            if (playerChips >= currentMainBet) {
+                currentMainBet *= 2;
+                playerChips -= currentMainBet; // Deduct from player chips
+                updateGlobalChipDisplay();
+                await dealCardToPlayer(playerHands[activeHandIndex]);
+                // After doubling down, the player cannot hit again (unless it's a split hand)
+                playerHands[activeHandIndex].isStand = true;
+                stand();
+            } else {
+                alert("Not enough chips to double down.");
+            }
+        }
+        async function handleSplit() { 
+            // Splitting is only allowed if the initial two cards are of the same value
+            const currentHand = playerHands[activeHandIndex];
+            if (currentHand.cards.length === 2 && 
+                getCardNumericValue(currentHand.cards[0]) === getCardNumericValue(currentHand.cards[1]) &&
+                playerChips >= currentHand.bet) {
+                
+                // Create a new hand for the split
+                const newHand = { cards: [currentHand.cards.pop()], score: 0, isBlackjack: false, bet: currentHand.bet, element: null, scoreElement: null, statusElement: null };
+                playerHands.push(newHand);
+                activeHandIndex = playerHands.length - 1; // Switch to the new hand
+
+                // Update UI: This assumes createPlayerHandDisplay is idempotent and can update existing hands
+                playerHandsDisplay.innerHTML = '';
+                playerHands.forEach((hand, index) => {
+                    createPlayerHandDisplay(hand, index);
+                });
+
+                // Deal a new card to the original hand and the new hand
+                await dealCardToPlayer(playerHands[activeHandIndex - 1]); // Original hand
+                await dealCardToPlayer(newHand); // New split hand
+
+                // Optionally, you can auto-hit for the player after a split
+                // await hit();
+            } else {
+                alert("Split not possible. Ensure two cards of the same value and enough chips.");
+            }
+        }
+        async function advanceToNextHandOrDealer() { 
+            activeHandIndex++;
+            if (activeHandIndex < playerHands.length) {
+                // There are more hands to play (in case of splits)
+                // Optionally, you can add a brief pause or message
+                await sleep(500);
+                // Auto-play the next hand (hit or stand based on strategy)
+                // For now, let's just show the next hand
+                playerHandsDisplay.querySelectorAll('.player-hand')[activeHandIndex].classList.add('active-hand');
+            } else {
+                // No more hands, dealer's turn
+                dealerTurn();
+            }
+        }
+        async function dealerTurn() { 
+            // Dealer plays automatically after player stands
+            // Typical rules: Hit until 17 or higher (including soft 17)
+            while (dealerHand.score < 17) {
+                await dealCardToDealer(true);
+                await sleep(300);
+            }
+            // After dealer's turn, determine the outcome (win/loss) for the player
+            endHand();
+        }
+        async function endHand() { 
+            gameControls.classList.add('hidden');
+            splitButton.classList.add('hidden');
+            let totalWinnings = 0;
+            let overallResultMessage = "";
+
+            playerHands.forEach(hand => {
+                let handWinnings = 0;
+                const handIndex = playerHands.indexOf(hand) + 1;
+                
+                if (hand.isBust) {
+                    overallResultMessage += `Hand ${handIndex}: Bust! You lose ${hand.bet} chips.\n`;
+                } else if (hand.isBlackjack) {
+                    if (dealerHand.isBlackjack) {
+                        overallResultMessage += `Hand ${handIndex}: Push (Both Blackjack)! Bet ${hand.bet} returned.\n`;
+                        handWinnings = hand.bet;
+                    } else {
+                        overallResultMessage += `Hand ${handIndex}: Blackjack! You win ${Math.floor(hand.bet * 1.5)} chips!\n`;
+                        handWinnings = hand.bet + Math.floor(hand.bet * 1.5);
+                    }
+                } else if (dealerHand.isBlackjack) {
+                    overallResultMessage += `Hand ${handIndex}: Dealer Blackjack! You lose ${hand.bet} chips.\n`;
+                } else if (dealerHand.isBust) {
+                    overallResultMessage += `Hand ${handIndex}: Dealer Busts! You win ${hand.bet} chips!\n`;
+                    handWinnings = hand.bet * 2;
+                } else if (hand.score > dealerHand.score) {
+                    overallResultMessage += `Hand ${handIndex}: You win ${hand.score} vs ${dealerHand.score}! Win ${hand.bet} chips.\n`;
+                    handWinnings = hand.bet * 2;
+                } else if (hand.score < dealerHand.score) {
+                    overallResultMessage += `Hand ${handIndex}: You lose ${hand.score} vs ${dealerHand.score}. Lose ${hand.bet} chips.\n`;
+                } else {
+                    overallResultMessage += `Hand ${handIndex}: Push (${hand.score})! Bet ${hand.bet} returned.\n`;
+                    handWinnings = hand.bet;
+                }
+                
+                playerChips += handWinnings;
+                totalWinnings += handWinnings;
+            });
+
+            document.getElementById('result-message').textContent = overallResultMessage.trim() || "Game Over!";
+            document.getElementById('final-chips').textContent = playerChips;
+            updateGlobalChipDisplay();
+            
+            if (currentUser && currentUser.uid) {
+                await updatePlayerChipsInFirestore(currentUser.uid, playerChips);
+            }
+            
+            await updateLeaderboard(currentPlayerName, playerChips);
+
+            gameResultScreen.classList.remove('hidden');
+            gameResultScreen.classList.add('active');
+        }
+
+        async function updateLeaderboard(playerName, chips) {
+            if (!db || !currentUser) return;
+            
+            try {
+                const leaderboardRef = collection(db, "leaderboard");
+                await setDoc(doc(leaderboardRef, currentUser.uid), {
+                    name: playerName,
+                    chips: chips,
+                    timestamp: new Date()
+                });
+            } catch (error) {
+                console.error("Error updating leaderboard:", error);
             }
         }
 
@@ -528,16 +1212,116 @@
             if (isFlush) return { type: 'Flush', payout: TWENTY_ONE_PLUS_THREE_PAYOUTS.flush };
 
             return { type: 'None', payout: 0 };
-                    }
-        
-        // --- UI & Event Listeners ---
-        function setupEventListeners() { /* Unchanged */ }
-        function placeBet() { /* Unchanged */ }
-        function updateChipDisplay() { /* Unchanged */ }
-        function toggleControls(show, mode) { /* Unchanged */ }
-        function setActiveHand(index) { /* Unchanged */ }
-        
-        // --- Initial Load ---
+        }
+
+        // --- Side Bet Logic (Fully Implemented) ---
+        function evaluateSideBets() {
+            let sideBetWinnings = 0;
+            let resultsHTML = '';
+            const playerCard1 = playerHands[0].cards[0];
+            const playerCard2 = playerHands[0].cards[1];
+            const dealerUpCard = dealerHand.cards.find(card => card.isFaceUp);
+
+            if (!playerCard1 || !playerCard2) {
+                console.warn("Player cards not available for side bet evaluation.");
+                return;
+            }
+
+            // 1. Perfect Pairs Evaluation
+            if (currentPPBet > 0) {
+                let pairResult = checkPerfectPairs(playerCard1, playerCard2);
+                if (pairResult.payout > 0) {
+                    const winnings = currentPPBet * pairResult.payout;
+                    sideBetWinnings += winnings;
+                    playerChips += winnings;
+                    resultsHTML += `<p class="text-green-300">Perfect Pairs: You hit a ${pairResult.type} pair! Won ${winnings} chips.</p>`;
+                } else {
+                    resultsHTML += `<p class="text-red-300">Perfect Pairs: No winning pair. Lost ${currentPPBet} chips.</p>`;
+                }
+            }
+            
+            // 2. 21+3 Evaluation
+            if (current21Plus3Bet > 0 && dealerUpCard) {
+                const threeCards = [playerCard1, playerCard2, dealerUpCard];
+                let twentyOnePlusThreeResult = check21Plus3(threeCards);
+                if (twentyOnePlusThreeResult.payout > 0) {
+                    const winnings = current21Plus3Bet * twentyOnePlusThreeResult.payout;
+                    sideBetWinnings += winnings;
+                    playerChips += winnings;
+                    resultsHTML += `<p class="text-green-300">21+3: You made a ${twentyOnePlusThreeResult.type}! Won ${winnings} chips.</p>`;
+                } else {
+                    resultsHTML += `<p class="text-red-300">21+3: No winning hand. Lost ${current21Plus3Bet} chips.</p>`;
+                }
+            }
+            
+            if (resultsHTML) {
+                sideBetResultsEl.innerHTML = resultsHTML;
+                sideBetResultsEl.classList.remove('hidden');
+            }
+            
+            updateGlobalChipDisplay();
+            if (currentUser && currentUser.uid && sideBetWinnings > 0) {
+                updatePlayerChipsInFirestore(currentUser.uid, playerChips);
+            }
+        }
+
+        // --- Event Listeners Setup ---
+        function setupEventListeners() {
+            if (logoutBtn) logoutBtn.addEventListener('click', handleLogout);
+            if (playBtn) {
+                playBtn.addEventListener('click', () => {
+                    mainMenu.classList.add('hidden');
+                    gameCanvas.classList.remove('hidden');
+                    
+                    bettingControls.classList.remove('hidden');
+                    gameArea.classList.add('hidden');
+                    gameResultScreen.classList.add('hidden');
+                    gameResultScreen.classList.remove('active');
+
+                    clearAllBets();
+                    updateGlobalChipDisplay();
+                    updateBetAmountDisplays();
+                });
+            }
+
+            // Chip button event listeners
+            document.addEventListener('click', (e) => {
+                if (e.target.classList.contains('chip')) {
+                    handleChipClick(e);
+                }
+            });
+
+            if (clearBetsBtn) clearBetsBtn.addEventListener('click', clearAllBets);
+            if (placeBetsDealBtn) placeBetsDealBtn.addEventListener('click', placeBetsAndDeal);
+
+            if (hitBtn) hitBtn.addEventListener('click', hit);
+            if (standBtn) standBtn.addEventListener('click', stand);
+            if (splitButton) splitButton.addEventListener('click', handleSplit);
+            
+            if (playAgainBtn) {
+                playAgainBtn.addEventListener('click', () => {
+                    gameResultScreen.classList.add('hidden');
+                    gameResultScreen.classList.remove('active');
+                    bettingControls.classList.remove('hidden');
+                    gameArea.classList.add('hidden');
+                    clearAllBets();
+                    updateGlobalChipDisplay();
+                    updateBetAmountDisplays();
+                });
+            }
+            
+            if (returnMenuBtn) {
+                returnMenuBtn.addEventListener('click', () => {
+                    gameResultScreen.classList.add('hidden');
+                    gameResultScreen.classList.remove('active');
+                    gameCanvas.classList.add('hidden');
+                    mainMenu.classList.remove('hidden');
+                    showUserProfile();
+                });
+            }
+        }
+
+        // --- Initialization ---
         document.addEventListener('DOMContentLoaded', () => {
             initializeFirebase();
             setupEventListeners();
