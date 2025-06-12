@@ -237,10 +237,22 @@
             transform: translateY(-4px) scale(1.05);
             box-shadow: 0 8px 20px rgba(0,0,0,0.4), 
                         inset 0 2px 4px rgba(255,255,255,0.4);
-        }
-        .chip:active {
+        }        .chip:active {
             transform: translateY(-2px) scale(1.02);
             box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+        }
+        
+        /* Chip animations for feedback */
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+        
+        @keyframes chipPlaced {
+            0% { transform: scale(1); }
+            50% { transform: scale(0.8); }
+            100% { transform: scale(1); }
         }
         
         /* Construction themed chip colors */
@@ -255,10 +267,45 @@
         .chip-25 { 
             background: conic-gradient(from 90deg, #708090, #4F5F6F, #708090, #4F5F6F);
             border: 3px solid #4F5F6F;
-        }
-        .chip-100 { 
+        }        .chip-100 { 
             background: conic-gradient(from 135deg, #2F4F4F, #1C3030, #2F4F4F, #1C3030);
             border: 3px solid #1C3030;
+        }
+        
+        /* Bet type selector styles */
+        .bet-type-btn {
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            padding: 12px 16px; border-radius: 12px; cursor: pointer;
+            background: rgba(100,100,100,0.3); border: 2px solid rgba(255,255,255,0.2);
+            transition: all 0.3s ease; min-width: 120px; text-align: center;
+        }
+        .bet-type-btn:hover {
+            background: rgba(120,120,120,0.4); border-color: rgba(255,255,255,0.4);
+            transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+        .bet-type-btn.active {
+            background: linear-gradient(135deg, #bfa14a, #8b7a00);
+            border-color: #e0b800; color: #23232b; font-weight: bold;
+            box-shadow: 0 4px 16px rgba(191,161,74,0.4);
+        }
+        .bet-type-icon {
+            font-size: 24px; margin-bottom: 4px; display: block;
+        }
+        .bet-type-name {
+            font-size: 14px; font-weight: 600; margin-bottom: 2px; display: block;
+        }
+        .bet-type-amount {
+            font-size: 16px; font-weight: bold; color: #fff;
+            background: rgba(0,0,0,0.5); padding: 2px 8px; border-radius: 8px;
+            min-width: 30px; display: inline-block;
+        }
+        .bet-type-btn.active .bet-type-amount {
+            background: rgba(35,35,43,0.8); color: #fff;
+        }
+        
+        /* Chip bank styling */
+        .chip-bank, .bet-type-selector {
+            backdrop-filter: blur(3px);
         }
         /* --- Result Screen --- */
         #game-result-screen {
@@ -327,58 +374,51 @@
                 <div class="player-area">
                     <div class="hand-label">Your Hand: <span id="player-score-display">0</span></div>
                     <div id="player-hands-display" class="cards"></div>
-                </div>
-                <div id="betting-controls" class="mt-6 space-y-6 bg-gray-900/80 p-6 rounded-xl shadow-lg max-w-lg mx-auto">
+                </div>                <div id="betting-controls" class="mt-6 space-y-4 bg-gray-900/80 p-6 rounded-xl shadow-lg max-w-2xl mx-auto">
                     <div class="flex justify-between items-center mb-4">
                         <h3 class="text-xl font-semibold text-yellow-300">Place Your Bets</h3>
                         <div class="text-lg">Your Chips: <span id="player-chip-balance" class="font-bold text-yellow-400">0</span></div>
                     </div>
 
-                    <!-- Main Bet -->
-                    <div class="bet-section space-y-2">
-                        <div class="flex justify-between items-center">
-                            <label class="text-md font-medium">Main Bet:</label>
-                            <span class="text-lg font-bold text-white">Current: <span id="current-main-bet-display">0</span></span>
-                        </div>
-                        <div id="main-bet-chips" class="chip-selection flex flex-wrap justify-center gap-2">
+                    <!-- Unified Chip Selection -->
+                    <div class="chip-bank bg-gray-800/60 p-4 rounded-lg border-2 border-yellow-600/30">
+                        <h4 class="text-center text-yellow-300 font-semibold mb-3">🪙 Chip Bank - Click to Add to Bets 🪙</h4>
+                        <div class="flex justify-center gap-3 flex-wrap">
                             <button type="button" class="chip chip-5" data-bet-type="main" data-amount="5">5</button>
                             <button type="button" class="chip chip-10" data-bet-type="main" data-amount="10">10</button>
                             <button type="button" class="chip chip-25" data-bet-type="main" data-amount="25">25</button>
                             <button type="button" class="chip chip-100" data-bet-type="main" data-amount="100">100</button>
                         </div>
-                    </div>
-
-                    <!-- Perfect Pairs Bet -->
-                    <div class="bet-section space-y-2">
-                        <div class="flex justify-between items-center">
-                            <label class="text-md font-medium">Perfect Pairs Bet:</label>
-                            <span class="text-lg font-bold text-white">Current: <span id="current-pp-bet-display">0</span></span>
-                        </div>
-                        <div id="pp-bet-chips" class="chip-selection flex flex-wrap justify-center gap-2">
-                            <button type="button" class="chip chip-5" data-bet-type="pp" data-amount="5">5</button>
-                            <button type="button" class="chip chip-10" data-bet-type="pp" data-amount="10">10</button>
-                            <button type="button" class="chip chip-25" data-bet-type="pp" data-amount="25">25</button>
-                            <button type="button" class="chip chip-100" data-bet-type="pp" data-amount="100">100</button>
+                        <div class="text-center text-sm text-gray-400 mt-2">
+                            Select bet type below, then click chips to add to that bet
                         </div>
                     </div>
 
-                    <!-- 21+3 Bet -->
-                    <div class="bet-section space-y-2">
-                        <div class="flex justify-between items-center">
-                            <label class="text-md font-medium">21+3 Bet:</label>
-                            <span class="text-lg font-bold text-white">Current: <span id="current-21plus3-bet-display">0</span></span>
-                        </div>
-                        <div id="twentyone-plus-three-bet-chips" class="chip-selection flex flex-wrap justify-center gap-2">
-                            <button type="button" class="chip chip-5" data-bet-type="21plus3" data-amount="5">5</button>
-                            <button type="button" class="chip chip-10" data-bet-type="21plus3" data-amount="10">10</button>
-                            <button type="button" class="chip chip-25" data-bet-type="21plus3" data-amount="25">25</button>
-                            <button type="button" class="chip chip-100" data-bet-type="21plus3" data-amount="100">100</button>
+                    <!-- Bet Type Selector -->
+                    <div class="bet-type-selector bg-gray-800/60 p-4 rounded-lg border-2 border-blue-600/30">
+                        <h4 class="text-center text-blue-300 font-semibold mb-3">🎯 Select Bet Type 🎯</h4>
+                        <div class="flex justify-center gap-2 flex-wrap">
+                            <button type="button" class="bet-type-btn active" data-bet-type="main">
+                                <span class="bet-type-icon">🃏</span>
+                                <span class="bet-type-name">Main Bet</span>
+                                <span class="bet-type-amount" id="main-bet-display">0</span>
+                            </button>
+                            <button type="button" class="bet-type-btn" data-bet-type="pp">
+                                <span class="bet-type-icon">👯</span>
+                                <span class="bet-type-name">Perfect Pairs</span>
+                                <span class="bet-type-amount" id="pp-bet-display">0</span>
+                            </button>
+                            <button type="button" class="bet-type-btn" data-bet-type="21plus3">
+                                <span class="bet-type-icon">🎲</span>
+                                <span class="bet-type-name">21+3</span>
+                                <span class="bet-type-amount" id="plus3-bet-display">0</span>
+                            </button>
                         </div>
                     </div>
 
                     <div class="flex flex-col sm:flex-row gap-3 mt-6">
-                        <button id="clear-bets-btn" class="secondary-btn bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-4 rounded w-full sm:w-auto flex-grow">Clear All Bets</button>
-                        <button id="place-bets-deal-btn" class="primary-btn bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded w-full sm:w-auto flex-grow">Place Bets & Deal</button>
+                        <button id="clear-bets-btn" class="secondary-btn bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-4 rounded w-full sm:w-auto flex-grow">🗑️ Clear All Bets</button>
+                        <button id="place-bets-deal-btn" class="primary-btn bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded w-full sm:w-auto flex-grow">🎴 Place Bets & Deal</button>
                     </div>
                 </div>
                 <div id="game-area" class="hidden mt-4 p-4 bg-gray-800/70 rounded-xl">
@@ -444,10 +484,7 @@
         const plus3BetAmountEl = document.getElementById('plus3-bet-amount');
         const mainBetStackEl = document.getElementById('main-bet-stack');
         const ppBetStackEl = document.getElementById('pp-bet-stack');
-        const plus3BetStackEl = document.getElementById('plus3-bet-stack');
-
-
-        // --- Game State ---
+        const plus3BetStackEl = document.getElementById('plus3-bet-stack');        // --- Game State ---
         let db, auth;
         // const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id'; // Already commented or removed
         let currentUser = null; 
@@ -460,6 +497,7 @@
         let currentMainBet = 0; // Renamed from currentBet
         let currentPPBet = 0; // Renamed from perfectPairsBetAmount
         let current21Plus3Bet = 0; // Renamed from twentyOnePlusThreeBetAmount
+        let selectedBetType = 'main'; // New: tracks which bet type is currently selected
 
         const suits = ['♥', '♦', '♠', '♣'];
         const values = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
@@ -616,11 +654,16 @@
                 playerChipBalanceEl.textContent = playerChips;
             }
         }        function updateBetAmountDisplays() {
-            if (currentMainBetDisplayEl) currentMainBetDisplayEl.textContent = currentMainBet;
-            if (currentPpBetDisplayEl) currentPpBetDisplayEl.textContent = currentPPBet;
-            if (current21plus3BetDisplayEl) current21plus3BetDisplayEl.textContent = current21Plus3Bet;
+            // Update new bet type selector displays
+            const mainBetDisplay = document.getElementById('main-bet-display');
+            const ppBetDisplay = document.getElementById('pp-bet-display');
+            const plus3BetDisplay = document.getElementById('plus3-bet-display');
             
-            // Update betting spots on table
+            if (mainBetDisplay) mainBetDisplay.textContent = currentMainBet;
+            if (ppBetDisplay) ppBetDisplay.textContent = currentPPBet;
+            if (plus3BetDisplay) plus3BetDisplay.textContent = current21Plus3Bet;
+            
+            // Update betting spots on table (if they exist)
             if (mainBetAmountEl) mainBetAmountEl.textContent = currentMainBet;
             if (ppBetAmountEl) ppBetAmountEl.textContent = currentPPBet;
             if (plus3BetAmountEl) plus3BetAmountEl.textContent = current21Plus3Bet;
@@ -709,24 +752,36 @@
             if (card.value === 'A') return 1;
             if (['K', 'Q', 'J'].includes(card.value)) return 10;
             return parseInt(card.value);
-        }
-
-        function handleChipClick(event) {
-            const chipButton = event.currentTarget; // Use currentTarget for delegated events if any
-            const betType = chipButton.dataset.betType;
+        }        function handleChipClick(event) {
+            // Fix: Find the chip button element regardless of what was actually clicked
+            const chipButton = event.target.closest('.chip');
+            if (!chipButton) return;
+            
+            // Use the currently selected bet type instead of the chip's data attribute
+            const betType = selectedBetType;
             const amount = parseInt(chipButton.dataset.amount);
+
+            // Validate data attributes exist
+            if (!betType || !amount) {
+                console.error("Missing bet type or amount on chip button:", chipButton);
+                return;
+            }
 
             const totalStagedBet = currentMainBet + currentPPBet + current21Plus3Bet;
 
             if (totalStagedBet + amount > playerChips) {
-                // Optionally, provide user feedback e.g., shake animation or subtle message
-                // For now, just don't add if it exceeds total chips
+                // Provide visual feedback for insufficient chips
+                chipButton.style.animation = 'shake 0.5s ease-in-out';
+                setTimeout(() => chipButton.style.animation = '', 500);
                 console.warn("Cannot add chip, total bet would exceed player chips.");
-                // alert("Not enough chips to increase this bet further."); // Can be too intrusive
                 return;
             }
             
             if (playerChips >= amount) { // Check if player has enough for this single chip
+                // Add visual feedback for successful chip placement
+                chipButton.style.transform = 'scale(0.9)';
+                setTimeout(() => chipButton.style.transform = '', 150);
+                
                 switch (betType) {
                     case 'main':
                         currentMainBet += amount;
@@ -737,12 +792,42 @@
                     case '21plus3':
                         current21Plus3Bet += amount;
                         break;
+                    default:
+                        console.error("Unknown bet type:", betType);
+                        return;
                 }
                 updateBetAmountDisplays();
+                
+                // Visual feedback: show chip moving to selected bet area
+                showChipPlacementFeedback(betType, amount);
             } else {
-                 // alert("Not enough chips for this specific chip value."); // Can be too intrusive
-                 console.warn("Not enough chips for this specific chip value.");
+                // Visual feedback for insufficient chips
+                chipButton.style.animation = 'shake 0.5s ease-in-out';
+                setTimeout(() => chipButton.style.animation = '', 500);
+                console.warn("Not enough chips for this specific chip value.");
             }
+        }
+
+        function showChipPlacementFeedback(betType, amount) {
+            // Create a temporary chip element for animation
+            const feedbackChip = document.createElement('div');
+            feedbackChip.className = 'chip chip-' + amount;
+            feedbackChip.style.position = 'fixed';
+            feedbackChip.style.zIndex = '1000';
+            feedbackChip.style.pointerEvents = 'none';
+            feedbackChip.style.animation = 'chipPlaced 0.6s ease-out forwards';
+            feedbackChip.textContent = amount;
+            
+            // Position based on bet type
+            const targetBtn = document.querySelector(`[data-bet-type="${betType}"]`);
+            if (targetBtn) {
+                const rect = targetBtn.getBoundingClientRect();
+                feedbackChip.style.left = rect.left + 'px';
+                feedbackChip.style.top = rect.top + 'px';
+            }
+            
+            document.body.appendChild(feedbackChip);
+            setTimeout(() => feedbackChip.remove(), 600);
         }
 
         function clearAllBets() {
@@ -1218,7 +1303,25 @@
             updateGlobalChipDisplay();
             if (currentUser && currentUser.uid && sideBetWinnings > 0) {
                 updatePlayerChipsInFirestore(currentUser.uid, playerChips);
-            }
+            }        }
+
+        function handleBetTypeSelection(betTypeBtn) {
+            // Remove active class from all bet type buttons
+            document.querySelectorAll('.bet-type-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Add active class to selected button
+            betTypeBtn.classList.add('active');
+            
+            // Update selected bet type
+            selectedBetType = betTypeBtn.dataset.betType;
+            
+            // Visual feedback
+            betTypeBtn.style.transform = 'scale(0.95)';
+            setTimeout(() => betTypeBtn.style.transform = '', 150);
+            
+            console.log(`Selected bet type: ${selectedBetType}`);
         }
 
         // --- Event Listeners Setup ---
@@ -1238,12 +1341,17 @@
                     updateGlobalChipDisplay();
                     updateBetAmountDisplays();
                 });
-            }
-
-            // Chip button event listeners
+            }            // Chip button event listeners - Enhanced delegation approach
             document.addEventListener('click', (e) => {
-                if (e.target.classList.contains('chip')) {
+                const chipButton = e.target.closest('.chip');
+                if (chipButton) {
                     handleChipClick(e);
+                }
+                
+                // Handle bet type selection
+                const betTypeBtn = e.target.closest('.bet-type-btn');
+                if (betTypeBtn) {
+                    handleBetTypeSelection(betTypeBtn);
                 }
             });
 
