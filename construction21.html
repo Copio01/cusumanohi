@@ -53,31 +53,62 @@
             display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; min-height: 180px; align-items: center; padding: 10px;
         }
         .card {
-            width: 120px; height: 170px; background: white; border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.25); position: relative;
+            width: 120px; height: 170px; background: #f5f5f4; border-radius: 12px;
+            box-shadow: 0 4px 16px rgba(80, 80, 80, 0.18), 0 1.5px 0 #bfa14a inset;
+            border: 2.5px solid #bfa14a; /* Construction gold border */
+            position: relative;
             transform-style: preserve-3d;
-            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s, border-color 0.2s;
         }
-        .card.hidden {
-            transform: rotateY(180deg);
+        .card.dealing {
+            animation: dealCard 0.5s cubic-bezier(0.215, 0.61, 0.355, 1) forwards;
+            box-shadow: 0 8px 24px 0 #bfa14a44, 0 4px 15px rgba(80,80,80,0.18);
+            border-color: #e0b800;
         }
-        .card .card-face, .card .card-back {
-            position: absolute; width: 100%; height: 100%;
-            backface-visibility: hidden; -webkit-backface-visibility: hidden;
-            border-radius: 12px;
+        .card:hover {
+            box-shadow: 0 8px 24px 0 #bfa14a33, 0 4px 15px rgba(80,80,80,0.18);
+            border-color: #e0b800;
+            z-index: 2;
         }
         .card .card-face {
             display: flex; flex-direction: column; justify-content: space-between;
-            box-sizing: border-box; padding: 10px; background: white;
-            border: 1px solid #e0e0e0;
+            box-sizing: border-box; padding: 10px; background: #f5f5f4;
+            border-radius: 12px; border: none;
+            position: relative;
         }
-        .card.red .card-face { color: #e63946; }
-        .card.black .card-face { color: #1d3557; }
+        .card .corner {
+            display: flex; flex-direction: column; align-items: center; font-weight: bold; line-height: 1;
+            font-size: 1.1rem; letter-spacing: 0.5px; color: #bfa14a;
+            text-shadow: 0 1px 0 #fffbe6;
+        }
+        .card .top-left {
+            align-self: flex-start; margin-top: 2px; margin-left: 2px;
+        }
+        .card .bottom-right {
+            align-self: flex-end; margin-bottom: 2px; margin-right: 2px; transform: rotate(180deg);
+        }
+        .card .value {
+            font-size: 26px; font-weight: 700; margin-bottom: 2px; color: #23232b;
+        }
+        .card .suit {
+            font-size: 28px; margin-bottom: 2px; color: #bfa14a;
+        }
+        .card .center-suit {
+            font-size: 64px; opacity: 0.85; color: #bfa14a;
+        }
+        .card .face-design {
+            font-size: 54px; opacity: 0.92; color: #bfa14a;
+        }
+        .card .face-K::after { content: '👷‍♂️'; }
+        .card .face-Q::after { content: '👷‍♀️'; }
+        .card .face-J::after { content: '🏗️'; }
+        .card .face-A { font-size: 80px; }
         .card .card-back {
-            background: repeating-linear-gradient(135deg, #0a4d68, #0a4d68 10px, #088395 10px, #088395 20px);
+            background: repeating-linear-gradient(135deg, #23232b 0px, #23232b 12px, #bfa14a 12px, #bfa14a 24px);
             transform: rotateY(180deg); display: flex; align-items: center; justify-content: center;
+            border-radius: 12px;
         }
-        .card .card-back::after { content: "🔨"; font-size: 50px; color: rgba(255, 255, 255, 0.85); text-shadow: 0 0 5px rgba(0, 0, 0, 0.3); }
+        .card .card-back::after { content: "\1F528"; font-size: 54px; color: #bfa14a; text-shadow: 0 1px 0 #fffbe6, 0 0 2px #23232b; }
         .card .corner { display: flex; flex-direction: column; align-items: center; font-weight: bold; line-height: 1; }
         .card .top-left { align-self: flex-start; }
         .card .bottom-right { align-self: flex-end; transform: rotate(180deg); }
@@ -92,6 +123,7 @@
         .card .face-A { font-size: 72px; }
         @keyframes dealCard {
             from { transform: translateY(-300px) translateX(400px) rotate(180deg) scale(0.3); opacity: 0; }
+            60% { transform: translateY(10px) translateX(-10px) rotate(8deg) scale(1.08); opacity: 1; }
             to { transform: translateY(0) translateX(0) rotate(0deg) scale(1); opacity: 1; }
         }
         .card.dealing { animation: dealCard 0.5s cubic-bezier(0.215, 0.61, 0.355, 1) forwards; }
@@ -136,17 +168,19 @@
         <div class="bg-shape bg-shape3"></div>
     </div>
     <div id="game-container" class="p-4 mx-auto max-w-4xl">
-        <h1 class="text-4xl font-bold text-center text-yellow-400 mb-4">🔨 Construction 21 🔨</h1>
+        <h1 class="text-4xl font-bold text-center text-yellow-400 mb-8 drop-shadow-lg">🔨 Construction 21 🔨</h1>
         <!-- Main Menu -->
-        <div id="main-menu" class="bg-gray-800 p-6 rounded-lg shadow-lg text-center">
+        <div id="main-menu" class="bg-gray-800/90 p-8 rounded-2xl shadow-2xl text-center max-w-lg mx-auto mb-8">
             <div id="auth-section">
                  <!-- Auth content will be injected by JS -->
             </div>
             <div id="user-profile" class="hidden">
                 <h3 class="text-2xl mb-2">Welcome, <span id="profile-name" class="font-bold text-yellow-400"></span>!</h3>
                 <div class="text-lg mb-4">Your Chips: <span id="profile-chips" class="font-bold"></span></div>
-                <button id="play-btn" class="primary-btn bg-blue-600 hover:bg-blue-700 text-white w-full sm:w-auto">Play Game</button>
-                <button id="logout-btn" class="secondary-btn bg-gray-600 hover:bg-gray-700 text-white w-full sm:w-auto mt-2 sm:mt-0 sm:ml-2">Logout</button>
+                <div class="flex flex-col sm:flex-row gap-2 justify-center">
+                  <button id="play-btn" class="primary-btn bg-blue-600 hover:bg-blue-700 text-white w-full sm:w-auto">Play Game</button>
+                  <button id="logout-btn" class="secondary-btn bg-gray-600 hover:bg-gray-700 text-white w-full sm:w-auto">Logout</button>
+                </div>
             </div>
         </div>
         <!-- Game Canvas -->
@@ -160,25 +194,26 @@
                     <div class="hand-label">Your Hand: <span id="player-score">0</span></div>
                     <div id="player-hands-display" class="cards"></div>
                 </div>
-                <div id="betting-controls" class="mt-4 space-y-2">
-                    <h3 class="text-lg font-semibold">Place Your Bets</h3>
-                    <div class="flex items-center space-x-2">
-                        <label for="bet-amount" class="text-sm">Main Bet:</label>
-                        <input type="number" id="bet-amount" value="10" min="1" class="p-1 border rounded w-20 text-black">
-                        <span class="text-sm">Current: <span id="current-bet">0</span></span>
+                <div id="betting-controls" class="mt-6 space-y-4 bg-gray-900/80 p-6 rounded-xl shadow-lg max-w-md mx-auto">
+                    <h3 class="text-lg font-semibold mb-2 text-yellow-300">Place Your Bets</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div class="flex flex-col items-start">
+                            <label for="bet-amount" class="text-sm mb-1">Main Bet:</label>
+                            <input type="number" id="bet-amount" value="10" min="1" class="p-2 border border-gray-400 rounded w-full text-black">
+                            <span class="text-xs mt-1">Current: <span id="current-bet">0</span></span>
+                        </div>
+                        <div class="flex flex-col items-start">
+                            <label for="perfect-pairs-bet" class="text-sm mb-1">Perfect Pairs:</label>
+                            <input type="number" id="perfect-pairs-bet" value="0" min="0" class="p-2 border border-gray-400 rounded w-full text-black">
+                            <span class="text-xs mt-1">Current: <span id="current-pp-bet">0</span></span>
+                        </div>
+                        <div class="flex flex-col items-start">
+                            <label for="twenty-one-plus-three-bet" class="text-sm mb-1">21+3:</label>
+                            <input type="number" id="twenty-one-plus-three-bet" value="0" min="0" class="p-2 border border-gray-400 rounded w-full text-black">
+                            <span class="text-xs mt-1">Current: <span id="current-21plus3-bet">0</span></span>
+                        </div>
                     </div>
-                    <!-- Side Bet Inputs -->
-                    <div class="flex items-center space-x-2">
-                        <label for="perfect-pairs-bet" class="text-sm">Perfect Pairs:</label>
-                        <input type="number" id="perfect-pairs-bet" value="0" min="0" class="p-1 border rounded w-20 text-black">
-                        <span class="text-sm">Current: <span id="current-pp-bet">0</span></span>
-                    </div>
-                    <div class="flex items-center space-x-2">
-                        <label for="twenty-one-plus-three-bet" class="text-sm">21+3:</label>
-                        <input type="number" id="twenty-one-plus-three-bet" value="0" min="0" class="p-1 border rounded w-20 text-black">
-                        <span class="text-sm">Current: <span id="current-21plus3-bet">0</span></span>
-                    </div>
-                    <button id="place-bet-btn" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">Place Bet</button>
+                    <button id="place-bet-btn" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded w-full mt-2">Place Bet</button>
                 </div>
                 <div id="game-area" class="hidden mt-4">
                     <h2 class="text-xl font-bold">Dealer's Hand</h2>
@@ -195,17 +230,17 @@
                 </div>
             </div>
             <!-- Result Screen -->
-            <div id="game-result-screen">
+            <div id="game-result-screen" class="hidden">
                 <h2 id="result-message" class="text-4xl font-bold text-yellow-400">You Win!</h2>
                 <div class="text-2xl">Final Chips: <span id="final-chips" class="font-bold">0</span></div>
-                <div>
+                <div class="flex flex-col sm:flex-row gap-2 justify-center mt-4">
                     <button id="play-again-btn" class="primary-btn bg-blue-600 hover:bg-blue-700 text-white">Play Again</button>
-                    <button id="return-menu-btn" class="secondary-btn bg-gray-600 hover:bg-gray-700 text-white ml-2">Main Menu</button>
+                    <button id="return-menu-btn" class="secondary-btn bg-gray-600 hover:bg-gray-700 text-white">Main Menu</button>
                 </div>
             </div>
         </div>
         <!-- Leaderboard -->
-        <div id="leaderboard" class="mt-6 p-4 rounded-lg shadow-lg hidden">
+        <div id="leaderboard" class="mt-6 p-4 rounded-lg shadow-lg hidden max-w-md mx-auto">
             <h2 class="text-2xl font-bold text-center mb-4 text-yellow-400">Top Players</h2>
             <ul id="leaderboard-entries" class="space-y-2"></ul>
         </div>
