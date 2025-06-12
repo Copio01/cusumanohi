@@ -1,13 +1,10 @@
-// construction21-logic.js
-// Pure game logic for Construction 21 (Blackjack)
-
 export class Construction21Game {
     constructor() {
         this.suits = ['♥', '♦', '♠', '♣'];
         this.values = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
         this.PERFECT_PAIRS_PAYOUTS = { perfect: 25, colored: 12, mixed: 6 };
         this.TWENTY_ONE_PLUS_THREE_PAYOUTS = { suitedTrips: 100, straightFlush: 40, threeOfAKind: 30, straight: 10, flush: 5 };
-        this.resetGame(100); // Default chips
+        this.resetGame(100);
     }
 
     resetGame(startingChips = 100) {
@@ -17,6 +14,8 @@ export class Construction21Game {
         this.activeHandIndex = 0;
         this.chips = startingChips;
         this.bets = { main: 0, pp: 0, plus3: 0 };
+        this.bets.insurance = 0; // Add insurance tracking
+        console.log('[Game] Reset game. Chips:', this.chips);
     }
 
     createDeck() {
@@ -26,6 +25,7 @@ export class Construction21Game {
                 this.deck.push({ suit, value, isFaceUp: false });
             });
         });
+        console.log('[Game] Deck created. Cards in deck:', this.deck.length);
     }
 
     shuffleDeck() {
@@ -33,12 +33,19 @@ export class Construction21Game {
             const j = Math.floor(Math.random() * (i + 1));
             [this.deck[i], this.deck[j]] = [this.deck[j], this.deck[i]];
         }
+        console.log('[Game] Deck shuffled.');
     }
 
     dealCard(hand, isFaceUp = true) {
+        if (this.deck.length === 0) {
+            console.warn('[Game] Tried to deal card from empty deck!');
+            return null;
+        }
         const card = this.deck.pop();
         card.isFaceUp = isFaceUp;
+        if (!hand.cards) hand.cards = [];
         hand.cards.push(card);
+        console.log(`[Game] Dealt card ${card.value}${card.suit} to hand. Face up: ${isFaceUp}`);
         return card;
     }
 
@@ -59,20 +66,24 @@ export class Construction21Game {
         return parseInt(card.value);
     }
 
-    // Betting logic
-    canPlaceBet(amount) { return this.chips >= amount; }
+    canPlaceBet(amount) {
+        const canBet = this.chips >= amount;
+        if (!canBet) console.warn(`[Game] Cannot place bet: ${amount} chips requested, only ${this.chips} available.`);
+        return canBet;
+    }
     placeBet(type, amount) {
         if (!this.canPlaceBet(amount)) return false;
         this.chips -= amount;
         this.bets[type] += amount;
+        console.log(`[Game] Placed bet of ${amount} on ${type}. Remaining chips: ${this.chips}`);
         return true;
     }
     clearBets() {
-        this.chips += this.bets.main + this.bets.pp + this.bets.plus3;
-        this.bets = { main: 0, pp: 0, plus3: 0 };
+        this.chips += this.bets.main + this.bets.pp + this.bets.plus3 + (this.bets.insurance || 0);
+        console.log(`[Game] Bets cleared. Chips refunded. Total chips: ${this.chips}`);
+        this.bets = { main: 0, pp: 0, plus3: 0, insurance: 0 };
     }
 
-    // Side Bets
     checkPerfectPairs(card1, card2) {
         if (card1.value !== card2.value) return { type: 'None', payout: 0 };
         const isRed = s => ['♥', '♦'].includes(s);
@@ -96,25 +107,27 @@ export class Construction21Game {
         return { type:'None', payout:0 };
     }
 
-    // Evaluate blackjack, bust, win, push, etc.
     isBlackjack(cards) {
-        return cards.length === 2 && this.calculateScore(cards) === 21;
+        const result = cards.length === 2 && this.calculateScore(cards) === 21;
+        if (result) console.log('[Game] Blackjack detected:', cards);
+        return result;
     }
     isBust(cards) {
-        return this.calculateScore(cards) > 21;
+        const result = this.calculateScore(cards) > 21;
+        if (result) console.log('[Game] Bust detected:', cards);
+        return result;
     }
 
-    // Settlement logic for round
     settleHands() {
         const dealerScore = this.calculateScore(this.dealerHand.cards);
         this.dealerHand.score = dealerScore;
         let results = [];
 
-        this.playerHands.forEach(hand => {
+        this.playerHands.forEach((hand, i) => {
             const playerScore = this.calculateScore(hand.cards);
             hand.score = playerScore;
-
             let result = { outcome: '', payout: 0 };
+            console.log(`[Game] Settling hand #${i + 1}:`, hand.cards);
 
             if (this.isBust(hand.cards)) {
                 result.outcome = 'bust';
@@ -139,18 +152,135 @@ export class Construction21Game {
                 result.payout = 0;
             }
             results.push(result);
+            console.log(`[Game] Result for hand #${i + 1}:`, result);
         });
 
-        // Settle side bets (if implemented in UI)
-        // e.g., checkPerfectPairs, check21Plus3
+        // Settle insurance after all hands (should be called after dealer reveals hole card)
+        this.settleInsurance();
 
-        // Clear main and side bets after settlement
-        this.bets = { main: 0, pp: 0, plus3: 0 };
+        this.bets = { main: 0, pp: 0, plus3: 0, insurance: 0 };
 
-        return results; // Array of {outcome, payout} per hand
+        return results;
     }
 
-    // (Optional) For UI: expose current dealer/player hand, activeHandIndex, etc.
+    getActiveHand() {
+        if (
+            Array.isArray(this.playerHands) &&
+            this.activeHandIndex >= 0 &&
+            this.activeHandIndex < this.playerHands.length
+        ) {
+            return this.playerHands[this.activeHandIndex];
+        } else {
+            console.warn('[Game] getActiveHand: No active hand available.', {
+                hands: this.playerHands,
+                activeHandIndex: this.activeHandIndex
+            });
+            return null;
+        }
+    }
 
-    // TODO: Add methods for splitting, doubling, insurance, etc. if desired.
+    /**
+     * Attempt to split the active hand (only if allowed: two cards, same value, enough chips).
+     * Returns true if split succeeds, false otherwise.
+     */
+    splitHand() {
+        const hand = this.getActiveHand();
+        if (!hand) {
+            console.warn('[Game] splitHand: No active hand.');
+            return false;
+        }
+        if (hand.cards.length !== 2 || hand.cards[0].value !== hand.cards[1].value) {
+            console.warn('[Game] splitHand: Can only split pairs. Hand:', hand.cards);
+            return false;
+        }
+        if (this.chips < hand.bet) {
+            console.warn('[Game] splitHand: Not enough chips to split.');
+            return false;
+        }
+        // Perform the split
+        const cardToMove = hand.cards.pop();
+        const newHand = {
+            cards: [cardToMove],
+            bet: hand.bet,
+            isSplit: true
+        };
+        this.chips -= hand.bet;
+        hand.isSplit = true;
+        // Each hand gets one new card (face up)
+        this.dealCard(hand, true);
+        this.playerHands.splice(this.activeHandIndex + 1, 0, newHand); // Insert new hand after current
+        this.dealCard(newHand, true);
+        console.log('[Game] splitHand: Hand split! New hands:', this.playerHands);
+        return true;
+    }
+
+    /**
+     * Double the bet on the active hand and deal one more card, then end turn for this hand.
+     * Returns true if double-down succeeds.
+     */
+    doubleDown() {
+        const hand = this.getActiveHand();
+        if (!hand) {
+            console.warn('[Game] doubleDown: No active hand.');
+            return false;
+        }
+        if (this.chips < hand.bet) {
+            console.warn('[Game] doubleDown: Not enough chips to double down.');
+            return false;
+        }
+        if (hand.cards.length !== 2) {
+            console.warn('[Game] doubleDown: Can only double down with exactly two cards.');
+            return false;
+        }
+        this.chips -= hand.bet;
+        hand.bet *= 2;
+        this.dealCard(hand, true);
+        hand.isDoubled = true;
+        console.log('[Game] doubleDown: Hand doubled. New bet:', hand.bet, 'Hand:', hand.cards);
+        // End turn for this hand—UI/game flow should move to next hand.
+        return true;
+    }
+
+    /**
+     * Place insurance bet (usually up to half the main bet) if dealer shows an Ace.
+     * Insurance bet is resolved when dealer checks for blackjack.
+     * Returns true if insurance bet is placed.
+     */
+    placeInsurance(amount) {
+        if (
+            !this.dealerHand.cards.length ||
+            this.dealerHand.cards[0].value !== 'A'
+        ) {
+            console.warn('[Game] placeInsurance: Dealer does not show Ace.');
+            return false;
+        }
+        if (!this.canPlaceBet(amount)) {
+            console.warn('[Game] placeInsurance: Not enough chips for insurance.');
+            return false;
+        }
+        this.chips -= amount;
+        this.bets.insurance = (this.bets.insurance || 0) + amount;
+        console.log('[Game] placeInsurance: Insurance bet placed:', amount, 'Total insurance bet:', this.bets.insurance);
+        return true;
+    }
+
+    /**
+     * Settle insurance bet after dealer reveals second card.
+     * Pays 2:1 if dealer blackjack, loses otherwise.
+     * Call after dealer checks for blackjack.
+     */
+    settleInsurance() {
+        const insuranceBet = this.bets.insurance || 0;
+        if (!insuranceBet) return;
+        const dealerCards = this.dealerHand.cards;
+        const isDealerBlackjack = this.isBlackjack(dealerCards);
+        if (isDealerBlackjack) {
+            const payout = insuranceBet * 3; // 2:1 plus the original bet back
+            this.chips += payout;
+            console.log('[Game] settleInsurance: Dealer blackjack! Insurance payout:', payout);
+        } else {
+            console.log('[Game] settleInsurance: No dealer blackjack. Insurance bet lost.');
+        }
+        this.bets.insurance = 0;
+    }
 }

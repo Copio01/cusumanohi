@@ -29,6 +29,54 @@ let betSpots = {
   plus3: document.getElementById('plus3-bet-spot'),
 };
 
+// --- Helper: current hand utilities ---
+function canSplitCurrentHand() {
+  const hand = game.getActiveHand();
+  return (
+    inPlay &&
+    hand &&
+    hand.cards.length === 2 &&
+    hand.cards[0].value === hand.cards[1].value &&
+    game.chips >= hand.bet
+  );
+}
+function canDoubleCurrentHand() {
+  const hand = game.getActiveHand();
+  return (
+    inPlay &&
+    hand &&
+    hand.cards.length === 2 &&
+    game.chips >= hand.bet
+  );
+}
+function canBuyInsurance() {
+  // Only on the first decision, after deal, if dealer upcard is Ace and insurance not already placed
+  return (
+    inPlay &&
+    game.dealerHand.cards.length &&
+    game.dealerHand.cards[0].isFaceUp &&
+    game.dealerHand.cards[0].value === 'A' &&
+    !game.bets.insurance &&
+    game.chips >= Math.ceil(game.bets.main / 2)
+  );
+}
+function canHitCurrentHand() {
+  const hand = game.getActiveHand();
+  return (
+    inPlay &&
+    hand &&
+    game.calculateScore(hand.cards) < 21
+  );
+}
+function isAllHandsDone() {
+  // All hands finished: either bust, stood, or doubled
+  return (
+    game.activeHandIndex >= game.playerHands.length ||
+    !inPlay
+  );
+}
+
+// --- Event handlers and UI logic ---
 function setupEventHandlers() {
   chipTray.querySelectorAll('.chip').forEach(chip => {
     chip.addEventListener('click', () => {
@@ -63,6 +111,7 @@ function setupEventHandlers() {
   if (clearBetsBtn) clearBetsBtn.addEventListener('click', () => { if (!inPlay) { game.clearBets(); updateBetsUI(); showStatusToast('Bets cleared!'); }});
 }
 
+// --- UI update functions ---
 function updateBetsUI() {
   mainBetAmountEl.textContent = game.bets.main;
   ppBetAmountEl.textContent = game.bets.pp;
@@ -99,32 +148,38 @@ function showInPlayButtons(show) {
   actionBar.style.display = show ? '' : 'none';
   dealBtn.style.display = show ? 'none' : '';
   clearBetsBtn.style.display = show ? 'none' : '';
-  // Show/hide side bet UI if you have any
 }
 
+// --- Core hand and card rendering, with multi-hand support ---
 function updateHandsUI() {
   // Dealer hand
   dealerCardsEl.innerHTML = '';
-  game.dealerHand.cards.forEach(card => {
+  game.dealerHand.cards.forEach((card, idx) => {
     const cardEl = document.createElement('div');
     cardEl.className = 'card';
     cardEl.innerHTML = card.isFaceUp ? `${card.value}${card.suit}` : `<span style="font-size:1.3em;">🂠</span>`;
     dealerCardsEl.appendChild(cardEl);
   });
 
-  // Player hands with split/multi
+  // Player hands (show all, highlight active)
   playerHandsEl.innerHTML = '';
   game.playerHands.forEach((hand, idx) => {
     const handDiv = document.createElement('div');
     handDiv.className = 'player-hand';
     if (idx === game.activeHandIndex && inPlay) handDiv.classList.add('active-hand');
-    handDiv.innerHTML = hand.cards.map(card => `<div class="card">${card.value}${card.suit}</div>`).join('');
+    hand.cards.forEach(card => {
+      const cardDiv = document.createElement('div');
+      cardDiv.className = 'card';
+      cardDiv.innerHTML = `${card.value}${card.suit}`;
+      handDiv.appendChild(cardDiv);
+    });
     let tagStr = `<span>Bet: ${hand.bet}</span> <span>Score: ${game.calculateScore(hand.cards)}</span>`;
     if (hand.isSplit) tagStr += ' <span class="side-bet-label">Split</span>';
-    if (hand.hasDoubled) tagStr += ' <span class="side-bet-label">Double</span>';
+    if (hand.isDoubled) tagStr += ' <span class="side-bet-label">Double</span>';
     handDiv.innerHTML += `<div class="hand-info">${tagStr}</div>`;
     playerHandsEl.appendChild(handDiv);
   });
+
   // Show insurance indicator if bought
   if (game.bets.insurance > 0 && inPlay) {
     let ins = document.createElement('div');
@@ -153,13 +208,13 @@ function updateActionBarState() {
     enableDealAndClear(true);
     return;
   }
-  const hand = game.getActiveHand();
-  let canHit = game.canHitCurrentHand();
-  let canStand = true;
-  let canDouble = game.canDoubleCurrentHand();
-  let canSplit = game.canSplitCurrentHand();
-  let canInsurance = game.canBuyInsurance();
-  showActionBar({ canHit, canStand, canDouble, canSplit, canInsurance });
+  showActionBar({
+    canHit: canHitCurrentHand(),
+    canStand: true,
+    canDouble: canDoubleCurrentHand(),
+    canSplit: canSplitCurrentHand(),
+    canInsurance: canBuyInsurance(),
+  });
 }
 
 function startRound() {
@@ -178,11 +233,11 @@ function startRound() {
 
   for (let i = 0; i < 2; i++) {
     game.dealCard(game.playerHands[0], true);
-    game.dealCard(game.dealerHand, i === 0);
+    game.dealCard(game.dealerHand, i === 0); // Only first dealer card face up
   }
   updateHandsUI(); updateActionBarState(); updateChipsDisplay(); updateBetsUI();
 
-  if (game.canBuyInsurance()) {
+  if (canBuyInsurance()) {
     showStatusToast("Insurance available: Dealer shows Ace.");
     if (insuranceBtn) insuranceBtn.style.display = '';
   } else if (insuranceBtn) {
@@ -196,55 +251,70 @@ function handlePlayerAction(action) {
   if (!hand || !inPlay) return;
 
   if (action === 'hit') {
-    if (game.hitCurrentHand()) showStatusToast("Card dealt.");
+    game.dealCard(hand, true);
     if (game.isBust(hand.cards)) {
       showStatusToast("Bust!");
-      if (!game.nextHand()) settleAndEndRound();
+      nextHandOrSettle();
+    } else {
+      showStatusToast("Card dealt.");
     }
   } else if (action === 'stand') {
-    if (!game.nextHand()) settleAndEndRound();
-    else showStatusToast("Next hand.");
+    nextHandOrSettle();
   } else if (action === 'double') {
-    if (game.doubleCurrentHand()) {
+    if (canDoubleCurrentHand() && game.doubleDown()) {
       showStatusToast("Bet doubled, one card only.");
-      if (game.isBust(hand.cards) || !game.nextHand()) settleAndEndRound();
+      if (game.isBust(hand.cards)) {
+        showStatusToast("Bust!");
+      }
+      nextHandOrSettle();
+    } else {
+      showStatusToast("Cannot double down!", true);
     }
   } else if (action === 'split') {
-    if (game.splitCurrentHand()) {
+    if (canSplitCurrentHand() && game.splitHand()) {
       showStatusToast("Hand split.");
-      updateHandsUI(); updateActionBarState();
+      updateHandsUI();
+      updateActionBarState();
       return;
+    } else {
+      showStatusToast("Cannot split!", true);
     }
   } else if (action === 'insurance') {
-    if (game.buyInsurance()) showStatusToast("Insurance bought.");
-    updateActionBarState();
-    return;
+    // Insurance is always up to half main bet
+    let insuranceAmt = Math.ceil(game.bets.main / 2);
+    if (canBuyInsurance() && game.placeInsurance(insuranceAmt)) {
+      showStatusToast("Insurance bought.");
+    } else {
+      showStatusToast("Cannot buy insurance!", true);
+    }
   }
 
-  updateHandsUI(); updateActionBarState();
-  if (game.isAllHandsDone()) settleAndEndRound();
+  updateHandsUI();
+  updateActionBarState();
+  if (isAllHandsDone()) {
+    settleAndEndRound();
+  }
+}
+
+function nextHandOrSettle() {
+  // Advance to next hand, or finish if done
+  game.activeHandIndex += 1;
+  if (game.activeHandIndex >= game.playerHands.length) {
+    settleAndEndRound();
+  } else {
+    updateHandsUI();
+    updateActionBarState();
+    showStatusToast(`Next hand: #${game.activeHandIndex + 1}`);
+  }
 }
 
 function settleAndEndRound() {
-  inPlay = false; outcomeLock = true; resultsCache = game.settleHands();
+  inPlay = false; outcomeLock = true; 
+  const results = game.settleHands();
   updateChipsDisplay(); updateBetsUI(); updateHandsUI();
 
-  // Show all results, one at a time for drama (side bets, insurance, hands)
-  let toastDelay = 0;
-  if (resultsCache.sideBets && resultsCache.sideBets.perfectPair && resultsCache.sideBets.perfectPair.type !== 'None') {
-    setTimeout(() => showStatusToast(`Perfect Pairs: ${resultsCache.sideBets.perfectPair.type}!`), toastDelay += 800);
-  }
-  if (resultsCache.sideBets && resultsCache.sideBets.twentyOnePlusThree && resultsCache.sideBets.twentyOnePlusThree.type !== 'None') {
-    setTimeout(() => showStatusToast(`21+3: ${resultsCache.sideBets.twentyOnePlusThree.type}!`), toastDelay += 800);
-  }
-  if (resultsCache.insurance) {
-    setTimeout(() => {
-      if (resultsCache.insurance.won) showStatusToast("Insurance paid!");
-      else showStatusToast("Insurance lost.");
-    }, toastDelay += 800);
-  }
-
-  resultsCache.hands.forEach((res, idx) => {
+  // Show result toasts
+  results.forEach((res, idx) => {
     setTimeout(() => {
       let txt;
       if (res.outcome === 'blackjack' || res.outcome === 'win') txt = `Hand ${idx+1}: You win!`;
@@ -253,15 +323,25 @@ function settleAndEndRound() {
       else if (res.outcome === 'dealer_blackjack') txt = `Hand ${idx+1}: Dealer Blackjack.`;
       else txt = `Hand ${idx+1}: Dealer wins.`;
       showStatusToast(txt);
-    }, toastDelay += 800);
+    }, 900 + idx * 700);
   });
+
+  // Insurance payout
+  setTimeout(() => {
+    if (game.bets.insurance === 0) return; // Insurance always cleared after settlement
+    if (game.isBlackjack(game.dealerHand.cards)) {
+      showStatusToast("Insurance paid!");
+    } else {
+      showStatusToast("Insurance lost.");
+    }
+  }, 800 + results.length * 700);
 
   setTimeout(() => {
     showStatusToast("Place your bets for the next round!");
     showInPlayButtons(false);
     updateActionBarState();
     outcomeLock = false;
-  }, toastDelay + 900);
+  }, 1500 + results.length * 700);
 }
 
 // --- Init ---
@@ -273,6 +353,3 @@ document.addEventListener('DOMContentLoaded', () => {
   updateActionBarState();
   showInPlayButtons(false);
 });
-// This file handles the UI interactions for the Construction 21 game.
-// It initializes the game, sets up event handlers, and updates the UI based on game state.
-// The logic for the game itself is handled in construction21-logic.js, which this file interacts with.
