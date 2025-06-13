@@ -1749,11 +1749,12 @@ body.modern-bg {
   clip: rect(0,0,0,0);
   border: 0;
 }
-/* Dynamic touch target sizing using CSS custom properties */
+/* Dynamic touch target sizing using CSS custom properties - Enhanced */
 :root {
   --chip-touch-scale: 1.2;
   --bet-spot-touch-scale: 1.3;
   --min-touch-size: 48px;
+  --bet-spot-padding: 20px;
 }
 
 /* Enhanced mobile touch interactions with improved hitboxes */
@@ -1826,11 +1827,10 @@ body.modern-bg {
       gap: 1.2rem !important;
     }
   }
-  
-  /* Enhanced bet spot touch targets */
+    /* Enhanced bet spot touch targets - Full spot coverage */
   .table-bet-spot {
     position: relative;
-    /* Add invisible padding for larger touch area */
+    /* Ensure full touch coverage for the betting area */
     box-sizing: content-box;
   }
   
@@ -1844,30 +1844,45 @@ body.modern-bg {
     pointer-events: none;
     z-index: 1;
   }
-  
-  /* Expand bet spot touch areas on mobile */
+    /* Expand bet spot touch areas to cover full betting space */
   .table-bet-spot::before {
     content: '';
     position: absolute;
-    top: -8px;
-    left: -8px;
-    right: -8px;
-    bottom: -8px;
+    /* Use dynamic padding for responsive touch coverage */
+    top: calc(-1 * var(--bet-spot-padding, 20px));
+    left: calc(-1 * var(--bet-spot-padding, 20px));
+    right: calc(-1 * var(--bet-spot-padding, 20px));
+    bottom: calc(-1 * var(--bet-spot-padding, 20px));
+    border-radius: 50%;
     pointer-events: auto;
     z-index: 0;
+    /* Visual debug aid for development - uncomment to see touch areas */
+    /* background: rgba(255, 0, 0, 0.1); */
+    /* border: 2px solid rgba(255, 0, 0, 0.3); */
+  }
+  
+  @media (max-width: 768px) {
+    .table-bet-spot::before {
+      /* Even more generous touch coverage on mobile */
+      top: -25px;
+      left: -25px;
+      right: -25px;
+      bottom: -25px;
+    }
   }
   
   @media (max-width: 480px) {
     .table-bet-spot::before {
-      top: -12px;
-      left: -12px;
-      right: -12px;
-      bottom: -12px;
+      /* Maximum touch coverage for small screens */
+      top: -30px;
+      left: -30px;
+      right: -30px;
+      bottom: -30px;
     }
     
     /* Reduce bet spot gap to accommodate larger touch areas */
     #table-bet-spots {
-      gap: 18px !important;
+      gap: 15px !important;
     }
   }
   
@@ -2225,9 +2240,170 @@ body.modern-bg {
   .table-bet-spot { width: 70px; height: 70px; font-size: 0.9em; }
   .card { width: 48px; height: 68px; }
   .chip { width: 48px; height: 48px; }
-  .chip-row { gap: 0.8rem; }
-  .table-area-dealer { width: 220px; height: 92px; }
+  .chip-row { gap: 0.8rem; }  .table-area-dealer { width: 220px; height: 92px; }
   .table-area-player { width: 238px; height: 89px; }
+}
+
+/* Advanced Animation Smoothness Optimizations */
+/* Performance-optimized animation classes */
+.smooth-animation {
+  will-change: transform;
+  backface-visibility: hidden;
+  transform-style: preserve-3d;
+  perspective: 1000px;
+}
+
+.gpu-accelerated {
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  -webkit-font-smoothing: subpixel-antialiased;
+}
+
+.performance-mode .card {
+  transition: transform 0.2s cubic-bezier(0.4, 0.0, 0.2, 1);
+  animation-duration: 0.3s;
+}
+
+.balanced-mode .card {
+  transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  animation-duration: 0.5s;
+}
+
+.high-quality-mode .card {
+  transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  animation-duration: 0.8s;
+}
+
+/* Optimized card animations */
+.card-dealing {
+  animation: smooth-deal var(--animation-duration, 0.5s) cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+.card-flipping {
+  animation: smooth-flip var(--animation-duration, 0.4s) cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+.card-moving {
+  animation: smooth-move var(--animation-duration, 0.3s) cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+@keyframes smooth-deal {
+  0% {
+    transform: translateX(-100vw) translateY(0) rotateY(180deg) scale(0.8);
+    opacity: 0;
+  }
+  20% {
+    opacity: 1;
+  }
+  80% {
+    transform: translateX(10px) translateY(0) rotateY(20deg) scale(1.05);
+  }
+  100% {
+    transform: translateX(0) translateY(0) rotateY(0deg) scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes smooth-flip {
+  0% {
+    transform: rotateY(0deg) scale(1);
+  }
+  50% {
+    transform: rotateY(90deg) scale(1.1);
+  }
+  100% {
+    transform: rotateY(180deg) scale(1);
+  }
+}
+
+@keyframes smooth-move {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* Optimized chip animations */
+.chip-placing {
+  animation: smooth-chip-place var(--animation-duration, 0.3s) cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+.chip-removing {
+  animation: smooth-chip-remove var(--animation-duration, 0.2s) cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+@keyframes smooth-chip-place {
+  0% {
+    transform: scale(0.8) translateY(-20px);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(1.1) translateY(-5px);
+  }
+  100% {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes smooth-chip-remove {
+  0% {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(0.8) translateY(-20px);
+    opacity: 0;
+  }
+}
+
+/* Reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  .card, .chip {
+    animation-duration: 0.1s !important;
+    transition-duration: 0.1s !important;
+  }
+  
+  .card-dealing, .card-flipping, .card-moving,
+  .chip-placing, .chip-removing {
+    animation: none !important;
+  }
+}
+
+/* Browser-specific optimizations */
+@supports (backdrop-filter: blur(10px)) {
+  .smooth-animation {
+    backdrop-filter: blur(0px);
+  }
+}
+
+/* Safari-specific optimizations */
+@media screen and (-webkit-min-device-pixel-ratio: 1) {
+  .card, .chip {
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    transform-style: preserve-3d;
+    -webkit-transform-style: preserve-3d;
+  }
+}
+
+/* Firefox-specific optimizations */
+@-moz-document url-prefix() {
+  .smooth-animation {
+    image-rendering: -moz-crisp-edges;
+  }
+}
+
+/* Edge/Chrome optimizations */
+@supports (display: -webkit-flex) {
+  .smooth-animation {
+    contain: layout style paint;
+  }
 }
     </style>
 </head>
