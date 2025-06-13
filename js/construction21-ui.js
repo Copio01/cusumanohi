@@ -220,20 +220,20 @@ function setupEventHandlers() {
       chip.classList.add('selected');
     });
   });
-
   Object.entries(betSpots).forEach(([type, spot]) => {
     spot.addEventListener('click', (ev) => {
       if (inPlay) return;
       if (!selectedChip) return;
-      if (game.canPlaceBet(selectedChip)) {
+      
+      // Use the enhanced bet validation
+      if (game.canPlaceBet(selectedChip) && game.placeBet(type === 'plus3' ? 'plus3' : type, selectedChip)) {
         animateChipToBetSpot(type, selectedChip, spot, getBetStackCount(type));
-        game.placeBet(type === 'plus3' ? 'plus3' : type, selectedChip);
         updateBetsUI();
         updateChipsDisplay();
         saveChipsToFirebase();
         showStatusToast(`Bet ${selectedChip} placed on ${type === 'main' ? 'Main' : type === 'pp' ? 'P / P' : '21+3'}`);
       } else {
-        showStatusToast('Not enough chips!', true);
+        showStatusToast('Cannot place bet!', true);
       }
     });
   });
@@ -562,6 +562,13 @@ async function startRound() {
     showStatusToast('Place a main bet to start!', true);
     return;
   }
+  
+  // Use the enhanced game state management
+  if (!game.startGame()) {
+    showStatusToast('Cannot start game!', true);
+    return;
+  }
+  
   resetAllHandsAndUI();
   inPlay = true; outcomeLock = false; resultsCache = null;
   showInPlayButtons(true); enableDealAndClear(false);
@@ -591,6 +598,12 @@ function handlePlayerAction(action) {
   if (outcomeLock) return;
   const hand = game.getActiveHand();
   if (!hand || !inPlay) return;
+
+  // Use the enhanced action validation
+  if (!game.canPerformAction(action)) {
+    showStatusToast(`Cannot ${action}!`, true);
+    return;
+  }
 
   if (action === 'hit') {
     game.dealCard(hand, true);
@@ -635,11 +648,10 @@ function handlePlayerAction(action) {
     } else {
       showStatusToast("Cannot buy insurance!", true);
     }
-  }
-
-  updateHandsUI();
+  }  updateHandsUI();
   updateActionBarState();
-  if (isAllHandsDone()) {
+  if (isAllHandsDone() && !outcomeLock) {
+    console.log('[SETTLE DEBUG] settleAndEndRound called from handlePlayerAction');
     settleAndEndRound();
   }
 }
@@ -677,8 +689,11 @@ function nextHandOrSettle() {
   if (game.activeHandIndex >= game.playerHands.length) {
     // Only settle if not already started!
     if (!outcomeLock && inPlay) {
+      console.log('[SETTLE DEBUG] settleAndEndRound called from nextHandOrSettle');
       inPlay = false; // No further player actions allowed
       settleAndEndRound();
+    } else {
+      console.log('[SETTLE DEBUG] nextHandOrSettle blocked: outcomeLock=' + outcomeLock + ', inPlay=' + inPlay);
     }
   } else {
     updateHandsUI();
@@ -709,7 +724,15 @@ async function dealerPlayOut() {
 }
 
 async function settleAndEndRound() {
+  console.log('[SETTLE DEBUG] settleAndEndRound started, outcomeLock=' + outcomeLock);
+  
+  if (outcomeLock) {
+    console.log('[SETTLE DEBUG] Already settling, returning early');
+    return;
+  }
+  
   outcomeLock = true; // Prevent multiple triggers
+  console.log('[SETTLE DEBUG] Set outcomeLock to true');
 
   // Reveal all dealer cards before play out
   game.dealerHand.cards.forEach(card => { card.isFaceUp = true; });
@@ -785,8 +808,10 @@ async function settleAndEndRound() {
       }, 500);
     }
   }, 800 + results.length * 700);
-
   setTimeout(() => {
+    // End the game properly using the new game state management
+    game.endGame();
+    
     showEndButtons();
     showStatusToast("Place your bets for the next round!");
     showInPlayButtons(false);
