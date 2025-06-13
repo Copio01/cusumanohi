@@ -324,8 +324,9 @@ body.modern-bg {
 }
 .bet-visual-chip {
   position: absolute;
-  left: 44px;
-  top: 52px;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
   width: 64px;
   height: 64px;
   border-radius: 50%;
@@ -333,8 +334,28 @@ body.modern-bg {
   opacity: 0.96;
   z-index: 200;
   box-shadow: 0 2px 6px #23232b44;
-  transition: top 0.25s, left 0.25s;
+  transition: all 0.25s ease;
   display: flex; align-items: center; justify-content: center;
+  font-size: 1em;
+  color: #fff;
+  font-weight: bold;
+}
+
+/* Responsive chip sizing based on bet spot size */
+@media (max-width: 768px) {
+  .bet-visual-chip {
+    width: 45px;
+    height: 45px;
+    font-size: 0.9em;
+  }
+}
+
+@media (max-width: 480px) {
+  .bet-visual-chip {
+    width: 38px;
+    height: 38px;
+    font-size: 0.8em;
+  }
 }
 .table-bet-spot.active {
   border: 5px solid #fffbe6;
@@ -357,19 +378,21 @@ body.modern-bg {
   justify-content: center;
   align-items: center;
   z-index: 10;
-  position: relative;
+  position: absolute;
 }
 #dealer-cards {
-  top: 7%;
+  top: 5%;
   left: 50%;
   transform: translateX(-50%);
-  position: absolute;
+  width: 100%;
+  max-width: 600px;
 }
 #player-hands {
-  bottom: 5%;
+  bottom: 3%;
   left: 50%;
   transform: translateX(-50%);
-  position: absolute;
+  width: 100%;
+  max-width: 600px;
 }
 .player-hand {
   position: relative;
@@ -989,8 +1012,7 @@ body.modern-bg {
     width: 180px; 
     opacity: 0.08 !important;
   }
-  
-  /* Compact bet spots */
+    /* Compact bet spots */
   #table-bet-spots { 
     gap: 20px; 
     bottom: 12% !important;
@@ -1001,8 +1023,7 @@ body.modern-bg {
     height: 60px; 
     font-size: 0.8em; 
   }
-  
-  .table-bet-spot .font-bold {
+    .table-bet-spot .font-bold {
     font-size: 1.2em !important;
   }
     /* Mobile card sizing */
@@ -1022,14 +1043,34 @@ body.modern-bg {
   .hand-cards {
     min-width: 100px !important;
   }
-  
-  /* Dealer cards adjustments */
+    /* Dealer cards adjustments */
   #dealer-cards {
     gap: 16px !important;
+    top: 8% !important;
+    min-height: 80px !important;
+    max-width: 95vw !important;
   }
   
   #player-hands {
     gap: 16px !important;
+    bottom: 8% !important;
+    min-height: 80px !important;
+    max-width: 95vw !important;
+  }
+  
+  /* Ensure proper card spacing within hands */
+  .hand-cards {
+    min-width: 80px !important;
+    justify-content: center !important;
+  }
+  
+  /* Adjust player hand margins for mobile */
+  .player-hand {
+    margin: 0 4px !important;
+    min-width: 80px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
   }
   
   /* Mobile chip tray */
@@ -1128,17 +1169,35 @@ body.modern-bg {
   #table-bet-spots { 
     gap: 15px !important;
   }
-  
   .table-bet-spot { 
     width: 50px !important; 
     height: 50px !important; 
     font-size: 0.7em !important;
   }
-  
-  .card { 
+    .card { 
     width: 38px !important; 
     height: 54px !important; 
     font-size: 1.4em !important;
+  }
+  
+  /* Extra small mobile card area positioning */
+  #dealer-cards {
+    top: 10% !important;
+    min-height: 60px !important;
+  }
+  
+  #player-hands {
+    bottom: 10% !important;
+    min-height: 60px !important;
+  }
+  
+  .hand-cards {
+    min-width: 60px !important;
+  }
+  
+  .player-hand {
+    min-width: 60px !important;
+    margin: 0 2px !important;
   }
   
   .chip { 
@@ -1198,9 +1257,19 @@ body.modern-bg {
     margin-top: 0.25rem !important;
     margin-bottom: 0.5rem !important;
   }
-  
-  #action-bar {
+    #action-bar {
     padding: 0.25rem 0.5rem !important;
+  }
+  
+  /* Landscape mode card positioning */
+  #dealer-cards {
+    top: 15% !important;
+    min-height: 60px !important;
+  }
+  
+  #player-hands {
+    bottom: 15% !important;
+    min-height: 60px !important;
   }
 }
 
