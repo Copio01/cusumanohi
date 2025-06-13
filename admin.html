@@ -81,11 +81,42 @@
             margin-bottom: 0.5rem;
             letter-spacing: 1px;
             text-shadow: 0 2px 8px #b2d8f7;
-        }
-        .form-group {
+        }        .form-group {
             margin-bottom: 1.7rem;
             text-align: left;
             position: relative;
+        }
+        
+        .password-group {
+            position: relative;
+        }
+        
+        .toggle-password {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.2rem;
+            color: var(--medium-gray);
+            padding: 0;
+            height: 24px;
+            width: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: color 0.2s ease;
+            z-index: 10;
+        }
+        
+        .toggle-password:hover {
+            color: var(--primary-color);
+        }
+        
+        .password-group input {
+            padding-right: 45px;
         }
         .form-group label {
             display: block;
@@ -164,8 +195,7 @@
             flex-direction: column;
             background: linear-gradient(120deg, #e0eafc 0%, #f7f8fc 100%);
             animation: fadeIn 0.7s cubic-bezier(.4,0,.2,1);
-        }
-        .admin-header {
+        }        .admin-header {
             background: var(--glass-bg);
             backdrop-filter: blur(var(--glass-blur));
             padding: 1.2rem 2.5rem;
@@ -174,6 +204,20 @@
             align-items: center;
             border-bottom: 1.5px solid #e9ecef;
             box-shadow: 0 2px 12px rgba(10,77,104,0.06);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .admin-header::before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--secondary-color), var(--accent-color));
+            opacity: 0.6;
         }
         .admin-header h1 {
             font-size: 2rem;
@@ -187,8 +231,7 @@
             flex-grow: 1;
             overflow-y: auto;
             background: none;
-        }
-        .control-card {
+        }        .control-card {
             background: var(--glass-bg);
             backdrop-filter: blur(var(--glass-blur));
             padding: 2.5rem 2rem;
@@ -198,10 +241,53 @@
             margin-bottom: 2.5rem;
             transition: box-shadow 0.2s, transform 0.2s;
             animation: fadeInUp 0.7s cubic-bezier(.4,0,.2,1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .control-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--secondary-color), var(--accent-color), var(--primary-color));
+            opacity: 0.8;
+        }
+        
+        .control-card:hover {
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-2px);
         }
         .control-card:hover, .control-card:focus-within {
             box-shadow: var(--shadow-lg);
             transform: translateY(-4px) scale(1.012);
+        }
+        .control-card h2 {
+            font-family: var(--font-heading);
+            font-weight: 700;
+            font-size: 1.5rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+            margin-top: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .control-card h2::before {
+            content: '';
+            width: 4px;
+            height: 1.2rem;
+            background: linear-gradient(135deg, var(--secondary-color), var(--accent-color));
+            border-radius: 2px;
+        }
+        
+        .control-card p {
+            color: var(--medium-gray);
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
         }
         .form-actions {
             display: flex;
@@ -499,9 +585,8 @@
             <input type="password" id="password" placeholder="Enter your password">
             <button type="button" class="toggle-password" id="toggle-password" aria-label="Show password" title="Show/Hide Password">👁️</button>
         </div>
-        <button id="login-btn" class="btn">Login</button>
-        <a href="#" id="play-games-launcher" style="display:inline-block;margin-left:1.2rem;padding:0.6rem 1.3rem;font-size:1.1rem;background:linear-gradient(90deg,#e0a106,#ff4e00);color:#fff;text-decoration:none;border-radius:8px;box-shadow:0 2px 8px rgba(224,161,6,0.13);font-weight:600;vertical-align:middle;transition:transform 0.15s;">
-            🏗️ Play Games
+        <button id="login-btn" class="btn">Login</button>        <a href="#" id="play-games-launcher" style="display:inline-block;margin-left:1.2rem;padding:0.6rem 1.3rem;font-size:1.1rem;background:linear-gradient(90deg,#e0a106,#ff4e00);color:#fff;text-decoration:none;border-radius:8px;box-shadow:0 2px 8px rgba(224,161,6,0.13);font-weight:600;vertical-align:middle;transition:transform 0.15s;">
+            🎮 Games Launcher
         </a>
         <script>
         document.getElementById('play-games-launcher').onclick = function(e) {
