@@ -561,10 +561,9 @@
                         <h2 style="color:var(--primary-color);font-size:2rem;margin-bottom:1rem;text-align:left;">Find Us on Google</h2>
                         <div id="google-reviews"></div>
                         <div class="google-reviews-row">
-                            <div class="google-map-col">
-                                <!-- Google Maps Embed for Cusumano Home Improvements -->
+                            <div class="google-map-col">                                <!-- Google Maps Embed for Cusumano Home Improvements -->
                                 <iframe
-                                    src="https://www.google.com/maps/embed?pb=!1m2!2m1!1sCusumano%20Home%20Improvements%20Monroe%20MI!3m1!1s0x883b4e4e3e7e6e6d:0x6e2e9c7f7c7e7e7e?hl=en"
+                                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2972.123!2d-83.397!3d41.916!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zNDHCsDU0JzU3LjYiTiA4M8KwMjMnNDkuMiJX!5e0!3m2!1sen!2sus!4v1640000000000!5m2!1sen!2sus"
                                     width="100%" height="350" style="border:0;border-radius:12px;box-shadow:0 2px 16px rgba(10,77,104,0.08);" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"
                                     title="Cusumano Home Improvements on Google Maps"></iframe>
                                 <div style="font-size:1rem;color:#555;margin-top:0.5rem;">
@@ -604,13 +603,23 @@
         <a href="admin.html" title="Admin Login">
             <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h7"/><polyline points="15 12 19 12 19 8 15 8 15 12"/><path d="M17 16v-4h-2V8a3 3 0 0 1 3-3h0a3 3 0 0 1 3 3v4h-2v4Z"/></svg>
         </a>
-    </div>
-
-    <!-- Facebook SDK for JavaScript -->
+    </div>    <!-- Facebook SDK for JavaScript -->
     <div id="fb-root"></div>
-    <script async defer crossorigin="anonymous" src="https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v19.0" nonce="cusumano"></script>
+    <script async defer crossorigin="anonymous" src="https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v19.0" nonce="cusumano" onload="window.fbAsyncInit = function() { /* Facebook loaded */ }" onerror="console.warn('Facebook SDK failed to load')"></script>    <script type="module">
+        // Suppress some third-party console errors
+        const originalConsoleError = console.error;
+        console.error = function(...args) {
+            const message = args.join(' ');
+            // Filter out known third-party errors that don't affect functionality
+            if (message.includes('Could not find element') || 
+                message.includes('DataStore.get: namespace is required') ||
+                message.includes('Search endpoint requested') ||
+                message.includes('DOMSubtreeModified')) {
+                return; // Don't log these
+            }
+            originalConsoleError.apply(console, args);
+        };
 
-    <script type="module">
         // --- Firebase Imports ---
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-app.js";
         import { getFirestore, collection, onSnapshot, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-firestore.js";
