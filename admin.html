@@ -678,17 +678,13 @@
                     </div>
                 </form>
                 <div id="site-preview" style="margin-top:2rem; background:#f7f8fc; border-radius:8px; padding:1.5rem; box-shadow:0 2px 8px rgba(10,77,104,0.06);"></div>
-            </div>
-
-            <div class="control-card" id="grant-chips-card">
+            </div>            <div class="control-card" id="grant-chips-card">
                 <h2 style="display:flex;align-items:center;gap:0.5rem;"><span style="color:var(--primary-color);font-size:1.5em;">💰</span> Grant Chips to Player</h2>
-                <p style="margin-bottom:1.2rem;">Give chips to a player by selecting their display name. (Case sensitive, exact match)</p>
+                <p style="margin-bottom:1.2rem;">Give chips to a player by entering their exact display name. (Case sensitive, exact match)</p>
                 <form id="grant-chips-form" style="display:flex;flex-wrap:wrap;gap:1.2rem;align-items:center;background:rgba(240,246,250,0.85);padding:1.2rem 1.2rem 0.7rem 1.2rem;border-radius:12px;box-shadow:0 2px 8px #0a4d6810;">
                     <div class="form-group" style="margin-bottom:0;min-width:220px;">
-                        <label for="grant-player-select">Player</label>
-                        <select id="grant-player-select" required style="width:100%;padding:0.7rem 1.1rem;border-radius:8px;border:1.5px solid #d1e3f8;font-size:1.08rem;background:#fff;">
-                            <option value="" disabled selected>Loading players...</option>
-                        </select>
+                        <label for="grant-player-name">Player Display Name</label>
+                        <input type="text" id="grant-player-name" placeholder="Enter display name" required style="width:100%;padding:0.7rem 1.1rem;border-radius:8px;border:1.5px solid #d1e3f8;font-size:1.08rem;background:#fff;">
                     </div>
                     <div class="form-group" style="margin-bottom:0;min-width:160px;">
                         <label for="grant-chips-amount">Chips to Add</label>
@@ -722,8 +718,7 @@
             signOut,
             setPersistence,
             browserLocalPersistence 
-        } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
-        import { 
+        } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";        import { 
             getFirestore, 
             collection, 
             addDoc, 
@@ -732,6 +727,10 @@
             onSnapshot, 
             setDoc, 
             getDoc,
+            getDocs,
+            query,
+            where,
+            orderBy,
             enableIndexedDbPersistence,
             CACHE_SIZE_UNLIMITED 
         } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
@@ -1921,66 +1920,55 @@
         }
 
         // On page load, call loadSiteContentFromFirestore instead of just renderServiceFields
-        loadSiteContentFromFirestore();
+        loadSiteContentFromFirestore();        // --- Grant Chips to Player by Display Name ---
+        const grantChipsForm = document.getElementById('grant-chips-form');
+        const grantChipsMsg = document.getElementById('grant-chips-message');
 
-        // --- Grant Chips to Player by Dropdown ---
-const grantChipsForm = document.getElementById('grant-chips-form');
-const grantChipsMsg = document.getElementById('grant-chips-message');
-const grantPlayerSelect = document.getElementById('grant-player-select');
-
-async function populatePlayerDropdown() {
-    grantPlayerSelect.innerHTML = '<option value="" disabled selected>Loading players...</option>';
-    try {
-        const usersRef = collection(db, 'construction21_users');
-        const q = query(usersRef, orderBy('displayName'));
-        const snap = await getDocs(q);
-        if (snap.empty) {
-            grantPlayerSelect.innerHTML = '<option value="" disabled>No players found</option>';
-            return;
-        }
-        grantPlayerSelect.innerHTML = '<option value="" disabled selected>Select a player...</option>';
-        snap.forEach(doc => {
-            const d = doc.data();
-            const label = d.displayName + (d.email ? ` (${d.email})` : '');
-            grantPlayerSelect.innerHTML += `<option value="${doc.id}">${label}</option>`;
+        grantChipsForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            grantChipsMsg.style.display = 'none';
+            
+            const displayName = document.getElementById('grant-player-name').value.trim();
+            const chipsToAdd = parseInt(document.getElementById('grant-chips-amount').value, 10);
+            
+            if (!displayName || isNaN(chipsToAdd) || chipsToAdd <= 0) {
+                grantChipsMsg.textContent = 'Enter a display name and valid chip amount.';
+                grantChipsMsg.className = 'upload-message error';
+                grantChipsMsg.style.display = 'block';
+                return;
+            }
+            
+            try {
+                // Query users by display name
+                const usersRef = collection(db, 'construction21_users');
+                const q = query(usersRef, where('displayName', '==', displayName));
+                const snap = await getDocs(q);
+                
+                if (snap.empty) {
+                    grantChipsMsg.textContent = `No player found with display name: ${displayName}`;
+                    grantChipsMsg.className = 'upload-message error';
+                    grantChipsMsg.style.display = 'block';
+                    return;
+                }
+                
+                // Get the first matching user
+                const userDoc = snap.docs[0];
+                const userData = userDoc.data();
+                const newChips = (userData.chips || 0) + chipsToAdd;
+                
+                // Update chips
+                await setDoc(doc(db, 'construction21_users', userDoc.id), { chips: newChips }, { merge: true });
+                
+                grantChipsMsg.textContent = `Granted ${chipsToAdd} chips to ${userData.displayName}. New balance: ${newChips}`;
+                grantChipsMsg.className = 'upload-message success';
+                grantChipsMsg.style.display = 'block';
+                grantChipsForm.reset();
+            } catch (err) {
+                grantChipsMsg.textContent = 'Error: ' + (err.message || err);
+                grantChipsMsg.className = 'upload-message error';
+                grantChipsMsg.style.display = 'block';
+            }
         });
-    } catch (err) {
-        grantPlayerSelect.innerHTML = '<option value="" disabled>Error loading players</option>';
-    }
-}
-
-populatePlayerDropdown();
-
-grantChipsForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    grantChipsMsg.style.display = 'none';
-    const userId = grantPlayerSelect.value;
-    const chipsToAdd = parseInt(document.getElementById('grant-chips-amount').value, 10);
-    if (!userId || isNaN(chipsToAdd) || chipsToAdd <= 0) {
-        grantChipsMsg.textContent = 'Select a player and enter a valid chip amount.';
-        grantChipsMsg.className = 'upload-message error';
-        grantChipsMsg.style.display = 'block';
-        return;
-    }
-    try {
-        // Get the user document directly instead of querying all users
-        const userDocRef = doc(db, 'construction21_users', userId);
-        const userSnap = await getDoc(userDocRef);
-        if (!userSnap.exists()) throw new Error('User not found');
-        const userData = userSnap.data();
-        const newChips = (userData.chips || 0) + chipsToAdd;
-        await setDoc(userDocRef, { chips: newChips }, { merge: true });
-        grantChipsMsg.textContent = `Granted ${chipsToAdd} chips to ${userData.displayName}. New balance: ${newChips}`;
-        grantChipsMsg.className = 'upload-message success';
-        grantChipsMsg.style.display = 'block';
-        grantChipsForm.reset();
-        populatePlayerDropdown();
-    } catch (err) {
-        grantChipsMsg.textContent = 'Error: ' + (err.message || err);
-        grantChipsMsg.className = 'upload-message error';
-        grantChipsMsg.style.display = 'block';
-    }
-});
     </script>
 </body>
 </html>
