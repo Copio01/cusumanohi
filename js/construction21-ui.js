@@ -61,16 +61,15 @@ const delay = ms => new Promise(r => setTimeout(r, ms));
 async function loadUserDataAndStartGame(user) {
   userId = user.uid;
   userDocRef = doc(db, "construction21_users", userId);
-  let chipCount = 100, displayName = user.email;
+  let chipCount = 10000, displayName = user.email; // Start with 10,000 chips
   try {
-    const docSnap = await getDoc(userDocRef);
-    if (docSnap.exists()) {
-      chipCount = docSnap.data().chips ?? 100;
+    const docSnap = await getDoc(userDocRef);    if (docSnap.exists()) {
+      chipCount = docSnap.data().chips ?? 10000;
       displayName = docSnap.data().displayName ?? user.email;
     } else {
       await setDoc(userDocRef, {
         displayName: user.email,
-        chips: 100,
+        chips: 10000,
         email: user.email,
         createdAt: new Date(),
         lastLogin: new Date()

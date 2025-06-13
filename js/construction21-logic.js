@@ -35,12 +35,12 @@ export class Construction21Game {
         this.isGameInProgress = false;
         this.isDealerPlayoutComplete = false;
         this.lastActionTimestamp = 0;
-        this.actionCooldown = 100; // 100ms cooldown between actions
+        this.actionCooldown = 25; // 25ms cooldown between actions (more responsive)
         
         // Maximum limits for safety
         this.MAX_CHIPS = 1000000;
         this.MIN_CHIPS = 0;
-        this.MAX_BET = 10000;
+        this.MAX_BET = 50000; // Increased max bet for high stakes play
         this.MIN_BET = 1;
         this.MAX_HANDS = 4; // Maximum hands after splitting
         this.MAX_CARDS_PER_HAND = 11; // Theoretical maximum (4 Aces + 7 other cards)
@@ -121,12 +121,11 @@ export class Construction21Game {
     }
 
     // ---- GAME LOGIC ----
-    
-    resetGame(startingChips = 100) {
+      resetGame(startingChips = 10000) {
         // Validate starting chips
         if (typeof startingChips !== 'number' || startingChips < this.MIN_CHIPS || startingChips > this.MAX_CHIPS) {
-            console.warn(`Invalid startingChips: ${startingChips}, using default 100`);
-            startingChips = 100;
+            console.warn(`Invalid startingChips: ${startingChips}, using default 10000`);
+            startingChips = 10000;
         }
         
         this.deck = [];
