@@ -205,29 +205,11 @@ async function animateDealCard(hand, faceUp, isDealer, cardIndex) {
   // Deal the card to the game state
   game.dealCard(hand, faceUp);
   
-  // Use the enhanced animation system for smooth dealing
-  const targetElement = isDealer ? dealerCardsEl : 
-    playerHandsEl.querySelector(`.player-hand:nth-child(${game.activeHandIndex + 1}) .hand-cards`);
-  
-  if (targetElement) {
-    const cardData = hand.cards[hand.cards.length - 1];
-    const cardElement = animationCoordinator.createCardElement(cardData);
-    
-    // Add smooth animation classes
-    cardElement.classList.add('smooth-animation', 'gpu-accelerated', 'card-dealing');
-    
-    // Queue the smooth dealing animation
-    await smoothAnimationManager.queueAnimation(async () => {
-      return smoothAnimationManager.dealCardSmooth(cardElement, targetElement, {
-        priority: cardIndex === 0 ? 'high' : 'normal',
-        delay: cardIndex * 200
-      });
-    }, 'high');
-  }
-  
-  // Update UI after animation
+  // Update UI immediately to ensure cards are visible
   updateHandsUI();
-  await smoothAnimationManager.smartDelay(900); // Adaptive delay based on performance
+  
+  // Use adaptive delay based on performance
+  await smoothAnimationManager.smartDelay(900);
 }
 async function dealOpeningCards() {
   await animateDealCard(game.playerHands[0], true, false, 0);
@@ -572,9 +554,9 @@ function updateHandsUI(resultData = null) {
     cardEl.style.left = `${virtualDeck.left - dealerHandRect.left}px`;
     cardEl.style.top = `${virtualDeck.top - dealerHandRect.top}px`;
     
-    // Use performance-adaptive delays
-    const baseDelay = smoothAnimationManager.performanceMetrics.isThrottling ? 80 : 120;
-    const sequenceDelay = smoothAnimationManager.performanceMetrics.isThrottling ? 250 : 350;
+    // Use simpler, more reliable delays
+    const baseDelay = 120;
+    const sequenceDelay = 350;
     
     setTimeout(() => {
       cardEl.classList.add('card-deal-animate');
@@ -590,8 +572,7 @@ function updateHandsUI(resultData = null) {
       cardEl.classList.remove('card-deal-animate');
       cardEl.style.opacity = '';
     }, (baseDelay + 680) + idx * sequenceDelay);
-  });
-  // --- Enhanced Player hands with smooth animation system ---
+  });  // --- Enhanced Player hands with smooth animation system ---
   game.playerHands.forEach((hand, hIdx) => {
     const handDiv = document.createElement('div');
     handDiv.className = 'player-hand';
@@ -614,11 +595,6 @@ function updateHandsUI(resultData = null) {
       cardDiv.style.transform = `translateX(${fanGap * (idx - (n - 1) / 2)}px) rotate(${(idx - (n - 1) / 2) * 7}deg)`;
       cardDiv.style.zIndex = 10 + idx;
       cardDiv.style.position = '';
-      
-      // Add intersection observer for performance optimization
-      if (animationCoordinator.observer) {
-        animationCoordinator.observer.observe(cardDiv);
-      }
       
       handCardsDiv.appendChild(cardDiv);
     });
@@ -863,24 +839,13 @@ async function dealerPlayOut() {
     cardCount++;
     console.log(`[DEALER PLAYOUT] Drawing card #${cardCount}`);
     
-    // Use smooth animation system for dealer cards
-    await smoothAnimationManager.smartDelay(1200); // Adaptive delay based on performance
+    // Use adaptive delay based on performance
+    await smoothAnimationManager.smartDelay(1200);
     
-    const newCard = game.dealCard(game.dealerHand, true);
+    // Deal the card normally
+    game.dealCard(game.dealerHand, true);
     
-    // Create smooth dealer card animation
-    if (dealerCardsEl) {
-      const cardElement = animationCoordinator.createCardElement(newCard);
-      cardElement.classList.add('smooth-animation', 'gpu-accelerated', 'card-dealing');
-      
-      await smoothAnimationManager.queueAnimation(async () => {
-        return smoothAnimationManager.dealCardSmooth(cardElement, dealerCardsEl, {
-          priority: 'high',
-          delay: 100
-        });
-      }, 'high');
-    }
-    
+    // Update UI immediately to show the card
     updateHandsUI();
   }
   
@@ -1399,16 +1364,13 @@ function adjustTouchTargetsForScreen() {
   document.documentElement.style.setProperty('--bet-spot-touch-scale', betSpotTouchScale);
   document.documentElement.style.setProperty('--min-touch-size', `${minTouchSize}px`);
   document.documentElement.style.setProperty('--bet-spot-padding', `${betSpotPadding}px`);
-  
-  // Apply dynamic bet spot touch area coverage
+    // Apply dynamic bet spot touch area coverage
   const betSpots = document.querySelectorAll('.table-bet-spot');
   betSpots.forEach(spot => {
     const beforeElement = spot.querySelector('::before');
     spot.style.setProperty('--dynamic-bet-padding', `${betSpotPadding}px`);
   });
-  
-  // Log for debugging (remove in production)
-  console.log(`Enhanced touch targets: chip=${chipTouchScale}x, betSpot=${betSpotTouchScale}x, padding=${betSpotPadding}px, minSize=${minTouchSize}px`);
+}
 }
 
 // Call on load and resize
@@ -1450,18 +1412,18 @@ class SmoothAnimationManager {
     this.setupPerformanceMonitoring();
     this.initializeOptimizations();
   }
-
   // Detect device frame rate and capabilities
   detectFrameRate() {
     let frameCount = 0;
     let lastTime = performance.now();
+    let detectedFPS = 60; // Default to 60 FPS
     
     const measureFrames = (currentTime) => {
       frameCount++;
       if (currentTime - lastTime >= 1000) {
-        const fps = Math.round(frameCount * 1000 / (currentTime - lastTime));
-        this.adaptToFrameRate(fps);
-        return;
+        detectedFPS = Math.round(frameCount * 1000 / (currentTime - lastTime));
+        this.adaptToFrameRate(detectedFPS);
+        return detectedFPS;
       }
       if (frameCount < 60) {
         requestAnimationFrame(measureFrames);
@@ -1469,6 +1431,7 @@ class SmoothAnimationManager {
     };
     
     requestAnimationFrame(measureFrames);
+    return detectedFPS; // Return default until measurement completes
   }
 
   adaptToFrameRate(fps) {
