@@ -321,12 +321,17 @@ export class Construction21Game {
             console.error(`Too many hands: ${this.playerHands.length}, limiting to ${this.MAX_HANDS}`);
             this.playerHands = this.playerHands.slice(0, this.MAX_HANDS);
         }
-        
-        // Check active hand index
-        if (this.activeHandIndex < 0 || this.activeHandIndex >= this.playerHands.length) {
-            console.warn(`Invalid activeHandIndex: ${this.activeHandIndex}, resetting to 0`);
+          // Check active hand index - only validate if game is in progress and has hands
+        if (this.activeHandIndex < 0) {
+            console.warn(`Invalid activeHandIndex: ${this.activeHandIndex} is negative, resetting to 0`);
+            this.activeHandIndex = 0;
+        } else if (this.isGameInProgress && this.playerHands.length > 0 && this.activeHandIndex >= this.playerHands.length) {
+            // Only flag as invalid if game is active, has hands, and index is out of bounds
+            console.warn(`Invalid activeHandIndex: ${this.activeHandIndex} >= ${this.playerHands.length} during active game, resetting to 0`);
             this.activeHandIndex = 0;
         }
+        // Note: During betting phase, playerHands is empty and activeHandIndex=0 is valid
+        // Note: During hand transitions, activeHandIndex may temporarily exceed array length
         
         return true;
     }

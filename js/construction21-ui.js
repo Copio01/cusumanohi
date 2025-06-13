@@ -204,7 +204,7 @@ function resetAllHandsAndUI() {
 async function animateDealCard(hand, faceUp, isDealer, cardIndex) {
   game.dealCard(hand, faceUp);
   updateHandsUI();
-  await delay(550);
+  await delay(900); // Increased from 550ms to 900ms for smoother pacing
 }
 async function dealOpeningCards() {
   await animateDealCard(game.playerHands[0], true, false, 0);
@@ -393,9 +393,8 @@ function animateChipToBetSpot(type, amount, spot, stackCount) {
 
   void clone.offsetWidth;
   const stackOffsetY = -stackCount * 8;
-  const x = spotRect.left + spotRect.width / 2 - (chipRect.left + chipRect.width / 2);
-  const y = spotRect.top + spotRect.height / 2 - (chipRect.top + chipRect.height / 2) + stackOffsetY;
-  clone.style.transition = 'transform 0.45s cubic-bezier(.68,-0.55,.27,1.55), opacity 0.5s';
+  const x = spotRect.left + spotRect.width / 2 - (chipRect.left + chipRect.width / 2);  const y = spotRect.top + spotRect.height / 2 - (chipRect.top + chipRect.height / 2) + stackOffsetY;
+  clone.style.transition = 'transform 0.75s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.6s ease-out'; // Smoother, slower animation
   clone.style.transform = `translate(${x}px, ${y}px) scale(1.3)`;
   clone.style.opacity = 0.95;
 
@@ -403,7 +402,7 @@ function animateChipToBetSpot(type, amount, spot, stackCount) {
     clone.remove();
     spot.classList.add('bet-pulse');
     setTimeout(() => spot.classList.remove('bet-pulse'), 300);
-  }, 460);
+  }, 780); // Increased to match transition duration
 }
 
 function updateBetsUI() {
@@ -498,14 +497,12 @@ function updateHandsUI(resultData = null) {
 
     cardEl.style.opacity = 0;
     cardEl.style.left = `${virtualDeck.left - dealerHandRect.left}px`;
-    cardEl.style.top = `${virtualDeck.top - dealerHandRect.top}px`;
-
-    setTimeout(() => {
+    cardEl.style.top = `${virtualDeck.top - dealerHandRect.top}px`;    setTimeout(() => {
       cardEl.classList.add('card-deal-animate');
       cardEl.style.left = `${idx * 34}px`;
       cardEl.style.top = `0px`;
       cardEl.style.opacity = 1;
-    }, 40 + idx * 210);
+    }, 120 + idx * 350); // Increased delay from 40+210 to 120+350 for smoother sequence
 
     setTimeout(() => {
       cardEl.style.position = '';
@@ -513,7 +510,7 @@ function updateHandsUI(resultData = null) {
       cardEl.style.top = '';
       cardEl.classList.remove('card-deal-animate');
       cardEl.style.opacity = '';
-    }, 340 + idx * 210);
+    }, 800 + idx * 350); // Increased from 340+210 to 800+350 for proper timing
   });
 
   // --- Player hands ---
@@ -737,11 +734,10 @@ function animateSplitCardMove() {
   void clone.offsetWidth;
 
   const x = toRect.left - cardRect.left + 44;
-  const y = toRect.top - cardRect.top + 4;
-  clone.style.transition = 'transform 0.32s cubic-bezier(.68,-0.55,.27,1.55)';
+  const y = toRect.top - cardRect.top + 4;  clone.style.transition = 'transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94)'; // Smoother split animation
   clone.style.transform = `translate(${x}px, ${y}px) scale(1.08)`;
 
-  setTimeout(() => clone.remove(), 350);
+  setTimeout(() => clone.remove(), 650); // Increased to match transition
 }
 
 function nextHandOrSettle() {
@@ -767,11 +763,10 @@ async function dealerPlayOut() {
   console.log('[DEALER PLAYOUT] Starting dealer play-out');
   let cardCount = 0;
   const maxCards = 10; // Safety limit to prevent infinite loops
-  
-  while (game.shouldDealerHit() && cardCount < maxCards) {
+    while (game.shouldDealerHit() && cardCount < maxCards) {
     cardCount++;
     console.log(`[DEALER PLAYOUT] Drawing card #${cardCount}`);
-    await delay(700);
+    await delay(1200); // Increased from 700ms to 1200ms for smoother dealer play
     game.dealCard(game.dealerHand, true);
     updateHandsUI();
   }

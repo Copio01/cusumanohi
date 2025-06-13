@@ -420,11 +420,11 @@ body.modern-bg {
   z-index: 1;
 }
 .hand-cards .card {
-  transition: transform 0.33s cubic-bezier(.68,-0.55,.27,1.55), box-shadow 0.22s;
-  animation: cardIn 0.36s cubic-bezier(.68,-0.55,.27,1.55) backwards;
+  transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94), box-shadow 0.35s ease-out;
+  animation: cardIn 0.55s cubic-bezier(0.25, 0.46, 0.45, 0.94) backwards;
 }
 @keyframes cardIn {
-  from { opacity: 0; transform: translateY(32px) scale(0.89);}
+  from { opacity: 0; transform: translateY(28px) scale(0.92);}
   to   { opacity: 1; transform: none;}
 }
 
@@ -456,10 +456,10 @@ body.modern-bg {
 }
 .card.flipped {
   transform: rotateY(180deg);
-  transition: transform 0.45s cubic-bezier(0.4,0,0.2,1);
+  transition: transform 0.65s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 .card-deal-animate {
-  transition: left 0.34s cubic-bezier(.68,-0.55,.27,1.55), top 0.34s cubic-bezier(.68,-0.55,.27,1.55), opacity 0.22s;
+  transition: left 0.65s cubic-bezier(0.25, 0.46, 0.45, 0.94), top 0.65s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.4s ease-out;
 }
 .card-fly {
   box-shadow: 0 8px 32px #0008;
