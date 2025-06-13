@@ -507,45 +507,116 @@ body.modern-bg {
   pointer-events: all;
 }
 
-/* Side Bet Win Display */
-.side-bet-win-panel {
+/* Enhanced Outcome Display Panel */
+.outcome-display-panel {
   position: fixed;
   bottom: 20px;
   right: 20px;
-  width: 320px;
-  background: linear-gradient(145deg, 
-    rgba(255, 215, 0, 0.95) 0%, 
-    rgba(255, 183, 0, 0.98) 25%,
-    rgba(255, 140, 0, 0.95) 100%);
-  backdrop-filter: blur(12px);
-  border-radius: 20px;
-  border: 2px solid #ffd700;
-  box-shadow: 
-    0 8px 32px rgba(255, 215, 0, 0.4),
-    0 4px 16px rgba(255, 140, 0, 0.3),
-    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  width: 350px;
+  backdrop-filter: blur(15px);
+  border-radius: 24px;
+  border: 3px solid;
   z-index: 1000;
-  transform: translateX(400px) scale(0.8);
+  transform: translateX(450px) scale(0.7) rotateY(20deg);
   opacity: 0;
-  transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  transition: all 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
   overflow: hidden;
-  color: #23232b;
   font-family: 'Segoe UI', Arial, sans-serif;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
 }
 
-.side-bet-win-panel.show {
-  transform: translateX(0) scale(1);
+.outcome-display-panel.show {
+  transform: translateX(0) scale(1) rotateY(0deg);
   opacity: 1;
 }
 
-.side-bet-win-panel::before {
+/* Win States */
+.outcome-display-panel.blackjack {
+  background: linear-gradient(145deg, 
+    rgba(255, 215, 0, 0.98) 0%, 
+    rgba(255, 140, 0, 0.95) 50%,
+    rgba(255, 69, 0, 0.98) 100%);
+  border-color: #ffd700;
+  color: #1a1a1a;
+  animation: blackjackPulse 2s ease-in-out infinite;
+}
+
+.outcome-display-panel.win {
+  background: linear-gradient(145deg, 
+    rgba(76, 175, 80, 0.95) 0%, 
+    rgba(139, 195, 74, 0.98) 50%,
+    rgba(76, 175, 80, 0.95) 100%);
+  border-color: #4caf50;
+  color: #fff;
+}
+
+.outcome-display-panel.side-bet-win {
+  background: linear-gradient(145deg, 
+    rgba(156, 39, 176, 0.95) 0%, 
+    rgba(233, 30, 99, 0.98) 50%,
+    rgba(255, 193, 7, 0.95) 100%);
+  border-color: #e91e63;
+  color: #fff;
+  animation: sideBetShimmer 1.5s ease-in-out infinite;
+}
+
+/* Loss States */
+.outcome-display-panel.bust {
+  background: linear-gradient(145deg, 
+    rgba(244, 67, 54, 0.95) 0%, 
+    rgba(183, 28, 28, 0.98) 50%,
+    rgba(136, 14, 79, 0.95) 100%);
+  border-color: #f44336;
+  color: #fff;
+  animation: bustShake 0.8s ease-in-out infinite;
+}
+
+.outcome-display-panel.lose {
+  background: linear-gradient(145deg, 
+    rgba(96, 125, 139, 0.95) 0%, 
+    rgba(69, 90, 100, 0.98) 50%,
+    rgba(55, 71, 79, 0.95) 100%);
+  border-color: #607d8b;
+  color: #fff;
+}
+
+.outcome-display-panel.dealer-blackjack {
+  background: linear-gradient(145deg, 
+    rgba(63, 81, 181, 0.95) 0%, 
+    rgba(48, 63, 159, 0.98) 50%,
+    rgba(26, 35, 126, 0.95) 100%);
+  border-color: #3f51b5;
+  color: #fff;
+  animation: dealerBlackjackGlow 2s ease-in-out infinite;
+}
+
+/* Neutral States */
+.outcome-display-panel.push {
+  background: linear-gradient(145deg, 
+    rgba(158, 158, 158, 0.95) 0%, 
+    rgba(117, 117, 117, 0.98) 50%,
+    rgba(97, 97, 97, 0.95) 100%);
+  border-color: #9e9e9e;
+  color: #fff;
+}
+
+.outcome-display-panel.insurance-win {
+  background: linear-gradient(145deg, 
+    rgba(0, 150, 136, 0.95) 0%, 
+    rgba(0, 121, 107, 0.98) 50%,
+    rgba(0, 95, 84, 0.95) 100%);
+  border-color: #009688;
+  color: #fff;
+}
+
+.outcome-display-panel::before {
   content: '';
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: radial-gradient(circle at 30% 20%, rgba(255, 255, 255, 0.3) 0%, transparent 50%);
+  background: radial-gradient(circle at 30% 20%, rgba(255, 255, 255, 0.2) 0%, transparent 50%);
   pointer-events: none;
 }
 
@@ -553,94 +624,91 @@ body.modern-bg {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 16px 20px 12px;
-  border-bottom: 2px solid rgba(35, 35, 43, 0.1);
-  background: linear-gradient(90deg, rgba(255, 255, 255, 0.2) 0%, transparent 100%);
+  padding: 18px 22px 14px;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.15) 0%, transparent 100%);
 }
 
-.win-icon {
-  font-size: 24px;
-  animation: bounce 1s infinite;
+.outcome-icon {
+  font-size: 28px;
+  animation: bounce 1.2s infinite;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
 }
 
-.win-title {
+.outcome-title {
   font-size: 18px;
   font-weight: bold;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
   letter-spacing: 1px;
 }
 
 .close-win-btn {
-  background: rgba(35, 35, 43, 0.2);
+  background: rgba(0, 0, 0, 0.2);
   border: none;
   border-radius: 50%;
-  width: 28px;
-  height: 28px;
+  width: 32px;
+  height: 32px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #23232b;
-  font-size: 14px;
+  color: inherit;
+  font-size: 16px;
   font-weight: bold;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
 }
 
 .close-win-btn:hover {
-  background: rgba(35, 35, 43, 0.3);
-  transform: scale(1.1);
+  background: rgba(0, 0, 0, 0.4);
+  transform: scale(1.1) rotate(90deg);
 }
 
-.win-details {
-  padding: 16px 20px;
+.outcome-details {
+  padding: 18px 22px;
 }
 
-.win-type-section,
-.win-amount-section {
-  margin-bottom: 12px;
+.outcome-type-section,
+.outcome-amount-section {
+  margin-bottom: 14px;
 }
 
-.win-type-label,
-.win-amount-label {
-  font-size: 14px;
+.outcome-type-label,
+.outcome-amount-label {
+  font-size: 13px;
   font-weight: 600;
-  opacity: 0.8;
-  margin-bottom: 4px;
+  opacity: 0.9;
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
-.win-type-value {
-  font-size: 20px;
+.outcome-type-value {
+  font-size: 22px;
   font-weight: bold;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
-  background: linear-gradient(45deg, #8b4513, #cd853f);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  margin-bottom: 8px;
 }
 
-.win-amount-value {
+.outcome-amount-value {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 24px;
+  gap: 10px;
+  font-size: 26px;
   font-weight: bold;
 }
 
-.chip-icon {
-  font-size: 28px;
+.outcome-icon-small {
+  font-size: 30px;
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
   animation: spin 2s linear infinite;
 }
 
 .amount-text {
-  background: linear-gradient(45deg, #2e7d32, #4caf50);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
-.win-celebration {
+.outcome-effects {
   position: absolute;
   top: 0;
   left: 0;
@@ -650,28 +718,95 @@ body.modern-bg {
   overflow: hidden;
 }
 
-.sparkle {
+.effect-sparkle,
+.effect-fire,
+.effect-money {
   position: absolute;
-  font-size: 16px;
-  animation: sparkle 2s ease-in-out infinite;
+  font-size: 18px;
+  animation: effectFloat 3s ease-in-out infinite;
 }
 
-.sparkle:nth-child(1) {
-  top: 15%;
+.effect-sparkle:nth-child(1) {
+  top: 20%;
   left: 15%;
   animation-delay: 0s;
 }
 
-.sparkle:nth-child(2) {
-  top: 25%;
+.effect-sparkle:nth-child(2) {
+  top: 30%;
   right: 20%;
-  animation-delay: 0.7s;
+  animation-delay: 1s;
 }
 
-.sparkle:nth-child(3) {
-  bottom: 20%;
+.effect-sparkle:nth-child(3) {
+  bottom: 25%;
   left: 25%;
-  animation-delay: 1.4s;
+  animation-delay: 2s;
+}
+
+.effect-fire {
+  top: 15%;
+  right: 15%;
+  animation: fireFlicker 0.5s ease-in-out infinite alternate;
+  display: none;
+}
+
+.effect-money {
+  bottom: 20%;
+  right: 25%;
+  animation: moneyBounce 1s ease-in-out infinite;
+  display: none;
+}
+
+/* Show specific effects for different outcomes */
+.outcome-display-panel.blackjack .effect-fire,
+.outcome-display-panel.side-bet-win .effect-fire {
+  display: block;
+}
+
+.outcome-display-panel.win .effect-money,
+.outcome-display-panel.side-bet-win .effect-money {
+  display: block;
+}
+
+/* Keyframe Animations */
+@keyframes blackjackPulse {
+  0%, 100% {
+    box-shadow: 0 0 30px rgba(255, 215, 0, 0.6);
+  }
+  50% {
+    box-shadow: 0 0 50px rgba(255, 215, 0, 0.9), 0 0 80px rgba(255, 140, 0, 0.4);
+  }
+}
+
+@keyframes sideBetShimmer {
+  0%, 100% {
+    filter: hue-rotate(0deg) brightness(1);
+  }
+  50% {
+    filter: hue-rotate(30deg) brightness(1.2);
+  }
+}
+
+@keyframes bustShake {
+  0%, 100% {
+    transform: translateX(0) scale(1) rotateY(0deg);
+  }
+  25% {
+    transform: translateX(-3px) scale(0.98) rotateY(-2deg);
+  }
+  75% {
+    transform: translateX(3px) scale(0.98) rotateY(2deg);
+  }
+}
+
+@keyframes dealerBlackjackGlow {
+  0%, 100% {
+    box-shadow: 0 0 25px rgba(63, 81, 181, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 40px rgba(63, 81, 181, 0.8), 0 0 60px rgba(48, 63, 159, 0.3);
+  }
 }
 
 @keyframes bounce {
@@ -679,10 +814,10 @@ body.modern-bg {
     transform: translateY(0);
   }
   40% {
-    transform: translateY(-8px);
+    transform: translateY(-10px);
   }
   60% {
-    transform: translateY(-4px);
+    transform: translateY(-5px);
   }
 }
 
@@ -695,14 +830,50 @@ body.modern-bg {
   }
 }
 
-@keyframes sparkle {
+@keyframes effectFloat {
   0%, 100% {
     opacity: 0;
-    transform: scale(0.5) rotate(0deg);
+    transform: scale(0.5) rotate(0deg) translateY(0px);
   }
   50% {
     opacity: 1;
-    transform: scale(1.2) rotate(180deg);
+    transform: scale(1.2) rotate(180deg) translateY(-10px);
+  }
+}
+
+@keyframes fireFlicker {
+  0% {
+    transform: scale(1) rotate(-2deg);
+    opacity: 0.9;
+  }
+  100% {
+    transform: scale(1.1) rotate(2deg);
+    opacity: 1;
+  }
+}
+
+@keyframes moneyBounce {
+  0%, 100% {
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    transform: translateY(-8px) scale(1.1);
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .outcome-display-panel {
+    width: 300px;
+    bottom: 10px;
+    right: 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .outcome-display-panel {
+    width: 280px;
+    transform: translateX(350px) scale(0.7) rotateY(20deg);
   }
 }
 .chip-flying {
@@ -858,31 +1029,32 @@ body.modern-bg {
   </main>
   <!-- Status Toast -->
   <div id="status-toast" class="fixed top-6 left-1/2 -translate-x-1/2 glassy px-6 py-3 rounded-lg shadow-lg text-yellow-300 text-lg z-50"></div>
-
   <!-- Side Bet Win Display -->
-  <div id="side-bet-win-display" class="side-bet-win-panel">
+  <div id="side-bet-win-display" class="outcome-display-panel">
     <div class="win-panel-header">
-      <span class="win-icon">🎉</span>
-      <span class="win-title">SIDE BET WIN!</span>
-      <button class="close-win-btn" onclick="closeSideBetWinDisplay()">✕</button>
+      <span class="outcome-icon">🎉</span>
+      <span class="outcome-title">SIDE BET WIN!</span>
+      <button class="close-win-btn" onclick="closeOutcomeDisplay()">✕</button>
     </div>
-    <div class="win-details">
-      <div class="win-type-section">
-        <div class="win-type-label">Win Type:</div>
-        <div class="win-type-value" id="win-type-display"></div>
+    <div class="outcome-details">
+      <div class="outcome-type-section">
+        <div class="outcome-type-label">Result:</div>
+        <div class="outcome-type-value" id="outcome-type-display"></div>
       </div>
-      <div class="win-amount-section">
-        <div class="win-amount-label">Amount Won:</div>
-        <div class="win-amount-value" id="win-amount-display">
-          <span class="chip-icon">🪙</span>
+      <div class="outcome-amount-section">
+        <div class="outcome-amount-label">Amount:</div>
+        <div class="outcome-amount-value" id="outcome-amount-display">
+          <span class="outcome-icon-small">🪙</span>
           <span class="amount-text"></span>
         </div>
       </div>
     </div>
-    <div class="win-celebration">
-      <div class="sparkle">✨</div>
-      <div class="sparkle">💫</div>
-      <div class="sparkle">⭐</div>
+    <div class="outcome-effects">
+      <div class="effect-sparkle">✨</div>
+      <div class="effect-sparkle">💫</div>
+      <div class="effect-sparkle">⭐</div>
+      <div class="effect-fire">🔥</div>
+      <div class="effect-money">💰</div>
     </div>
   </div>
 

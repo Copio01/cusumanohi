@@ -81,7 +81,10 @@ async function loadUserDataAndStartGame(user) {
   }
   userDisplayName = displayName;
   if (profileNameEl) profileNameEl.textContent = userDisplayName;
-  game = new Construction21Game(chipCount);
+  
+  // Create game with userId and set chips manually
+  game = new Construction21Game(userId);
+  game.chips = chipCount;
   updateChipsDisplay();
   setupEventHandlers();
   updateBetsUI();
@@ -253,35 +256,50 @@ function setupEventHandlers() {
     updateHandsUI();
     updateActionBarState();
     showInPlayButtons(false);
-  });
-  rebetBtn.addEventListener('click', () => {
+  });  rebetBtn.addEventListener('click', () => {
     hideEndButtons();
     if (lastBets) {
       resetAllHandsAndUI();
       game.clearBets();
-      Object.keys(lastBets).forEach(k => { if (lastBets[k] > 0) game.bets[k] = lastBets[k]; });
+      // Deduct chips for re-bet
+      let totalBet = 0;
+      Object.keys(lastBets).forEach(k => { 
+        if (lastBets[k] > 0) {
+          totalBet += lastBets[k];
+          game.bets[k] = lastBets[k];
+        }
+      });
+      game.chips -= totalBet;
       updateBetsUI();
+      updateChipsDisplay();
+      saveChipsToFirebase();
     }
     startRound();
-  });
-  doubleBetBtn.addEventListener('click', () => {
+  });  doubleBetBtn.addEventListener('click', () => {
     hideEndButtons();
     if (lastBets) {
-      let ok = true;
+      let totalDoubleBet = 0;
       Object.keys(lastBets).forEach(k => {
-        if (lastBets[k] * 2 > game.chips) ok = false;
+        if (lastBets[k] * 2 > game.chips) totalDoubleBet = Infinity;
+        else totalDoubleBet += lastBets[k];
       });
-      if (!ok) {
+      if (totalDoubleBet === Infinity || totalDoubleBet * 2 > game.chips) {
         showStatusToast('Not enough chips for 2x bet!', true);
         showEndButtons();
         return;
       }
       resetAllHandsAndUI();
       game.clearBets();
+      // Deduct chips for double bet
       Object.keys(lastBets).forEach(k => {
-        if (lastBets[k] > 0) game.bets[k] = lastBets[k] * 2;
+        if (lastBets[k] > 0) {
+          game.bets[k] = lastBets[k] * 2;
+        }
       });
+      game.chips -= totalDoubleBet * 2;
       updateBetsUI();
+      updateChipsDisplay();
+      saveChipsToFirebase();
       startRound();
     }
   });
@@ -584,9 +602,10 @@ function handlePlayerAction(action) {
       showStatusToast("Card dealt.");
     }
   } else if (action === 'stand') {
-    nextHandOrSettle();
-  } else if (action === 'double') {
+    nextHandOrSettle();  } else if (action === 'double') {
     if (canDoubleCurrentHand() && game.doubleDown()) {
+      updateChipsDisplay();
+      saveChipsToFirebase();
       showStatusToast("Bet doubled, one card only.");
       updateHandsUI();
       if (game.isBust(hand.cards)) {
@@ -598,6 +617,8 @@ function handlePlayerAction(action) {
     }
   } else if (action === 'split') {
     if (canSplitCurrentHand() && game.splitHand()) {
+      updateChipsDisplay();
+      saveChipsToFirebase();
       animateSplitCardMove();
       showStatusToast("Hand split.");
       updateHandsUI();
@@ -605,10 +626,11 @@ function handlePlayerAction(action) {
       return;
     } else {
       showStatusToast("Cannot split!", true);
-    }
-  } else if (action === 'insurance') {
+    }} else if (action === 'insurance') {
     let insuranceAmt = Math.ceil(game.bets.main / 2);
     if (canBuyInsurance() && game.placeInsurance(insuranceAmt)) {
+      updateChipsDisplay();
+      saveChipsToFirebase();
       showStatusToast("Insurance bought.");
     } else {
       showStatusToast("Cannot buy insurance!", true);
@@ -689,8 +711,7 @@ async function settleAndEndRound() {
   updateChipsDisplay();
   saveChipsToFirebase();
   updateBetsUI();
-  updateHandsUI(results);
-  results.forEach((res, idx) => {
+  updateHandsUI(results);  results.forEach((res, idx) => {
     setTimeout(() => {
       let txt;
       if (res.outcome === 'blackjack' || res.outcome === 'win') txt = `Hand ${idx+1}: You win!`;
@@ -699,6 +720,13 @@ async function settleAndEndRound() {
       else if (res.outcome === 'dealer_blackjack') txt = `Hand ${idx+1}: Dealer Blackjack.`;
       else txt = `Hand ${idx+1}: Dealer wins.`;
       showStatusToast(txt);
+      
+      // Show main hand outcome display for the first result (or if only one hand)
+      if (idx === 0 || results.length === 1) {
+        setTimeout(() => {
+          showMainHandResult(res.outcome, res.payout, idx);
+        }, 500);
+      }
     }, 900 + idx * 700);
   });
   // Show side bet results
@@ -732,13 +760,19 @@ async function settleAndEndRound() {
       }
     }
   }, 1200 + results.length * 700);
-
   setTimeout(() => {
     if (game.bets.insurance === 0) return;
+    const insuranceAmount = lastBets ? lastBets.insurance : 0;
     if (game.isBlackjack(game.dealerHand.cards)) {
       showStatusToast("Insurance paid!");
+      setTimeout(() => {
+        showInsuranceResult(true, insuranceAmount * 3);
+      }, 500);
     } else {
       showStatusToast("Insurance lost.");
+      setTimeout(() => {
+        showInsuranceResult(false, insuranceAmount);
+      }, 500);
     }
   }, 800 + results.length * 700);
 
@@ -762,41 +796,122 @@ function hideEndButtons() {
   doubleBetBtn.style.display = 'none';
 }
 
-// ---- Side Bet Win Display Functions ----
-function showSideBetWinDisplay(betType, winType, amount) {
-  const winDisplay = document.getElementById('side-bet-win-display');
-  const winTypeDisplay = document.getElementById('win-type-display');
-  const winAmountDisplay = document.getElementById('win-amount-display');
+// ---- Enhanced Outcome Display Functions ----
+function showOutcomeDisplay(outcomeType, title, description, amount = null, isWin = true) {
+  const outcomeDisplay = document.getElementById('side-bet-win-display');
+  const outcomeIcon = outcomeDisplay.querySelector('.outcome-icon');
+  const outcomeTitle = outcomeDisplay.querySelector('.outcome-title');
+  const outcomeTypeDisplay = document.getElementById('outcome-type-display');
+  const outcomeAmountDisplay = document.getElementById('outcome-amount-display');
+  const amountText = outcomeAmountDisplay.querySelector('.amount-text');
+  const outcomeIconSmall = outcomeAmountDisplay.querySelector('.outcome-icon-small');
   
-  if (!winDisplay || !winTypeDisplay || !winAmountDisplay) return;
+  if (!outcomeDisplay) return;
+  
+  // Remove all existing outcome classes
+  const outcomeClasses = ['blackjack', 'win', 'side-bet-win', 'bust', 'lose', 'dealer-blackjack', 'push', 'insurance-win'];
+  outcomeClasses.forEach(cls => outcomeDisplay.classList.remove(cls));
+  
+  // Add the new outcome class
+  outcomeDisplay.classList.add(outcomeType);
+  
+  // Set icons and content based on outcome type
+  const outcomeConfig = {
+    'blackjack': { icon: '🎰', smallIcon: '💰', title: 'BLACKJACK!' },
+    'win': { icon: '🎉', smallIcon: '💰', title: 'YOU WIN!' },
+    'side-bet-win': { icon: '✨', smallIcon: '🎰', title: 'SIDE BET WIN!' },
+    'bust': { icon: '💥', smallIcon: '💸', title: 'BUST!' },
+    'lose': { icon: '😞', smallIcon: '💸', title: 'YOU LOSE' },
+    'dealer-blackjack': { icon: '🃏', smallIcon: '💸', title: 'DEALER BLACKJACK' },
+    'push': { icon: '🤝', smallIcon: '🪙', title: 'PUSH' },
+    'insurance-win': { icon: '🛡️', smallIcon: '💰', title: 'INSURANCE PAID!' }
+  };
+  
+  const config = outcomeConfig[outcomeType] || outcomeConfig['win'];
   
   // Update content
-  winTypeDisplay.textContent = winType;
-  winAmountDisplay.querySelector('.amount-text').textContent = amount;
+  outcomeIcon.textContent = config.icon;
+  outcomeTitle.textContent = title || config.title;
+  outcomeTypeDisplay.textContent = description;
+  outcomeIconSmall.textContent = config.smallIcon;
   
-  // Update title based on bet type
-  const winTitle = winDisplay.querySelector('.win-title');
-  if (winTitle) {
-    winTitle.textContent = `${betType.toUpperCase()} WIN!`;
+  // Handle amount display
+  if (amount !== null) {
+    if (isWin) {
+      amountText.textContent = `+${amount}`;
+    } else if (amount === 0) {
+      amountText.textContent = `${amount}`;
+    } else {
+      amountText.textContent = `-${Math.abs(amount)}`;
+    }
+    outcomeAmountDisplay.style.display = 'flex';
+  } else {
+    outcomeAmountDisplay.style.display = 'none';
   }
   
   // Show the display with animation
-  winDisplay.classList.add('show');
+  outcomeDisplay.classList.add('show');
   
-  // Auto-hide after 8 seconds
+  // Auto-hide after different durations based on outcome
+  const hideDelay = outcomeType === 'blackjack' ? 10000 : 
+                   outcomeType === 'side-bet-win' ? 8000 : 6000;
+  
   setTimeout(() => {
-    closeSideBetWinDisplay();
-  }, 8000);
+    closeOutcomeDisplay();
+  }, hideDelay);
 }
 
-function closeSideBetWinDisplay() {
-  const winDisplay = document.getElementById('side-bet-win-display');
-  if (winDisplay) {
-    winDisplay.classList.remove('show');
+function showSideBetWinDisplay(betType, winType, amount) {
+  showOutcomeDisplay('side-bet-win', `${betType.toUpperCase()} WIN!`, winType, amount, true);
+}
+
+function showMainHandResult(outcome, amount, handIndex = 0) {
+  const handText = handIndex > 0 ? ` (Hand ${handIndex + 1})` : '';
+  
+  switch(outcome) {
+    case 'blackjack':
+      showOutcomeDisplay('blackjack', 'BLACKJACK!', `Natural 21${handText}`, amount, true);
+      break;
+    case 'win':
+      showOutcomeDisplay('win', 'YOU WIN!', `Victory${handText}`, amount, true);
+      break;
+    case 'bust':
+      showOutcomeDisplay('bust', 'BUST!', `Over 21${handText}`, amount, false);
+      break;
+    case 'lose':
+      showOutcomeDisplay('lose', 'YOU LOSE', `Dealer wins${handText}`, amount, false);
+      break;
+    case 'dealer_blackjack':
+      showOutcomeDisplay('dealer-blackjack', 'DEALER BLACKJACK', `House natural 21${handText}`, amount, false);
+      break;
+    case 'push':
+      showOutcomeDisplay('push', 'PUSH', `Tie game${handText}`, amount, true);
+      break;
   }
 }
 
-// Make closeSideBetWinDisplay global for onclick
+function showInsuranceResult(won, amount) {
+  if (won) {
+    showOutcomeDisplay('insurance-win', 'INSURANCE PAID!', 'Dealer had blackjack', amount, true);
+  } else {
+    showOutcomeDisplay('lose', 'INSURANCE LOST', 'Dealer did not have blackjack', amount, false);
+  }
+}
+
+function closeOutcomeDisplay() {
+  const outcomeDisplay = document.getElementById('side-bet-win-display');
+  if (outcomeDisplay) {
+    outcomeDisplay.classList.remove('show');
+  }
+}
+
+// Make closeOutcomeDisplay global for onclick
+window.closeOutcomeDisplay = closeOutcomeDisplay;
+
+// Legacy function for backward compatibility
+function closeSideBetWinDisplay() {
+  closeOutcomeDisplay();
+}
 window.closeSideBetWinDisplay = closeSideBetWinDisplay;
 
 // ---- Firebase Auth Init ----
