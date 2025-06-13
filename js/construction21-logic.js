@@ -277,17 +277,12 @@ export class Construction21Game {
             return 0;
         }
         
-        return score;
-    }
+        return score;    }
     
     // Rate limiting helper
     checkActionCooldown() {
-        const now = Date.now();
-        if (now - this.lastActionTimestamp < this.actionCooldown) {
-            console.warn('Action blocked: too fast');
-            return false;
-        }
-        this.lastActionTimestamp = now;
+        // Action cooldown disabled for smooth gameplay with new animation system
+        this.lastActionTimestamp = Date.now();
         return true;
     }
 

@@ -407,13 +407,26 @@ function setupEventHandlers() {
   });  rebetBtn.addEventListener('click', () => {
     hideEndButtons();
     if (lastBets) {
-      resetAllHandsAndUI();
-      game.clearBets();
-      // Deduct chips for re-bet
+      // Calculate total rebet amount
       let totalBet = 0;
       Object.keys(lastBets).forEach(k => { 
         if (lastBets[k] > 0) {
           totalBet += lastBets[k];
+        }
+      });
+      
+      // Validate player has enough chips for rebet
+      if (totalBet > game.chips) {
+        showStatusToast('Not enough chips for rebet!', true);
+        showEndButtons();
+        return;
+      }
+      
+      resetAllHandsAndUI();
+      game.clearBets();
+      // Deduct chips for re-bet
+      Object.keys(lastBets).forEach(k => { 
+        if (lastBets[k] > 0) {
           game.bets[k] = lastBets[k];
         }
       });
@@ -423,7 +436,7 @@ function setupEventHandlers() {
       saveChipsToFirebase();
     }
     startRound();
-  });  doubleBetBtn.addEventListener('click', () => {
+  });doubleBetBtn.addEventListener('click', () => {
     hideEndButtons();
     if (lastBets) {
       let totalDoubleBet = 0;
