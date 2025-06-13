@@ -169,12 +169,12 @@ export class Construction21Game {
             return true;
         }
         return false;
-    }
-
-    settleHands() {
+    }    settleHands() {
         const dealerScore = this.calculateScore(this.dealerHand.cards);
         this.dealerHand.score = dealerScore;
         let results = [];
+        
+        // Settle main hand outcomes
         this.playerHands.forEach((hand, i) => {
             const playerScore = this.calculateScore(hand.cards);
             hand.score = playerScore;
@@ -204,6 +204,31 @@ export class Construction21Game {
             }
             results.push(result);
         });
+
+        // Settle side bets (only for first hand - side bets are based on first two cards)
+        if (this.playerHands.length > 0 && this.playerHands[0].cards.length >= 2) {
+            const firstHand = this.playerHands[0];
+            
+            // Perfect Pairs side bet
+            if (this.bets.pp > 0) {
+                const ppResult = this.checkPerfectPairs(firstHand.cards[0], firstHand.cards[1]);
+                if (ppResult.payout > 0) {
+                    const ppPayout = this.bets.pp * (ppResult.payout + 1); // payout + original bet
+                    this.chips += ppPayout;
+                }
+            }
+            
+            // 21+3 side bet (uses player's first two cards + dealer's up card)
+            if (this.bets.plus3 > 0 && this.dealerHand.cards.length > 0) {
+                const plus3Cards = [firstHand.cards[0], firstHand.cards[1], this.dealerHand.cards[0]];
+                const plus3Result = this.check21Plus3(plus3Cards);
+                if (plus3Result.payout > 0) {
+                    const plus3Payout = this.bets.plus3 * (plus3Result.payout + 1); // payout + original bet
+                    this.chips += plus3Payout;
+                }
+            }
+        }
+
         this.settleInsurance();
         this.bets = { main: 0, pp: 0, plus3: 0, insurance: 0 };
         return results;

@@ -690,7 +690,6 @@ async function settleAndEndRound() {
   saveChipsToFirebase();
   updateBetsUI();
   updateHandsUI(results);
-
   results.forEach((res, idx) => {
     setTimeout(() => {
       let txt;
@@ -702,6 +701,34 @@ async function settleAndEndRound() {
       showStatusToast(txt);
     }, 900 + idx * 700);
   });
+
+  // Show side bet results
+  setTimeout(() => {
+    if (game.playerHands.length > 0 && game.playerHands[0].cards.length >= 2) {
+      const firstHand = game.playerHands[0];
+      
+      // Check Perfect Pairs
+      if (lastBets && lastBets.pp > 0) {
+        const ppResult = game.checkPerfectPairs(firstHand.cards[0], firstHand.cards[1]);
+        if (ppResult.payout > 0) {
+          showStatusToast(`Perfect Pairs: ${ppResult.type} pays ${ppResult.payout}:1!`);
+        } else {
+          showStatusToast("Perfect Pairs: No pair.");
+        }
+      }
+      
+      // Check 21+3
+      if (lastBets && lastBets.plus3 > 0 && game.dealerHand.cards.length > 0) {
+        const plus3Cards = [firstHand.cards[0], firstHand.cards[1], game.dealerHand.cards[0]];
+        const plus3Result = game.check21Plus3(plus3Cards);
+        if (plus3Result.payout > 0) {
+          showStatusToast(`21+3: ${plus3Result.type} pays ${plus3Result.payout}:1!`);
+        } else {
+          showStatusToast("21+3: No winning combination.");
+        }
+      }
+    }
+  }, 1200 + results.length * 700);
 
   setTimeout(() => {
     if (game.bets.insurance === 0) return;
