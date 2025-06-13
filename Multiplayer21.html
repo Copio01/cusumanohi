@@ -211,6 +211,12 @@ body.modern-bg {
     import { Construction21Game } from './js/construction21-logic.js';
     import { renderGameUI, updateChipsUI, showToast, showOutcome, resetUI } from './js/construction21-ui.js';
 
+    // --- SessionStorage handoff from login page ---
+    let sessionUser = null;
+    try {
+      const stored = sessionStorage.getItem('c21user');
+      if (stored) sessionUser = JSON.parse(stored);
+    } catch (e) { sessionUser = null; }
     // --- Firebase Config (reuse from construction21-login.html) ---
     const firebaseConfig = {
       apiKey: "YOUR_API_KEY", // TODO: fill with your config
@@ -237,8 +243,12 @@ body.modern-bg {
     const joinRoomInput = document.getElementById('join-room-id');
 
     // --- Auth & Chip Management ---
-    let currentUser = null;
-    let userChips = 0;
+    let currentUser = sessionUser ? {
+      uid: sessionUser.uid,
+      displayName: sessionUser.displayName,
+      email: sessionUser.email
+    } : null;
+    let userChips = sessionUser ? sessionUser.chips : 0;
     function updateUserInfoUI() {
       if (currentUser) {
         userInfoDiv.innerHTML = `Logged in as <b>${currentUser.displayName || currentUser.email}</b> | Chips: <span id="chip-balance">${userChips}</span> <button id="logout-btn" class="btn-secondary ml-2" aria-label="Logout">Logout</button>`;

@@ -283,15 +283,27 @@
           try {
             const userDocRef = doc(db, "construction21_users", user.uid);
             const userDoc = await getDoc(userDocRef);
+            let chips = 100;
+            let displayName = user.displayName || user.email?.split('@')[0] || 'Player';
             if (!userDoc.exists()) {
               await setDoc(userDocRef, {
-                displayName: user.displayName || user.email?.split('@')[0] || 'Player',
-                chips: 100,
+                displayName,
+                chips,
                 email: user.email,
                 createdAt: new Date(),
                 lastLogin: new Date()
               });
+            } else {
+              chips = userDoc.data().chips || 100;
+              displayName = userDoc.data().displayName || displayName;
             }
+            // Store user info for multiplayer handoff
+            sessionStorage.setItem('c21user', JSON.stringify({
+              uid: user.uid,
+              displayName,
+              email: user.email,
+              chips
+            }));
             sessionStorage.setItem('loginSuccess', 'true');
             window.location.href = 'construction21.html';
           } catch (error) {
@@ -341,6 +353,13 @@
           createdAt: new Date(),
           lastLogin: new Date()
         });
+        // Store user info for multiplayer handoff
+        sessionStorage.setItem('c21user', JSON.stringify({
+          uid: user.uid,
+          displayName: name,
+          email,
+          chips: 100
+        }));
         showMessage(signupMessage, 'Account created! Redirecting...', 'success');
       } catch (error) {
         setButtonLoading(signupBtn, 'Create Account & Play', false);
