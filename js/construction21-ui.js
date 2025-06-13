@@ -1364,13 +1364,12 @@ function adjustTouchTargetsForScreen() {
   document.documentElement.style.setProperty('--bet-spot-touch-scale', betSpotTouchScale);
   document.documentElement.style.setProperty('--min-touch-size', `${minTouchSize}px`);
   document.documentElement.style.setProperty('--bet-spot-padding', `${betSpotPadding}px`);
-    // Apply dynamic bet spot touch area coverage
+  // Apply dynamic bet spot touch area coverage
   const betSpots = document.querySelectorAll('.table-bet-spot');
   betSpots.forEach(spot => {
     const beforeElement = spot.querySelector('::before');
     spot.style.setProperty('--dynamic-bet-padding', `${betSpotPadding}px`);
   });
-}
 }
 
 // Call on load and resize
