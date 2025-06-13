@@ -192,6 +192,10 @@ function resetAllHandsAndUI() {
   inPlay = false;
   outcomeLock = false;
   resultsCache = null;
+  
+  // Reset mobile gameplay mode
+  setMobileGameplayMode(false);
+  
   if (dealerCardsEl) dealerCardsEl.innerHTML = '';
   if (playerHandsEl) playerHandsEl.innerHTML = '';
 }
@@ -572,6 +576,9 @@ async function startRound() {
   resetAllHandsAndUI();
   inPlay = true; outcomeLock = false; resultsCache = null;
   showInPlayButtons(true); enableDealAndClear(false);
+  
+  // Enable mobile gameplay mode
+  setMobileGameplayMode(true);
 
   lastBets = { ...game.bets };
 
@@ -807,10 +814,12 @@ async function settleAndEndRound() {
         showInsuranceResult(false, insuranceAmount);
       }, 500);
     }
-  }, 800 + results.length * 700);
-  setTimeout(() => {
+  }, 800 + results.length * 700);  setTimeout(() => {
     // End the game properly using the new game state management
     game.endGame();
+    
+    // Disable mobile gameplay mode when round ends
+    setMobileGameplayMode(false);
     
     showEndButtons();
     showStatusToast("Place your bets for the next round!");
@@ -948,6 +957,84 @@ function closeSideBetWinDisplay() {
   closeOutcomeDisplay();
 }
 window.closeSideBetWinDisplay = closeSideBetWinDisplay;
+
+// ---- Mobile Optimizations ----
+function isMobileDevice() {
+  return window.innerWidth <= 768 || 
+         /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+         ('ontouchstart' in window);
+}
+
+function setMobileGameplayMode(isGameplay) {
+  const body = document.body;
+  const isMobile = isMobileDevice();
+  
+  if (isMobile) {
+    if (isGameplay) {
+      body.classList.add('mobile-gameplay');
+    } else {
+      body.classList.remove('mobile-gameplay');
+    }
+  }
+}
+
+function optimizeForMobile() {
+  const isMobile = isMobileDevice();
+  
+  if (isMobile) {
+    // Add mobile class to body
+    document.body.classList.add('mobile-device');
+    
+    // Prevent zoom on double tap
+    let lastTouchEnd = 0;
+    document.addEventListener('touchend', function (event) {
+      const now = (new Date()).getTime();
+      if (now - lastTouchEnd <= 300) {
+        event.preventDefault();
+      }
+      lastTouchEnd = now;
+    }, false);
+    
+    // Add haptic feedback for touch devices
+    function addHapticFeedback(element) {
+      if (!element) return;
+      element.addEventListener('touchstart', function() {
+        if (navigator.vibrate) {
+          navigator.vibrate(30); // Light haptic feedback
+        }
+      });
+    }
+    
+    // Add haptic feedback to interactive elements
+    document.querySelectorAll('.chip, .btn-primary, .btn-secondary, .table-bet-spot').forEach(addHapticFeedback);
+    
+    // Handle orientation changes
+    window.addEventListener('orientationchange', function() {
+      setTimeout(function() {
+        // Force layout recalculation after orientation change
+        document.body.style.opacity = '0.99';
+        setTimeout(() => {
+          document.body.style.opacity = '';
+        }, 10);
+      }, 100);
+    });
+    
+    // Prevent unwanted scrolling on mobile
+    document.body.addEventListener('touchmove', function(e) {
+      if (e.target === document.body) {
+        e.preventDefault();
+      }
+    }, { passive: false });
+  }
+}
+
+// Enhanced deal function with mobile optimizations
+const originalDealCards = window.dealCards || (() => {});
+
+// Initialize mobile optimizations when DOM is loaded
+document.addEventListener('DOMContentLoaded', function() {
+  optimizeForMobile();
+});
 
 // ---- Firebase Auth Init ----
 onAuthStateChanged(auth, (user) => {

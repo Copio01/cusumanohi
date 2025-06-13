@@ -2,10 +2,9 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <title>Game Launcher</title>
-  <style>
-    body {
+  <style>    body {
       margin: 0;
       padding: 0;
       background: radial-gradient(ellipse at 60% 40%, #ffd70033 0%, #23232b 100%), linear-gradient(135deg, #23232b 0%, #2d2d3a 100%);
@@ -13,8 +12,22 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      height: 100vh;
-      overflow: hidden;
+      min-height: 100vh;
+      overflow-x: hidden;
+      overflow-y: auto;
+      -webkit-text-size-adjust: 100%;
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+      padding: 10px;
+      box-sizing: border-box;
+      /* Mobile optimizations */
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+      /* Safe area support for modern mobile browsers */
+      padding: max(10px, env(safe-area-inset-top)) max(10px, env(safe-area-inset-right)) max(10px, env(safe-area-inset-bottom)) max(10px, env(safe-area-inset-left));
     }
     .animated-bg {
       position: fixed;
@@ -42,6 +55,7 @@
       box-shadow: 0 12px 48px 0 #000a, 0 0 0 4px #ffd70033, 0 0 24px #ffd70011;
       padding: 44px 38px 32px 38px;
       min-width: 340px;
+      max-width: 90vw;
       min-height: 340px;
       display: flex;
       flex-direction: column;
@@ -52,6 +66,7 @@
       overflow: visible;
       backdrop-filter: blur(8px);
       border: 1px solid rgba(255,215,0,0.1);
+      box-sizing: border-box;
     }
     @keyframes fadeIn {
       from { opacity: 0; transform: scale(0.92); }
@@ -97,6 +112,9 @@
       animation: cardIn 0.7s cubic-bezier(.4,2,.6,1);
       word-break: break-word;
       white-space: normal;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+      box-sizing: border-box;
     }
     
     /* Special styling for Construction 21 card */
@@ -322,44 +340,251 @@
       color: #fff;
       transform: scale(1.18) rotate(8deg);
     }    @media (max-width: 768px) {
-      .launcher-modal { 
-        min-width: 90vw; 
-        padding: 24px 4vw; 
-        min-height: auto;
+      body {
+        padding: 5px;
+        min-height: 100vh;
+        align-items: flex-start;
+        justify-content: center;
+        padding-top: 20px;
       }
+      
+      .launcher-modal { 
+        min-width: 95vw; 
+        max-width: 95vw;
+        padding: 24px 20px 20px 20px; 
+        min-height: auto;
+        margin: 0;
+        border-radius: 16px;
+      }
+      
       .game-options { 
         flex-direction: column; 
-        gap: 20px; 
+        gap: 16px; 
+        width: 100%;
+        align-items: center;
       }
+      
       .game-card { 
         min-width: 0; 
         width: 100%; 
-        max-width: 280px;
-        padding: 24px 28px 20px 28px;
+        max-width: 100%;
+        padding: 20px 24px 18px 24px;
+        min-height: 120px;
       }
+      
       .launcher-title {
-        font-size: 2rem;
-        margin-bottom: 18px;
+        font-size: 1.8rem;
+        margin-bottom: 16px;
+        text-align: center;
       }
+      
       .game-icon {
-        font-size: 2.8rem;
+        font-size: 2.4rem;
+        margin-bottom: 10px;
       }
+      
       .game-title {
-        font-size: 1.15rem;
+        font-size: 1.1rem;
+        margin-bottom: 4px;
       }
+      
       .game-desc {
-        font-size: 0.95rem;
+        font-size: 0.9rem;
+        max-width: 100%;
+        text-align: center;
+      }
+      
+      .close-btn {
+        top: 8px;
+        right: 12px;
+        font-size: 1.8rem;
+      }
+      
+      .fullscreen-close {
+        top: 15px;
+        right: 20px;
+        font-size: 2rem;
       }
     }
     
     @media (max-width: 600px) {
       .launcher-modal { 
-        min-width: 95vw; 
-        padding: 20px 3vw; 
+        min-width: 98vw; 
+        max-width: 98vw;
+        padding: 20px 16px 16px 16px; 
+        border-radius: 12px;
       }
+      
       .game-card {
         max-width: 100%;
-        padding: 20px 24px 18px 24px;
+        padding: 18px 20px 16px 20px;
+        min-height: 110px;
+      }
+      
+      .launcher-title {
+        font-size: 1.6rem;
+        margin-bottom: 14px;
+      }
+      
+      .game-icon {
+        font-size: 2.2rem;
+        margin-bottom: 8px;
+      }
+      
+      .game-title {
+        font-size: 1rem;
+        margin-bottom: 3px;
+      }
+      
+      .game-desc {
+        font-size: 0.85rem;
+        line-height: 1.2;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      body {
+        padding: 2px;
+        padding-top: 10px;
+      }
+      
+      .launcher-modal {
+        min-width: 99vw;
+        max-width: 99vw;
+        padding: 16px 12px 12px 12px;
+        border-radius: 8px;
+      }
+      
+      .game-card {
+        padding: 16px 18px 14px 18px;
+        min-height: 100px;
+        border-radius: 12px;
+      }
+      
+      .launcher-title {
+        font-size: 1.4rem;
+        margin-bottom: 12px;
+      }
+      
+      .game-icon {
+        font-size: 2rem;
+        margin-bottom: 6px;
+      }
+      
+      .game-title {
+        font-size: 0.95rem;
+        margin-bottom: 2px;
+      }
+      
+      .game-desc {
+        font-size: 0.8rem;
+        line-height: 1.1;
+      }
+      
+      .close-btn {
+        top: 6px;
+        right: 8px;
+        font-size: 1.6rem;
+      }
+    }
+    
+    /* Landscape mobile optimizations */
+    @media screen and (max-height: 600px) and (orientation: landscape) {
+      body {
+        padding-top: 5px;
+        align-items: center;
+        justify-content: center;
+      }
+      
+      .launcher-modal {
+        padding: 16px 20px 12px 20px;
+        min-height: auto;
+        max-height: 95vh;
+        overflow-y: auto;
+      }
+      
+      .launcher-title {
+        font-size: 1.3rem;
+        margin-bottom: 10px;
+      }
+      
+      .game-options {
+        gap: 12px;
+      }
+      
+      .game-card {
+        padding: 14px 16px 12px 16px;
+        min-height: 80px;
+      }
+      
+      .game-icon {
+        font-size: 1.8rem;
+        margin-bottom: 4px;
+      }
+      
+      .game-title {
+        font-size: 0.9rem;
+        margin-bottom: 2px;
+      }
+      
+      .game-desc {
+        font-size: 0.75rem;
+        line-height: 1.1;
+      }
+    }
+      /* Touch-specific improvements */
+    @media (hover: none) and (pointer: coarse) {
+      .game-card:hover {
+        /* Disable hover effects on touch devices */
+        transform: none;
+        box-shadow: 0 4px 24px #0006, 0 0 0 2px #ffd70033;
+        border-color: transparent;
+      }
+      
+      .game-card:active {
+        transform: scale(0.98);
+        transition: transform 0.1s ease;
+        background: linear-gradient(135deg, #3a3a45 60%, #2d2d3a 100%);
+      }
+      
+      .close-btn:hover,
+      .fullscreen-close:hover {
+        transform: none;
+        color: #ffd700;
+      }
+      
+      .close-btn:active,
+      .fullscreen-close:active {
+        transform: scale(0.95);
+        color: #fff;
+      }
+      
+      /* Enhanced visual feedback for touch interactions */
+      .game-card:active .game-icon {
+        filter: drop-shadow(0 0px 12px #ffd700bb) brightness(1.1);
+      }
+      
+      /* Prevent double-tap zoom on touch devices */
+      * {
+        touch-action: manipulation;
+      }
+    }
+    
+    /* Additional mobile performance optimizations */
+    @media screen and (max-width: 768px) {
+      /* Reduce animation complexity on mobile for better performance */
+      .bg-shape {
+        animation-duration: 12s;
+        filter: blur(12px);
+      }
+      
+      .game-card {
+        will-change: transform;
+      }
+      
+      /* Optimize sparkle animations for mobile */
+      .sparkle {
+        will-change: transform, opacity;
       }
     }
   </style>
@@ -486,8 +711,7 @@
           window.close();
         }
       }
-    });
-    // Random sparkles on background
+    });    // Random sparkles on background
     setInterval(() => {
       const bg = document.querySelector('.animated-bg');
       if (!bg) return;
@@ -500,6 +724,78 @@
       bg.appendChild(sparkle);
       setTimeout(() => sparkle.remove(), 1200);
     }, 600);
+    
+    // Mobile-specific enhancements
+    document.addEventListener('DOMContentLoaded', function() {
+      // Detect mobile device and add appropriate class
+      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || 
+                      ('ontouchstart' in window) || (window.innerWidth <= 768);
+      
+      if (isMobile) {
+        document.body.classList.add('mobile-device');
+        
+        // Prevent zooming on double tap for iOS
+        let lastTouchEnd = 0;
+        document.addEventListener('touchend', function (event) {
+          const now = (new Date()).getTime();
+          if (now - lastTouchEnd <= 300) {
+            event.preventDefault();
+          }
+          lastTouchEnd = now;
+        }, false);
+        
+        // Add haptic feedback for supported devices
+        function addHapticFeedback(element) {
+          element.addEventListener('touchstart', function() {
+            if (navigator.vibrate) {
+              navigator.vibrate(50); // Light haptic feedback
+            }
+          });
+        }
+        
+        // Add haptic feedback to interactive elements
+        document.querySelectorAll('.game-card, .close-btn, .fullscreen-close').forEach(addHapticFeedback);
+        
+        // Optimize performance for mobile
+        if (window.innerWidth <= 768) {
+          // Reduce sparkle frequency on mobile
+          clearInterval(); // Clear the previous interval
+          setInterval(() => {
+            const bg = document.querySelector('.animated-bg');
+            if (!bg) return;
+            const sparkle = document.createElement('div');
+            sparkle.className = 'sparkle';
+            sparkle.style.left = Math.random() * window.innerWidth + 'px';
+            sparkle.style.top = Math.random() * window.innerHeight + 'px';
+            sparkle.style.opacity = 0.2 + Math.random() * 0.3;
+            sparkle.style.width = sparkle.style.height = (8 + Math.random() * 12) + 'px';
+            bg.appendChild(sparkle);
+            setTimeout(() => sparkle.remove(), 1000);
+          }, 1200); // Less frequent sparkles for better mobile performance
+        }
+      }
+      
+      // Handle orientation changes
+      window.addEventListener('orientationchange', function() {
+        setTimeout(function() {
+          // Force layout recalculation after orientation change
+          const launcherModal = document.getElementById('launcherModal');
+          if (launcherModal) {
+            launcherModal.style.opacity = '0.99';
+            setTimeout(() => {
+              launcherModal.style.opacity = '';
+            }, 10);
+          }
+        }, 100);
+      });
+      
+      // Prevent unwanted scrolling on mobile
+      document.body.addEventListener('touchmove', function(e) {
+        if (e.target === document.body) {
+          e.preventDefault();
+        }
+      }, { passive: false });
+    });
   </script>
 </body>
 </html>

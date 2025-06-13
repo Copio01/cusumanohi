@@ -50,7 +50,99 @@
             box-shadow: 0 8px 32px rgba(0,0,0,0.2);
             padding: 24px;
         }
-        #game-canvas {
+        
+        /* Mobile optimizations for game field */
+        @media (max-width: 768px) {
+            #game-container {
+                width: 98vw;
+                margin: 5px auto;
+                padding: 10px;
+                border-radius: 8px;
+                border-width: 4px;
+            }
+            
+            /* Hide leaderboard on mobile during gameplay */
+            #leaderboard {
+                display: none !important;
+            }
+            
+            /* Optimize game canvas for mobile */
+            #game-canvas {
+                width: calc(100vw - 40px);
+                height: calc(100vw - 40px);
+                max-width: 85vw;
+                max-height: 85vw;
+                border-width: 2px;
+            }
+            
+            /* Adjust title for mobile */
+            h1 {
+                font-size: 1.3rem !important;
+                margin: 10px 0 !important;
+            }
+            
+            /* Compact score area */
+            #score-area {
+                margin: 8px 0 !important;
+            }
+            
+            /* Compact difficulty meter */
+            #difficulty-meter {
+                height: 20px;
+                margin-bottom: 10px;
+                border-width: 1px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            #game-container {
+                width: 100vw;
+                margin: 0;
+                padding: 8px;
+                border-radius: 0;
+                border-left: none;
+                border-right: none;
+            }
+            
+            #game-canvas {
+                width: calc(100vw - 20px);
+                height: calc(100vw - 20px);
+                max-width: 95vw;
+                max-height: 95vw;
+            }
+            
+            h1 {
+                font-size: 1.1rem !important;
+                margin: 5px 0 !important;
+            }
+        }
+        
+        /* Landscape mode optimizations for mobile */
+        @media screen and (max-height: 600px) and (orientation: landscape) {
+            #game-container {
+                margin: 2px auto;
+                padding: 5px;
+            }
+            
+            #game-canvas {
+                width: min(50vh, 85vw);
+                height: min(50vh, 85vw);
+            }
+            
+            h1 {
+                font-size: 1rem !important;
+                margin: 2px 0 !important;
+            }
+            
+            #difficulty-meter {
+                height: 15px;
+                margin-bottom: 5px;
+            }
+            
+            #score-area {
+                margin: 5px 0 !important;
+            }
+        }        #game-canvas {
             background: #d1c089;
             display: block;
             margin: 0 auto 16px auto;
@@ -59,6 +151,37 @@
             height: min(800px, 90vw);
             max-width: 90vw;
             max-height: 90vw;
+        }
+        
+        /* Mobile canvas optimizations */
+        @media (max-width: 768px) {
+            #game-canvas {
+                width: min(85vw, calc(100vh - 200px));
+                height: min(85vw, calc(100vh - 200px));
+                max-width: 85vw;
+                max-height: calc(100vh - 200px);
+                margin: 0 auto 8px auto;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            #game-canvas {
+                width: min(95vw, calc(100vh - 150px));
+                height: min(95vw, calc(100vh - 150px));
+                max-width: 95vw;
+                max-height: calc(100vh - 150px);
+                margin: 0 auto 5px auto;
+            }
+        }
+        
+        /* Landscape mode canvas sizing */
+        @media screen and (max-height: 600px) and (orientation: landscape) {
+            #game-canvas {
+                width: min(60vh, 50vw);
+                height: min(60vh, 50vw);
+                max-width: 50vw;
+                max-height: 60vh;
+            }
         }
         #difficulty-meter {
             width: 100%;
@@ -1362,7 +1485,14 @@
         canvas.style.display = 'block';
         difficultyMeter.style.display = 'block';
         scoreArea.style.display = 'block';
-        leaderboard.style.display = 'block'; // Or hide until game over
+        
+        // Hide leaderboard on mobile during gameplay
+        const isMobile = window.innerWidth <= 768;
+        if (isMobile) {
+            leaderboard.style.display = 'none';
+        } else {
+            leaderboard.style.display = 'block';
+        }
         
         // Show touch controls on mobile
         const touchControls = document.getElementById('touch-controls');
@@ -1371,11 +1501,12 @@
         }
 
         resetGame();
-        // intervalId = setInterval(gameLoop, speed); // Moved to resetGame
-        // running = true; // Set in resetGame
-    }
-
-    function endGame() {
+        // Trigger canvas resize to optimize for gameplay
+        setTimeout(() => {
+            const resizeEvent = new Event('resize');
+            window.dispatchEvent(resizeEvent);
+        }, 100);
+    }    function endGame() {
         running = false;
         clearInterval(intervalId);
         showGameOver();
@@ -1384,6 +1515,9 @@
         difficultyMeter.style.display = 'none';
         scoreArea.style.display = 'none';
         
+        // Show leaderboard when game ends (on all devices)
+        leaderboard.style.display = 'block';
+        
         // Hide touch controls when game ends
         const touchControls = document.getElementById('touch-controls');
         if (touchControls) {
@@ -1391,6 +1525,12 @@
         }
         
         submitScore(playerName, score);
+        
+        // Trigger canvas resize to restore normal layout
+        setTimeout(() => {
+            const resizeEvent = new Event('resize');
+            window.dispatchEvent(resizeEvent);
+        }, 100);
     }
 
     function showGameOver() {
@@ -1501,18 +1641,52 @@
                     <div style="font-size:0.9em;opacity:0.7;margin-top:5px;">Please try again later</div>
                 </div>`;
         }
-    }    window.onload = () => {        // Set up responsive canvas
+    }    window.onload = () => {        // Set up responsive canvas with mobile optimizations
         function resizeCanvas() {
             const container = document.getElementById('game-container');
-            const containerWidth = container.clientWidth - 48; // Account for padding
-            const viewportHeight = window.innerHeight;
-            const maxSize = Math.min(containerWidth, viewportHeight * 0.5, 800);
+            const isMobile = window.innerWidth <= 768;
+            const isSmallMobile = window.innerWidth <= 480;
+            const isLandscape = window.innerHeight < 600 && window.orientation !== undefined;
             
-            // Ensure minimum size for playability
-            const finalSize = Math.max(maxSize, 300);
+            let finalSize;
+            
+            if (isMobile) {
+                // Mobile-specific sizing logic
+                const viewportWidth = window.innerWidth;
+                const viewportHeight = window.innerHeight;
+                const availableHeight = viewportHeight - 150; // Account for controls and UI
+                
+                if (isLandscape) {
+                    // Landscape mode - prioritize height
+                    finalSize = Math.min(viewportHeight * 0.6, viewportWidth * 0.5, 400);
+                } else if (isSmallMobile) {
+                    // Small mobile - maximize screen usage
+                    finalSize = Math.min(viewportWidth - 20, availableHeight, viewportWidth * 0.95);
+                } else {
+                    // Regular mobile
+                    finalSize = Math.min(viewportWidth - 40, availableHeight, viewportWidth * 0.85);
+                }
+                
+                // Ensure minimum playable size
+                finalSize = Math.max(finalSize, 250);
+            } else {
+                // Desktop sizing (original logic)
+                const containerWidth = container.clientWidth - 48;
+                const viewportHeight = window.innerHeight;
+                const maxSize = Math.min(containerWidth, viewportHeight * 0.5, 800);
+                finalSize = Math.max(maxSize, 300);
+            }
             
             canvas.style.width = finalSize + 'px';
             canvas.style.height = finalSize + 'px';
+            
+            // Hide leaderboard on mobile during gameplay
+            const leaderboard = document.getElementById('leaderboard');
+            if (isMobile && running) {
+                leaderboard.style.display = 'none';
+            } else if (!isMobile || !running) {
+                leaderboard.style.display = '';
+            }
         }
         
         canvas.width = CANVAS_SIZE;
