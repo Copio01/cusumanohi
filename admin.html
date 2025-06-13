@@ -1239,21 +1239,36 @@
                 console.error("Firestore not initialized");
                 return;
             }
-            
             try {
                 const logoDoc = doc(db, 'siteContent', 'main');
                 const unsubscribe = onSnapshot(logoDoc, (docSnap) => {
                     try {
                         if (docSnap.exists()) {
                             const data = docSnap.data();
-                if (data && data.logoUrl) {
-                    currentLogoImage.innerHTML = `<img src="${data.logoUrl}" alt="Current Logo" style="max-width:180px;max-height:120px;border-radius:8px;box-shadow:0 2px 8px rgba(10,77,104,0.10);margin-bottom:0.5rem;">`;
-                } else {
-                    currentLogoImage.innerHTML = '<em>No logo image set.</em>';
-                }
-            });
+                            if (data && data.logoUrl) {
+                                currentLogoImage.innerHTML = `<img src="${data.logoUrl}" alt="Current Logo" style="max-width:180px;max-height:120px;border-radius:8px;box-shadow:0 2px 8px rgba(10,77,104,0.10);margin-bottom:0.5rem;">`;
+                            } else {
+                                currentLogoImage.innerHTML = '<em>No logo image set.</em>';
+                            }
+                        } else {
+                            currentLogoImage.innerHTML = '<em>No logo image set.</em>';
+                        }
+                    } catch (err) {
+                        currentLogoImage.innerHTML = '<em>Error loading logo image.</em>';
+                        console.error("Error processing logo data:", err);
+                    }
+                }, error => {
+                    console.error("Logo listener error:", error);
+                    currentLogoImage.innerHTML = '<em>Connection error. Please refresh the page.</em>';
+                });
+                // Store unsubscribe function
+                window._firebaseListeners = window._firebaseListeners || {};
+                window._firebaseListeners.logo = unsubscribe;
+            } catch (error) {
+                console.error("setupLogoListener error:", error);
+            }
         }
-        
+
         galleryContainer.addEventListener('click', async (e) => {
             if (e.target.classList.contains('delete-btn')) {
                 const docId = e.target.dataset.id;
