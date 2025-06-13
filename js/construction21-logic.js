@@ -179,16 +179,12 @@ export class Construction21Game {
         // If we have aces and the score would be over 21 without converting any ace to 1,
         // but currently equals 17, then it's a soft 17
         return aceCount > 0 && tempScore > 21 && score === 17;
-    }
-
-    shouldDealerHit() {
+    }    shouldDealerHit() {
         const dealerScore = this.calculateScore(this.dealerHand.cards);
-        if (dealerScore < 17) return true;
         
-        // Dealer stands on all 17s (including soft 17) - this is standard casino rule
-        // To make dealer hit on soft 17, change this logic
-        return false;
-    }    settleHands() {
+        // Explicit logic: dealer hits on 16 and below, stands on 17 and above
+        return dealerScore <= 16;
+    }settleHands() {
         const dealerScore = this.calculateScore(this.dealerHand.cards);
         this.dealerHand.score = dealerScore;
         let results = [];
