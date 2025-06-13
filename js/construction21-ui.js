@@ -216,18 +216,52 @@ async function dealOpeningCards() {
 
 // --- Event handlers and UI logic ---
 function setupEventHandlers() {
+  // Enhanced chip selection with touch support and debouncing
   chipTray.querySelectorAll('.chip').forEach(chip => {
-    chip.addEventListener('click', () => {
-      if (inPlay) return;
+    let isProcessing = false;
+    
+    // Handle both click and touch events
+    const handleChipSelection = (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      
+      if (inPlay || isProcessing) return;
+      
+      isProcessing = true;
+      setTimeout(() => { isProcessing = false; }, 300); // Debounce for 300ms
+      
       selectedChip = parseInt(chip.dataset.amount);
       chipTray.querySelectorAll('.chip').forEach(c => c.classList.remove('selected'));
       chip.classList.add('selected');
+      
+      // Enhanced haptic feedback for chip selection
+      if (navigator.vibrate) {
+        navigator.vibrate(20);
+      }
+    };
+    
+    // Add both touch and click handlers
+    chip.addEventListener('click', handleChipSelection);
+    chip.addEventListener('touchend', handleChipSelection);
+    
+    // Prevent touch from triggering additional events
+    chip.addEventListener('touchstart', (e) => {
+      e.preventDefault();
     });
   });
+
+  // Enhanced bet spot handling with touch support
   Object.entries(betSpots).forEach(([type, spot]) => {
-    spot.addEventListener('click', (ev) => {
-      if (inPlay) return;
-      if (!selectedChip) return;
+    let isProcessing = false;
+    
+    const handleBetPlacement = (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      
+      if (inPlay || !selectedChip || isProcessing) return;
+      
+      isProcessing = true;
+      setTimeout(() => { isProcessing = false; }, 400); // Slightly longer debounce for bets
       
       // Use the enhanced bet validation
       if (game.canPlaceBet(selectedChip) && game.placeBet(type === 'plus3' ? 'plus3' : type, selectedChip)) {
@@ -236,9 +270,28 @@ function setupEventHandlers() {
         updateChipsDisplay();
         saveChipsToFirebase();
         showStatusToast(`Bet ${selectedChip} placed on ${type === 'main' ? 'Main' : type === 'pp' ? 'P / P' : '21+3'}`);
+        
+        // Enhanced haptic feedback for successful bet
+        if (navigator.vibrate) {
+          navigator.vibrate([30, 50, 30]);
+        }
       } else {
         showStatusToast('Cannot place bet!', true);
+        
+        // Error haptic feedback
+        if (navigator.vibrate) {
+          navigator.vibrate(100);
+        }
       }
+    };
+    
+    // Add both touch and click handlers
+    spot.addEventListener('click', handleBetPlacement);
+    spot.addEventListener('touchend', handleBetPlacement);
+    
+    // Prevent touch from triggering additional events
+    spot.addEventListener('touchstart', (e) => {
+      e.preventDefault();
     });
   });
 
@@ -841,7 +894,7 @@ function hideEndButtons() {
 }
 
 // ---- Enhanced Outcome Display Functions ----
-function showOutcomeDisplay(outcomeType, title, description, amount = null, isWin = true) {
+function showOutcomeDisplay(outcomeType, title, description, amount = null, isWin = true, playerScore = null, dealerScore = null) {
   const outcomeDisplay = document.getElementById('side-bet-win-display');
   const outcomeIcon = outcomeDisplay.querySelector('.outcome-icon');
   const outcomeTitle = outcomeDisplay.querySelector('.outcome-title');
@@ -849,6 +902,11 @@ function showOutcomeDisplay(outcomeType, title, description, amount = null, isWi
   const outcomeAmountDisplay = document.getElementById('outcome-amount-display');
   const amountText = outcomeAmountDisplay.querySelector('.amount-text');
   const outcomeIconSmall = outcomeAmountDisplay.querySelector('.outcome-icon-small');
+  
+  // Card totals elements
+  const outcomeScoresSection = document.getElementById('outcome-scores-section');
+  const playerScoreDisplay = document.getElementById('player-score-display');
+  const dealerScoreDisplay = document.getElementById('dealer-score-display');
   
   if (!outcomeDisplay) return;
   
@@ -879,6 +937,36 @@ function showOutcomeDisplay(outcomeType, title, description, amount = null, isWi
   outcomeTypeDisplay.textContent = description;
   outcomeIconSmall.textContent = config.smallIcon;
   
+  // Handle card totals display
+  if (playerScore !== null && dealerScore !== null && outcomeScoresSection) {
+    outcomeScoresSection.style.display = 'block';
+    playerScoreDisplay.textContent = playerScore;
+    dealerScoreDisplay.textContent = dealerScore;
+    
+    // Apply score styling based on outcome
+    const playerScoreContainer = playerScoreDisplay.closest('.score-item');
+    const dealerScoreContainer = dealerScoreDisplay.closest('.score-item');
+    
+    // Reset classes
+    ['winning', 'bust'].forEach(cls => {
+      playerScoreContainer.classList.remove(cls);
+      dealerScoreContainer.classList.remove(cls);
+    });
+    
+    // Apply appropriate styling
+    if (playerScore > 21) {
+      playerScoreContainer.classList.add('bust');
+    } else if (dealerScore > 21) {
+      dealerScoreContainer.classList.add('bust');
+    } else if (outcomeType === 'win' || outcomeType === 'blackjack') {
+      playerScoreContainer.classList.add('winning');
+    } else if (outcomeType === 'lose' || outcomeType === 'dealer-blackjack') {
+      dealerScoreContainer.classList.add('winning');
+    }
+  } else if (outcomeScoresSection) {
+    outcomeScoresSection.style.display = 'none';
+  }
+  
   // Handle amount display
   if (amount !== null) {
     if (isWin) {
@@ -906,35 +994,43 @@ function showOutcomeDisplay(outcomeType, title, description, amount = null, isWi
 }
 
 function showSideBetWinDisplay(betType, winType, amount) {
+  // Side bets don't show card totals since they're not based on final hand values
   showOutcomeDisplay('side-bet-win', `${betType.toUpperCase()} WIN!`, winType, amount, true);
 }
 
 function showMainHandResult(outcome, amount, handIndex = 0) {
   const handText = handIndex > 0 ? ` (Hand ${handIndex + 1})` : '';
   
+  // Get current hand scores
+  const playerScore = game.playerHands[handIndex] ? 
+    game.calculateScore(game.playerHands[handIndex].cards) : 0;
+  const dealerScore = game.dealerHand ? 
+    game.calculateScore(game.dealerHand.cards) : 0;
+  
   switch(outcome) {
     case 'blackjack':
-      showOutcomeDisplay('blackjack', 'BLACKJACK!', `Natural 21${handText}`, amount, true);
+      showOutcomeDisplay('blackjack', 'BLACKJACK!', `Natural 21${handText}`, amount, true, playerScore, dealerScore);
       break;
     case 'win':
-      showOutcomeDisplay('win', 'YOU WIN!', `Victory${handText}`, amount, true);
+      showOutcomeDisplay('win', 'YOU WIN!', `Victory${handText}`, amount, true, playerScore, dealerScore);
       break;
     case 'bust':
-      showOutcomeDisplay('bust', 'BUST!', `Over 21${handText}`, amount, false);
+      showOutcomeDisplay('bust', 'BUST!', `Over 21${handText}`, amount, false, playerScore, dealerScore);
       break;
     case 'lose':
-      showOutcomeDisplay('lose', 'YOU LOSE', `Dealer wins${handText}`, amount, false);
+      showOutcomeDisplay('lose', 'YOU LOSE', `Dealer wins${handText}`, amount, false, playerScore, dealerScore);
       break;
     case 'dealer_blackjack':
-      showOutcomeDisplay('dealer-blackjack', 'DEALER BLACKJACK', `House natural 21${handText}`, amount, false);
+      showOutcomeDisplay('dealer-blackjack', 'DEALER BLACKJACK', `House natural 21${handText}`, amount, false, playerScore, dealerScore);
       break;
     case 'push':
-      showOutcomeDisplay('push', 'PUSH', `Tie game${handText}`, amount, true);
+      showOutcomeDisplay('push', 'PUSH', `Tie game${handText}`, amount, true, playerScore, dealerScore);
       break;
   }
 }
 
 function showInsuranceResult(won, amount) {
+  // Insurance bets also don't need card totals shown
   if (won) {
     showOutcomeDisplay('insurance-win', 'INSURANCE PAID!', 'Dealer had blackjack', amount, true);
   } else {
@@ -946,6 +1042,55 @@ function closeOutcomeDisplay() {
   const outcomeDisplay = document.getElementById('side-bet-win-display');
   if (outcomeDisplay) {
     outcomeDisplay.classList.remove('show');
+  }
+}
+
+// Enhanced mobile-friendly close button setup
+function setupOutcomeDisplayMobileOptimizations() {
+  const closeButton = document.querySelector('.close-win-btn');
+  if (!closeButton) return;
+  
+  // Add mobile touch enhancements
+  if (isMobileDevice()) {
+    let isProcessing = false;
+    
+    // Enhanced touch handling with debouncing
+    const handleClose = (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      
+      if (isProcessing) return;
+      isProcessing = true;
+      
+      // Haptic feedback
+      if (navigator.vibrate) {
+        navigator.vibrate(50);
+      }
+      
+      // Visual feedback
+      closeButton.style.transform = 'scale(0.9)';
+      setTimeout(() => {
+        closeButton.style.transform = '';
+      }, 150);
+      
+      closeOutcomeDisplay();
+      
+      setTimeout(() => { isProcessing = false; }, 300);
+    };
+    
+    // Add both touch and click handlers
+    closeButton.addEventListener('click', handleClose);
+    closeButton.addEventListener('touchend', handleClose);
+    
+    // Prevent unwanted touch events
+    closeButton.addEventListener('touchstart', (e) => {
+      e.stopPropagation();
+      closeButton.style.transform = 'scale(0.95)';
+    });
+    
+    closeButton.addEventListener('touchcancel', (e) => {
+      closeButton.style.transform = '';
+    });
   }
 }
 
@@ -995,7 +1140,7 @@ function optimizeForMobile() {
       lastTouchEnd = now;
     }, false);
     
-    // Add haptic feedback for touch devices
+    // Enhanced haptic feedback for touch devices
     function addHapticFeedback(element) {
       if (!element) return;
       element.addEventListener('touchstart', function() {
@@ -1005,8 +1150,81 @@ function optimizeForMobile() {
       });
     }
     
+    // Enhanced touch target optimization
+    function enhanceTouchTargets() {
+      // Add larger touch areas for chips
+      chipTray.querySelectorAll('.chip').forEach(chip => {
+        chip.style.position = 'relative';
+        
+        // Visual touch feedback
+        chip.addEventListener('touchstart', (e) => {
+          chip.style.transform = 'scale(0.95)';
+          chip.style.transition = 'transform 0.1s ease';
+        });
+        
+        chip.addEventListener('touchend', (e) => {
+          setTimeout(() => {
+            chip.style.transform = '';
+            chip.style.transition = '';
+          }, 100);
+        });
+        
+        chip.addEventListener('touchcancel', (e) => {
+          chip.style.transform = '';
+          chip.style.transition = '';
+        });
+      });
+      
+      // Add larger touch areas for bet spots
+      Object.values(betSpots).forEach(spot => {
+        spot.style.position = 'relative';
+        
+        // Visual touch feedback for bet spots
+        spot.addEventListener('touchstart', (e) => {
+          spot.style.transform = 'scale(0.96)';
+          spot.style.transition = 'transform 0.1s ease';
+        });
+        
+        spot.addEventListener('touchend', (e) => {
+          setTimeout(() => {
+            spot.style.transform = '';
+            spot.style.transition = '';
+          }, 100);
+        });
+        
+        spot.addEventListener('touchcancel', (e) => {
+          spot.style.transform = '';
+          spot.style.transition = '';
+        });
+      });
+      
+      // Enhance button touch targets
+      const buttons = document.querySelectorAll('.btn-primary, .btn-secondary');
+      buttons.forEach(button => {
+        button.addEventListener('touchstart', (e) => {
+          button.style.transform = 'scale(0.97)';
+          button.style.transition = 'transform 0.1s ease';
+        });
+        
+        button.addEventListener('touchend', (e) => {
+          setTimeout(() => {
+            button.style.transform = '';
+            button.style.transition = '';
+          }, 100);
+        });
+        
+        button.addEventListener('touchcancel', (e) => {
+          button.style.transform = '';
+          button.style.transition = '';
+        });
+      });
+    }
+    
     // Add haptic feedback to interactive elements
     document.querySelectorAll('.chip, .btn-primary, .btn-secondary, .table-bet-spot').forEach(addHapticFeedback);
+    
+    // Initialize enhanced touch targets
+    enhanceTouchTargets();
     
     // Handle orientation changes
     window.addEventListener('orientationchange', function() {
@@ -1025,15 +1243,66 @@ function optimizeForMobile() {
         e.preventDefault();
       }
     }, { passive: false });
+    
+    // Add touch tolerance for small screens
+    if (window.innerWidth <= 480) {
+      document.documentElement.style.setProperty('--touch-tolerance', '12px');
+    } else if (window.innerWidth <= 768) {
+      document.documentElement.style.setProperty('--touch-tolerance', '8px');
+    }
   }
 }
 
 // Enhanced deal function with mobile optimizations
 const originalDealCards = window.dealCards || (() => {});
 
+// Dynamic touch target adjustment based on screen size
+function adjustTouchTargetsForScreen() {
+  const screenWidth = window.innerWidth;
+  const isMobile = isMobileDevice();
+  
+  if (!isMobile) return;
+  
+  // Calculate appropriate touch target sizes
+  let chipTouchScale, betSpotTouchScale, minTouchSize;
+  
+  if (screenWidth <= 480) {
+    // Small mobile devices
+    chipTouchScale = 1.4;
+    betSpotTouchScale = 1.5;
+    minTouchSize = 60;
+  } else if (screenWidth <= 768) {
+    // Regular mobile devices
+    chipTouchScale = 1.3;
+    betSpotTouchScale = 1.4;
+    minTouchSize = 54;
+  } else {
+    // Larger mobile devices/tablets
+    chipTouchScale = 1.2;
+    betSpotTouchScale = 1.3;
+    minTouchSize = 48;
+  }
+  
+  // Apply dynamic touch target sizing via CSS custom properties
+  document.documentElement.style.setProperty('--chip-touch-scale', chipTouchScale);
+  document.documentElement.style.setProperty('--bet-spot-touch-scale', betSpotTouchScale);
+  document.documentElement.style.setProperty('--min-touch-size', `${minTouchSize}px`);
+  
+  // Log for debugging (remove in production)
+  console.log(`Touch targets adjusted for ${screenWidth}px screen: chip=${chipTouchScale}x, betSpot=${betSpotTouchScale}x, minSize=${minTouchSize}px`);
+}
+
+// Call on load and resize
+window.addEventListener('resize', adjustTouchTargetsForScreen);
+window.addEventListener('orientationchange', () => {
+  setTimeout(adjustTouchTargetsForScreen, 100);
+});
+
 // Initialize mobile optimizations when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
   optimizeForMobile();
+  adjustTouchTargetsForScreen(); // Initialize dynamic touch targets
+  setupOutcomeDisplayMobileOptimizations(); // Setup enhanced outcome display interactions
 });
 
 // ---- Firebase Auth Init ----

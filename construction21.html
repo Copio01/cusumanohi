@@ -544,22 +544,89 @@ body.modern-bg {
   position: fixed;
   bottom: 20px;
   right: 20px;
-  width: 350px;
-  backdrop-filter: blur(15px);
-  border-radius: 24px;
-  border: 3px solid;
+  width: 380px;
+  backdrop-filter: blur(20px);
+  border-radius: 28px;
+  border: 4px solid;
   z-index: 1000;
-  transform: translateX(450px) scale(0.7) rotateY(20deg);
+  transform: translateX(480px) scale(0.7) rotateY(25deg);
   opacity: 0;
-  transition: all 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  transition: all 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
   overflow: hidden;
-  font-family: 'Segoe UI', Arial, sans-serif;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  font-family: 'Segoe UI', Arial, sans-serif;  box-shadow: 
+    0 25px 80px rgba(0, 0, 0, 0.4),
+    0 8px 32px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+/* Desktop-specific glass effect layer */
+@media (min-width: 769px) {
+  .outcome-display-panel::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: inherit;
+    background: linear-gradient(135deg, 
+      rgba(255, 255, 255, 0.1) 0%, 
+      transparent 30%, 
+      transparent 70%, 
+      rgba(255, 255, 255, 0.05) 100%);
+    pointer-events: none;
+    z-index: 1;
+  }
 }
 
 .outcome-display-panel.show {
   transform: translateX(0) scale(1) rotateY(0deg);
   opacity: 1;
+}
+
+/* Desktop enhanced entrance animation */
+@media (min-width: 769px) {
+  .outcome-display-panel {
+    transform: translateX(500px) scale(0.6) rotateY(30deg);
+    transition: all 0.9s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  }
+  
+  .outcome-display-panel.show {
+    transform: translateX(0) scale(1) rotateY(0deg);
+    animation: desktopBreathing 4s ease-in-out infinite;
+  }
+  
+  @keyframes desktopBreathing {
+    0%, 100% {
+      transform: translateX(0) scale(1) rotateY(0deg);
+    }
+    50% {
+      transform: translateX(0) scale(1.01) rotateY(0deg);
+    }
+  }
+  
+  /* Disable breathing during hover */
+  .outcome-display-panel.show:hover {
+    animation: none;
+  }
+}
+
+/* Desktop hover effects */
+@media (hover: hover) and (pointer: fine) {
+  .outcome-display-panel:hover {
+    transform: translateX(-10px) scale(1.02) rotateY(-2deg);
+    box-shadow: 
+      0 30px 100px rgba(0, 0, 0, 0.5),
+      0 12px 40px rgba(0, 0, 0, 0.3),
+      inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    animation: none;
+  }
+  
+  .outcome-display-panel.show:hover {
+    transform: translateX(-10px) scale(1.02) rotateY(-2deg);
+    animation: none;
+  }
 }
 
 /* Win States */
@@ -571,6 +638,13 @@ body.modern-bg {
   border-color: #ffd700;
   color: #1a1a1a;
   animation: blackjackPulse 2s ease-in-out infinite;
+  
+  /* Enhanced desktop glow */
+  box-shadow: 
+    0 25px 80px rgba(0, 0, 0, 0.4),
+    0 8px 32px rgba(255, 215, 0, 0.3),
+    0 0 60px rgba(255, 215, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
 }
 
 .outcome-display-panel.win {
@@ -580,6 +654,13 @@ body.modern-bg {
     rgba(76, 175, 80, 0.95) 100%);
   border-color: #4caf50;
   color: #fff;
+  
+  /* Enhanced desktop glow */
+  box-shadow: 
+    0 25px 80px rgba(0, 0, 0, 0.4),
+    0 8px 32px rgba(76, 175, 80, 0.3),
+    0 0 40px rgba(76, 175, 80, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
 }
 
 .outcome-display-panel.side-bet-win {
@@ -590,6 +671,13 @@ body.modern-bg {
   border-color: #e91e63;
   color: #fff;
   animation: sideBetShimmer 1.5s ease-in-out infinite;
+  
+  /* Enhanced desktop glow */
+  box-shadow: 
+    0 25px 80px rgba(0, 0, 0, 0.4),
+    0 8px 32px rgba(233, 30, 99, 0.3),
+    0 0 50px rgba(233, 30, 99, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
 }
 
 /* Loss States */
@@ -601,6 +689,13 @@ body.modern-bg {
   border-color: #f44336;
   color: #fff;
   animation: bustShake 0.8s ease-in-out infinite;
+  
+  /* Enhanced desktop styling */
+  box-shadow: 
+    0 25px 80px rgba(0, 0, 0, 0.4),
+    0 8px 32px rgba(244, 67, 54, 0.3),
+    0 0 40px rgba(244, 67, 54, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
 .outcome-display-panel.lose {
@@ -610,6 +705,13 @@ body.modern-bg {
     rgba(55, 71, 79, 0.95) 100%);
   border-color: #607d8b;
   color: #fff;
+  
+  /* Enhanced desktop styling */
+  box-shadow: 
+    0 25px 80px rgba(0, 0, 0, 0.4),
+    0 8px 32px rgba(96, 125, 139, 0.3),
+    0 0 30px rgba(96, 125, 139, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
 .outcome-display-panel.dealer-blackjack {
@@ -620,6 +722,13 @@ body.modern-bg {
   border-color: #3f51b5;
   color: #fff;
   animation: dealerBlackjackGlow 2s ease-in-out infinite;
+  
+  /* Enhanced desktop styling */
+  box-shadow: 
+    0 25px 80px rgba(0, 0, 0, 0.4),
+    0 8px 32px rgba(63, 81, 181, 0.3),
+    0 0 50px rgba(63, 81, 181, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
 }
 
 /* Neutral States */
@@ -630,6 +739,13 @@ body.modern-bg {
     rgba(97, 97, 97, 0.95) 100%);
   border-color: #9e9e9e;
   color: #fff;
+  
+  /* Enhanced desktop styling */
+  box-shadow: 
+    0 25px 80px rgba(0, 0, 0, 0.4),
+    0 8px 32px rgba(158, 158, 158, 0.3),
+    0 0 30px rgba(158, 158, 158, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
 .outcome-display-panel.insurance-win {
@@ -639,6 +755,13 @@ body.modern-bg {
     rgba(0, 95, 84, 0.95) 100%);
   border-color: #009688;
   color: #fff;
+  
+  /* Enhanced desktop styling */
+  box-shadow: 
+    0 25px 80px rgba(0, 0, 0, 0.4),
+    0 8px 32px rgba(0, 150, 136, 0.3),
+    0 0 40px rgba(0, 150, 136, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
 }
 
 .outcome-display-panel::before {
@@ -648,96 +771,363 @@ body.modern-bg {
   left: 0;
   right: 0;
   bottom: 0;
-  background: radial-gradient(circle at 30% 20%, rgba(255, 255, 255, 0.2) 0%, transparent 50%);
+  background: radial-gradient(circle at 30% 20%, rgba(255, 255, 255, 0.25) 0%, transparent 50%);
   pointer-events: none;
+  z-index: 2;
+}
+
+/* Desktop-specific glass effect layer */
+@media (min-width: 769px) {
+  .outcome-display-panel::after {
+    opacity: 1;
+    background: linear-gradient(135deg, 
+      rgba(255, 255, 255, 0.15) 0%, 
+      transparent 25%, 
+      transparent 75%, 
+      rgba(255, 255, 255, 0.08) 100%);
+  }
 }
 
 .win-panel-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 18px 22px 14px;
+  padding: 20px 24px 16px;
   border-bottom: 2px solid rgba(255, 255, 255, 0.2);
-  background: linear-gradient(90deg, rgba(255, 255, 255, 0.15) 0%, transparent 100%);
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.18) 0%, transparent 100%);
+  position: relative;
+  z-index: 3;
+}
+
+/* Desktop enhanced header styling */
+@media (min-width: 769px) {
+  .win-panel-header {
+    padding: 22px 26px 18px;
+    border-bottom: 3px solid rgba(255, 255, 255, 0.25);
+    background: linear-gradient(90deg, 
+      rgba(255, 255, 255, 0.2) 0%, 
+      rgba(255, 255, 255, 0.1) 50%,
+      transparent 100%);
+  }
 }
 
 .outcome-icon {
-  font-size: 28px;
+  font-size: 32px;
   animation: bounce 1.2s infinite;
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+  position: relative;
+  z-index: 4;
+}
+
+/* Desktop enhanced icon */
+@media (min-width: 769px) {
+  .outcome-icon {
+    font-size: 36px;
+    filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.4));
+  }
 }
 
 .outcome-title {
-  font-size: 18px;
+  font-size: 20px;
   font-weight: bold;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-  letter-spacing: 1px;
+  letter-spacing: 1.2px;
+  position: relative;
+  z-index: 4;
+}
+
+/* Desktop enhanced title */
+@media (min-width: 769px) {
+  .outcome-title {
+    font-size: 22px;
+    letter-spacing: 1.5px;
+    text-shadow: 0 3px 6px rgba(0, 0, 0, 0.4);
+  }
 }
 
 .close-win-btn {
-  background: rgba(0, 0, 0, 0.2);
+  background: rgba(0, 0, 0, 0.25);
   border: none;
   border-radius: 50%;
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
   color: inherit;
-  font-size: 16px;
+  font-size: 18px;
   font-weight: bold;
   cursor: pointer;
   transition: all 0.3s ease;
   backdrop-filter: blur(10px);
+  position: relative;
+  z-index: 10;
+}
+
+/* Desktop enhanced close button */
+@media (min-width: 769px) {
+  .close-win-btn {
+    width: 40px;
+    height: 40px;
+    font-size: 20px;
+    background: rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(15px);
+  }
 }
 
 .close-win-btn:hover {
-  background: rgba(0, 0, 0, 0.4);
-  transform: scale(1.1) rotate(90deg);
+  background: rgba(0, 0, 0, 0.5);
+  transform: scale(1.15) rotate(90deg);
+}
+
+/* Desktop enhanced hover effect */
+@media (min-width: 769px) {
+  .close-win-btn:hover {
+    background: rgba(0, 0, 0, 0.6);
+    transform: scale(1.2) rotate(90deg);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  }
+}
+
+/* Enhanced mobile touch feedback */
+@media (hover: none) and (pointer: coarse) {
+  .close-win-btn {
+    transition: all 0.2s ease;
+    -webkit-tap-highlight-color: transparent;
+  }
+  
+  .close-win-btn:hover {
+    transform: scale(1.05);
+  }
+  
+  .close-win-btn:active {
+    transform: scale(0.95);
+    background: rgba(0, 0, 0, 0.5);
+  }
 }
 
 .outcome-details {
-  padding: 18px 22px;
+  padding: 20px 24px;
+  position: relative;
+  z-index: 3;
+}
+
+/* Desktop enhanced details section */
+@media (min-width: 769px) {
+  .outcome-details {
+    padding: 22px 26px;
+  }
 }
 
 .outcome-type-section,
-.outcome-amount-section {
-  margin-bottom: 14px;
+.outcome-amount-section,
+.outcome-scores-section {
+  margin-bottom: 16px;
+}
+
+/* Desktop enhanced section spacing */
+@media (min-width: 769px) {
+  .outcome-type-section,
+  .outcome-amount-section,
+  .outcome-scores-section {
+    margin-bottom: 18px;
+  }
 }
 
 .outcome-type-label,
-.outcome-amount-label {
-  font-size: 13px;
+.outcome-amount-label,
+.outcome-scores-label {
+  font-size: 14px;
   font-weight: 600;
   opacity: 0.9;
-  margin-bottom: 6px;
+  margin-bottom: 7px;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+}
+
+/* Desktop enhanced labels */
+@media (min-width: 769px) {
+  .outcome-type-label,
+  .outcome-amount-label,
+  .outcome-scores-label {
+    font-size: 15px;
+    letter-spacing: 0.8px;
+    margin-bottom: 8px;
+  }
+}
+
+.outcome-type-value {
+  font-size: 24px;
+  font-weight: bold;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  margin-bottom: 10px;
+}
+
+/* Desktop enhanced type value */
+@media (min-width: 769px) {
+  .outcome-type-value {
+    font-size: 26px;
+    text-shadow: 0 3px 6px rgba(0, 0, 0, 0.4);
+    margin-bottom: 12px;
+  }
+}
+
+/* Card Totals Styling */
+.outcome-scores-comparison {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 14px;
+  padding: 14px 18px;
+  margin-top: 10px;
+  backdrop-filter: blur(15px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Desktop enhanced scores comparison */
+@media (min-width: 769px) {
+  .outcome-scores-comparison {
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 16px;
+    padding: 16px 20px;
+    margin-top: 12px;
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  }
+}
+
+.score-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  flex: 1;
+}
+
+.score-label {
+  font-size: 12px;
+  font-weight: 600;
+  opacity: 0.8;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+}
+
+/* Desktop enhanced score labels */
+@media (min-width: 769px) {
+  .score-label {
+    font-size: 13px;
+    letter-spacing: 0.8px;
+  }
+}
+
+.score-value {
+  font-size: 26px;
+  font-weight: bold;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* Desktop enhanced score values */
+@media (min-width: 769px) {
+  .score-value {
+    font-size: 28px;
+    text-shadow: 0 3px 6px rgba(0, 0, 0, 0.4);
+  }
+}
+
+.player-score .score-value {
+  color: #4CAF50;
+}
+
+.dealer-score .score-value {
+  color: #FF6B6B;
+}
+
+.score-vs {
+  font-size: 16px;
+  font-weight: bold;
+  opacity: 0.7;
+  margin: 0 10px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
-.outcome-type-value {
-  font-size: 22px;
-  font-weight: bold;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-  margin-bottom: 8px;
+/* Desktop enhanced vs text */
+@media (min-width: 769px) {
+  .score-vs {
+    font-size: 18px;
+    margin: 0 12px;
+    letter-spacing: 0.8px;
+  }
+}
+
+/* Special scoring states */
+.player-score.winning .score-value {
+  color: #FFD700;
+  animation: scoreGlow 2s ease-in-out infinite alternate;
+}
+
+.dealer-score.winning .score-value {
+  color: #FFD700;
+  animation: scoreGlow 2s ease-in-out infinite alternate;
+}
+
+.player-score.bust .score-value,
+.dealer-score.bust .score-value {
+  color: #FF4444;
+  text-decoration: line-through;
+  opacity: 0.7;
+}
+
+@keyframes scoreGlow {
+  0% {
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3), 0 0 20px rgba(255, 215, 0, 0.5);
+  }
+  100% {
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3), 0 0 30px rgba(255, 215, 0, 0.8);
+  }
 }
 
 .outcome-amount-value {
   display: flex;
   align-items: center;
-  gap: 10px;
-  font-size: 26px;
+  gap: 12px;
+  font-size: 28px;
   font-weight: bold;
 }
 
+/* Desktop enhanced amount value */
+@media (min-width: 769px) {
+  .outcome-amount-value {
+    gap: 14px;
+    font-size: 30px;
+  }
+}
+
 .outcome-icon-small {
-  font-size: 30px;
+  font-size: 32px;
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
   animation: spin 2s linear infinite;
 }
 
+/* Desktop enhanced small icon */
+@media (min-width: 769px) {
+  .outcome-icon-small {
+    font-size: 36px;
+    filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.4));
+  }
+}
+
 .amount-text {
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* Desktop enhanced amount text */
+@media (min-width: 769px) {
+  .amount-text {
+    text-shadow: 0 3px 6px rgba(0, 0, 0, 0.4);
+  }
 }
 
 .outcome-effects {
@@ -748,6 +1138,7 @@ body.modern-bg {
   bottom: 0;
   pointer-events: none;
   overflow: hidden;
+  z-index: 1;
 }
 
 .effect-sparkle,
@@ -756,6 +1147,77 @@ body.modern-bg {
   position: absolute;
   font-size: 18px;
   animation: effectFloat 3s ease-in-out infinite;
+}
+
+/* Enhanced desktop effects */
+@media (min-width: 769px) {
+  .effect-sparkle,
+  .effect-fire,
+  .effect-money {
+    font-size: 22px;
+  }
+  
+  .effect-sparkle {
+    animation: desktopSparkleFloat 4s ease-in-out infinite;
+  }
+  
+  .effect-fire {
+    animation: desktopFireFlicker 0.4s ease-in-out infinite alternate;
+  }
+  
+  .effect-money {
+    animation: desktopMoneyBounce 1.2s ease-in-out infinite;
+  }
+}
+
+/* Desktop-specific enhanced effect animations */
+@media (min-width: 769px) {
+  @keyframes desktopSparkleFloat {
+    0%, 100% {
+      opacity: 0;
+      transform: scale(0.5) rotate(0deg) translateY(0px);
+    }
+    25% {
+      opacity: 0.8;
+      transform: scale(1.1) rotate(90deg) translateY(-8px);
+    }
+    50% {
+      opacity: 1;
+      transform: scale(1.3) rotate(180deg) translateY(-15px);
+    }
+    75% {
+      opacity: 0.8;
+      transform: scale(1.1) rotate(270deg) translateY(-8px);
+    }
+  }
+  
+  @keyframes desktopFireFlicker {
+    0% {
+      transform: scale(1) rotate(-3deg);
+      opacity: 0.9;
+      filter: hue-rotate(0deg);
+    }
+    100% {
+      transform: scale(1.15) rotate(3deg);
+      opacity: 1;
+      filter: hue-rotate(15deg);
+    }
+  }
+  
+  @keyframes desktopMoneyBounce {
+    0%, 100% {
+      transform: translateY(0) scale(1) rotate(0deg);
+    }
+    25% {
+      transform: translateY(-6px) scale(1.05) rotate(5deg);
+    }
+    50% {
+      transform: translateY(-12px) scale(1.1) rotate(0deg);
+    }
+    75% {
+      transform: translateY(-6px) scale(1.05) rotate(-5deg);
+    }
+  }
 }
 
 .effect-sparkle:nth-child(1) {
@@ -811,12 +1273,56 @@ body.modern-bg {
   }
 }
 
+/* Enhanced desktop blackjack pulse */
+@media (min-width: 769px) {
+  @keyframes blackjackPulse {
+    0%, 100% {
+      box-shadow: 
+        0 25px 80px rgba(0, 0, 0, 0.4),
+        0 8px 32px rgba(255, 215, 0, 0.3),
+        0 0 40px rgba(255, 215, 0, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    }
+    50% {
+      box-shadow: 
+        0 30px 100px rgba(0, 0, 0, 0.5),
+        0 12px 40px rgba(255, 215, 0, 0.5),
+        0 0 80px rgba(255, 215, 0, 0.7),
+        0 0 120px rgba(255, 140, 0, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    }
+  }
+}
+
 @keyframes sideBetShimmer {
   0%, 100% {
     filter: hue-rotate(0deg) brightness(1);
   }
   50% {
     filter: hue-rotate(30deg) brightness(1.2);
+  }
+}
+
+/* Enhanced desktop shimmer effect */
+@media (min-width: 769px) {
+  @keyframes sideBetShimmer {
+    0%, 100% {
+      filter: hue-rotate(0deg) brightness(1) saturate(1);
+      box-shadow: 
+        0 25px 80px rgba(0, 0, 0, 0.4),
+        0 8px 32px rgba(233, 30, 99, 0.3),
+        0 0 50px rgba(233, 30, 99, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    }
+    50% {
+      filter: hue-rotate(20deg) brightness(1.15) saturate(1.2);
+      box-shadow: 
+        0 30px 100px rgba(0, 0, 0, 0.5),
+        0 12px 40px rgba(233, 30, 99, 0.4),
+        0 0 70px rgba(233, 30, 99, 0.3),
+        0 0 100px rgba(255, 193, 7, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    }
   }
 }
 
@@ -832,12 +1338,63 @@ body.modern-bg {
   }
 }
 
+/* Enhanced desktop bust shake */
+@media (min-width: 769px) {
+  @keyframes bustShake {
+    0%, 100% {
+      transform: translateX(0) scale(1) rotateY(0deg);
+      box-shadow: 
+        0 25px 80px rgba(0, 0, 0, 0.4),
+        0 8px 32px rgba(244, 67, 54, 0.3),
+        0 0 40px rgba(244, 67, 54, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    }
+    25% {
+      transform: translateX(-5px) scale(0.97) rotateY(-3deg);
+      box-shadow: 
+        0 20px 70px rgba(0, 0, 0, 0.5),
+        0 6px 28px rgba(244, 67, 54, 0.4),
+        0 0 50px rgba(244, 67, 54, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    }
+    75% {
+      transform: translateX(5px) scale(0.97) rotateY(3deg);
+      box-shadow: 
+        0 20px 70px rgba(0, 0, 0, 0.5),
+        0 6px 28px rgba(244, 67, 54, 0.4),
+        0 0 50px rgba(244, 67, 54, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    }
+  }
+}
+
 @keyframes dealerBlackjackGlow {
   0%, 100% {
     box-shadow: 0 0 25px rgba(63, 81, 181, 0.5);
   }
   50% {
     box-shadow: 0 0 40px rgba(63, 81, 181, 0.8), 0 0 60px rgba(48, 63, 159, 0.3);
+  }
+}
+
+/* Enhanced desktop dealer blackjack glow */
+@media (min-width: 769px) {
+  @keyframes dealerBlackjackGlow {
+    0%, 100% {
+      box-shadow: 
+        0 25px 80px rgba(0, 0, 0, 0.4),
+        0 8px 32px rgba(63, 81, 181, 0.3),
+        0 0 40px rgba(63, 81, 181, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    }
+    50% {
+      box-shadow: 
+        0 30px 100px rgba(0, 0, 0, 0.5),
+        0 12px 40px rgba(63, 81, 181, 0.5),
+        0 0 70px rgba(63, 81, 181, 0.6),
+        0 0 100px rgba(48, 63, 159, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    }
   }
 }
 
@@ -853,12 +1410,42 @@ body.modern-bg {
   }
 }
 
+/* Enhanced desktop bounce animation */
+@media (min-width: 769px) {
+  @keyframes bounce {
+    0%, 20%, 50%, 80%, 100% {
+      transform: translateY(0) scale(1);
+    }
+    40% {
+      transform: translateY(-12px) scale(1.05);
+    }
+    60% {
+      transform: translateY(-6px) scale(1.02);
+    }
+  }
+}
+
 @keyframes spin {
   from {
     transform: rotate(0deg);
   }
   to {
     transform: rotate(360deg);
+  }
+}
+
+/* Enhanced desktop spin for money icons */
+@media (min-width: 769px) {
+  @keyframes spin {
+    from {
+      transform: rotate(0deg) scale(1);
+    }
+    50% {
+      transform: rotate(180deg) scale(1.1);
+    }
+    to {
+      transform: rotate(360deg) scale(1);
+    }
   }
 }
 
@@ -893,19 +1480,248 @@ body.modern-bg {
   }
 }
 
-/* Responsive adjustments */
+/* Mobile responsive adjustments */
 @media (max-width: 768px) {
   .outcome-display-panel {
-    width: 300px;
-    bottom: 10px;
-    right: 10px;
+    width: 320px;
+    bottom: 8px;
+    right: 8px;
+    border-width: 2px;
+    border-radius: 20px;
+  }
+  
+  .win-panel-header {
+    padding: 14px 18px 10px;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  
+  .outcome-title {
+    font-size: 16px;
+    flex: 1;
+    min-width: 120px;
+  }
+  
+  .close-win-btn {
+    width: 36px;
+    height: 36px;
+    font-size: 18px;
+    /* Enhanced mobile touch target */
+    position: relative;
+  }
+  
+  .close-win-btn::before {
+    content: '';
+    position: absolute;
+    top: -8px;
+    left: -8px;
+    right: -8px;
+    bottom: -8px;
+    pointer-events: auto;
+    border-radius: 50%;
+    /* Invisible expanded touch area */
+  }
+  
+  .outcome-details {
+    padding: 12px 18px;
+  }
+    .outcome-type-section,
+  .outcome-amount-section,
+  .outcome-scores-section {
+    margin-bottom: 10px;
+  }
+  
+  .outcome-type-value {
+    font-size: 18px;
+  }
+  
+  .outcome-amount-value {
+    font-size: 22px;
+  }
+  
+  /* Mobile card totals adjustments */
+  .outcome-scores-comparison {
+    padding: 10px 14px;
+  }
+  
+  .score-value {
+    font-size: 20px;
+  }
+  
+  .score-label {
+    font-size: 10px;
+  }
+  
+  .score-vs {
+    font-size: 12px;
   }
 }
 
 @media (max-width: 480px) {
   .outcome-display-panel {
+    width: 300px;
+    bottom: 6px;
+    right: 6px;
+    transform: translateX(370px) scale(0.75) rotateY(20deg);
+    border-radius: 18px;
+  }
+  
+  .outcome-display-panel.show {
+    transform: translateX(0) scale(0.95) rotateY(0deg);
+  }
+  
+  .win-panel-header {
+    padding: 12px 16px 8px;
+  }
+  
+  .outcome-title {
+    font-size: 14px;
+  }
+  
+  .close-win-btn {
+    width: 32px;
+    height: 32px;
+    font-size: 16px;
+  }
+  
+  .close-win-btn::before {
+    top: -10px;
+    left: -10px;
+    right: -10px;
+    bottom: -10px;
+  }
+  
+  .outcome-details {
+    padding: 10px 16px;
+  }
+    .outcome-type-value {
+    font-size: 16px;
+  }
+  
+  .outcome-amount-value {
+    font-size: 20px;
+  }
+  
+  /* Smaller mobile card totals */
+  .outcome-scores-comparison {
+    padding: 8px 12px;
+  }
+  
+  .score-value {
+    font-size: 18px;
+  }
+  
+  .score-label {
+    font-size: 9px;
+  }
+  
+  .score-vs {
+    font-size: 11px;
+    margin: 0 6px;
+  }
+}
+
+/* Enhanced mobile positioning and overflow handling */
+@media (max-width: 480px) and (max-height: 700px) {
+  .outcome-display-panel {
+    position: fixed;
+    bottom: 8px;
+    right: 8px;
+    left: 8px;
+    width: auto;
+    max-width: none;
+    transform: translateY(100%) scale(0.95);
+    transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    z-index: 1001;
+  }
+  
+  .outcome-display-panel.show {
+    transform: translateY(0) scale(1);
+  }
+  
+  .outcome-details {
+    max-height: 40vh;
+    overflow-y: auto;
+    scrollbar-width: thin;
+  }
+  
+  .outcome-details::-webkit-scrollbar {
+    width: 4px;
+  }
+  
+  .outcome-details::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 2px;
+  }
+}
+
+/* Smooth mobile animations */
+@media (max-width: 480px) {
+  .outcome-display-panel {
+    transform: translateX(110%) scale(0.9);
+    transition: transform 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+  
+  .outcome-display-panel.show {
+    transform: translateX(0) scale(1);
+  }
+}
+
+/* Landscape mobile optimizations */
+@media screen and (max-height: 600px) and (orientation: landscape) {
+  .outcome-display-panel {
+    bottom: 4px;
+    right: 4px;
     width: 280px;
-    transform: translateX(350px) scale(0.7) rotateY(20deg);
+    max-height: 90vh;
+  }
+  
+  .outcome-display-panel.show {
+    transform: translateX(0) scale(0.9) rotateY(0deg);
+  }
+  
+  .win-panel-header {
+    padding: 8px 14px 6px;
+  }
+  
+  .outcome-details {
+    padding: 8px 14px;
+    max-height: 60vh;
+    overflow-y: auto;
+  }
+  
+  .outcome-type-section,
+  .outcome-amount-section,
+  .outcome-scores-section {
+    margin-bottom: 8px;
+  }
+  
+  .outcome-scores-comparison {
+    padding: 6px 10px;
+  }
+  
+  .score-value {
+    font-size: 16px;
+  }
+}
+
+/* Prevent outcome display from interfering with game controls */
+@media (max-width: 768px) {
+  .outcome-display-panel {
+    pointer-events: auto;
+  }
+  
+  .outcome-display-panel:not(.show) {
+    pointer-events: none;
+  }
+  
+  /* Ensure it doesn't block betting area */
+  #table-bet-spots {
+    z-index: 8;
+  }
+  
+  .outcome-display-panel {
+    z-index: 1000;
   }
 }
 .chip-flying {
@@ -933,7 +1749,14 @@ body.modern-bg {
   clip: rect(0,0,0,0);
   border: 0;
 }
-/* Enhanced mobile touch interactions */
+/* Dynamic touch target sizing using CSS custom properties */
+:root {
+  --chip-touch-scale: 1.2;
+  --bet-spot-touch-scale: 1.3;
+  --min-touch-size: 48px;
+}
+
+/* Enhanced mobile touch interactions with improved hitboxes */
 @media (hover: none) and (pointer: coarse) {
   .btn-primary:hover,
   .btn-secondary:hover,
@@ -961,6 +1784,127 @@ body.modern-bg {
   .table-bet-spot:active {
     transform: scale(0.96);
     transition: transform 0.1s ease;
+  }
+    /* Enhanced chip touch targets for mobile */
+  .chip {
+    position: relative;
+    /* Ensure chips have minimum touch-friendly spacing */
+    margin: 4px;
+  }
+    .chip::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: calc(100% * var(--chip-touch-scale, 1.2));
+    height: calc(100% * var(--chip-touch-scale, 1.2));
+    min-width: var(--min-touch-size, 50px);
+    min-height: var(--min-touch-size, 50px);
+    z-index: -1;
+    pointer-events: auto;
+    border-radius: 50%;
+    /* Visual debug aid - remove in production */
+    /* background: rgba(255, 0, 0, 0.1); */
+  }
+  
+  /* Even larger touch targets for small mobile screens */
+  @media (max-width: 480px) {
+    .chip {
+      margin: 6px; /* More spacing on small screens */
+    }
+    
+    .chip::before {
+      width: 140%;
+      height: 140%;
+      min-width: 60px;
+      min-height: 60px;
+    }
+    
+    /* Increase chip row gap for better touch separation */
+    .chip-row {
+      gap: 1.2rem !important;
+    }
+  }
+  
+  /* Enhanced bet spot touch targets */
+  .table-bet-spot {
+    position: relative;
+    /* Add invisible padding for larger touch area */
+    box-sizing: content-box;
+  }
+  
+  .table-bet-spot::after {
+    content: '\1F477';
+    position: absolute;
+    left: 50%; top: 50%;
+    transform: translate(-50%, -50%) scale(2.3);
+    opacity: 0.09;
+    font-size: 2.7em;
+    pointer-events: none;
+    z-index: 1;
+  }
+  
+  /* Expand bet spot touch areas on mobile */
+  .table-bet-spot::before {
+    content: '';
+    position: absolute;
+    top: -8px;
+    left: -8px;
+    right: -8px;
+    bottom: -8px;
+    pointer-events: auto;
+    z-index: 0;
+  }
+  
+  @media (max-width: 480px) {
+    .table-bet-spot::before {
+      top: -12px;
+      left: -12px;
+      right: -12px;
+      bottom: -12px;
+    }
+    
+    /* Reduce bet spot gap to accommodate larger touch areas */
+    #table-bet-spots {
+      gap: 18px !important;
+    }
+  }
+  
+  /* Enhanced button touch targets */
+  .btn-primary, .btn-secondary {
+    min-height: 44px; /* Apple's recommended minimum touch target */
+    min-width: 44px;
+    position: relative;
+  }
+  
+  @media (max-width: 480px) {
+    .btn-primary, .btn-secondary {
+      min-height: 48px;
+      padding: 0.6rem 1.4rem !important;
+    }
+    
+    #action-bar button {
+      min-height: 44px !important;
+      min-width: 60px !important;
+    }
+  }
+  
+  /* Touch feedback animations */
+  .chip.touch-active {
+    transform: scale(0.95) !important;
+    transition: transform 0.1s ease !important;
+  }
+  
+  .table-bet-spot.touch-active {
+    transform: scale(0.96) !important;
+    transition: transform 0.1s ease !important;
+  }
+  
+  .btn-primary.touch-active,
+  .btn-secondary.touch-active {
+    transform: scale(0.97) !important;
+    transition: transform 0.1s ease !important;
   }
 }
 
@@ -1399,11 +2343,25 @@ body.modern-bg {
       <span class="outcome-icon">🎉</span>
       <span class="outcome-title">SIDE BET WIN!</span>
       <button class="close-win-btn" onclick="closeOutcomeDisplay()">✕</button>
-    </div>
-    <div class="outcome-details">
+    </div>    <div class="outcome-details">
       <div class="outcome-type-section">
         <div class="outcome-type-label">Result:</div>
         <div class="outcome-type-value" id="outcome-type-display"></div>
+      </div>
+      <!-- Card Totals Section -->
+      <div class="outcome-scores-section" id="outcome-scores-section" style="display: none;">
+        <div class="outcome-scores-label">Final Scores:</div>
+        <div class="outcome-scores-comparison">
+          <div class="score-item player-score">
+            <span class="score-label">You:</span>
+            <span class="score-value" id="player-score-display">0</span>
+          </div>
+          <div class="score-vs">vs</div>
+          <div class="score-item dealer-score">
+            <span class="score-label">Dealer:</span>
+            <span class="score-value" id="dealer-score-display">0</span>
+          </div>
+        </div>
       </div>
       <div class="outcome-amount-section">
         <div class="outcome-amount-label">Amount:</div>
