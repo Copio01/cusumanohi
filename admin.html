@@ -679,6 +679,23 @@
                 </form>
                 <div id="site-preview" style="margin-top:2rem; background:#f7f8fc; border-radius:8px; padding:1.5rem; box-shadow:0 2px 8px rgba(10,77,104,0.06);"></div>
             </div>
+
+            <div class="control-card">
+                <h2>Grant Chips to Player</h2>
+                <p>Give chips to a player by their display name. (Case sensitive, exact match)</p>
+                <form id="grant-chips-form" style="display:flex;flex-wrap:wrap;gap:1.2rem;align-items:center;">
+                    <div class="form-group" style="margin-bottom:0;">
+                        <label for="grant-display-name">Display Name</label>
+                        <input type="text" id="grant-display-name" placeholder="Player display name" required>
+                    </div>
+                    <div class="form-group" style="margin-bottom:0;">
+                        <label for="grant-chips-amount">Chips to Add</label>
+                        <input type="number" id="grant-chips-amount" placeholder="Amount" min="1" required>
+                    </div>
+                    <button type="submit" class="btn" style="background:var(--success-color);">Grant Chips</button>
+                </form>
+                <div id="grant-chips-message" class="upload-message" style="display:none;"></div>
+            </div>
         </main>
         
         <div class="site-return-float">
@@ -1888,6 +1905,46 @@
 
         // On page load, call loadSiteContentFromFirestore instead of just renderServiceFields
         loadSiteContentFromFirestore();
+
+        // --- Grant Chips to Player by Display Name ---
+        const grantChipsForm = document.getElementById('grant-chips-form');
+        const grantChipsMsg = document.getElementById('grant-chips-message');
+        grantChipsForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            grantChipsMsg.style.display = 'none';
+            const displayName = document.getElementById('grant-display-name').value.trim();
+            const chipsToAdd = parseInt(document.getElementById('grant-chips-amount').value, 10);
+            if (!displayName || isNaN(chipsToAdd) || chipsToAdd <= 0) {
+                grantChipsMsg.textContent = 'Enter a valid display name and chip amount.';
+                grantChipsMsg.className = 'upload-message error';
+                grantChipsMsg.style.display = 'block';
+                return;
+            }
+            try {
+                const { query, where, getDocs, setDoc } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js');
+                const usersRef = collection(db, 'construction21_users');
+                const q = query(usersRef, where('displayName', '==', displayName));
+                const userSnap = await getDocs(q);
+                if (userSnap.empty) {
+                    grantChipsMsg.textContent = 'No user found with that display name.';
+                    grantChipsMsg.className = 'upload-message error';
+                    grantChipsMsg.style.display = 'block';
+                    return;
+                }
+                // Assume only one user per display name
+                const userDoc = userSnap.docs[0];
+                const userData = userDoc.data();
+                const newChips = (userData.chips || 0) + chipsToAdd;
+                await setDoc(userDoc.ref, { chips: newChips }, { merge: true });
+                grantChipsMsg.textContent = `Granted ${chipsToAdd} chips to ${displayName}. New balance: ${newChips}`;
+                grantChipsMsg.className = 'upload-message success';
+                grantChipsMsg.style.display = 'block';
+            } catch (err) {
+                grantChipsMsg.textContent = 'Error: ' + (err.message || err);
+                grantChipsMsg.className = 'upload-message error';
+                grantChipsMsg.style.display = 'block';
+            }
+        });
     </script>
 </body>
 </html>

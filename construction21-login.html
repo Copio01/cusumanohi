@@ -180,6 +180,7 @@
           <span class="forgot-link" id="forgot-link" tabindex="0">Forgot password?</span>
         </div>
         <button id="login-btn" class="auth-btn" type="submit">Login & Play</button>
+        <button id="login-multiplayer-btn" class="auth-btn" type="button" style="margin-top:0.3rem;background:linear-gradient(90deg,#ffd700 80%,#b7aaff 100%);color:#23232b;font-weight:800;">Login & Play Multiplayer (WIP)</button>
         <div id="login-message" class="message"></div>
       </form>
       <form id="forgot-form" style="display:none;">
@@ -249,6 +250,7 @@
     const forgotBtn = document.getElementById('forgot-btn');
     const forgotCancelBtn = document.getElementById('forgot-cancel-btn');
     const forgotMessage = document.getElementById('forgot-message');
+    const loginMultiplayerBtn = document.getElementById('login-multiplayer-btn');
 
     // Tab Switching
     authTabs.forEach(tab => {
@@ -327,6 +329,26 @@
         showMessage(loginMessage, 'Login successful! Redirecting...', 'success');
       } catch (error) {
         setButtonLoading(loginBtn, 'Login & Play', false);
+        showMessage(loginMessage, getErrorMessage(error.code), 'error');
+      }
+    });
+
+    // Multiplayer Login (WIP)
+    loginMultiplayerBtn.addEventListener('click', async () => {
+      const email = document.getElementById('login-email').value.trim();
+      const password = document.getElementById('login-password').value;
+      if (!email || !password) return showMessage(loginMessage, 'Please fill in all fields.', 'error');
+      if (!email.includes('@')) return showMessage(loginMessage, 'Please enter a valid email.', 'error');
+      if (!auth) return showMessage(loginMessage, 'Authentication unavailable. Refresh.', 'error');
+      setButtonLoading(loginMultiplayerBtn, 'Logging in...');
+      try {
+        await signInWithEmailAndPassword(auth, email, password);
+        showMessage(loginMessage, 'Login successful! Redirecting to multiplayer...', 'success');
+        // onAuthStateChanged will handle sessionStorage, so just redirect
+        sessionStorage.setItem('loginToMultiplayer', 'true');
+        window.location.href = 'Multiplayer21.html';
+      } catch (error) {
+        setButtonLoading(loginMultiplayerBtn, 'Login & Play Multiplayer (WIP)', false);
         showMessage(loginMessage, getErrorMessage(error.code), 'error');
       }
     });
