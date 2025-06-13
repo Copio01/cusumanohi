@@ -91,9 +91,7 @@ export class Construction21Game {
         if (!hand.cards) hand.cards = [];
         hand.cards.push(card);
         return card;
-    }
-
-    calculateScore(cards) {
+    }    calculateScore(cards) {
         let score = 0, aceCount = 0;
         cards.forEach(card => {
             if (card.value === 'A') { aceCount++; score += 11; }
@@ -101,6 +99,18 @@ export class Construction21Game {
             else score += parseInt(card.value);
         });
         while (score > 21 && aceCount > 0) { score -= 10; aceCount--; }
+        
+        // Debug logging for dealer hands only
+        if (cards === this.dealerHand?.cards) {
+            console.log(`[SCORE DEBUG] Cards: ${cards.map(c => c.value + c.suit).join(', ')}`);
+            console.log(`[SCORE DEBUG] Raw values: ${cards.map(c => {
+                if (c.value === 'A') return '11(A)';
+                if (['K', 'Q', 'J'].includes(c.value)) return '10(' + c.value + ')';
+                return c.value;
+            }).join(', ')}`);
+            console.log(`[SCORE DEBUG] Final score: ${score}, Aces remaining: ${aceCount}`);
+        }
+        
         return score;
     }
 
@@ -181,9 +191,15 @@ export class Construction21Game {
         return aceCount > 0 && tempScore > 21 && score === 17;
     }    shouldDealerHit() {
         const dealerScore = this.calculateScore(this.dealerHand.cards);
+        const shouldHit = dealerScore <= 16;
+        
+        // Debug logging
+        console.log(`[DEALER DEBUG] Cards: ${this.dealerHand.cards.map(c => c.value + c.suit).join(', ')}`);
+        console.log(`[DEALER DEBUG] Score: ${dealerScore}`);
+        console.log(`[DEALER DEBUG] Should hit: ${shouldHit}`);
         
         // Explicit logic: dealer hits on 16 and below, stands on 17 and above
-        return dealerScore <= 16;
+        return shouldHit;
     }settleHands() {
         const dealerScore = this.calculateScore(this.dealerHand.cards);
         this.dealerHand.score = dealerScore;

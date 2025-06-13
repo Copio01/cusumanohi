@@ -689,11 +689,23 @@ function nextHandOrSettle() {
 
 // Dealer logic: Use the game's shouldDealerHit method for proper rule enforcement
 async function dealerPlayOut() {
-  while (game.shouldDealerHit()) {
+  console.log('[DEALER PLAYOUT] Starting dealer play-out');
+  let cardCount = 0;
+  const maxCards = 10; // Safety limit to prevent infinite loops
+  
+  while (game.shouldDealerHit() && cardCount < maxCards) {
+    cardCount++;
+    console.log(`[DEALER PLAYOUT] Drawing card #${cardCount}`);
     await delay(700);
     game.dealCard(game.dealerHand, true);
     updateHandsUI();
   }
+  
+  if (cardCount >= maxCards) {
+    console.error(`[DEALER PLAYOUT] ERROR: Hit maximum card limit (${maxCards}), stopping dealer`);
+  }
+  
+  console.log(`[DEALER PLAYOUT] Finished. Final score: ${game.calculateScore(game.dealerHand.cards)}, Total cards drawn: ${cardCount}`);
 }
 
 async function settleAndEndRound() {
