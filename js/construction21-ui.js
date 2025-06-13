@@ -254,10 +254,23 @@ async function animateDealCard(hand, faceUp, isDealer, cardIndex) {
   await simpleDelay(700);
 }
 async function dealOpeningCards() {
-  await animateDealCard(game.playerHands[0], true, false, 0);
-  await animateDealCard(game.dealerHand, true, true, 0);
-  await animateDealCard(game.playerHands[0], true, false, 1);
-  await animateDealCard(game.dealerHand, false, true, 1);
+  // Standard blackjack dealing order: Player, Dealer, Player, Dealer (face down)
+  console.log('[DEAL] Starting opening card sequence...');
+  
+  await animateDealCard(game.playerHands[0], true, false, 0);   // Player card 1 (face up)
+  console.log('[DEAL] Player first card dealt');
+  
+  await animateDealCard(game.dealerHand, true, true, 0);        // Dealer card 1 (face up)
+  console.log('[DEAL] Dealer first card dealt (face up)');
+  
+  await animateDealCard(game.playerHands[0], true, false, 1);   // Player card 2 (face up)
+  console.log('[DEAL] Player second card dealt');
+  
+  await animateDealCard(game.dealerHand, false, true, 1);       // Dealer card 2 (face down)
+  console.log('[DEAL] Dealer second card dealt (face down)');
+  
+  console.log('[DEAL] Opening deal complete, dealer cards:', game.dealerHand.cards.map((c, i) => `${i}: ${c.value}${c.suit} (${c.isFaceUp ? 'up' : 'down'})`));
+  
   updateActionBarState(); // <-- ENSURE action bar is updated after opening deal!
 }
 
@@ -407,20 +420,34 @@ function setupEventHandlers() {
   });  rebetBtn.addEventListener('click', () => {
     hideEndButtons();
     if (lastBets) {
-      // Calculate total rebet amount
+      // Calculate total rebet amount with detailed logging
       let totalBet = 0;
+      const betBreakdown = [];
       Object.keys(lastBets).forEach(k => { 
         if (lastBets[k] > 0) {
           totalBet += lastBets[k];
+          betBreakdown.push(`${k}: ${lastBets[k]}`);
         }
       });
       
-      // Validate player has enough chips for rebet
-      if (totalBet > game.chips) {
-        showStatusToast('Not enough chips for rebet!', true);
+      console.log(`[REBET DEBUG] Attempting rebet - Total needed: ${totalBet}, Available chips: ${game.chips}`);
+      console.log(`[REBET DEBUG] Bet breakdown: ${betBreakdown.join(', ')}`);
+      
+      // Enhanced validation with detailed feedback
+      if (totalBet <= 0) {
+        showStatusToast('No previous bets to repeat!', true);
         showEndButtons();
         return;
       }
+      
+      if (totalBet > game.chips) {
+        console.log(`[REBET DEBUG] Insufficient chips: need ${totalBet}, have ${game.chips}`);
+        showStatusToast(`Not enough chips for rebet! Need ${totalBet}, have ${game.chips}`, true);
+        showEndButtons();
+        return;
+      }
+      
+      console.log(`[REBET DEBUG] Rebet validation passed, proceeding with game setup`);
       
       resetAllHandsAndUI();
       game.clearBets();
@@ -431,9 +458,16 @@ function setupEventHandlers() {
         }
       });
       game.chips -= totalBet;
+      
+      console.log(`[REBET DEBUG] Bets placed, chips remaining: ${game.chips}`);
+      
       updateBetsUI();
       updateChipsDisplay();
       saveChipsToFirebase();
+    } else {
+      showStatusToast('No previous bets available!', true);
+      showEndButtons();
+      return;
     }
     startRound();
   });doubleBetBtn.addEventListener('click', () => {
@@ -589,16 +623,44 @@ function showInPlayButtons(show) {
 
 function updateHandsUI(resultData = null) {
   dealerCardsEl.innerHTML = '';
-  playerHandsEl.innerHTML = '';
-
-  // --- Simple Dealer cards display ---
-  game.dealerHand.cards.forEach((card, idx) => {
-    const cardEl = document.createElement('div');
-    cardEl.className = 'card';
-    cardEl.innerHTML = renderCard(card);
-    cardEl.style.marginLeft = idx > 0 ? '-20px' : '0';
-    dealerCardsEl.appendChild(cardEl);
-  });  // --- Simple Player hands display ---
+  playerHandsEl.innerHTML = '';  
+  
+  // --- Enhanced Dealer cards display with proper ordering ---
+  if (game.dealerHand.cards && game.dealerHand.cards.length > 0) {
+    // Create a copy of cards array to avoid mutation during display
+    const dealerCards = [...game.dealerHand.cards];
+    
+    // Enhanced debugging for card order validation
+    console.log(`[CARD ORDER DEBUG] Displaying ${dealerCards.length} dealer cards:`, 
+      dealerCards.map((c, i) => `${i}: ${c.value}${c.suit} (${c.isFaceUp ? 'face-up' : 'face-down'})`));
+    
+    dealerCards.forEach((card, idx) => {
+      const cardEl = document.createElement('div');
+      cardEl.className = 'card';
+      cardEl.innerHTML = renderCard(card);
+      
+      // Ensure proper card positioning and layering
+      cardEl.style.marginLeft = idx > 0 ? '-20px' : '0';
+      cardEl.style.zIndex = 10 + idx; // Cards dealt later appear on top
+      cardEl.style.position = 'relative'; // Ensure proper positioning context
+      
+      // Add debug info in development for better troubleshooting
+      if (window.location.hostname === 'localhost') {
+        cardEl.setAttribute('data-card-index', idx);
+        cardEl.setAttribute('data-card-value', `${card.value}${card.suit}`);
+        cardEl.setAttribute('data-face-up', card.isFaceUp);
+        cardEl.title = `Card ${idx}: ${card.value}${card.suit} (${card.isFaceUp ? 'face-up' : 'face-down'})`;
+      }
+      
+      dealerCardsEl.appendChild(cardEl);
+    });
+    
+    // Validate display order matches game state
+    const displayedCards = dealerCardsEl.querySelectorAll('.card');
+    if (displayedCards.length !== dealerCards.length) {
+      console.error(`[CARD ORDER ERROR] Mismatch: ${displayedCards.length} displayed vs ${dealerCards.length} in game state`);
+    }
+  }// --- Simple Player hands display ---
   game.playerHands.forEach((hand, hIdx) => {
     const handDiv = document.createElement('div');
     handDiv.className = 'player-hand';
@@ -877,9 +939,13 @@ async function settleAndEndRound() {
   
   outcomeLock = true; // Prevent multiple triggers
   console.log('[SETTLE DEBUG] Set outcomeLock to true');
-
-  // Reveal all dealer cards before play out
-  game.dealerHand.cards.forEach(card => { card.isFaceUp = true; });
+  // Reveal all dealer cards before play out - ensure proper order
+  if (game.dealerHand.cards && game.dealerHand.cards.length > 0) {
+    game.dealerHand.cards.forEach((card, idx) => { 
+      card.isFaceUp = true; 
+      console.log(`[REVEAL] Dealer card ${idx}: ${card.value}${card.suit} now face up`);
+    });
+  }
   updateHandsUI();
 
   await dealerPlayOut();
