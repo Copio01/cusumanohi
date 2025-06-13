@@ -701,7 +701,6 @@ async function settleAndEndRound() {
       showStatusToast(txt);
     }, 900 + idx * 700);
   });
-
   // Show side bet results
   setTimeout(() => {
     if (game.playerHands.length > 0 && game.playerHands[0].cards.length >= 2) {
@@ -711,6 +710,8 @@ async function settleAndEndRound() {
       if (lastBets && lastBets.pp > 0) {
         const ppResult = game.checkPerfectPairs(firstHand.cards[0], firstHand.cards[1]);
         if (ppResult.payout > 0) {
+          const totalWin = lastBets.pp * (ppResult.payout + 1);
+          showSideBetWinDisplay('Perfect Pairs', ppResult.type, totalWin);
           showStatusToast(`Perfect Pairs: ${ppResult.type} pays ${ppResult.payout}:1!`);
         } else {
           showStatusToast("Perfect Pairs: No pair.");
@@ -722,6 +723,8 @@ async function settleAndEndRound() {
         const plus3Cards = [firstHand.cards[0], firstHand.cards[1], game.dealerHand.cards[0]];
         const plus3Result = game.check21Plus3(plus3Cards);
         if (plus3Result.payout > 0) {
+          const totalWin = lastBets.plus3 * (plus3Result.payout + 1);
+          showSideBetWinDisplay('21+3', plus3Result.type, totalWin);
           showStatusToast(`21+3: ${plus3Result.type} pays ${plus3Result.payout}:1!`);
         } else {
           showStatusToast("21+3: No winning combination.");
@@ -758,6 +761,43 @@ function hideEndButtons() {
   rebetBtn.style.display = 'none';
   doubleBetBtn.style.display = 'none';
 }
+
+// ---- Side Bet Win Display Functions ----
+function showSideBetWinDisplay(betType, winType, amount) {
+  const winDisplay = document.getElementById('side-bet-win-display');
+  const winTypeDisplay = document.getElementById('win-type-display');
+  const winAmountDisplay = document.getElementById('win-amount-display');
+  
+  if (!winDisplay || !winTypeDisplay || !winAmountDisplay) return;
+  
+  // Update content
+  winTypeDisplay.textContent = winType;
+  winAmountDisplay.querySelector('.amount-text').textContent = amount;
+  
+  // Update title based on bet type
+  const winTitle = winDisplay.querySelector('.win-title');
+  if (winTitle) {
+    winTitle.textContent = `${betType.toUpperCase()} WIN!`;
+  }
+  
+  // Show the display with animation
+  winDisplay.classList.add('show');
+  
+  // Auto-hide after 8 seconds
+  setTimeout(() => {
+    closeSideBetWinDisplay();
+  }, 8000);
+}
+
+function closeSideBetWinDisplay() {
+  const winDisplay = document.getElementById('side-bet-win-display');
+  if (winDisplay) {
+    winDisplay.classList.remove('show');
+  }
+}
+
+// Make closeSideBetWinDisplay global for onclick
+window.closeSideBetWinDisplay = closeSideBetWinDisplay;
 
 // ---- Firebase Auth Init ----
 onAuthStateChanged(auth, (user) => {

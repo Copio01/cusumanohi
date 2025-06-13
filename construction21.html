@@ -506,6 +506,205 @@ body.modern-bg {
   opacity: 1;
   pointer-events: all;
 }
+
+/* Side Bet Win Display */
+.side-bet-win-panel {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 320px;
+  background: linear-gradient(145deg, 
+    rgba(255, 215, 0, 0.95) 0%, 
+    rgba(255, 183, 0, 0.98) 25%,
+    rgba(255, 140, 0, 0.95) 100%);
+  backdrop-filter: blur(12px);
+  border-radius: 20px;
+  border: 2px solid #ffd700;
+  box-shadow: 
+    0 8px 32px rgba(255, 215, 0, 0.4),
+    0 4px 16px rgba(255, 140, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  z-index: 1000;
+  transform: translateX(400px) scale(0.8);
+  opacity: 0;
+  transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  overflow: hidden;
+  color: #23232b;
+  font-family: 'Segoe UI', Arial, sans-serif;
+}
+
+.side-bet-win-panel.show {
+  transform: translateX(0) scale(1);
+  opacity: 1;
+}
+
+.side-bet-win-panel::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(circle at 30% 20%, rgba(255, 255, 255, 0.3) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+.win-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px 12px;
+  border-bottom: 2px solid rgba(35, 35, 43, 0.1);
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.2) 0%, transparent 100%);
+}
+
+.win-icon {
+  font-size: 24px;
+  animation: bounce 1s infinite;
+}
+
+.win-title {
+  font-size: 18px;
+  font-weight: bold;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  letter-spacing: 1px;
+}
+
+.close-win-btn {
+  background: rgba(35, 35, 43, 0.2);
+  border: none;
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #23232b;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.close-win-btn:hover {
+  background: rgba(35, 35, 43, 0.3);
+  transform: scale(1.1);
+}
+
+.win-details {
+  padding: 16px 20px;
+}
+
+.win-type-section,
+.win-amount-section {
+  margin-bottom: 12px;
+}
+
+.win-type-label,
+.win-amount-label {
+  font-size: 14px;
+  font-weight: 600;
+  opacity: 0.8;
+  margin-bottom: 4px;
+}
+
+.win-type-value {
+  font-size: 20px;
+  font-weight: bold;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  background: linear-gradient(45deg, #8b4513, #cd853f);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.win-amount-value {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.chip-icon {
+  font-size: 28px;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+  animation: spin 2s linear infinite;
+}
+
+.amount-text {
+  background: linear-gradient(45deg, #2e7d32, #4caf50);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.win-celebration {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.sparkle {
+  position: absolute;
+  font-size: 16px;
+  animation: sparkle 2s ease-in-out infinite;
+}
+
+.sparkle:nth-child(1) {
+  top: 15%;
+  left: 15%;
+  animation-delay: 0s;
+}
+
+.sparkle:nth-child(2) {
+  top: 25%;
+  right: 20%;
+  animation-delay: 0.7s;
+}
+
+.sparkle:nth-child(3) {
+  bottom: 20%;
+  left: 25%;
+  animation-delay: 1.4s;
+}
+
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-8px);
+  }
+  60% {
+    transform: translateY(-4px);
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes sparkle {
+  0%, 100% {
+    opacity: 0;
+    transform: scale(0.5) rotate(0deg);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.2) rotate(180deg);
+  }
+}
 .chip-flying {
   pointer-events: none !important;
   box-shadow: 0 8px 22px #ffd70077, 0 2px 2px #0006;
@@ -657,9 +856,35 @@ body.modern-bg {
       </div>
     </div>
   </main>
-
   <!-- Status Toast -->
   <div id="status-toast" class="fixed top-6 left-1/2 -translate-x-1/2 glassy px-6 py-3 rounded-lg shadow-lg text-yellow-300 text-lg z-50"></div>
+
+  <!-- Side Bet Win Display -->
+  <div id="side-bet-win-display" class="side-bet-win-panel">
+    <div class="win-panel-header">
+      <span class="win-icon">🎉</span>
+      <span class="win-title">SIDE BET WIN!</span>
+      <button class="close-win-btn" onclick="closeSideBetWinDisplay()">✕</button>
+    </div>
+    <div class="win-details">
+      <div class="win-type-section">
+        <div class="win-type-label">Win Type:</div>
+        <div class="win-type-value" id="win-type-display"></div>
+      </div>
+      <div class="win-amount-section">
+        <div class="win-amount-label">Amount Won:</div>
+        <div class="win-amount-value" id="win-amount-display">
+          <span class="chip-icon">🪙</span>
+          <span class="amount-text"></span>
+        </div>
+      </div>
+    </div>
+    <div class="win-celebration">
+      <div class="sparkle">✨</div>
+      <div class="sparkle">💫</div>
+      <div class="sparkle">⭐</div>
+    </div>
+  </div>
 
   <!-- Scripts -->
   <script type="module" src="js/construction21-ui.js"></script>
