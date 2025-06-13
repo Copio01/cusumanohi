@@ -35,7 +35,7 @@ export class Construction21Game {
         this.isGameInProgress = false;
         this.isDealerPlayoutComplete = false;
         this.lastActionTimestamp = 0;
-        this.actionCooldown = 25; // 25ms cooldown between actions (more responsive)
+        this.actionCooldown = 10; // 10ms cooldown between actions (very responsive)
         
         // Maximum limits for safety
         this.MAX_CHIPS = 1000000;
