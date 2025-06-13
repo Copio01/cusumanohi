@@ -1963,11 +1963,11 @@ grantChipsForm.addEventListener('submit', async (e) => {
         return;
     }
     try {
+        // Get the user document directly instead of querying all users
         const userDocRef = doc(db, 'construction21_users', userId);
-        const userSnap = await getDocs(query(collection(db, 'construction21_users'), orderBy('displayName')));
-        let userData = null;
-        userSnap.forEach(docSnap => { if (docSnap.id === userId) userData = docSnap.data(); });
-        if (!userData) throw new Error('User not found');
+        const userSnap = await getDoc(userDocRef);
+        if (!userSnap.exists()) throw new Error('User not found');
+        const userData = userSnap.data();
         const newChips = (userData.chips || 0) + chipsToAdd;
         await setDoc(userDocRef, { chips: newChips }, { merge: true });
         grantChipsMsg.textContent = `Granted ${chipsToAdd} chips to ${userData.displayName}. New balance: ${newChips}`;
