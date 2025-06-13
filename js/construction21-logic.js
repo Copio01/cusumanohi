@@ -157,17 +157,36 @@ export class Construction21Game {
         return this.calculateScore(cards) > 21;
     }
 
+    // Check if a hand is a soft 17 (contains an Ace counted as 11)
+    isSoft17(cards) {
+        const score = this.calculateScore(cards);
+        if (score !== 17) return false;
+        
+        // Check if there's an Ace being counted as 11
+        let aceCount = 0;
+        let tempScore = 0;
+        cards.forEach(card => {
+            if (card.value === 'A') { 
+                aceCount++; 
+                tempScore += 11; 
+            } else if (['K', 'Q', 'J'].includes(card.value)) {
+                tempScore += 10;
+            } else {
+                tempScore += parseInt(card.value);
+            }
+        });
+        
+        // If we have aces and the score would be over 21 without converting any ace to 1,
+        // but currently equals 17, then it's a soft 17
+        return aceCount > 0 && tempScore > 21 && score === 17;
+    }
+
     shouldDealerHit() {
         const dealerScore = this.calculateScore(this.dealerHand.cards);
         if (dealerScore < 17) return true;
-        if (
-            dealerScore === 17 &&
-            typeof this.isSoft17 === 'function' &&
-            this.isSoft17(this.dealerHand.cards) &&
-            !this.dealerStandsOnSoft17
-        ) {
-            return true;
-        }
+        
+        // Dealer stands on all 17s (including soft 17) - this is standard casino rule
+        // To make dealer hit on soft 17, change this logic
         return false;
     }    settleHands() {
         const dealerScore = this.calculateScore(this.dealerHand.cards);
