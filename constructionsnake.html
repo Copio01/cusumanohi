@@ -3,10 +3,9 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=900, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Construction Snake</title>
-    <style>
-        body {
+    <style>        body {
             margin: 0;
             padding: 0;
             background: radial-gradient(ellipse at 60% 40%, #ffd70033 0%, #23232b 100%), linear-gradient(135deg, #23232b 0%, #2d2d3a 100%);
@@ -15,6 +14,12 @@
             min-width: 100vw;
             overflow-x: hidden;
             overflow-y: auto;
+            -webkit-text-size-adjust: 100%;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
         }
         .animated-bg {
             position: fixed;
@@ -36,10 +41,9 @@
         @keyframes floatBg {
             0% { transform: translateY(0) scale(1); }
             100% { transform: translateY(-30px) scale(1.08); }
-        }
-        #game-container {
-            width: 900px;
-            margin: 40px auto;
+        }        #game-container {
+            width: min(900px, 98vw);
+            margin: 20px auto;
             background: rgba(255, 255, 255, 0.95);
             border: 8px solid #e0a106;
             border-radius: 16px;
@@ -51,6 +55,10 @@
             display: block;
             margin: 0 auto 16px auto;
             border: 4px solid #bfa14a;
+            width: min(800px, 90vw);
+            height: min(800px, 90vw);
+            max-width: 90vw;
+            max-height: 90vw;
         }
         #difficulty-meter {
             width: 100%;
@@ -77,14 +85,13 @@
         #leaderboard h2 {
             margin-top: 0;
             color: #e0a106;
-        }
-        #leaderboard {
+        }        #leaderboard {
             background-color: rgba(255, 255, 255, 0.15);
             border-radius: 8px;
             padding: 15px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
             border: 2px solid rgba(224, 161, 6, 0.7);
-            max-width: 500px;
+            max-width: min(500px, 90vw);
             margin: 0 auto;
         }
         #leaderboard h2 {
@@ -96,6 +103,26 @@
             border-bottom: 2px solid rgba(224, 161, 6, 0.5);
             margin-bottom: 12px;
             text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+        }
+        
+        @media (max-width: 768px) {
+            #leaderboard {
+                padding: 12px;
+                margin: 10px;
+            }
+            #leaderboard h2 {
+                font-size: 1.2em;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            #leaderboard {
+                padding: 10px;
+                margin: 8px;
+            }
+            #leaderboard h2 {
+                font-size: 1.1em;
+            }
         }
         .score-entry {
             display: flex;
@@ -209,22 +236,22 @@
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
-        }
-        #main-menu {
+        }        #main-menu {
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             gap: 1.2rem;
             padding: 2.5rem 0 2rem 0;
-        }
-        #main-menu input[type="text"] {
+        }        #main-menu input[type="text"] {
             font-size: 1.2rem;
             padding: 0.5rem 1rem;
             border-radius: 8px;
             border: 2px solid #e0a106;
-            width: 260px;
+            width: min(260px, 80vw);
             margin-bottom: 0.5rem;
+            -webkit-appearance: none;
+            appearance: none;
         }
         #main-menu button {
             font-size: 1.2rem;
@@ -237,18 +264,242 @@
             cursor: pointer;
             box-shadow: 0 2px 8px rgba(224,161,6,0.13);
             transition: transform 0.13s;
+            min-width: 140px;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
         }
         #main-menu button:hover {
             transform: scale(1.06);
+        }
+        #main-menu button:active {
+            transform: scale(0.98);
         }
         #main-menu label {
             font-size: 1.1rem;
             color: #bfa14a;
             font-weight: 500;
+            text-align: center;
         }
-        @media (max-width: 1000px) {
-            #game-container { width: 98vw; }
-            #game-canvas { width: 98vw !important; height: 98vw !important; max-width: 98vw; max-height: 98vw; }
+        
+        @media (max-width: 480px) {
+            #main-menu {
+                padding: 1.5rem 0 1rem 0;
+                gap: 1rem;
+            }
+            #main-menu input[type="text"] {
+                font-size: 1rem;
+                width: min(240px, 85vw);
+            }
+            #main-menu button {
+                font-size: 1rem;
+                padding: 0.6rem 1.8rem;
+                min-width: 120px;
+            }
+            #main-menu label {
+                font-size: 1rem;
+            }
+        }@media (max-width: 1000px) {
+            #game-container { 
+                width: 98vw; 
+                margin: 10px auto;
+                padding: 16px;
+            }
+            #game-canvas { 
+                width: min(90vw, 90vh) !important; 
+                height: min(90vw, 90vh) !important; 
+                max-width: 90vw; 
+                max-height: 90vh; 
+            }
+            h1 { font-size: 1.8rem; margin-bottom: 1rem; }
+        }
+
+        /* Touch Controls */
+        #touch-controls {
+            display: none;
+            margin-top: 20px;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .controls-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        
+        .control-row {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .direction-btn {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #e0a106, #f4b73d);
+            border: 3px solid #bfa14a;
+            border-radius: 12px;
+            color: #23232b;
+            font-size: 1.8rem;
+            font-weight: bold;
+            cursor: pointer;
+            touch-action: manipulation;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(224, 161, 6, 0.3);
+            text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+        }
+          .direction-btn:active {
+            transform: scale(0.95);
+            box-shadow: 0 2px 6px rgba(224, 161, 6, 0.5);
+            background: linear-gradient(135deg, #f4b73d, #e0a106);
+        }
+        
+        .direction-btn:hover {
+            background: linear-gradient(135deg, #f4b73d, #ff8c00);
+            box-shadow: 0 6px 16px rgba(244, 183, 61, 0.4);
+        }
+        
+        /* Enhanced touch feedback */
+        .direction-btn.pressed {
+            transform: scale(0.9);
+            background: linear-gradient(135deg, #ff8c00, #e0a106);
+            box-shadow: 0 1px 3px rgba(224, 161, 6, 0.7);
+        }
+        
+        /* Controls visibility */
+        @media (hover: none) and (pointer: coarse) {
+            #touch-controls {
+                display: flex;
+            }
+        }
+        
+        /* Force show on small screens */
+        @media (max-width: 768px) {
+            #touch-controls {
+                display: flex;
+            }
+        }
+          /* Control instructions */
+        .control-instructions {
+            text-align: center;
+            margin-bottom: 15px;
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        .desktop-hint {
+            display: inline;
+        }
+        
+        .keyboard-hint {
+            display: none;
+        }
+        
+        /* Show mobile instructions on touch devices */
+        @media (hover: none) and (pointer: coarse) {
+            .desktop-hint {
+                display: none;
+            }
+            
+            .keyboard-hint {
+                display: inline;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .control-instructions {
+                font-size: 0.8rem;
+                margin-bottom: 10px;
+            }
+            
+            .direction-btn {
+                width: 55px;
+                height: 55px;
+                font-size: 1.6rem;
+            }
+        }        @media (max-width: 480px) {
+            .direction-btn {
+                width: 50px;
+                height: 50px;
+                font-size: 1.4rem;
+            }
+            
+            .control-row {
+                gap: 8px;
+            }
+            
+            .controls-container {
+                gap: 8px;
+            }
+            
+            .score-entry {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 5px;
+                padding: 6px 10px;
+            }
+            
+            .score-entry .player-name {
+                width: 100%;
+                text-align: center;
+            }
+            
+            .score-entry .player-score {
+                align-self: center;
+            }
+            
+            .score-entry .score-date {
+                align-self: center;
+                font-size: 0.8em;
+            }
+        }
+
+        /* Landscape mobile optimizations */
+        @media screen and (max-height: 600px) and (orientation: landscape) {
+            #game-container {
+                margin: 5px auto;
+                padding: 12px;
+            }
+            
+            h1 {
+                font-size: 1.5rem !important;
+                margin-bottom: 0.5rem !important;
+            }
+            
+            #main-menu {
+                padding: 1rem 0 0.5rem 0;
+                gap: 0.8rem;
+            }
+            
+            #touch-controls {
+                margin-top: 10px;
+            }
+            
+            .direction-btn {
+                width: 45px;
+                height: 45px;
+                font-size: 1.3rem;
+            }
+            
+            .controls-container {
+                gap: 6px;
+            }
+            
+            .control-row {
+                gap: 6px;
+            }
+            
+            .control-instructions {
+                font-size: 0.75rem;
+                margin-bottom: 5px;
+            }
         }
     </style>
 </head>
@@ -274,10 +525,26 @@
         <canvas id="game-canvas" width="800" height="800" style="display:none;"></canvas>
         <div id="score-area" style="text-align:center;margin:12px 0;display:none;">
             <span id="score-label">Score: 0</span>
-        </div>
-        <div id="leaderboard" style="display:none;">
+        </div>        <div id="leaderboard" style="display:none;">
             <h2>Leaderboard</h2>
             <div id="leaderboard-entries">Loading...</div>
+        </div>
+        
+        <!-- Touch Controls -->
+        <div id="touch-controls">
+            <div class="controls-container">                <div class="control-instructions">
+                    <span class="keyboard-hint">Use buttons below or swipe on game area</span>
+                    <span class="desktop-hint">Use WASD, Arrow Keys, or buttons below</span>
+                </div>
+                <div class="control-row">
+                    <button class="direction-btn" id="up-btn" data-direction="UP">↑</button>
+                </div>
+                <div class="control-row">
+                    <button class="direction-btn" id="left-btn" data-direction="LEFT">←</button>
+                    <button class="direction-btn" id="down-btn" data-direction="DOWN">↓</button>
+                    <button class="direction-btn" id="right-btn" data-direction="RIGHT">→</button>
+                </div>
+            </div>
         </div>
     </div>
     <script type="module">
@@ -1087,9 +1354,7 @@
         if (gameMode === "ultra") {
             updatePowerupEffects();
         }
-    }
-
-    function startGame(mode) {
+    }    function startGame(mode) {
         playerName = playerNameInput.value.trim() || "Anonymous";
         gameMode = mode;
 
@@ -1098,6 +1363,12 @@
         difficultyMeter.style.display = 'block';
         scoreArea.style.display = 'block';
         leaderboard.style.display = 'block'; // Or hide until game over
+        
+        // Show touch controls on mobile
+        const touchControls = document.getElementById('touch-controls');
+        if (touchControls) {
+            touchControls.style.display = 'flex';
+        }
 
         resetGame();
         // intervalId = setInterval(gameLoop, speed); // Moved to resetGame
@@ -1112,6 +1383,13 @@
         canvas.style.display = 'none';
         difficultyMeter.style.display = 'none';
         scoreArea.style.display = 'none';
+        
+        // Hide touch controls when game ends
+        const touchControls = document.getElementById('touch-controls');
+        if (touchControls) {
+            touchControls.style.display = 'none';
+        }
+        
         submitScore(playerName, score);
     }
 
@@ -1223,39 +1501,141 @@
                     <div style="font-size:0.9em;opacity:0.7;margin-top:5px;">Please try again later</div>
                 </div>`;
         }
-    }
-
-    window.onload = () => {
+    }    window.onload = () => {        // Set up responsive canvas
+        function resizeCanvas() {
+            const container = document.getElementById('game-container');
+            const containerWidth = container.clientWidth - 48; // Account for padding
+            const viewportHeight = window.innerHeight;
+            const maxSize = Math.min(containerWidth, viewportHeight * 0.5, 800);
+            
+            // Ensure minimum size for playability
+            const finalSize = Math.max(maxSize, 300);
+            
+            canvas.style.width = finalSize + 'px';
+            canvas.style.height = finalSize + 'px';
+        }
+        
         canvas.width = CANVAS_SIZE;
         canvas.height = CANVAS_SIZE;
+        resizeCanvas();
+        
+        // Resize on orientation change
+        window.addEventListener('resize', resizeCanvas);
+        window.addEventListener('orientationchange', () => {
+            setTimeout(resizeCanvas, 100);
+        });
+        
         updateLeaderboard(); // Load leaderboard on page load
         requestAnimationFrame(animationLoop); // Start drawing loop
 
         classicButton.addEventListener('click', () => startGame('classic'));
         ultraButton.addEventListener('click', () => startGame('ultra'));
 
+        // Keyboard controls
         document.addEventListener('keydown', e => {
             if (!running) return;
-            switch (e.key.toLowerCase()) { // Convert to lower case to handle 'W' and 'w' etc.
-                case 'arrowleft':
-                case 'a': // Add 'a' for LEFT
-                    if (direction !== 'RIGHT') nextDirection = 'LEFT'; 
-                    break;
-                case 'arrowright':
-                case 'd': // Add 'd' for RIGHT
-                    if (direction !== 'LEFT') nextDirection = 'RIGHT'; 
-                    break;
-                case 'arrowup':
-                case 'w': // Add 'w' for UP
-                    if (direction !== 'DOWN') nextDirection = 'UP'; 
-                    break;
-                case 'arrowdown':
-                case 's': // Add 's' for DOWN
-                    if (direction !== 'UP') nextDirection = 'DOWN'; 
-                    break;
+            handleDirectionInput(e.key.toLowerCase());
+        });        // Touch button controls with enhanced feedback
+        const directionButtons = document.querySelectorAll('.direction-btn');
+        directionButtons.forEach(btn => {
+            // Prevent zoom on double-tap
+            btn.addEventListener('touchstart', e => {
+                e.preventDefault();
+                btn.classList.add('pressed');
+                if (!running) return;
+                const direction = btn.dataset.direction;
+                handleDirectionInput(direction.toLowerCase());
+            }, { passive: false });
+            
+            btn.addEventListener('touchend', e => {
+                e.preventDefault();
+                btn.classList.remove('pressed');
+            }, { passive: false });
+            
+            btn.addEventListener('click', e => {
+                e.preventDefault();
+                if (!running) return;
+                const direction = btn.dataset.direction;
+                handleDirectionInput(direction.toLowerCase());
+            });
+        });        // Swipe controls with improved detection
+        let touchStartX = 0;
+        let touchStartY = 0;
+        let touchStartTime = 0;
+        const minSwipeDistance = 30;
+        const maxSwipeTime = 300; // ms
+        
+        canvas.addEventListener('touchstart', e => {
+            e.preventDefault();
+            const touch = e.touches[0];
+            touchStartX = touch.clientX;
+            touchStartY = touch.clientY;
+            touchStartTime = Date.now();
+        }, { passive: false });
+        
+        canvas.addEventListener('touchend', e => {
+            e.preventDefault();
+            if (!running) return;
+            
+            const touch = e.changedTouches[0];
+            const deltaX = touch.clientX - touchStartX;
+            const deltaY = touch.clientY - touchStartY;
+            const deltaTime = Date.now() - touchStartTime;
+            
+            // Only register swipes that are fast enough and long enough
+            if (deltaTime > maxSwipeTime) return;
+            if (Math.abs(deltaX) < minSwipeDistance && Math.abs(deltaY) < minSwipeDistance) {
+                return;
             }
-        });
+            
+            // Determine primary direction with better sensitivity
+            if (Math.abs(deltaX) > Math.abs(deltaY) * 0.7) {
+                // Horizontal swipe (with some tolerance for diagonal)
+                if (deltaX > 0) {
+                    handleDirectionInput('arrowright');
+                } else {
+                    handleDirectionInput('arrowleft');
+                }
+            } else if (Math.abs(deltaY) > Math.abs(deltaX) * 0.7) {
+                // Vertical swipe (with some tolerance for diagonal)
+                if (deltaY > 0) {
+                    handleDirectionInput('arrowdown');
+                } else {
+                    handleDirectionInput('arrowup');
+                }
+            }
+        }, { passive: false });
+
+        // Prevent default touch behavior on game container
+        const gameContainer = document.getElementById('game-container');
+        gameContainer.addEventListener('touchmove', e => e.preventDefault(), { passive: false });
     };
+
+    // Centralized direction handling function
+    function handleDirectionInput(key) {
+        switch (key) {
+            case 'arrowleft':
+            case 'left':
+            case 'a':
+                if (direction !== 'RIGHT') nextDirection = 'LEFT'; 
+                break;
+            case 'arrowright':
+            case 'right':
+            case 'd':
+                if (direction !== 'LEFT') nextDirection = 'RIGHT'; 
+                break;
+            case 'arrowup':
+            case 'up':
+            case 'w':
+                if (direction !== 'DOWN') nextDirection = 'UP'; 
+                break;
+            case 'arrowdown':
+            case 'down':
+            case 's':
+                if (direction !== 'UP') nextDirection = 'DOWN'; 
+                break;
+        }
+    }
 
     // --- Construction Snake Game JS End ---
     </script>
