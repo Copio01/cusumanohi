@@ -2244,122 +2244,35 @@ body.modern-bg {
   .table-area-player { width: 238px; height: 89px; }
 }
 
-/* Advanced Animation Smoothness Optimizations */
-/* Performance-optimized animation classes */
-.smooth-animation {
-  will-change: transform;
-  backface-visibility: hidden;
-  transform-style: preserve-3d;
-  perspective: 1000px;
+/* Simple Card Animation System */
+.card-fly {
+  box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+  pointer-events: none;
+  z-index: 10000;
 }
 
-.gpu-accelerated {
-  transform: translateZ(0);
-  -webkit-transform: translateZ(0);
-  -webkit-font-smoothing: subpixel-antialiased;
-}
-
-.performance-mode .card {
-  transition: transform 0.2s cubic-bezier(0.4, 0.0, 0.2, 1);
-  animation-duration: 0.3s;
-}
-
-.balanced-mode .card {
-  transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  animation-duration: 0.5s;
-}
-
-.high-quality-mode .card {
-  transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  animation-duration: 0.8s;
-}
-
-/* Optimized card animations */
-.card-dealing {
-  animation: smooth-deal var(--animation-duration, 0.5s) cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
-}
-
-.card-flipping {
-  animation: smooth-flip var(--animation-duration, 0.4s) cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
-}
-
-.card-moving {
-  animation: smooth-move var(--animation-duration, 0.3s) cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
-}
-
-@keyframes smooth-deal {
+/* Clean card dealing animation */
+@keyframes dealCard {
   0% {
-    transform: translateX(-100vw) translateY(0) rotateY(180deg) scale(0.8);
+    transform: translateX(-150px) translateY(-50px) scale(0.9) rotate(-10deg);
     opacity: 0;
   }
-  20% {
+  50% {
     opacity: 1;
   }
-  80% {
-    transform: translateX(10px) translateY(0) rotateY(20deg) scale(1.05);
-  }
   100% {
+    transform: translateX(0) translateY(0) scale(1) rotate(0deg);
+    opacity: 1;
+  }
+}
     transform: translateX(0) translateY(0) rotateY(0deg) scale(1);
     opacity: 1;
   }
 }
 
-@keyframes smooth-flip {
-  0% {
-    transform: rotateY(0deg) scale(1);
-  }
-  50% {
-    transform: rotateY(90deg) scale(1.1);
-  }
-  100% {
-    transform: rotateY(180deg) scale(1);
-  }
-}
-
-@keyframes smooth-move {
-  0% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.05);
-  }
-  100% {
-    transform: scale(1);
-  }
-}
-
-/* Optimized chip animations */
-.chip-placing {
-  animation: smooth-chip-place var(--animation-duration, 0.3s) cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
-}
-
-.chip-removing {
-  animation: smooth-chip-remove var(--animation-duration, 0.2s) cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
-}
-
-@keyframes smooth-chip-place {
-  0% {
-    transform: scale(0.8) translateY(-20px);
-    opacity: 0.8;
-  }
-  50% {
-    transform: scale(1.1) translateY(-5px);
-  }
-  100% {
-    transform: scale(1) translateY(0);
-    opacity: 1;
-  }
-}
-
-@keyframes smooth-chip-remove {
-  0% {
-    transform: scale(1) translateY(0);
-    opacity: 1;
-  }
-  100% {
-    transform: scale(0.8) translateY(-20px);
-    opacity: 0;
-  }
+/* Simple chip animation */
+.chip-flying {
+  transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.5s ease-out;
 }
 
 /* Reduced motion preferences */
@@ -2367,11 +2280,6 @@ body.modern-bg {
   .card, .chip {
     animation-duration: 0.1s !important;
     transition-duration: 0.1s !important;
-  }
-  
-  .card-dealing, .card-flipping, .card-moving,
-  .chip-placing, .chip-removing {
-    animation: none !important;
   }
 }
 

@@ -200,16 +200,59 @@ function resetAllHandsAndUI() {
   if (playerHandsEl) playerHandsEl.innerHTML = '';
 }
 
-// --- Enhanced Animated Card Dealing with Smooth Animation System ---
+// --- Simplified Visual Card Dealing Animation ---
 async function animateDealCard(hand, faceUp, isDealer, cardIndex) {
-  // Deal the card to the game state
-  game.dealCard(hand, faceUp);
+  // Deal the card to the game state first
+  const dealtCard = game.dealCard(hand, faceUp);
+  if (!dealtCard) return;
   
-  // Update UI immediately to ensure cards are visible
-  updateHandsUI();
+  // Get target container
+  const targetContainer = isDealer ? dealerCardsEl : 
+    playerHandsEl.querySelector('.player-hand:last-child .hand-cards') || 
+    playerHandsEl;
   
-  // Use adaptive delay based on performance
-  await smoothAnimationManager.smartDelay(900);
+  if (!targetContainer) {
+    updateHandsUI();
+    return;
+  }
+  
+  // Create visual card element
+  const cardEl = document.createElement('div');
+  cardEl.className = 'card';
+  cardEl.innerHTML = renderCard(dealtCard);
+  
+  // Position from deck initially
+  const deckPos = getVirtualDeckPos();
+  const containerRect = targetContainer.getBoundingClientRect();
+  
+  cardEl.style.position = 'fixed';
+  cardEl.style.left = deckPos.left - 50 + 'px';
+  cardEl.style.top = deckPos.top - 72 + 'px';
+  cardEl.style.zIndex = '1000';
+  cardEl.style.opacity = '0.8';
+  cardEl.style.transform = 'scale(0.9) rotateY(-15deg)';
+  cardEl.style.transition = 'all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+  
+  document.body.appendChild(cardEl);
+  
+  // Animate to target position after a brief delay
+  setTimeout(() => {
+    const targetX = containerRect.left + (hand.cards.length - 1) * 25;
+    const targetY = containerRect.top;
+    
+    cardEl.style.left = targetX + 'px';
+    cardEl.style.top = targetY + 'px';
+    cardEl.style.opacity = '1';
+    cardEl.style.transform = 'scale(1) rotateY(0deg)';
+  }, 50);
+  
+  // Remove animated card and update UI after animation
+  setTimeout(() => {
+    cardEl.remove();
+    updateHandsUI();
+  }, 650);
+    // Wait for animation to complete
+  await simpleDelay(700);
 }
 async function dealOpeningCards() {
   await animateDealCard(game.playerHands[0], true, false, 0);
@@ -425,13 +468,13 @@ function getBetStackCount(type) {
   return 0;
 }
 
-// Enhanced chip animation with smooth animation system
+// Simple chip animation
 function animateChipToBetSpot(type, amount, spot, stackCount) {
   const chip = chipTray.querySelector(`.chip[data-amount="${amount}"]`);
   if (!chip) return;
   
   const clone = chip.cloneNode(true);
-  clone.classList.add('chip-flying', 'smooth-animation', 'gpu-accelerated', 'chip-placing');
+  clone.classList.add('chip-flying');
   document.body.appendChild(clone);
 
   const chipRect = chip.getBoundingClientRect();
@@ -441,15 +484,12 @@ function animateChipToBetSpot(type, amount, spot, stackCount) {
   clone.style.top = chipRect.top + chipRect.height / 2 - chip.offsetHeight / 2 + 'px';
   clone.style.zIndex = 9999;
   clone.style.pointerEvents = 'none';
-
   void clone.offsetWidth;
   const stackOffsetY = -stackCount * 8;
   const x = spotRect.left + spotRect.width / 2 - (chipRect.left + chipRect.width / 2);
   const y = spotRect.top + spotRect.height / 2 - (chipRect.top + chipRect.height / 2) + stackOffsetY;
   
-  // Use performance-adaptive animation duration
-  const duration = smoothAnimationManager.performanceMetrics.isThrottling ? 0.5 : 0.75;
-  clone.style.transition = `transform ${duration}s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity ${duration * 0.8}s ease-out`;
+  clone.style.transition = 'transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.5s ease-out';
   clone.style.transform = `translate(${x}px, ${y}px) scale(1.3)`;
   clone.style.opacity = 0.95;
 
@@ -457,7 +497,7 @@ function animateChipToBetSpot(type, amount, spot, stackCount) {
     clone.remove();
     spot.classList.add('bet-pulse');
     setTimeout(() => spot.classList.remove('bet-pulse'), 300);
-  }, (duration * 1000) + 30); // Adaptive cleanup timing
+  }, 630);
 }
 
 function updateBetsUI() {
@@ -539,63 +579,33 @@ function updateHandsUI(resultData = null) {
   dealerCardsEl.innerHTML = '';
   playerHandsEl.innerHTML = '';
 
-  // --- Enhanced Dealer cards with smooth animation system ---
-  const dealerHandRect = dealerCardsEl.getBoundingClientRect();
-  const virtualDeck = getVirtualDeckPos();
-
+  // --- Simple Dealer cards display ---
   game.dealerHand.cards.forEach((card, idx) => {
     const cardEl = document.createElement('div');
-    cardEl.className = 'card smooth-animation gpu-accelerated';
+    cardEl.className = 'card';
     cardEl.innerHTML = renderCard(card);
-    cardEl.style.position = 'absolute';
+    cardEl.style.marginLeft = idx > 0 ? '-20px' : '0';
     dealerCardsEl.appendChild(cardEl);
-
-    cardEl.style.opacity = 0;
-    cardEl.style.left = `${virtualDeck.left - dealerHandRect.left}px`;
-    cardEl.style.top = `${virtualDeck.top - dealerHandRect.top}px`;
-    
-    // Use simpler, more reliable delays
-    const baseDelay = 120;
-    const sequenceDelay = 350;
-    
-    setTimeout(() => {
-      cardEl.classList.add('card-deal-animate');
-      cardEl.style.left = `${idx * 34}px`;
-      cardEl.style.top = `0px`;
-      cardEl.style.opacity = 1;
-    }, baseDelay + idx * sequenceDelay);
-
-    setTimeout(() => {
-      cardEl.style.position = '';
-      cardEl.style.left = '';
-      cardEl.style.top = '';
-      cardEl.classList.remove('card-deal-animate');
-      cardEl.style.opacity = '';
-    }, (baseDelay + 680) + idx * sequenceDelay);
-  });  // --- Enhanced Player hands with smooth animation system ---
+  });  // --- Simple Player hands display ---
   game.playerHands.forEach((hand, hIdx) => {
     const handDiv = document.createElement('div');
     handDiv.className = 'player-hand';
     if (hIdx === game.activeHandIndex && inPlay) handDiv.classList.add('active-hand');
     handDiv.style.display = 'inline-block';
     handDiv.style.margin = '0 16px';
-    handDiv.style.position = 'relative';
 
-    // Fan the cards in a .hand-cards flexbox with smooth animations
+    // Simple card display with fan effect
     const handCardsDiv = document.createElement('div');
     handCardsDiv.className = 'hand-cards';
-    handCardsDiv.style.position = 'relative';
     const n = hand.cards.length;
-    const fanGap = Math.min(38, 180 / n);
+    const fanGap = Math.min(25, 120 / n);
 
     hand.cards.forEach((card, idx) => {
       const cardDiv = document.createElement('div');
-      cardDiv.className = 'card smooth-animation gpu-accelerated';
+      cardDiv.className = 'card';
       cardDiv.innerHTML = renderCard(card);
-      cardDiv.style.transform = `translateX(${fanGap * (idx - (n - 1) / 2)}px) rotate(${(idx - (n - 1) / 2) * 7}deg)`;
+      cardDiv.style.transform = `translateX(${fanGap * (idx - (n - 1) / 2)}px) rotate(${(idx - (n - 1) / 2) * 5}deg)`;
       cardDiv.style.zIndex = 10 + idx;
-      cardDiv.style.position = '';
-      
       handCardsDiv.appendChild(cardDiv);
     });
 
@@ -773,7 +783,7 @@ function handlePlayerAction(action) {
   }
 }
 
-// Enhanced split card animation with smooth animation system
+// Simple split card animation
 function animateSplitCardMove() {
   const handEls = playerHandsEl.querySelectorAll('.player-hand');
   if (handEls.length < 2) return;
@@ -787,28 +797,23 @@ function animateSplitCardMove() {
   const toRect = toHand.getBoundingClientRect();
   const clone = fromCard.cloneNode(true);
   
-  // Add smooth animation classes
-  clone.classList.add('card-fly', 'smooth-animation', 'gpu-accelerated', 'card-moving');
+  clone.classList.add('card-fly');
   document.body.appendChild(clone);
 
   clone.style.position = 'fixed';
   clone.style.left = cardRect.left + 'px';
   clone.style.top = cardRect.top + 'px';
-  clone.style.zIndex = 10000;
-  void clone.offsetWidth;
+  clone.style.zIndex = 10000;  void clone.offsetWidth;
 
   const x = toRect.left - cardRect.left + 44;
   const y = toRect.top - cardRect.top + 4;
   
-  // Use enhanced smooth transition with performance optimization
-  const duration = smoothAnimationManager.performanceMetrics.isThrottling ? 0.4 : 0.6;
-  clone.style.transition = `transform ${duration}s cubic-bezier(0.25, 0.46, 0.45, 0.94)`; 
+  clone.style.transition = 'transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94)'; 
   clone.style.transform = `translate(${x}px, ${y}px) scale(1.08)`;
 
-  // Cleanup with adaptive timing
   setTimeout(() => {
     clone.remove();
-  }, (duration * 1000) + 50);
+  }, 550);
 }
 
 function nextHandOrSettle() {
@@ -829,24 +834,18 @@ function nextHandOrSettle() {
   }
 }
 
-// Enhanced Dealer logic with smooth animation system
+// Simplified Dealer Play-out with Visual Animations
 async function dealerPlayOut() {
   console.log('[DEALER PLAYOUT] Starting dealer play-out');
   let cardCount = 0;
-  const maxCards = 10; // Safety limit to prevent infinite loops
+  const maxCards = 10; // Safety limit
   
   while (game.shouldDealerHit() && cardCount < maxCards) {
     cardCount++;
     console.log(`[DEALER PLAYOUT] Drawing card #${cardCount}`);
     
-    // Use adaptive delay based on performance
-    await smoothAnimationManager.smartDelay(1200);
-    
-    // Deal the card normally
-    game.dealCard(game.dealerHand, true);
-    
-    // Update UI immediately to show the card
-    updateHandsUI();
+    // Use the visual card animation
+    await animateDealCard(game.dealerHand, true, true, cardCount);
   }
   
   if (cardCount >= maxCards) {
@@ -1394,527 +1393,10 @@ onAuthStateChanged(auth, (user) => {
   loadUserDataAndStartGame(user);
 });
 
-// ---- Advanced Animation Smoothness System ----
+// Simple delay function for animations
+const simpleDelay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
-// Advanced Animation Smoothness Controller
-class SmoothAnimationManager {
-  constructor() {
-    this.frameRate = this.detectFrameRate();
-    this.performanceMetrics = {
-      frameDrops: 0,
-      averageFrameTime: 16.67,
-      isThrottling: false
-    };
-    this.animationQueue = [];
-    this.isProcessingQueue = false;
-    this.maxConcurrentAnimations = 4;
-    this.setupPerformanceMonitoring();
-    this.initializeOptimizations();
-  }
-  // Detect device frame rate and capabilities
-  detectFrameRate() {
-    let frameCount = 0;
-    let lastTime = performance.now();
-    let detectedFPS = 60; // Default to 60 FPS
-    
-    const measureFrames = (currentTime) => {
-      frameCount++;
-      if (currentTime - lastTime >= 1000) {
-        detectedFPS = Math.round(frameCount * 1000 / (currentTime - lastTime));
-        this.adaptToFrameRate(detectedFPS);
-        return detectedFPS;
-      }
-      if (frameCount < 60) {
-        requestAnimationFrame(measureFrames);
-      }
-    };
-    
-    requestAnimationFrame(measureFrames);
-    return detectedFPS; // Return default until measurement completes
-  }
-
-  adaptToFrameRate(fps) {
-    console.log(`[PERFORMANCE] Detected ${fps} FPS`);
-    
-    if (fps < 30) {
-      this.enablePerformanceMode();
-    } else if (fps >= 60) {
-      this.enableHighQualityMode();
-    } else {
-      this.enableBalancedMode();
-    }
-  }
-
-  enablePerformanceMode() {
-    document.documentElement.style.setProperty('--animation-duration-multiplier', '0.7');
-    document.documentElement.style.setProperty('--animation-complexity', 'minimal');
-    this.maxConcurrentAnimations = 2;
-    console.log('[PERFORMANCE] Enabled performance mode');
-  }
-
-  enableBalancedMode() {
-    document.documentElement.style.setProperty('--animation-duration-multiplier', '1.0');
-    document.documentElement.style.setProperty('--animation-complexity', 'balanced');
-    this.maxConcurrentAnimations = 4;
-    console.log('[PERFORMANCE] Enabled balanced mode');
-  }
-
-  enableHighQualityMode() {
-    document.documentElement.style.setProperty('--animation-duration-multiplier', '1.2');
-    document.documentElement.style.setProperty('--animation-complexity', 'full');
-    this.maxConcurrentAnimations = 8;
-    console.log('[PERFORMANCE] Enabled high quality mode');
-  }
-
-  initializeOptimizations() {
-    // Set initial animation complexity
-    document.documentElement.setAttribute('data-animation-complexity', 'balanced');
-  }
-
-  // Queue-based animation management for smooth sequencing
-  async queueAnimation(animationFunc, priority = 'normal') {
-    return new Promise((resolve, reject) => {
-      this.animationQueue.push({
-        func: animationFunc,
-        priority,
-        resolve,
-        reject,
-        timestamp: performance.now()
-      });
-      
-      this.processQueue();
-    });
-  }
-
-  async processQueue() {
-    if (this.isProcessingQueue) return;
-    
-    this.isProcessingQueue = true;
-    
-    // Sort by priority and timestamp
-    this.animationQueue.sort((a, b) => {
-      if (a.priority === 'high' && b.priority !== 'high') return -1;
-      if (b.priority === 'high' && a.priority !== 'high') return 1;
-      return a.timestamp - b.timestamp;
-    });
-
-    while (this.animationQueue.length > 0) {
-      const batch = this.animationQueue.splice(0, this.maxConcurrentAnimations);
-      
-      try {
-        await Promise.all(batch.map(async (item) => {
-          try {
-            const result = await item.func();
-            item.resolve(result);
-          } catch (error) {
-            item.reject(error);
-          }
-        }));
-        
-        // Small delay between batches to prevent overwhelming
-        await this.smartDelay(50);
-        
-      } catch (error) {
-        console.error('[ANIMATION] Batch processing error:', error);
-      }
-    }
-    
-    this.isProcessingQueue = false;
-  }
-
-  // Intelligent delay that adapts to performance
-  async smartDelay(baseDelay) {
-    const adjustedDelay = baseDelay * (this.performanceMetrics.isThrottling ? 1.5 : 1);
-    return new Promise(resolve => setTimeout(resolve, adjustedDelay));
-  }
-
-  // Performance monitoring with automatic adjustments
-  setupPerformanceMonitoring() {
-    let frameCount = 0;
-    let lastTime = performance.now();
-    let frameDrops = 0;
-
-    const monitor = (currentTime) => {
-      frameCount++;
-      const deltaTime = currentTime - lastTime;
-      
-      // Detect frame drops (frame time > 20ms indicates dropped frames)
-      if (deltaTime > 20) {
-        frameDrops++;
-        this.performanceMetrics.frameDrops++;
-      }
-
-      this.performanceMetrics.averageFrameTime = 
-        (this.performanceMetrics.averageFrameTime * 0.9) + (deltaTime * 0.1);
-
-      // Check every 60 frames
-      if (frameCount % 60 === 0) {
-        this.performanceMetrics.isThrottling = frameDrops > 5;
-        
-        if (this.performanceMetrics.isThrottling) {
-          this.reduceConcurrentAnimations();
-        }
-        
-        frameDrops = 0;
-      }
-
-      lastTime = currentTime;
-      requestAnimationFrame(monitor);
-    };
-
-    requestAnimationFrame(monitor);
-  }
-
-  reduceConcurrentAnimations() {
-    this.maxConcurrentAnimations = Math.max(1, this.maxConcurrentAnimations - 1);
-    console.log(`[PERFORMANCE] Reduced concurrent animations to ${this.maxConcurrentAnimations}`);
-  }
-
-  // Enhanced card dealing with smoothness optimizations
-  async dealCardSmooth(cardElement, targetPosition, options = {}) {
-    const animationFunc = async () => {
-      // Pre-calculate all transforms to avoid layout thrashing
-      const startTransform = 'translate3d(-200px, -100px, 0) scale(0.8) rotateY(-15deg)';
-      const endTransform = 'translate3d(0, 0, 0) scale(1) rotateY(0deg)';
-      
-      // Use transform instead of changing layout properties
-      cardElement.style.willChange = 'transform, opacity';
-      cardElement.style.transform = startTransform;
-      cardElement.style.opacity = '0';
-      
-      // Force layout calculation
-      cardElement.offsetHeight;
-      
-      // Apply animation with optimal timing
-      await this.nextFrame();
-      
-      cardElement.style.transition = this.getOptimalTransition();
-      cardElement.style.transform = endTransform;
-      cardElement.style.opacity = '1';
-      
-      // Wait for completion with fallback
-      await this.waitForAnimationComplete(cardElement, 650);
-      
-      // Cleanup
-      cardElement.style.willChange = 'auto';
-      
-      return cardElement;
-    };
-
-    return this.queueAnimation(animationFunc, options.priority || 'normal');
-  }
-
-  getOptimalTransition() {
-    const duration = 650 * parseFloat(
-      getComputedStyle(document.documentElement)
-        .getPropertyValue('--animation-duration-multiplier') || '1'
-    );
-    
-    return `transform ${duration}ms cubic-bezier(0.25, 0.46, 0.45, 0.94), 
-            opacity ${duration * 0.7}ms ease-out`;
-  }
-
-  async waitForAnimationComplete(element, timeout) {
-    return Promise.race([
-      new Promise(resolve => {
-        element.addEventListener('transitionend', resolve, { once: true });
-      }),
-      new Promise(resolve => setTimeout(resolve, timeout + 100))
-    ]);
-  }
-
-  nextFrame() {
-    return new Promise(resolve => requestAnimationFrame(resolve));
-  }
-
-  // Cleanup method for memory management
-  cleanup() {
-    this.animationQueue = [];
-    this.isProcessingQueue = false;
-  }
-}
-
-// Animation Coordinator for timing and coordination
-class AnimationCoordinator {
-  constructor() {
-    this.activeAnimations = new Map();
-    this.globalAnimationState = 'idle';
-    this.setupIntersectionObserver();
-    this.setupVisibilityOptimizations();
-  }
-
-  // Only animate cards that are visible
-  setupIntersectionObserver() {
-    if ('IntersectionObserver' in window) {
-      this.observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-          const card = entry.target;
-          if (entry.isIntersecting) {
-            card.classList.add('visible');
-          } else {
-            card.classList.remove('visible');
-            // Pause animations for off-screen cards
-            if (card.style.animationPlayState !== 'paused') {
-              card.style.animationPlayState = 'paused';
-            }
-          }
-        });
-      }, {
-        rootMargin: '50px'
-      });
-    }
-  }
-
-  // Optimize based on page visibility
-  setupVisibilityOptimizations() {
-    document.addEventListener('visibilitychange', () => {
-      if (document.hidden) {
-        this.pauseAllAnimations();
-      } else {
-        this.resumeAllAnimations();
-      }
-    });
-
-    // Optimize for window focus
-    window.addEventListener('blur', () => this.reduceAnimationComplexity());
-    window.addEventListener('focus', () => this.restoreAnimationComplexity());
-  }
-
-  pauseAllAnimations() {
-    document.querySelectorAll('.card').forEach(card => {
-      card.style.animationPlayState = 'paused';
-    });
-  }
-
-  resumeAllAnimations() {
-    document.querySelectorAll('.card').forEach(card => {
-      card.style.animationPlayState = 'running';
-    });
-  }
-
-  reduceAnimationComplexity() {
-    document.documentElement.setAttribute('data-animation-complexity', 'minimal');
-  }
-
-  restoreAnimationComplexity() {
-    const complexity = smoothAnimationManager.maxConcurrentAnimations > 4 ? 'full' : 'balanced';
-    document.documentElement.setAttribute('data-animation-complexity', complexity);
-  }
-
-  // Enhanced card dealing with perfect timing
-  async dealHandSmooth(cards, handElement, dealDelay = 600) {
-    this.globalAnimationState = 'dealing';
-    
-    try {
-      for (let i = 0; i < cards.length; i++) {
-        const card = cards[i];
-        const cardElement = this.createCardElement(card);
-        
-        // Add to DOM immediately but invisible
-        cardElement.style.opacity = '0';
-        handElement.appendChild(cardElement);
-        
-        // Observe for visibility optimizations
-        if (this.observer) {
-          this.observer.observe(cardElement);
-        }
-        
-        // Deal with perfect timing
-        await smoothAnimationManager.dealCardSmooth(cardElement, handElement, {
-          delay: i * dealDelay,
-          priority: i === 0 ? 'high' : 'normal'
-        });
-        
-        // Small pause between cards for visual clarity
-        if (i < cards.length - 1) {
-          await smoothAnimationManager.smartDelay(dealDelay);
-        }
-      }
-    } finally {
-      this.globalAnimationState = 'idle';
-    }
-  }
-
-  createCardElement(cardData) {
-    const cardElement = document.createElement('div');
-    cardElement.className = 'card animating';
-    cardElement.setAttribute('data-suit', cardData.suit);
-    cardElement.setAttribute('data-rank', cardData.rank);
-    
-    // Pre-populate content to avoid layout shifts
-    cardElement.innerHTML = this.getCardHTML(cardData);
-    
-    return cardElement;
-  }
-
-  getCardHTML(cardData) {
-    const suitSymbols = { hearts: '♥', diamonds: '♦', clubs: '♣', spades: '♠' };
-    const isRed = cardData.suit === 'hearts' || cardData.suit === 'diamonds';
-    
-    return `
-      <div class="card-content ${isRed ? 'red' : 'black'}">
-        <div class="card-rank">${cardData.rank}</div>
-        <div class="card-suit">${suitSymbols[cardData.suit]}</div>
-      </div>
-    `;
-  }
-
-  // Cleanup method
-  cleanup() {
-    if (this.observer) {
-      this.observer.disconnect();
-    }
-    this.activeAnimations.clear();
-  }
-}
-
-// System resource monitoring for optimal performance
-class ResourceMonitor {
-  constructor() {
-    this.memoryThreshold = 50 * 1024 * 1024; // 50MB
-    this.cpuThreshold = 80; // 80% CPU usage
-    this.startMonitoring();
-  }
-
-  startMonitoring() {
-    // Monitor memory usage if available
-    if ('memory' in performance) {
-      setInterval(() => {
-        const memory = performance.memory;
-        if (memory.usedJSHeapSize > this.memoryThreshold) {
-          this.optimizeForMemory();
-        }
-      }, 5000);
-    }
-
-    // Monitor frame rate for CPU usage estimation
-    this.monitorFrameRate();
-  }
-
-  monitorFrameRate() {
-    let frames = 0;
-    let lastTime = performance.now();
-
-    const checkFrameRate = (currentTime) => {
-      frames++;
-      
-      if (currentTime - lastTime >= 1000) {
-        const fps = Math.round(frames * 1000 / (currentTime - lastTime));
-        
-        if (fps < 30) {
-          this.optimizeForCPU();
-        } else if (fps > 55) {
-          this.restoreOptimalSettings();
-        }
-        
-        frames = 0;
-        lastTime = currentTime;
-      }
-      
-      requestAnimationFrame(checkFrameRate);
-    };
-
-    requestAnimationFrame(checkFrameRate);
-  }
-
-  optimizeForMemory() {
-    console.log('[RESOURCE] Optimizing for memory usage');
-    
-    // Reduce concurrent animations
-    smoothAnimationManager.maxConcurrentAnimations = 1;
-    
-    // Cleanup unused DOM elements
-    this.cleanupUnusedCards();
-    
-    // Force garbage collection if available
-    if (window.gc) {
-      window.gc();
-    }
-  }
-
-  optimizeForCPU() {
-    console.log('[RESOURCE] Optimizing for CPU usage');
-    
-    // Switch to performance mode
-    smoothAnimationManager.enablePerformanceMode();
-    
-    // Reduce animation complexity
-    document.documentElement.setAttribute('data-animation-complexity', 'minimal');
-  }
-
-  restoreOptimalSettings() {
-    // Only restore if we previously optimized
-    if (smoothAnimationManager.maxConcurrentAnimations < 4) {
-      smoothAnimationManager.enableBalancedMode();
-      document.documentElement.setAttribute('data-animation-complexity', 'balanced');
-    }
-  }
-
-  cleanupUnusedCards() {
-    document.querySelectorAll('.card:not(.active)').forEach(card => {
-      if (!card.classList.contains('animating')) {
-        card.remove();
-      }
-    });
-  }
-}
-
-// Initialize the smoothness management systems
-const smoothAnimationManager = new SmoothAnimationManager();
-const animationCoordinator = new AnimationCoordinator();
-const resourceMonitor = new ResourceMonitor();
-
-// ---- Enhanced Animation System Initialization ----
-function initializeEnhancedAnimationSystem() {
-  console.log('[ANIMATION] Initializing enhanced smooth animation system...');
-  
-  // Apply performance mode classes to existing elements
-  document.querySelectorAll('.card').forEach(card => {
-    card.classList.add('smooth-animation', 'gpu-accelerated');
-  });
-  
-  document.querySelectorAll('.chip').forEach(chip => {
-    chip.classList.add('smooth-animation', 'gpu-accelerated');
-  });
-  
-  // Set up performance monitoring
-  resourceMonitor.startMonitoring();
-  
-  // Initialize animation quality based on device capabilities
-  const performanceMode = smoothAnimationManager.frameRate >= 60 ? 'high-quality-mode' : 
-                         smoothAnimationManager.frameRate >= 30 ? 'balanced-mode' : 'performance-mode';
-  
-  document.body.classList.add(performanceMode);
-  
-  // Set CSS custom properties for responsive animations
-  const animationDurationMultiplier = smoothAnimationManager.performanceMetrics.isThrottling ? 0.7 : 1.0;
-  document.documentElement.style.setProperty('--animation-duration-multiplier', animationDurationMultiplier);
-  
-  console.log(`[ANIMATION] Enhanced system initialized in ${performanceMode} mode`);
-  console.log(`[ANIMATION] Frame rate: ${smoothAnimationManager.frameRate} FPS`);
-  console.log(`[ANIMATION] Max concurrent animations: ${smoothAnimationManager.maxConcurrentAnimations}`);
-}
-
-// ---- Cleanup Function for Enhanced Animation System ----
-function cleanupEnhancedAnimationSystem() {
-  console.log('[ANIMATION] Cleaning up enhanced animation system...');
-  
-  smoothAnimationManager.cleanup();
-  animationCoordinator.cleanup();
-  resourceMonitor.stopMonitoring();
-  
-  // Remove performance monitoring listeners
-  document.removeEventListener('visibilitychange', animationCoordinator.pauseAllAnimations);
-  window.removeEventListener('blur', animationCoordinator.reduceAnimationComplexity);
-  window.removeEventListener('focus', animationCoordinator.restoreAnimationComplexity);
-}
-
-// Initialize the enhanced animation system when the page loads
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', initializeEnhancedAnimationSystem);
-} else {
-  initializeEnhancedAnimationSystem();
-}
-
-// Cleanup when page unloads
-window.addEventListener('beforeunload', cleanupEnhancedAnimationSystem);
+// Simple initialization - no complex animation management needed
+document.addEventListener('DOMContentLoaded', () => {
+  console.log('[ANIMATION] Simple animation system ready');
+});
