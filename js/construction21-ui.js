@@ -268,8 +268,10 @@ async function dealOpeningCards() {
   
   await animateDealCard(game.dealerHand, false, true, 1);       // Dealer card 2 (face down)
   console.log('[DEAL] Dealer second card dealt (face down)');
+    console.log('[DEAL] Opening deal complete, dealer cards:', game.dealerHand.cards.map((c, i) => `${i}: ${c.value}${c.suit} (${c.isFaceUp ? 'up' : 'down'})`));
   
-  console.log('[DEAL] Opening deal complete, dealer cards:', game.dealerHand.cards.map((c, i) => `${i}: ${c.value}${c.suit} (${c.isFaceUp ? 'up' : 'down'})`));
+  // Check for auto-stand conditions (blackjacks)
+  await checkAndHandleBlackjacks();
   
   updateActionBarState(); // <-- ENSURE action bar is updated after opening deal!
 }
@@ -1478,3 +1480,62 @@ const simpleDelay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 document.addEventListener('DOMContentLoaded', () => {
   console.log('[ANIMATION] Simple animation system ready');
 });
+
+// --- Auto-Stand Logic for Blackjacks ---
+async function checkAndHandleBlackjacks() {
+  const playerHand = game.playerHands[0];
+  const dealerHand = game.dealerHand;
+  
+  // Check if player has blackjack
+  const playerHasBlackjack = game.isBlackjack(playerHand.cards);
+  
+  // For dealer blackjack check, we need to peek at the hole card
+  // In blackjack, dealer checks for blackjack when showing Ace or 10-value card
+  const dealerUpCard = dealerHand.cards[0];
+  const shouldCheckDealerBlackjack = dealerUpCard && (
+    dealerUpCard.value === 'A' || 
+    ['10', 'J', 'Q', 'K'].includes(dealerUpCard.value)
+  );
+  
+  let dealerHasBlackjack = false;
+  if (shouldCheckDealerBlackjack && dealerHand.cards.length >= 2) {
+    dealerHasBlackjack = game.isBlackjack(dealerHand.cards);
+  }
+  
+  console.log(`[BLACKJACK CHECK] Player BJ: ${playerHasBlackjack}, Dealer BJ: ${dealerHasBlackjack}, Should check dealer: ${shouldCheckDealerBlackjack}`);
+  
+  // Handle different blackjack scenarios
+  if (playerHasBlackjack || dealerHasBlackjack) {
+    if (playerHasBlackjack && dealerHasBlackjack) {
+      // Both have blackjack - immediate push
+      showStatusToast("Both blackjacks! Push.");
+      await autoStandAllHands("Both players have blackjack");
+    } else if (playerHasBlackjack && !dealerHasBlackjack) {
+      // Player blackjack only - auto stand
+      showStatusToast("Blackjack! Auto-standing.");
+      await autoStandAllHands("Player has blackjack");
+    } else if (dealerHasBlackjack && !playerHasBlackjack) {
+      // Dealer blackjack only - auto settle
+      showStatusToast("Dealer blackjack! Round ends.");
+      await autoStandAllHands("Dealer has blackjack");
+    }
+  }
+}
+
+// Auto-stand all hands and proceed to settlement
+async function autoStandAllHands(reason) {
+  console.log(`[AUTO STAND] Reason: ${reason}`);
+  
+  // Set all hands as complete by advancing past the last hand
+  game.activeHandIndex = game.playerHands.length;
+  
+  // Small delay for visual feedback
+  await new Promise(resolve => setTimeout(resolve, 1500));
+  
+  // Proceed to settlement
+  if (!outcomeLock && inPlay) {
+    console.log('[AUTO STAND] Proceeding to settlement');
+    inPlay = false;
+    settleAndEndRound();
+  }
+}
