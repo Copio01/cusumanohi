@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Construction 21 Multiplayer</title>
+  <link rel="icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2NCIgaGVpZ2h0PSI2NCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiNlMGExMDYiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBkPSJNMTUuMDUgNWEzIDMgMCAwIDEgNC41IDBIM05NMTUuMDUgNU0xOSA4LjVjMCAxLjUtLjUgMy41LTIgNC41di4wNUgxN2EyIDIgMCAwIDAgLTIgLTIgYSAyIDIgMCAwIDAgLTIgMkgxM3YtNkgxNlY4LjVNOSA2LjVWNE02IDcgTDUuNSAxNC41TWwwIDE1IDguOTkgMy04IGMxLjUgLTRoMmMwIDAuNSAwLjUgMSAwLjUgMnYxSDEwdjNjMCAxIDAgMi40IC0xIDN2XzIgYzAgMC41IDAuMiAwLjUgMC41IDAuNXMwLjUgLTAuMiAwLjUgLTAuNVYyMUg0LjA3bDEuOCAtMTQuMjUgYTEgMSAwIDAgMSAwLjE5IC0wLjA3IHoiLz48L3N2Zz4=" type="image/svg+xml">
+  <link href="css/tailwind.output.css" rel="stylesheet">
+  <style>
+body.modern-bg {
+  background: radial-gradient(ellipse at 60% 40%, #ffd70033 0%, #23232b 100%), linear-gradient(135deg, #23232b 0%, #2d2d3a 100%);
+  min-height: 100vh;
+  color: #EAEAEA;
+  font-family: 'Segoe UI', Arial, sans-serif;
+}
+.glassy {
+  background: rgba(36,36,28,0.85);
+  backdrop-filter: blur(8px);
+  border-radius: 18px;
+}
+.btn-primary {
+  background: linear-gradient(90deg, #ffd700, #ffb700);
+  color: #23232b;
+  font-weight: bold;
+  border: none;
+  border-radius: 12px;
+  padding: 0.75em 1.5em;
+  font-size: 1.1em;
+  box-shadow: 0 2px 8px rgba(255, 215, 0, 0.3), 0 0 0 1px rgba(255, 215, 0, 0.2);
+  transition: all 0.2s;
+  position: relative;
+  overflow: hidden;
+}
+.btn-primary::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: linear-gradient(180deg, rgba(255,255,255,0.27) 0%, rgba(255,255,255,0) 60%);
+  pointer-events: none;
+}
+.btn-primary:hover {
+  background: linear-gradient(90deg, #ffe066, #ffd700);
+  box-shadow: 0 4px 16px rgba(255, 215, 0, 0.5), 0 0 0 2px rgba(255, 215, 0, 0.3);
+  transform: translateY(-2px) scale(1.04);
+}
+.btn-primary:active {
+  transform: translateY(1px) scale(0.98);
+  box-shadow: 0 2px 8px rgba(255, 215, 0, 0.2), 0 0 0 1px rgba(255, 215, 0, 0.3);
+}
+.btn-secondary {
+  background: linear-gradient(90deg, #444, #333);
+  color: #fff;
+  border-radius: 10px;
+  padding: 0.6em 1.2em;
+  font-weight: 500;
+  border: none;
+  transition: all 0.2s;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3), 0 0 0 1px rgba(255,255,255,0.1);
+}
+.btn-secondary:hover {
+  background: linear-gradient(90deg, #333, #222);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.2);
+  transform: translateY(-2px);
+}
+.btn-secondary:active {
+  transform: translateY(1px) scale(0.98);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.3), 0 0 0 1px rgba(255,255,255,0.1);
+}
+.action-buttons-container { width: fit-content; margin-left: auto; margin-right: auto; }
+
+.chip {
+  width: 64px; height: 64px;
+  border-radius: 50%;
+  position: relative;
+  display: flex;
+  justify-content: center; align-items: center;
+  font-weight: bold; color: #fff;
+  border: 4px dashed rgba(255,255,255,0.7);
+  transition: transform 0.1s, box-shadow 0.1s;
+  cursor: pointer; user-select: none;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.5), inset 0 0 10px rgba(0,0,0,0.3);
+  text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+  font-size: 1.1em;
+}
+.chip[data-amount="5"]    { background: linear-gradient(135deg, #ff2d55, #d30000); border-color: #ff7f7f; }
+.chip[data-amount="10"]   { background: linear-gradient(135deg, #3478f6, #0035aa); border-color: #7fb3ff; }
+.chip[data-amount="25"]   { background: linear-gradient(135deg, #34c759, #00701a); border-color: #7fff8e; }
+.chip[data-amount="100"]  { background: linear-gradient(135deg, #9254de, #5e00c0); border-color: #d5b8ff; }
+.chip .chip-value { font-size: 1.5rem; z-index: 3; }
+.chip.selected, .chip:hover {
+  transform: translateY(-5px) scale(1.07);
+  box-shadow: 0 8px 16px rgba(0,0,0,0.4), 0 0 15px rgba(255,215,0,0.5), inset 0 0 10px rgba(0,0,0,0.3);
+}
+.chip::after {
+  content: "";
+  position: absolute;
+  width: 60%; height: 26%;
+  left: 20%; top: 8%;
+  background: linear-gradient(90deg, #fff7 50%, transparent 90%);
+  border-radius: 60% 60% 80% 80%/90% 90% 40% 40%;
+  opacity: 0.75;
+  pointer-events: none;
+  filter: blur(1.2px);
+  transition: opacity 0.2s, filter 0.2s;
+}
+.chip.selected::after, .chip:hover::after {
+  opacity: 1;
+  filter: blur(0.7px) brightness(1.13);
+}
+  </style>
+</head>
+<body class="modern-bg flex flex-col items-center justify-center">
+  <!-- Header (copied from construction21.html) -->
+  <header class="w-full flex justify-between items-center px-6 py-4 glassy mt-2">
+    <div class="flex items-center gap-2">
+      <span class="text-3xl">🔨</span>
+      <h1 class="text-2xl font-bold text-yellow-400 tracking-wide">Construction 21 Multiplayer</h1>
+    </div>
+    <div id="profile" class="flex items-center gap-3">
+      <span id="profile-name" class="font-semibold text-white"></span>
+      <button id="logout-btn" class="btn-secondary">Logout</button>
+    </div>
+  </header>
+  <!-- Multiplayer Lobby -->
+  <main class="w-full max-w-2xl flex flex-col items-center mt-6">
+    <div id="multiplayer-lobby" class="glassy p-6 mt-8 rounded-xl shadow-xl">
+      <div id="user-info" class="mb-4"></div>
+      <div id="lobby-controls">
+        <button id="create-room-btn" class="btn-primary mr-2">Create Room</button>
+        <input id="join-room-id" class="rounded p-2 text-black" placeholder="Room code">
+        <button id="join-room-btn" class="btn-secondary ml-2">Join Room</button>
+      </div>
+      <div id="room-status" class="mt-4 text-yellow-300"></div>
+      <div id="player-list" class="mt-4"></div>
+      <div id="start-game-area" class="mt-4 hidden">
+        <button id="start-game-btn" class="btn-primary">Start Game</button>
+      </div>
+    </div>
+    <!-- Game Area (unchanged, but now inside <main>) -->
+    <div id="game-area" class="hidden w-full">
+      <div id="center-chips-display" class="mb-4"></div>
+      <div id="blackjack-table">
+        <div class="table-area-dealer"></div>
+        <div class="table-area-player"></div>
+        <div id="virtual-deck"></div>
+        <div id="table-vignette"></div>
+        <svg class="table-logo" viewBox="0 0 800 120" fill="none">
+          <text x="50%" y="50%" text-anchor="middle" fill="#ffd700" font-size="64" font-family="Segoe UI, Arial, sans-serif" font-weight="bold" opacity="0.9" dy=".35em" stroke="#bfa14a" stroke-width="3">CONSTRUCTION 21</text>
+          <g opacity="0.18">
+            <rect x="80" y="90" width="640" height="18" rx="9" fill="#23232b"/>
+            <rect x="80" y="90" width="640" height="9" rx="4.5" fill="#ffd700"/>
+            <rect x="80" y="99" width="640" height="9" rx="4.5" fill="#bfa14a"/>
+          </g>
+        </svg>
+        <div class="table-text rules">DEALER HITS SOFT 17 • BLACKJACK PAYS 3:2</div>
+        <div class="table-text nosmoke">NO SMOKING 🚭</div>
+        <div id="table-bet-spots">
+          <div class="table-bet-spot" id="pp-bet-spot">
+            <span>P / P</span>
+            <span id="pp-bet-amount" class="font-bold">0</span>
+            <div class="bet-spot-chips"></div>
+          </div>
+          <div class="table-bet-spot" id="main-bet-spot">
+            <span>Main Bet</span>
+            <span id="main-bet-amount" class="font-bold">0</span>
+            <div class="bet-spot-chips"></div>
+          </div>
+          <div class="table-bet-spot" id="plus3-bet-spot">
+            <span>21+3</span>
+            <span id="plus3-bet-amount" class="font-bold">0</span>
+            <div class="bet-spot-chips"></div>
+          </div>
+        </div>
+        <div id="dealer-cards"></div>
+        <div id="player-hands"></div>
+      </div>
+      <div class="chip-tray-container">
+        <div class="chip-row">
+          <button class="chip" data-amount="5"><span class="chip-value">5</span><span class="sr-only">Bet 5 chips</span></button>
+          <button class="chip" data-amount="10"><span class="chip-value">10</span><span class="sr-only">Bet 10 chips</span></button>
+          <button class="chip" data-amount="25"><span class="chip-value">25</span><span class="sr-only">Bet 25 chips</span></button>
+          <button class="chip" data-amount="100"><span class="chip-value">100</span><span class="sr-only">Bet 100 chips</span></button>
+        </div>
+      </div>
+      <div class="action-buttons-container flex flex-col items-center justify-center gap-4 mt-6 mb-8">
+        <div class="betting-actions flex flex-row justify-center items-center gap-4">
+          <button id="clear-bets-btn" class="btn-secondary px-8 py-2">Clear Bets</button>
+          <button id="deal-btn" class="btn-primary px-8 py-2">Deal</button>
+        </div>
+        <div class="inplay-actions flex flex-row justify-center items-center gap-4 mt-2">
+          <button id="hit-btn" class="btn-primary px-8 py-2 hidden">Hit</button>
+          <button id="stand-btn" class="btn-primary px-8 py-2 hidden">Stand</button>
+          <button id="double-btn" class="btn-primary px-8 py-2 hidden">Double</button>
+          <button id="split-btn" class="btn-primary px-8 py-2 hidden">Split</button>
+          <button id="insurance-btn" class="btn-primary px-8 py-2 hidden">Insurance</button>
+        </div>
+      </div>
+      <div id="status-toast" class="hidden"></div>
+      <div id="outcome-display" class="outcome-display-panel hidden"></div>
+    </div>
+  </main>
+  <script src="https://unpkg.com/peerjs@1.5.0/dist/peerjs.min.js"></script>
+  <script type="module">
+    // --- Multiplayer 21 Final Polish ---
+    const Peer = window.Peer;
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signInWithPopup, GoogleAuthProvider, signOut } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-auth.js";
+    import { getFirestore, doc, getDoc, setDoc, updateDoc, runTransaction } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-firestore.js";
+    import { Construction21Game } from './js/construction21-logic.js';
+    import { renderGameUI, updateChipsUI, showToast, showOutcome, resetUI } from './js/construction21-ui.js';
+
+    // --- Firebase Config (reuse from construction21-login.html) ---
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY", // TODO: fill with your config
+      authDomain: "YOUR_AUTH_DOMAIN",
+      projectId: "YOUR_PROJECT_ID",
+      storageBucket: "YOUR_STORAGE_BUCKET",
+      messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+      appId: "YOUR_APP_ID"
+    };
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    // --- UI Elements ---
+    const userInfoDiv = document.getElementById('user-info');
+    const lobbyDiv = document.getElementById('multiplayer-lobby');
+    const gameAreaDiv = document.getElementById('game-area');
+    const playerListDiv = document.getElementById('player-list');
+    const roomStatusDiv = document.getElementById('room-status');
+    const startGameArea = document.getElementById('start-game-area');
+    const startGameBtn = document.getElementById('start-game-btn');
+    const createRoomBtn = document.getElementById('create-room-btn');
+    const joinRoomBtn = document.getElementById('join-room-btn');
+    const joinRoomInput = document.getElementById('join-room-id');
+
+    // --- Auth & Chip Management ---
+    let currentUser = null;
+    let userChips = 0;
+    function updateUserInfoUI() {
+      if (currentUser) {
+        userInfoDiv.innerHTML = `Logged in as <b>${currentUser.displayName || currentUser.email}</b> | Chips: <span id="chip-balance">${userChips}</span> <button id="logout-btn" class="btn-secondary ml-2" aria-label="Logout">Logout</button>`;
+        document.getElementById('logout-btn').onclick = () => signOut(auth);
+      } else {
+        userInfoDiv.innerHTML = `<button id="login-btn" class="btn-primary" aria-label="Login with Google">Login with Google</button>`;
+        document.getElementById('login-btn').onclick = () => signInWithPopup(auth, new GoogleAuthProvider());
+      }
+    }
+    async function loadUserChips(uid) {
+      const userDoc = await getDoc(doc(db, 'users', uid));
+      if (userDoc.exists()) {
+        userChips = userDoc.data().chips || 1000;
+      } else {
+        userChips = 1000;
+        await setDoc(doc(db, 'users', uid), { chips: userChips });
+      }
+      updateUserInfoUI();
+    }
+    async function updateChipsInFirestore(uid, delta) {
+      // Atomically update chips in Firestore
+      await runTransaction(db, async (transaction) => {
+        const userRef = doc(db, 'users', uid);
+        const userDoc = await transaction.get(userRef);
+        let chips = 1000;
+        if (userDoc.exists()) chips = userDoc.data().chips || 1000;
+        chips += delta;
+        if (chips < 0) chips = 0;
+        transaction.set(userRef, { chips }, { merge: true });
+        userChips = chips;
+      });
+      updateUserInfoUI();
+    }
+    onAuthStateChanged(auth, async (user) => {
+      currentUser = user;
+      if (user) {
+        await loadUserChips(user.uid);
+        lobbyDiv.classList.remove('hidden');
+      } else {
+        userChips = 0;
+        updateUserInfoUI();
+        lobbyDiv.classList.remove('hidden');
+      }
+    });
+
+    // --- PeerJS Multiplayer Lobby & Sync ---
+    let peer = null;
+    let conn = null;
+    let isHost = false;
+    let roomId = null;
+    let players = [];
+    let connections = [];
+    let game = null;
+    let gameStarted = false;
+
+    function updatePlayerListUI() {
+      playerListDiv.innerHTML = '<b>Players:</b><ul>' + players.map(p => `<li>${p.name}${p.uid === currentUser?.uid ? ' (You)' : ''}</li>`).join('') + '</ul>';
+    }
+    function showRoomStatus(msg) {
+      roomStatusDiv.textContent = msg;
+      roomStatusDiv.setAttribute('aria-live', 'polite');
+    }
+    function showLobby() {
+      lobbyDiv.classList.remove('hidden');
+      gameAreaDiv.classList.add('hidden');
+      resetUI();
+    }
+    function showGame() {
+      lobbyDiv.classList.add('hidden');
+      gameAreaDiv.classList.remove('hidden');
+      renderGameUI(game.getState());
+      updateChipsUI(userChips);
+    }
+
+    // --- Room Creation ---
+    createRoomBtn.onclick = () => {
+      if (!currentUser) return showToast('Login first!');
+      isHost = true;
+      peer = new Peer();
+      peer.on('open', id => {
+        roomId = id;
+        players = [{ uid: currentUser.uid, name: currentUser.displayName || currentUser.email, peerId: id }];
+        updatePlayerListUI();
+        showRoomStatus(`Room created! Share this code: <b>${roomId}</b>`);
+        startGameArea.classList.remove('hidden');
+        joinRoomInput.value = roomId;
+      });
+      peer.on('connection', c => {
+        c.on('data', data => handlePeerData(c, data));
+        c.on('close', () => handlePeerDisconnect(c));
+        connections.push(c);
+        showRoomStatus('A player joined!');
+      });
+      peer.on('error', err => showToast('PeerJS error: ' + err));
+    };
+
+    // --- Room Join ---
+    joinRoomBtn.onclick = () => {
+      if (!currentUser) return showToast('Login first!');
+      const id = joinRoomInput.value.trim();
+      if (!id) return showToast('Enter a room code!');
+      isHost = false;
+      peer = new Peer();
+      peer.on('open', () => {
+        conn = peer.connect(id);
+        conn.on('open', () => {
+          conn.send({ type: 'join', user: { uid: currentUser.uid, name: currentUser.displayName || currentUser.email, peerId: peer.id } });
+          showRoomStatus('Joined room! Waiting for host...');
+        });
+        conn.on('data', data => handlePeerData(conn, data));
+        conn.on('close', () => handlePeerDisconnect(conn));
+      });
+      peer.on('error', err => showToast('PeerJS error: ' + err));
+    };
+
+    // --- Peer Data Handling ---
+    function handlePeerData(connection, data) {
+      if (data.type === 'join' && isHost) {
+        // New player joined
+        if (!players.find(p => p.uid === data.user.uid)) {
+          players.push(data.user);
+        }
+        updatePlayerListUI();
+        // Inform all players
+        for (const c of connections) c.send({ type: 'player-list', players });
+        connection.send({ type: 'player-list', players });
+        showRoomStatus('A player joined!');
+      } else if (data.type === 'player-list') {
+        players = data.players;
+        updatePlayerListUI();
+      } else if (data.type === 'start-game') {
+        startMultiplayerGame(data.state);
+        showRoomStatus('Game started!');
+      } else if (data.type === 'game-action') {
+        if (!gameStarted) return;
+        applyRemoteAction(data.action);
+      } else if (data.type === 'chips-update') {
+        userChips = data.chips;
+        updateChipsUI(userChips);
+      }
+    }
+    function handlePeerDisconnect(connection) {
+      // Remove player from list
+      connections = connections.filter(c => c !== connection);
+      // Remove from players array
+      const idx = players.findIndex(p => p.peerId === connection.peer);
+      if (idx !== -1) players.splice(idx, 1);
+      updatePlayerListUI();
+      showRoomStatus('A player disconnected.');
+    }
+
+    // --- Start Game ---
+    startGameBtn.onclick = () => {
+      if (!isHost) return;
+      if (players.length < 2) return showToast('Need 2 players to start!');
+      game = new Construction21Game();
+      gameStarted = true;
+      showGame();
+      // Broadcast start
+      for (const c of connections) c.send({ type: 'start-game', state: game.getState() });
+      // Host also starts
+      startMultiplayerGame(game.getState());
+      showRoomStatus('Game started!');
+    };
+    function startMultiplayerGame(state) {
+      game = new Construction21Game(state); // Accepts state for sync
+      gameStarted = true;
+      showGame();
+      setupMultiplayerUI();
+    }
+
+    // --- Multiplayer UI & Action Sync ---
+    function broadcastAction(action) {
+      if (isHost) {
+        for (const c of connections) c.send({ type: 'game-action', action });
+      } else if (conn) {
+        conn.send({ type: 'game-action', action });
+      }
+    }
+    function broadcastChipsUpdate() {
+      if (isHost) {
+        for (const c of connections) c.send({ type: 'chips-update', chips: userChips });
+      } else if (conn) {
+        conn.send({ type: 'chips-update', chips: userChips });
+      }
+    }
+    function setupMultiplayerUI() {
+      // Intercept all game actions and broadcast
+      document.getElementById('deal-btn').onclick = () => {
+        if (!gameStarted) return;
+        if (game.canDeal()) {
+          game.deal();
+          renderGameUI(game.getState());
+          broadcastAction({ type: 'deal' });
+        } else {
+          showToast('Place a bet first!');
+        }
+      };
+      document.getElementById('hit-btn').onclick = () => {
+        if (!gameStarted) return;
+        if (game.canHit()) {
+          game.hit();
+          renderGameUI(game.getState());
+          broadcastAction({ type: 'hit' });
+        }
+      };
+      document.getElementById('stand-btn').onclick = () => {
+        if (!gameStarted) return;
+        if (game.canStand()) {
+          game.stand();
+          renderGameUI(game.getState());
+          broadcastAction({ type: 'stand' });
+        }
+      };
+      document.getElementById('double-btn').onclick = () => {
+        if (!gameStarted) return;
+        if (game.canDouble()) {
+          game.double();
+          renderGameUI(game.getState());
+          broadcastAction({ type: 'double' });
+        }
+      };
+      document.getElementById('split-btn').onclick = () => {
+        if (!gameStarted) return;
+        if (game.canSplit()) {
+          game.split();
+          renderGameUI(game.getState());
+          broadcastAction({ type: 'split' });
+        }
+      };
+      document.getElementById('insurance-btn').onclick = () => {
+        if (!gameStarted) return;
+        if (game.canInsurance()) {
+          game.insurance();
+          renderGameUI(game.getState());
+          broadcastAction({ type: 'insurance' });
+        }
+      };
+      document.getElementById('clear-bets-btn').onclick = () => {
+        if (!gameStarted) return;
+        game.clearBets();
+        renderGameUI(game.getState());
+        broadcastAction({ type: 'clear-bets' });
+      };
+      // Chip tray buttons
+      document.querySelectorAll('.chip').forEach(btn => {
+        btn.onclick = () => {
+          if (!gameStarted) return;
+          const amt = parseInt(btn.dataset.amount);
+          if (userChips >= amt) {
+            game.placeBet(amt);
+            updateChipsInFirestore(currentUser.uid, -amt);
+            renderGameUI(game.getState());
+            updateChipsUI(userChips);
+            broadcastAction({ type: 'place-bet', amount: amt });
+            broadcastChipsUpdate();
+          } else {
+            showToast('Not enough chips!');
+          }
+        };
+      });
+      // UI update hooks
+      renderGameUI(game.getState());
+      updateChipsUI(userChips);
+    }
+    function applyRemoteAction(action) {
+      // Apply the action to the local game instance
+      switch (action.type) {
+        case 'deal':
+          if (game.canDeal()) game.deal();
+          break;
+        case 'hit':
+          if (game.canHit()) game.hit();
+          break;
+        case 'stand':
+          if (game.canStand()) game.stand();
+          break;
+        case 'double':
+          if (game.canDouble()) game.double();
+          break;
+        case 'split':
+          if (game.canSplit()) game.split();
+          break;
+        case 'insurance':
+          if (game.canInsurance()) game.insurance();
+          break;
+        case 'clear-bets':
+          game.clearBets();
+          break;
+        case 'place-bet':
+          if (userChips >= action.amount) {
+            game.placeBet(action.amount);
+            updateChipsInFirestore(currentUser.uid, -action.amount);
+            updateChipsUI(userChips);
+          }
+          break;
+        // ...add more as needed
+      }
+      renderGameUI(game.getState());
+    }
+    // --- End Multiplayer Logic ---
+  </script>
+</body>
+</html>

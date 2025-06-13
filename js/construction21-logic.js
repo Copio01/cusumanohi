@@ -457,41 +457,33 @@ export class Construction21Game {
         return this.calculateScore(cards) > 21;
     }
 
+    // Dealer hits on soft 17 (H17) rule
+    shouldDealerHit() {
+        const dealerScore = this.calculateScore(this.dealerHand.cards);
+        // Dealer hits on 16 or less, and also hits on soft 17
+        if (dealerScore < 17) return true;
+        if (dealerScore === 17 && this.isSoft17(this.dealerHand.cards)) return true;
+        return false;
+    }
+
     // Check if a hand is a soft 17 (contains an Ace counted as 11)
     isSoft17(cards) {
-        const score = this.calculateScore(cards);
+        let score = this.calculateScore(cards);
         if (score !== 17) return false;
-        
-        // Check if there's an Ace being counted as 11
         let aceCount = 0;
         let tempScore = 0;
-        cards.forEach(card => {
-            if (card.value === 'A') { 
-                aceCount++; 
-                tempScore += 11; 
+        for (const card of cards) {
+            if (card.value === 'A') {
+                aceCount++;
+                tempScore += 11;
             } else if (['K', 'Q', 'J'].includes(card.value)) {
                 tempScore += 10;
             } else {
                 tempScore += parseInt(card.value);
             }
-        });
-        
-        // If we have aces and the score would be over 21 without converting any ace to 1,
-        // but currently equals 17, then it's a soft 17
-        return aceCount > 0 && tempScore > 21 && score === 17;
-    }
-    
-    shouldDealerHit() {
-        const dealerScore = this.calculateScore(this.dealerHand.cards);
-        const shouldHit = dealerScore <= 16;
-        
-        // Debug logging
-        console.log(`[DEALER DEBUG] Cards: ${this.dealerHand.cards.map(c => c.value + c.suit).join(', ')}`);
-        console.log(`[DEALER DEBUG] Score: ${dealerScore}`);
-        console.log(`[DEALER DEBUG] Should hit: ${shouldHit}`);
-        
-        // Explicit logic: dealer hits on 16 and below, stands on 17 and above
-        return shouldHit;
+        }
+        // If we have at least one ace and counting all aces as 11 puts us over 17, but the hand is 17, it's soft 17
+        return aceCount > 0 && tempScore > 17 && score === 17;
     }
     
     settleHands() {
