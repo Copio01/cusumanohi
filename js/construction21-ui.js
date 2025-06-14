@@ -300,6 +300,8 @@ function setupEventHandlers() {
       if (navigator.vibrate) {
         navigator.vibrate(20);
       }
+      
+      console.log(`[CHIP SELECTION] Selected chip: ${selectedChip}`);
     };
     
     // Add both touch and click handlers

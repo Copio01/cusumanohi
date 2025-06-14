@@ -97,7 +97,15 @@ body.modern-bg {
 .chip[data-amount="10"]   { background: linear-gradient(135deg, #3478f6, #0035aa); border-color: #7fb3ff; }
 .chip[data-amount="25"]   { background: linear-gradient(135deg, #34c759, #00701a); border-color: #7fff8e; }
 .chip[data-amount="100"]  { background: linear-gradient(135deg, #9254de, #5e00c0); border-color: #d5b8ff; }
-.chip .chip-value { font-size: 1.5rem; z-index: 3; }
+.chip .chip-value { 
+  font-size: 1.5rem; 
+  z-index: 3; 
+  pointer-events: none; /* Allow clicks to pass through to parent chip */
+  user-select: none;
+}
+.chip .sr-only {
+  pointer-events: none; /* Ensure screen reader text doesn't block clicks */
+}
 .chip.selected, .chip:hover {
   transform: translateY(-5px) scale(1.07);
   box-shadow: 0 8px 16px rgba(0,0,0,0.4), 0 0 15px rgba(255,215,0,0.5), inset 0 0 10px rgba(0,0,0,0.3);
