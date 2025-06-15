@@ -1033,8 +1033,8 @@ export function setupEventHandlersSafe() {
     });
   }
 
-  if (elements.logoutBtn) {
-    elements.logoutBtn.addEventListener('click', async () => {
+  if (logoutBtn) {
+    logoutBtn.addEventListener('click', async () => {
       await signOut(auth);
       window.location.href = "construction21-login.html";
     });
@@ -1298,8 +1298,8 @@ export function setupEventHandlersSafe() {
     });
   }
 
-  if (elements.logoutBtn) {
-    elements.logoutBtn.addEventListener('click', async () => {
+  if (logoutBtn) {
+    logoutBtn.addEventListener('click', async () => {
       await signOut(auth);
       window.location.href = "construction21-login.html";
     });
@@ -1563,8 +1563,8 @@ export function setupEventHandlersSafe() {
     });
   }
 
-  if (elements.logoutBtn) {
-    elements.logoutBtn.addEventListener('click', async () => {
+  if (logoutBtn) {
+    logoutBtn.addEventListener('click', async () => {
       await signOut(auth);
       window.location.href = "construction21-login.html";
     });
@@ -1828,8 +1828,8 @@ export function setupEventHandlersSafe() {
     });
   }
 
-  if (elements.logoutBtn) {
-    elements.logoutBtn.addEventListener('click', async () => {
+  if (logoutBtn) {
+    logoutBtn.addEventListener('click', async () => {
       await signOut(auth);
       window.location.href = "construction21-login.html";
     });
@@ -2093,8 +2093,8 @@ export function setupEventHandlersSafe() {
     });
   }
 
-  if (elements.logoutBtn) {
-    elements.logoutBtn.addEventListener('click', async () => {
+  if (logoutBtn) {
+    logoutBtn.addEventListener('click', async () => {
       await signOut(auth);
       window.location.href = "construction21-login.html";
     });
@@ -3069,6 +3069,7 @@ onAuthStateChanged(auth, (user) => {
 
 // Simple delay function for animations
 const simpleDelay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
 
 // Simple initialization - no complex animation management needed
 document.addEventListener('DOMContentLoaded', () => {
