@@ -717,7 +717,6 @@ export function setupEventHandlersSafe() {
         
         resetAllHandsAndUI();
         game.clearBets();
-        // Deduct chips for re-bet
         Object.keys(lastBets).forEach(k => { 
           if (lastBets[k] > 0) {
             game.bets[k] = lastBets[k];
@@ -755,7 +754,6 @@ export function setupEventHandlersSafe() {
         }
         resetAllHandsAndUI();
         game.clearBets();
-        // Deduct chips for double bet
         Object.keys(lastBets).forEach(k => {
           if (lastBets[k] > 0) {
             game.bets[k] = lastBets[k] * 2;
@@ -778,7 +776,6 @@ export function setupEventHandlersSafe() {
   }
 }
 
-// The duplicate definition of setupEventHandlersSafe, which started around line 1111, has been removed.
 // Safe event handler setup for multiplayer compatibility
 export function setupEventHandlersSafe() {
   // Only set up handlers for elements that actually exist
@@ -985,7 +982,6 @@ export function setupEventHandlersSafe() {
         
         resetAllHandsAndUI();
         game.clearBets();
-        // Deduct chips for re-bet
         Object.keys(lastBets).forEach(k => { 
           if (lastBets[k] > 0) {
             game.bets[k] = lastBets[k];
@@ -1023,7 +1019,6 @@ export function setupEventHandlersSafe() {
         }
         resetAllHandsAndUI();
         game.clearBets();
-        // Deduct chips for double bet
         Object.keys(lastBets).forEach(k => {
           if (lastBets[k] > 0) {
             game.bets[k] = lastBets[k] * 2;
@@ -1046,7 +1041,6 @@ export function setupEventHandlersSafe() {
   }
 }
 
-// The duplicate definition of setupEventHandlersSafe, which started around line 1238, has been removed.
 // Safe event handler setup for multiplayer compatibility
 export function setupEventHandlersSafe() {
   // Only set up handlers for elements that actually exist
@@ -1253,7 +1247,6 @@ export function setupEventHandlersSafe() {
         
         resetAllHandsAndUI();
         game.clearBets();
-        // Deduct chips for re-bet
         Object.keys(lastBets).forEach(k => { 
           if (lastBets[k] > 0) {
             game.bets[k] = lastBets[k];
@@ -1291,7 +1284,6 @@ export function setupEventHandlersSafe() {
         }
         resetAllHandsAndUI();
         game.clearBets();
-        // Deduct chips for double bet
         Object.keys(lastBets).forEach(k => {
           if (lastBets[k] > 0) {
             game.bets[k] = lastBets[k] * 2;
@@ -1314,7 +1306,6 @@ export function setupEventHandlersSafe() {
   }
 }
 
-// The duplicate definition of setupEventHandlersSafe, which started around line 1365, has been removed.
 // Safe event handler setup for multiplayer compatibility
 export function setupEventHandlersSafe() {
   // Only set up handlers for elements that actually exist
@@ -1521,7 +1512,6 @@ export function setupEventHandlersSafe() {
         
         resetAllHandsAndUI();
         game.clearBets();
-        // Deduct chips for re-bet
         Object.keys(lastBets).forEach(k => { 
           if (lastBets[k] > 0) {
             game.bets[k] = lastBets[k];
@@ -1559,7 +1549,6 @@ export function setupEventHandlersSafe() {
         }
         resetAllHandsAndUI();
         game.clearBets();
-        // Deduct chips for double bet
         Object.keys(lastBets).forEach(k => {
           if (lastBets[k] > 0) {
             game.bets[k] = lastBets[k] * 2;
@@ -1582,7 +1571,6 @@ export function setupEventHandlersSafe() {
   }
 }
 
-// The duplicate definition of setupEventHandlersSafe, which started around line 1450, has been removed.
 // Safe event handler setup for multiplayer compatibility
 export function setupEventHandlersSafe() {
   // Only set up handlers for elements that actually exist
@@ -1789,7 +1777,6 @@ export function setupEventHandlersSafe() {
         
         resetAllHandsAndUI();
         game.clearBets();
-        // Deduct chips for re-bet
         Object.keys(lastBets).forEach(k => { 
           if (lastBets[k] > 0) {
             game.bets[k] = lastBets[k];
@@ -1827,7 +1814,6 @@ export function setupEventHandlersSafe() {
         }
         resetAllHandsAndUI();
         game.clearBets();
-        // Deduct chips for double bet
         Object.keys(lastBets).forEach(k => {
           if (lastBets[k] > 0) {
             game.bets[k] = lastBets[k] * 2;
@@ -1850,4 +1836,1328 @@ export function setupEventHandlersSafe() {
   }
 }
 
-// The duplicate definition of setupEventHandlersSafe, which started around line 3161, has been removed.
+// Safe event handler setup for multiplayer compatibility
+export function setupEventHandlersSafe() {
+  // Only set up handlers for elements that actually exist
+  const elements = {
+    chips: chipTray?.querySelectorAll('.chip'),
+    betSpots: betSpots,
+    dealBtn,
+    hitBtn,
+    standBtn,
+    doubleBtn,
+    splitBtn,
+    insuranceBtn,
+    clearBetsBtn,
+    newBetBtn,
+    rebetBtn,
+    doubleBetBtn,
+    logoutBtn
+  };
+
+  // Chip selection handlers (only if chip tray exists)
+  if (elements.chips) {
+    elements.chips.forEach(chip => {
+      let isProcessing = false;
+      
+      const handleChipSelection = (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        
+        if (inPlay || isProcessing) return;
+        
+        isProcessing = true;
+        setTimeout(() => { isProcessing = false; }, 300);
+        
+        selectedChip = parseInt(chip.dataset.amount);
+        elements.chips.forEach(c => c.classList.remove('selected'));
+        chip.classList.add('selected');
+        
+        if (navigator.vibrate) {
+          navigator.vibrate(20);
+        }
+        
+        console.log(`[CHIP SELECTION] Selected chip: ${selectedChip}`);
+      };
+      
+      chip.addEventListener('click', handleChipSelection);
+      chip.addEventListener('touchend', handleChipSelection);
+      
+      chip.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+      });
+    });
+  }
+
+  // Bet spot handlers (only if bet spots exist)
+  if (elements.betSpots) {
+    Object.entries(elements.betSpots).forEach(([type, spot]) => {
+      if (!spot) return; // Skip if spot doesn't exist
+      
+      let isProcessing = false;
+      let touchStartTime = 0;
+      
+      const handleBetPlacement = (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        
+        if (inPlay || !selectedChip || isProcessing) return;
+        
+        isProcessing = true;
+        setTimeout(() => { isProcessing = false; }, 400); // Debounce for bets
+        
+        // Use the enhanced bet validation
+        if (game?.canPlaceBet?.(selectedChip) && game?.placeBet?.(type === 'plus3' ? 'plus3' : type, selectedChip)) {
+          if (typeof animateChipToBetSpot === 'function') {
+            animateChipToBetSpot(type, selectedChip, spot, getBetStackCount(type));
+          }
+          updateBetsUI();
+          updateChipsDisplay();
+          saveChipsToFirebase();
+          showStatusToast(`Bet ${selectedChip} placed on ${type === 'main' ? 'Main' : type === 'pp' ? 'P / P' : '21+3'}`);
+          
+          if (navigator.vibrate) {
+            navigator.vibrate([40, 30, 40]);
+          }
+          
+          spot.style.boxShadow = '0 0 25px #00ff0066, 0 0 50px #00ff0033';
+          setTimeout(() => {
+            spot.style.boxShadow = '';
+          }, 300);
+        } else {
+          showStatusToast('Cannot place bet!', true);
+          
+          if (navigator.vibrate) {
+            navigator.vibrate([100, 50, 100]);
+          }
+          
+          spot.style.boxShadow = '0 0 20px #ff004466, 0 0 40px #ff004433';
+          setTimeout(() => {
+            spot.style.boxShadow = '';
+          }, 400);
+        }
+      };
+      
+      spot.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        touchStartTime = Date.now();
+        spot.style.transform = 'scale(0.98)';
+        spot.style.transition = 'transform 0.1s ease';
+        
+        if (navigator.vibrate && selectedChip) {
+          navigator.vibrate(25);
+        }
+      });
+      
+      spot.addEventListener('touchend', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        setTimeout(() => {
+          spot.style.transform = '';
+          spot.style.transition = '';
+        }, 100);
+        
+        const touchDuration = Date.now() - touchStartTime;
+        if (touchDuration < 500) {
+          handleBetPlacement(e);
+        }
+      });
+      
+      spot.addEventListener('touchcancel', (e) => {
+        spot.style.transform = '';
+        spot.style.transition = '';
+      });
+      
+      spot.addEventListener('click', handleBetPlacement);
+    });
+  }
+
+  // Game action button handlers (only if buttons exist)
+  if (elements.dealBtn) elements.dealBtn.addEventListener('click', () => { if (!inPlay) startRound(); });
+  if (elements.hitBtn) elements.hitBtn.addEventListener('click', () => handlePlayerAction('hit'));
+  if (elements.standBtn) elements.standBtn.addEventListener('click', () => handlePlayerAction('stand'));
+  if (elements.doubleBtn) elements.doubleBtn.addEventListener('click', () => handlePlayerAction('double'));
+  if (elements.splitBtn) elements.splitBtn.addEventListener('click', () => handlePlayerAction('split'));
+  if (elements.insuranceBtn) elements.insuranceBtn.addEventListener('click', () => handlePlayerAction('insurance'));
+  
+  // Betting control handlers
+  if (elements.clearBetsBtn) {
+    elements.clearBetsBtn.addEventListener('click', () => { 
+      if (!inPlay && game) { 
+        game.clearBets(); 
+        updateBetsUI(); 
+        updateChipsDisplay(); 
+        saveChipsToFirebase(); 
+        showStatusToast('Bets cleared!'); 
+      } 
+    });
+  }
+
+  if (elements.newBetBtn) {
+    elements.newBetBtn.addEventListener('click', () => {
+      hideEndButtons();
+      resetAllHandsAndUI();
+      if (game) game.clearBets();
+      updateBetsUI();
+      updateChipsDisplay();
+      saveChipsToFirebase();
+      updateHandsUI();
+      updateActionBarState();
+      showInPlayButtons(false);
+    });
+  }
+
+  if (elements.rebetBtn) {
+    elements.rebetBtn.addEventListener('click', () => {
+      hideEndButtons();
+      if (lastBets && game) {
+        let totalBet = 0;
+        const betBreakdown = [];
+        Object.keys(lastBets).forEach(k => { 
+          if (lastBets[k] > 0) {
+            totalBet += lastBets[k];
+            betBreakdown.push(`${k}: ${lastBets[k]}`);
+          }
+        });
+        
+        console.log(`[REBET DEBUG] Attempting rebet - Total needed: ${totalBet}, Available chips: ${game.chips}`);
+        console.log(`[REBET DEBUG] Bet breakdown: ${betBreakdown.join(', ')}`);
+        
+        // Enhanced validation with detailed feedback
+        if (totalBet <= 0) {
+          showStatusToast('No previous bets to repeat!', true);
+          showEndButtons();
+          return;
+        }
+        
+        if (totalBet > game.chips) {
+          console.log(`[REBET DEBUG] Insufficient chips: need ${totalBet}, have ${game.chips}`);
+          showStatusToast(`Not enough chips for rebet! Need ${totalBet}, have ${game.chips}`, true);
+          showEndButtons();
+          return;
+        }
+        
+        console.log(`[REBET DEBUG] Rebet validation passed, proceeding with game setup`);
+        
+        resetAllHandsAndUI();
+        game.clearBets();
+        Object.keys(lastBets).forEach(k => { 
+          if (lastBets[k] > 0) {
+            game.bets[k] = lastBets[k];
+          }
+        });
+        game.chips -= totalBet;
+        
+        console.log(`[REBET DEBUG] Bets placed, chips remaining: ${game.chips}`);
+        
+        updateBetsUI();
+        updateChipsDisplay();
+        saveChipsToFirebase();
+      } else {
+        showStatusToast('No previous bets available!', true);
+        showEndButtons();
+        return;
+      }
+      startRound();
+    });
+  }
+
+  if (elements.doubleBetBtn) {
+    elements.doubleBetBtn.addEventListener('click', () => {
+      hideEndButtons();
+      if (lastBets && game) {
+        let totalDoubleBet = 0;
+        Object.keys(lastBets).forEach(k => {
+          if (lastBets[k] * 2 > game.chips) totalDoubleBet = Infinity;
+          else totalDoubleBet += lastBets[k];
+        });
+        if (totalDoubleBet === Infinity || totalDoubleBet * 2 > game.chips) {
+          showStatusToast('Not enough chips for 2x bet!', true);
+          showEndButtons();
+          return;
+        }
+        resetAllHandsAndUI();
+        game.clearBets();
+        Object.keys(lastBets).forEach(k => {
+          if (lastBets[k] > 0) {
+            game.bets[k] = lastBets[k] * 2;
+          }
+        });
+        game.chips -= totalDoubleBet * 2;
+        updateBetsUI();
+        updateChipsDisplay();
+        saveChipsToFirebase();
+        startRound();
+      }
+    });
+  }
+
+  if (logoutBtn) {
+    logoutBtn.addEventListener('click', async () => {
+      await signOut(auth);
+      window.location.href = "construction21-login.html";
+    });
+  }
+}
+
+function getBetStackCount(type) {
+  if (type === 'main') return Math.floor(game.bets.main / (selectedChip || 1));
+  if (type === 'pp') return Math.floor(game.bets.pp / (selectedChip || 1));
+  if (type === 'plus3') return Math.floor(game.bets.plus3 / (selectedChip || 1));
+  return 0;
+}
+
+// Simple chip animation
+function animateChipToBetSpot(type, amount, spot, stackCount) {
+  const chip = chipTray.querySelector(`.chip[data-amount="${amount}"]`);
+  if (!chip) return;
+  
+  const clone = chip.cloneNode(true);
+  clone.classList.add('chip-flying');
+  document.body.appendChild(clone);
+
+  const chipRect = chip.getBoundingClientRect();
+  const spotRect = spot.getBoundingClientRect();
+  clone.style.position = 'fixed';
+  clone.style.left = chipRect.left + chipRect.width / 2 - chip.offsetWidth / 2 + 'px';
+  clone.style.top = chipRect.top + chipRect.height / 2 - chip.offsetHeight / 2 + 'px';
+  clone.style.zIndex = 9999;
+  clone.style.pointerEvents = 'none';
+  void clone.offsetWidth;
+  const stackOffsetY = -stackCount * 8;
+  const x = spotRect.left + spotRect.width / 2 - (chipRect.left + chipRect.width / 2);
+  const y = spotRect.top + spotRect.height / 2 - (chipRect.top + chipRect.height / 2) + stackOffsetY;
+  
+  clone.style.transition = 'transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.5s ease-out';
+  clone.style.transform = `translate(${x}px, ${y}px) scale(1.3)`;
+  clone.style.opacity = 0.95;
+
+  setTimeout(() => {
+    clone.remove();
+    spot.classList.add('bet-pulse');
+    setTimeout(() => spot.classList.remove('bet-pulse'), 300);
+  }, 630);
+}
+
+function updateBetsUI() {
+  mainBetAmountEl.textContent = game.bets.main;
+  ppBetAmountEl.textContent = game.bets.pp;
+  plus3BetAmountEl.textContent = game.bets.plus3;
+  updateBetChipsVisual();
+}
+
+function updateBetChipsVisual() {
+  Object.values(betSpots).forEach(spot => {
+    const toRemove = spot.querySelectorAll('.bet-visual-chip');
+    toRemove.forEach(n => n.remove());
+    let chipContainer = spot.querySelector('.bet-spot-chips');
+    if (!chipContainer) {
+      chipContainer = document.createElement('div');
+      chipContainer.className = 'bet-spot-chips';
+      spot.appendChild(chipContainer);
+    }
+    chipContainer.innerHTML = '';
+  });
+  [
+    { type: 'main', spot: betSpots.main, bet: game.bets.main },
+    { type: 'pp', spot: betSpots.pp, bet: game.bets.pp },
+    { type: 'plus3', spot: betSpots.plus3, bet: game.bets.plus3 }
+  ].forEach(({type, spot, bet}) => {
+    let chipVals = [100, 25, 10, 5];
+    let chips = [];
+    let amt = bet;
+    for (let v of chipVals) {
+      let count = Math.floor(amt / v);
+      amt -= count * v;
+      for (let i = 0; i < count; i++) chips.push(v);
+    }
+    let chipContainer = spot.querySelector('.bet-spot-chips');
+    chips.forEach((v, i) => {
+      const chipDiv = document.createElement('div');
+      chipDiv.className = `chip bet-visual-chip`;
+      chipDiv.dataset.amount = v;
+      chipDiv.style.position = 'absolute';
+      chipDiv.style.left = `${48 + (i % 3) * 8}px`;
+      chipDiv.style.top = `${52 - i * 10}px`;
+      chipDiv.style.zIndex = 200 + i;
+      chipDiv.innerHTML = `<span class="chip-value">${v}</span>`;
+      chipContainer.appendChild(chipDiv);
+    });
+    spot.style.position = 'relative';
+  });
+}
+
+function showStatusToast(msg, isError = false) {
+  statusToast.textContent = msg;
+  statusToast.classList.add('active');
+  statusToast.style.color = isError ? '#ff4e4e' : '#ffd700';
+  setTimeout(() => statusToast.classList.remove('active'), 2000);
+}
+
+function showActionBar(opts) {
+  hitBtn.style.display = opts.canHit ? '' : 'none';
+  standBtn.style.display = opts.canStand ? '' : 'none';
+  doubleBtn.style.display = opts.canDouble ? '' : 'none';
+  splitBtn.style.display = opts.canSplit ? '' : 'none';
+  if (insuranceBtn) insuranceBtn.style.display = opts.canInsurance ? '' : 'none';
+}
+
+function enableDealAndClear(enable) {
+  dealBtn.disabled = !enable;
+  dealBtn.classList.toggle('faint', !enable);
+  clearBetsBtn.style.display = enable ? '' : 'none';
+}
+
+function showInPlayButtons(show) {
+  actionBar.style.display = show ? '' : 'none';
+  dealBtn.style.display = show ? 'none' : '';
+  clearBetsBtn.style.display = show ? 'none' : '';
+}
+
+function updateHandsUI(resultData = null) {
+  dealerCardsEl.innerHTML = '';
+  playerHandsEl.innerHTML = '';  
+  
+  // --- Enhanced Dealer cards display with proper ordering ---
+  if (game.dealerHand.cards && game.dealerHand.cards.length > 0) {
+    // Create a copy of cards array to avoid mutation during display
+    const dealerCards = [...game.dealerHand.cards];
+    
+    // Enhanced debugging for card order validation
+    console.log(`[CARD ORDER DEBUG] Displaying ${dealerCards.length} dealer cards:`, 
+      dealerCards.map((c, i) => `${i}: ${c.value}${c.suit} (${c.isFaceUp ? 'face-up' : 'face-down'})`));
+    
+    dealerCards.forEach((card, idx) => {
+      const cardEl = document.createElement('div');
+      cardEl.className = 'card';
+      cardEl.innerHTML = renderCard(card);
+      
+      // Ensure proper card positioning and layering
+      cardEl.style.marginLeft = idx > 0 ? '-20px' : '0';
+      cardEl.style.zIndex = 10 + idx; // Cards dealt later appear on top
+      cardEl.style.position = 'relative'; // Ensure proper positioning context
+      
+      // Add debug info in development for better troubleshooting
+      if (window.location.hostname === 'localhost') {
+        cardEl.setAttribute('data-card-index', idx);
+        cardEl.setAttribute('data-card-value', `${card.value}${card.suit}`);
+        cardEl.setAttribute('data-face-up', card.isFaceUp);
+        cardEl.title = `Card ${idx}: ${card.value}${card.suit} (${card.isFaceUp ? 'face-up' : 'face-down'})`;
+      }
+      
+      dealerCardsEl.appendChild(cardEl);
+    });
+    
+    // Validate display order matches game state
+    const displayedCards = dealerCardsEl.querySelectorAll('.card');
+    if (displayedCards.length !== dealerCards.length) {
+      console.error(`[CARD ORDER ERROR] Mismatch: ${displayedCards.length} displayed vs ${dealerCards.length} in game state`);
+    }
+  }// --- Simple Player hands display ---
+  game.playerHands.forEach((hand, hIdx) => {
+    const handDiv = document.createElement('div');
+    handDiv.className = 'player-hand';
+    if (hIdx === game.activeHandIndex && inPlay) handDiv.classList.add('active-hand');
+    handDiv.style.display = 'inline-block';
+    handDiv.style.margin = '0 16px';
+
+    // Simple card display with fan effect
+    const handCardsDiv = document.createElement('div');
+    handCardsDiv.className = 'hand-cards';
+    const n = hand.cards.length;
+    const fanGap = Math.min(25, 120 / n);
+
+    hand.cards.forEach((card, idx) => {
+      const cardDiv = document.createElement('div');
+      cardDiv.className = 'card';
+      cardDiv.innerHTML = renderCard(card);
+      cardDiv.style.transform = `translateX(${fanGap * (idx - (n - 1) / 2)}px) rotate(${(idx - (n - 1) / 2) * 5}deg)`;
+      cardDiv.style.zIndex = 10 + idx;
+      handCardsDiv.appendChild(cardDiv);
+    });
+
+    handDiv.appendChild(handCardsDiv);
+
+    // Hand info: score, bet, split, doubled, blackjack badge
+    let tagStr = `<span>Bet: ${hand.bet}</span> <span>Score: ${game.calculateScore(hand.cards)}</span>`;
+    if (hand.isSplit) tagStr += ' <span class="side-bet-label">Split</span>';
+    if (hand.isDoubled) tagStr += ' <span class="side-bet-label">Double</span>';
+    if (hand.cards.length === 2 && game.calculateScore(hand.cards) === 21) {
+      tagStr += ' <span style="color:#ffd700;font-weight:bold;background:rgba(0,0,0,0.08);padding:1px 8px;border-radius:10px;margin-left:6px;">Blackjack!</span>';
+    }
+    const handInfo = document.createElement('div');
+    handInfo.className = 'hand-info';
+    handInfo.innerHTML = tagStr;
+    handDiv.appendChild(handInfo);
+
+    // Per-hand result banners (only after resultData is passed)
+    if (resultData && resultData[hIdx]) {
+      let resultText = '';
+      switch (resultData[hIdx].outcome) {
+        case 'blackjack': case 'win': resultText = 'WIN'; break;
+        case 'push': resultText = 'PUSH'; break;
+        case 'bust': resultText = 'BUST'; break;
+        case 'dealer_blackjack': resultText = 'DEALER BJ'; break;
+        default: resultText = 'LOSE';
+      }
+      const resultBanner = document.createElement('div');
+      resultBanner.textContent = resultText;
+      resultBanner.className = 'result-banner';
+      handDiv.appendChild(resultBanner);
+
+      setTimeout(() => {
+        if (resultBanner && resultBanner.parentNode) resultBanner.parentNode.removeChild(resultBanner);
+      }, 1400);
+    }
+    playerHandsEl.appendChild(handDiv);
+  });
+
+  // Insurance, side bet indicators
+  if (game.bets.insurance > 0 && inPlay) {
+    let ins = document.createElement('div');
+    ins.className = 'insurance-label';
+    ins.textContent = `Insurance bet: ${game.bets.insurance}`;
+    playerHandsEl.appendChild(ins);
+  }
+  if (game.bets.pp > 0 && !inPlay) {
+    let label = document.createElement('div');
+    label.className = 'side-bet-label';
+    label.textContent = `Perfect Pairs bet: ${game.bets.pp}`;
+    playerHandsEl.appendChild(label);
+  }
+  if (game.bets.plus3 > 0 && !inPlay) {
+    let label = document.createElement('div');
+    label.className = 'side-bet-label';
+    label.textContent = `21+3 bet: ${game.bets.plus3}`;
+    playerHandsEl.appendChild(label);
+  }
+}
+
+function updateActionBarState() {
+  if (!inPlay) {
+    showActionBar({ canHit: false, canStand: false, canDouble: false, canSplit: false, canInsurance: false });
+    enableDealAndClear(true);
+    return;
+  }
+  showActionBar({
+    canHit: canHitCurrentHand(),
+    canStand: true,
+    canDouble: canDoubleCurrentHand(),
+    canSplit: canSplitCurrentHand(),
+    canInsurance: canBuyInsurance(),
+  });
+}
+
+async function startRound() {
+  if (game.bets.main <= 0) {
+    showStatusToast('Place a main bet to start!', true);
+    return;
+  }
+  
+  // Use the enhanced game state management
+  if (!game.startGame()) {
+    showStatusToast('Cannot start game!', true);
+    return;
+  }
+  
+  resetAllHandsAndUI();
+  inPlay = true; outcomeLock = false; resultsCache = null;
+  showInPlayButtons(true); enableDealAndClear(false);
+  
+  // Enable mobile gameplay mode
+  setMobileGameplayMode(true);
+
+  lastBets = { ...game.bets };
+
+  game.createDeck(); game.shuffleDeck();
+  let playerBet = game.bets.main;
+  game.dealerHand = { cards: [], score: 0, isBlackjack: false, hasInsurance: false };
+  game.playerHands = [{ cards: [], score: 0, isBlackjack: false, bet: playerBet }];
+  game.activeHandIndex = 0;
+
+  updateHandsUI(); updateActionBarState(); updateChipsDisplay(); updateBetsUI();
+  hideEndButtons();
+
+  await dealOpeningCards(); // <-- Updates action bar state after initial deal!
+
+  if (canBuyInsurance()) {
+    showStatusToast("Insurance available: Dealer shows Ace.");
+    if (insuranceBtn) insuranceBtn.style.display = '';
+  } else if (insuranceBtn) {
+    insuranceBtn.style.display = 'none';
+  }
+}
+
+function handlePlayerAction(action) {
+  if (outcomeLock) return;
+  const hand = game.getActiveHand();
+  if (!hand || !inPlay) return;
+
+  // Use the enhanced action validation
+  if (!game.canPerformAction(action)) {
+    showStatusToast(`Cannot ${action}!`, true);
+    return;
+  }
+
+  if (action === 'hit') {
+    game.dealCard(hand, true);
+    updateHandsUI();
+    if (game.isBust(hand.cards)) {
+      showStatusToast("Bust!");
+      nextHandOrSettle();
+    } else {
+      showStatusToast("Card dealt.");
+    }
+  } else if (action === 'stand') {
+    nextHandOrSettle();  } else if (action === 'double') {
+    if (canDoubleCurrentHand() && game.doubleDown()) {
+      updateChipsDisplay();
+      saveChipsToFirebase();
+      showStatusToast("Bet doubled, one card only.");
+      updateHandsUI();
+      if (game.isBust(hand.cards)) {
+        showStatusToast("Bust!");
+      }
+      nextHandOrSettle();
+    } else {
+      showStatusToast("Cannot double down!", true);
+    }
+  } else if (action === 'split') {
+    if (canSplitCurrentHand() && game.splitHand()) {
+      updateChipsDisplay();
+      saveChipsToFirebase();
+      animateSplitCardMove();
+      showStatusToast("Hand split.");
+      updateHandsUI();
+      updateActionBarState();
+      return;
+    } else {
+      showStatusToast("Cannot split!", true);
+    }} else if (action === 'insurance') {
+    let insuranceAmt = Math.ceil(game.bets.main / 2);
+    if (canBuyInsurance() && game.placeInsurance(insuranceAmt)) {
+      updateChipsDisplay();
+      saveChipsToFirebase();
+      showStatusToast("Insurance bought.");
+    } else {
+      showStatusToast("Cannot buy insurance!", true);
+    }
+  }  updateHandsUI();
+  updateActionBarState();
+  if (isAllHandsDone() && !outcomeLock) {
+    console.log('[SETTLE DEBUG] settleAndEndRound called from handlePlayerAction');
+    settleAndEndRound();
+  }
+}
+
+// Simple split card animation
+function animateSplitCardMove() {
+  const handEls = playerHandsEl.querySelectorAll('.player-hand');
+  if (handEls.length < 2) return;
+  
+  const fromHand = handEls[game.activeHandIndex];
+  const toHand = handEls[game.activeHandIndex + 1];
+  const fromCard = fromHand.querySelector('.card:last-child');
+  if (!fromCard || !toHand) return;
+
+  const cardRect = fromCard.getBoundingClientRect();
+  const toRect = toHand.getBoundingClientRect();
+  const clone = fromCard.cloneNode(true);
+  
+  clone.classList.add('card-fly');
+  document.body.appendChild(clone);
+
+  clone.style.position = 'fixed';
+  clone.style.left = cardRect.left + 'px';
+  clone.style.top = cardRect.top + 'px';
+  clone.style.zIndex = 10000;  void clone.offsetWidth;
+
+  const x = toRect.left - cardRect.left + 44;
+  const y = toRect.top - cardRect.top + 4;
+  
+  clone.style.transition = 'transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94)'; 
+  clone.style.transform = `translate(${x}px, ${y}px) scale(1.08)`;
+
+  setTimeout(() => {
+    clone.remove();
+  }, 550);
+}
+
+function nextHandOrSettle() {
+  game.activeHandIndex += 1;
+  if ( game.activeHandIndex >= game.playerHands.length) {
+    // Only settle if not already started!
+    if (!outcomeLock && inPlay) {
+      console.log('[SETTLE DEBUG] settleAndEndRound called from nextHandOrSettle');
+      inPlay = false; // No further player actions allowed
+      settleAndEndRound();
+    } else {
+      console.log('[SETTLE DEBUG] nextHandOrSettle blocked: outcomeLock=' + outcomeLock + ', inPlay=' + inPlay);
+    }
+  } else {
+    updateHandsUI();
+    updateActionBarState();
+    showStatusToast(`Next hand: #${game.activeHandIndex + 1}`);
+  }
+}
+
+// Simplified Dealer Play-out with Visual Animations
+async function dealerPlayOut() {
+  console.log('[DEALER PLAYOUT] Starting dealer play-out');
+  let cardCount = 0;
+  const maxCards = 10; // Safety limit
+  
+  while (game.shouldDealerHit() && cardCount < maxCards) {
+    cardCount++;
+    console.log(`[DEALER PLAYOUT] Drawing card #${cardCount}`);
+    
+    // Use the visual card animation
+    await animateDealCard(game.dealerHand, true, true, cardCount);
+  }
+  
+  if (cardCount >= maxCards) {
+    console.error(`[DEALER PLAYOUT] ERROR: Hit maximum card limit (${maxCards}), stopping dealer`);
+  }
+  
+  console.log(`[DEALER PLAYOUT] Finished. Final score: ${game.calculateScore(game.dealerHand.cards)}, Total cards drawn: ${cardCount}`);
+}
+
+async function settleAndEndRound() {
+  console.log('[SETTLE DEBUG] settleAndEndRound started, outcomeLock=' + outcomeLock);
+  
+  if (outcomeLock) {
+    console.log('[SETTLE DEBUG] Already settling, returning early');
+    return;
+  }
+  
+  outcomeLock = true; // Prevent multiple triggers
+  console.log('[SETTLE DEBUG] Set outcomeLock to true');
+  // Reveal all dealer cards before play out - ensure proper order
+  if (game.dealerHand.cards && game.dealerHand.cards.length > 0) {
+    game.dealerHand.cards.forEach((card, idx) => { 
+      card.isFaceUp = true; 
+      console.log(`[REVEAL] Dealer card ${idx}: ${card.value}${card.suit} now face up`);
+    });
+  }
+  updateHandsUI();
+
+  await dealerPlayOut();
+
+  const results = game.settleHands();
+  updateChipsDisplay();
+  saveChipsToFirebase();
+  updateBetsUI();
+  updateHandsUI(results);  results.forEach((res, idx) => {
+    setTimeout(() => {
+      let txt;
+      if (res.outcome === 'blackjack' || res.outcome === 'win') txt = `Hand ${idx+1}: You win!`;
+      else if (res.outcome === 'push') txt = `Hand ${idx+1}: Push.`;
+      else if (res.outcome === 'bust') txt = `Hand ${idx+1}: Bust!`;
+      else if (res.outcome === 'dealer_blackjack') txt = `Hand ${idx+1}: Dealer Blackjack.`;
+      else txt = `Hand ${idx+1}: Dealer wins.`;
+      showStatusToast(txt);
+      
+      // Show main hand outcome display for the first result (or if only one hand)
+      if (idx === 0 || results.length === 1) {
+        setTimeout(() => {
+          showMainHandResult(res.outcome, res.payout, idx);
+        }, 500);
+      }
+    }, 900 + idx * 700);
+  });
+  // Show side bet results
+  setTimeout(() => {
+    if (game.playerHands.length > 0 && game.playerHands[0].cards.length >= 2) {
+      const firstHand = game.playerHands[0];
+      
+      // Check Perfect Pairs
+      if (lastBets && lastBets.pp > 0) {
+        const ppResult = game.checkPerfectPairs(firstHand.cards[0], firstHand.cards[1]);
+        if (ppResult.payout > 0) {
+          const totalWin = lastBets.pp * (ppResult.payout + 1);
+          showSideBetWinDisplay('Perfect Pairs', ppResult.type, totalWin);
+          showStatusToast(`Perfect Pairs: ${ppResult.type} pays ${ppResult.payout}:1!`);
+        } else {
+          showStatusToast("Perfect Pairs: No pair.");
+        }
+      }
+      
+      // Check 21+3
+      if (lastBets && lastBets.plus3 > 0 && game.dealerHand.cards.length > 0) {
+        const plus3Cards = [firstHand.cards[0], firstHand.cards[1], game.dealerHand.cards[0]];
+        const plus3Result = game.check21Plus3(plus3Cards);
+        if (plus3Result.payout > 0) {
+          const totalWin = lastBets.plus3 * (plus3Result.payout + 1);
+          showSideBetWinDisplay('21+3', plus3Result.type, totalWin);
+          showStatusToast(`21+3: ${plus3Result.type} pays ${plus3Result.payout}:1!`);
+        } else {
+          showStatusToast("21+3: No winning combination.");
+        }
+      }
+    }
+  }, 1200 + results.length * 700);
+  setTimeout(() => {
+    if (game.bets.insurance === 0) return;
+    const insuranceAmount = lastBets ? lastBets.insurance : 0;
+    if (game.isBlackjack(game.dealerHand.cards)) {
+      showStatusToast("Insurance paid!");
+      setTimeout(() => {
+        showInsuranceResult(true, insuranceAmount * 3);
+      }, 500);
+    } else {
+      showStatusToast("Insurance lost.");
+      setTimeout(() => {
+        showInsuranceResult(false, insuranceAmount);
+      }, 500);
+    }
+  }, 800 + results.length * 700);  setTimeout(() => {
+    // End the game properly using the new game state management
+    game.endGame();
+    
+    // Disable mobile gameplay mode when round ends
+    setMobileGameplayMode(false);
+    
+    showEndButtons();
+    showStatusToast("Place your bets for the next round!");
+    showInPlayButtons(false);
+    updateActionBarState();
+    outcomeLock = false;
+  }, 1500 + results.length * 700);
+}
+
+function showEndButtons() {
+  newBetBtn.style.display = '';
+  rebetBtn.style.display = '';
+  doubleBetBtn.style.display = '';
+}
+function hideEndButtons() {
+  newBetBtn.style.display = 'none';
+  rebetBtn.style.display = 'none';
+  doubleBetBtn.style.display = 'none';
+}
+
+// ---- Enhanced Outcome Display Functions ----
+function showOutcomeDisplay(outcomeType, title, description, amount = null, isWin = true, playerScore = null, dealerScore = null) {
+  const outcomeDisplay = document.getElementById('side-bet-win-display');
+  const outcomeIcon = outcomeDisplay.querySelector('.outcome-icon');
+  const outcomeTitle = outcomeDisplay.querySelector('.outcome-title');
+  const outcomeTypeDisplay = document.getElementById('outcome-type-display');
+  const outcomeAmountDisplay = document.getElementById('outcome-amount-display');
+  const amountText = outcomeAmountDisplay.querySelector('.amount-text');
+  const outcomeIconSmall = outcomeAmountDisplay.querySelector('.outcome-icon-small');
+  
+  // Card totals elements
+  const outcomeScoresSection = document.getElementById('outcome-scores-section');
+  const playerScoreDisplay = document.getElementById('player-score-display');
+  const dealerScoreDisplay = document.getElementById('dealer-score-display');
+  
+  if (!outcomeDisplay) return;
+  
+  // Remove all existing outcome classes
+  const outcomeClasses = ['blackjack', 'win', 'side-bet-win', 'bust', 'lose', 'dealer-blackjack', 'push', 'insurance-win'];
+  outcomeClasses.forEach(cls => outcomeDisplay.classList.remove(cls));
+  
+  // Add the new outcome class
+  outcomeDisplay.classList.add(outcomeType);
+  
+  // Set icons and content based on outcome type
+  const outcomeConfig = {
+    'blackjack': { icon: '🎰', smallIcon: '💰', title: 'BLACKJACK!' },
+    'win': { icon: '🎉', smallIcon: '💰', title: 'YOU WIN!' },
+    'side-bet-win': { icon: '✨', smallIcon: '🎰', title: 'SIDE BET WIN!' },
+    'bust': { icon: '💥', smallIcon: '💸', title: 'BUST!' },
+    'lose': { icon: '😞', smallIcon: '💸', title: 'YOU LOSE' },
+    'dealer-blackjack': { icon: '🃏', smallIcon: '💸', title: 'DEALER BLACKJACK' },
+    'push': { icon: '🤝', smallIcon: '🪙', title: 'PUSH' },
+    'insurance-win': { icon: '🛡️', smallIcon: '💰', title: 'INSURANCE PAID!' }
+  };
+  
+  const config = outcomeConfig[outcomeType] || outcomeConfig['win'];
+  
+  // Update content
+  outcomeIcon.textContent = config.icon;
+  outcomeTitle.textContent = title || config.title;
+
+  outcomeTypeDisplay.textContent = description;
+  outcomeIconSmall.textContent = config.smallIcon;
+  
+  // Handle card totals display
+  if (playerScore !== null && dealerScore !== null && outcomeScoresSection) {
+    outcomeScoresSection.style.display = 'block';
+    playerScoreDisplay.textContent = playerScore;
+    dealerScoreDisplay.textContent = dealerScore;
+    
+    // Apply score styling based on outcome
+    const playerScoreContainer = playerScoreDisplay.closest('.score-item');
+    const dealerScoreContainer = dealerScoreDisplay.closest('.score-item');
+    
+    // Reset classes
+    ['winning', 'bust'].forEach(cls => {
+      playerScoreContainer.classList.remove(cls);
+      dealerScoreContainer.classList.remove(cls);
+    });
+    
+    // Apply appropriate styling
+    if (playerScore > 21) {
+      playerScoreContainer.classList.add('bust');
+    } else if (dealerScore > 21) {
+      dealerScoreContainer.classList.add('bust');
+    } else if (outcomeType === 'win' || outcomeType === 'blackjack') {
+      playerScoreContainer.classList.add('winning');
+    } else if (outcomeType === 'lose' || outcomeType === 'dealer-blackjack') {
+      dealerScoreContainer.classList.add('winning');
+    }
+  } else if (outcomeScoresSection) {
+    outcomeScoresSection.style.display = 'none';
+  }
+  
+  // Handle amount display
+  if (amount !== null) {
+    if (isWin) {
+      amountText.textContent = `+${amount}`;
+    } else if (amount === 0) {
+      amountText.textContent = `${amount}`;
+    } else {
+      amountText.textContent = `-${Math.abs(amount)}`;
+    }
+    outcomeAmountDisplay.style.display = 'flex';
+  } else {
+    outcomeAmountDisplay.style.display = 'none';
+  }
+  
+  // Show the display with animation
+  outcomeDisplay.classList.add('show');
+  
+  // Auto-hide after different durations based on outcome
+  const hideDelay = outcomeType === 'blackjack' ? 10000 : 
+                   outcomeType === 'side-bet-win' ? 8000 : 6000;
+  
+  setTimeout(() => {
+    closeOutcomeDisplay();
+  }, hideDelay);
+}
+
+function showSideBetWinDisplay(betType, winType, amount) {
+  // Side bets don't show card totals since they're not based on final hand values
+  showOutcomeDisplay('side-bet-win', `${betType.toUpperCase()} WIN!`, winType, amount, true);
+}
+
+function showMainHandResult(outcome, amount, handIndex = 0) {
+  const handText = handIndex > 0 ? ` (Hand ${handIndex + 1})` : '';
+  
+  // Get current hand scores
+  const playerScore = game.playerHands[handIndex] ? 
+    game.calculateScore(game.playerHands[handIndex].cards) : 0;
+  const dealerScore = game.dealerHand ? 
+    game.calculateScore(game.dealerHand.cards) : 0;
+  
+  switch(outcome) {
+    case 'blackjack':
+      showOutcomeDisplay('blackjack', 'BLACKJACK!', `Natural 21${handText}`, amount, true, playerScore, dealerScore);
+      break;
+    case 'win':
+      showOutcomeDisplay('win', 'YOU WIN!', `Victory${handText}`, amount, true, playerScore, dealerScore);
+      break;
+    case 'bust':
+      showOutcomeDisplay('bust', 'BUST!', `Over 21${handText}`, amount, false, playerScore, dealerScore);
+      break;
+    case 'lose':
+      showOutcomeDisplay('lose', 'YOU LOSE', `Dealer wins${handText}`, amount, false, playerScore, dealerScore);
+      break;
+    case 'dealer_blackjack':
+      showOutcomeDisplay('dealer-blackjack', 'DEALER BLACKJACK', `House natural 21${handText}`, amount, false, playerScore, dealerScore);
+      break;
+    case 'push':
+      showOutcomeDisplay('push', 'PUSH', `Tie game${handText}`, amount, true, playerScore, dealerScore);
+      break;
+  }
+}
+
+function showInsuranceResult(won, amount) {
+  // Insurance bets also don't need card totals shown
+  if (won) {
+    showOutcomeDisplay('insurance-win', 'INSURANCE PAID!', 'Dealer had blackjack', amount, true);
+  } else {
+    showOutcomeDisplay('lose', 'INSURANCE LOST', 'Dealer did not have blackjack', amount, false);
+  }
+}
+
+function closeOutcomeDisplay() {
+  const outcomeDisplay = document.getElementById('side-bet-win-display');
+  if (outcomeDisplay) {
+    outcomeDisplay.classList.remove('show');
+  }
+}
+
+// Enhanced mobile-friendly close button setup
+function setupOutcomeDisplayMobileOptimizations() {
+  const closeButton = document.querySelector('.close-win-btn');
+  if (!closeButton) return;
+  
+  // Add mobile touch enhancements
+  if (isMobileDevice()) {
+    let isProcessing = false;
+    
+    // Enhanced touch handling with debouncing
+    const handleClose = (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      
+      if (isProcessing) return;
+      isProcessing = true;
+      
+      // Haptic feedback
+      if (navigator.vibrate) {
+        navigator.vibrate(50);
+      }
+      
+      // Visual feedback
+      closeButton.style.transform = 'scale(0.9)';
+      setTimeout(() => {
+        closeButton.style.transform = '';
+      }, 150);
+      
+      closeOutcomeDisplay();
+      
+      setTimeout(() => { isProcessing = false; }, 300);
+    };
+    
+    // Add both touch and click handlers
+    closeButton.addEventListener('click', handleClose);
+    closeButton.addEventListener('touchend', handleClose);
+    
+    // Prevent unwanted touch events
+    closeButton.addEventListener('touchstart', (e) => {
+      e.stopPropagation();
+      closeButton.style.transform = 'scale(0.95)';
+    });
+    
+    closeButton.addEventListener('touchcancel', (e) => {
+      closeButton.style.transform = '';
+    });
+  }
+}
+
+// Make closeOutcomeDisplay global for onclick
+window.closeOutcomeDisplay = closeOutcomeDisplay;
+
+// Legacy function for backward compatibility
+function closeSideBetWinDisplay() {
+  closeOutcomeDisplay();
+}
+window.closeSideBetWinDisplay = closeSideBetWinDisplay;
+
+// ---- Mobile Optimizations ----
+function isMobileDevice() {
+  return window.innerWidth <= 768 || 
+         /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+         ('ontouchstart' in window);
+}
+
+function setMobileGameplayMode(isGameplay) {
+  const body = document.body;
+  const isMobile = isMobileDevice();
+  
+  if (isMobile) {
+    if (isGameplay) {
+      body.classList.add('mobile-gameplay');
+    } else {
+      body.classList.remove('mobile-gameplay');
+    }
+  }
+}
+
+function optimizeForMobile() {
+  const isMobile = isMobileDevice();
+  
+  if (isMobile) {
+    // Add mobile class to body
+    document.body.classList.add('mobile-device');
+    
+    // Prevent zoom on double tap
+    let lastTouchEnd = 0;
+    document.addEventListener('touchend', function (event) {
+      const now = (new Date()).getTime();
+      if (now - lastTouchEnd <= 300) {
+        event.preventDefault();
+      }
+      lastTouchEnd = now;
+    }, false);
+    
+    // Enhanced haptic feedback for touch devices
+    function addHapticFeedback(element) {
+      if (!element) return;
+      element.addEventListener('touchstart', function() {
+        if (navigator.vibrate) {
+          navigator.vibrate(30); // Light haptic feedback
+        }
+      });
+    }
+    
+    // Enhanced touch target optimization
+    function enhanceTouchTargets() {
+      // Add larger touch areas for chips
+      chipTray.querySelectorAll('.chip').forEach(chip => {
+        chip.style.position = 'relative';
+        
+        // Visual touch feedback
+        chip.addEventListener('touchstart', (e) => {
+          chip.style.transform = 'scale(0.95)';
+          chip.style.transition = 'transform 0.1s ease';
+        });
+        
+        chip.addEventListener('touchend', (e) => {
+          setTimeout(() => {
+            chip.style.transform = '';
+            chip.style.transition = '';
+          }, 100);
+        });
+        
+        chip.addEventListener('touchcancel', (e) => {
+          chip.style.transform = '';
+          chip.style.transition = '';
+        });
+      });
+      
+      // Add larger touch areas for bet spots
+      Object.values(betSpots).forEach(spot => {
+        spot.style.position = 'relative';
+        
+        // Visual touch feedback for bet spots
+        spot.addEventListener('touchstart', (e) => {
+          spot.style.transform = 'scale(0.96)';
+          spot.style.transition = 'transform 0.1s ease';
+        });
+        
+        spot.addEventListener('touchend', (e) => {
+          setTimeout(() => {
+            spot.style.transform = '';
+            spot.style.transition = '';
+          }, 100);
+        });
+        
+        spot.addEventListener('touchcancel', (e) => {
+          spot.style.transform = '';
+          spot.style.transition = '';
+        });
+      });
+      
+      // Enhance button touch targets
+      const buttons = document.querySelectorAll('.btn-primary, .btn-secondary');
+      buttons.forEach(button => {
+       
+        button.addEventListener('touchstart', (e) => {
+          button.style.transform = 'scale(0.97)';
+          button.style.transition = 'transform 0.1s ease';
+        });
+        
+        button.addEventListener('touchend', (e) => {
+          setTimeout(() => {
+            button.style.transform = '';
+            button.style.transition = '';
+          }, 100);
+        });
+        
+        button.addEventListener('touchcancel', (e) => {
+          button.style.transform = '';
+          button.style.transition = '';
+        });
+      });
+    }
+    
+    // Add haptic feedback to interactive elements
+    document.querySelectorAll('.chip, .btn-primary, .btn-secondary, .table-bet-spot').forEach(addHapticFeedback);
+    
+    // Initialize enhanced touch targets
+    enhanceTouchTargets();
+    
+    // Handle orientation changes
+    window.addEventListener('orientationchange', function() {
+      setTimeout(function() {
+        // Force layout recalculation after orientation change
+        document.body.style.opacity = '0.99';
+        setTimeout(() => {
+          document.body.style.opacity = '';
+        }, 10);
+      }, 100);
+    });
+    
+    // Prevent unwanted scrolling on mobile
+    document.body.addEventListener('touchmove', function(e) {
+      if (e.target === document.body) {
+        e.preventDefault();
+      }
+    }, { passive: false });
+    
+    // Add touch tolerance for small screens
+    if (window.innerWidth <= 480) {
+      document.documentElement.style.setProperty('--touch-tolerance', '12px');
+    } else if (window.innerWidth <= 768) {
+      document.documentElement.style.setProperty('--touch-tolerance', '8px');
+    }
+  }
+}
+
+// Enhanced deal function with mobile optimizations
+const originalDealCards = window.dealCards || (() => {});
+
+// Dynamic touch target adjustment based on screen size - Enhanced for full bet spot coverage
+function adjustTouchTargetsForScreen() {
+  const screenWidth = window.innerWidth;
+  const isMobile = isMobileDevice();
+  
+  if (!isMobile) return;
+  
+  // Calculate appropriate touch target sizes with enhanced bet spot coverage
+  let chipTouchScale, betSpotTouchScale, minTouchSize, betSpotPadding;
+  
+  if (screenWidth <= 480) {
+    // Small mobile devices - maximum touch coverage
+    chipTouchScale = 1.5;
+    betSpotTouchScale = 1.8;
+    minTouchSize = 62;
+    betSpotPadding = 35;
+  } else if (screenWidth <= 768) {
+    // Regular mobile devices - enhanced coverage
+    chipTouchScale = 1.4;
+    betSpotTouchScale = 1.6;
+    minTouchSize = 56;
+    betSpotPadding = 28;
+  } else {
+    // Larger mobile devices/tablets - improved coverage
+    chipTouchScale = 1.3;
+    betSpotTouchScale = 1.5;
+    minTouchSize = 50;
+    betSpotPadding = 22;
+  }
+  
+  // Apply dynamic touch target sizing via CSS custom properties
+  document.documentElement.style.setProperty('--chip-touch-scale', chipTouchScale);
+  document.documentElement.style.setProperty('--bet-spot-touch-scale', betSpotTouchScale);
+  document.documentElement.style.setProperty('--min-touch-size', `${minTouchSize}px`);
+  document.documentElement.style.setProperty('--bet-spot-padding', `${betSpotPadding}px`);
+  // Apply dynamic bet spot touch area coverage
+  const betSpots = document.querySelectorAll('.table-bet-spot');
+  betSpots.forEach(spot => {
+    const beforeElement = spot.querySelector('::before');
+    spot.style.setProperty('--dynamic-bet-padding', `${betSpotPadding}px`);
+  });
+}
+
+// Call on load and resize
+window.addEventListener('resize', adjustTouchTargetsForScreen);
+window.addEventListener('orientationchange', () => {
+  setTimeout(adjustTouchTargetsForScreen, 100);
+});
+
+// Initialize mobile optimizations when DOM is loaded
+document.addEventListener('DOMContentLoaded', function() {
+  optimizeForMobile();
+  adjustTouchTargetsForScreen(); // Initialize dynamic touch targets
+  setupOutcomeDisplayMobileOptimizations(); // Setup enhanced outcome display interactions
+});
+
+// ---- Firebase Auth Init ----
+onAuthStateChanged(auth, (user) => {
+  if (!user) {
+    window.location.href = "construction21-login.html";
+    return;
+  }
+  loadUserDataAndStartGame(user);
+});
+
+// Simple delay function for animations
+const simpleDelay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+
+// Simple initialization - no complex animation management needed
+document.addEventListener('DOMContentLoaded', () => {
+  console.log('[ANIMATION] Simple animation system ready');
+});
+
+// --- Auto-Stand Logic for Blackjacks ---
+async function checkAndHandleBlackjacks() {
+  const playerHand = game.playerHands[0];
+  const dealerHand = game.dealerHand;
+  
+  // Check if player has blackjack
+  const playerHasBlackjack = game.isBlackjack(playerHand.cards);
+  
+  // For dealer blackjack check, we need to peek at the hole card
+  // In blackjack, dealer checks for blackjack when showing Ace or 10-value card
+  const dealerUpCard = dealerHand.cards[0];
+  const shouldCheckDealerBlackjack = dealerUpCard && (
+    dealerUpCard.value === 'A' || 
+    ['10', 'J', 'Q', 'K'].includes(dealerUpCard.value)
+  );
+  
+  let dealerHasBlackjack = false;
+  if (shouldCheckDealerBlackjack && dealerHand.cards.length >= 2) {
+    dealerHasBlackjack = game.isBlackjack(dealerHand.cards);
+  }
+  
+  console.log(`[BLACKJACK CHECK] Player BJ: ${playerHasBlackjack}, Dealer BJ: ${dealerHasBlackjack}, Should check dealer: ${shouldCheckDealerBlackjack}`);
+  
+  // Handle different blackjack scenarios
+  if (playerHasBlackjack || dealerHasBlackjack) {
+    if (playerHasBlackjack && dealerHasBlackjack) {
+      // Both have blackjack - immediate push
+      showStatusToast("Both blackjacks! Push.");
+      await autoStandAllHands("Both players have blackjack");
+    } else if (playerHasBlackjack && !dealerHasBlackjack) {
+      // Player blackjack only - auto stand
+      showStatusToast("Blackjack! Auto-standing.");
+      await autoStandAllHands("Player has blackjack");
+    } else if (dealerHasBlackjack && !playerHasBlackjack) {
+      // Dealer blackjack only - auto settle
+      showStatusToast("Dealer blackjack! Round ends.");
+      await autoStandAllHands("Dealer has blackjack");
+    }
+  }
+}
+
+// Auto-stand all hands and proceed to settlement
+async function autoStandAllHands(reason) {
+  console.log(`[AUTO STAND] Reason: ${reason}`);
+  
+  // Set all hands as complete by advancing past the last hand
+  game.activeHandIndex = game.playerHands.length;
+  
+  // Small delay for visual feedback
+  await new Promise(resolve => setTimeout(resolve, 1500));
+  
+  // Proceed to settlement
+  if (!outcomeLock && inPlay) {
+    console.log('[AUTO STAND] Proceeding to settlement');
+    inPlay = false;
+    settleAndEndRound();
+  }
+}
+
+// ---- ES6 Module Exports for Multiplayer ----
+// Export functions needed by the multiplayer version with appropriate mappings
+export const renderGameUI = updateHandsUI;
+export const updateChipsUI = updateChipsDisplay;
+export const showToast = showStatusToast;
+export const showOutcome = showOutcomeDisplay;
+export const resetUI = resetAllHandsAndUI;
+
+// Export additional useful functions for multiplayer
+export { 
+  updateBetsUI,
+  updateActionBarState,
+  showActionBar,
+  enableDealAndClear,
+  showInPlayButtons,
+  animateChipToBetSpot,
+  getBetStackCount,
+  canSplitCurrentHand,
+  canDoubleCurrentHand,
+  canBuyInsurance,
+  canHitCurrentHand,  handlePlayerAction,
+  startRound,
+  setupEventHandlers,
+  loadUserDataAndStartGame,
+  saveChipsToFirebase
+};
