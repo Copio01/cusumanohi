@@ -768,6 +768,1331 @@ export function setupEventHandlersSafe() {
     });
   }
 
+  if (logoutBtn) {
+    logoutBtn.addEventListener('click', async () => {
+      await signOut(auth);
+      window.location.href = "construction21-login.html";
+    });
+  }
+}
+
+// Safe event handler setup for multiplayer compatibility
+export function setupEventHandlersSafe() {
+  // Only set up handlers for elements that actually exist
+  const elements = {
+    chips: chipTray?.querySelectorAll('.chip'),
+    betSpots: betSpots,
+    dealBtn,
+    hitBtn,
+    standBtn,
+    doubleBtn,
+    splitBtn,
+    insuranceBtn,
+    clearBetsBtn,
+    newBetBtn,
+    rebetBtn,
+    doubleBetBtn,
+    logoutBtn
+  };
+
+  // Chip selection handlers (only if chip tray exists)
+  if (elements.chips) {
+    elements.chips.forEach(chip => {
+      let isProcessing = false;
+      
+      const handleChipSelection = (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        
+        if (inPlay || isProcessing) return;
+        
+        isProcessing = true;
+        setTimeout(() => { isProcessing = false; }, 300);
+        
+        selectedChip = parseInt(chip.dataset.amount);
+        elements.chips.forEach(c => c.classList.remove('selected'));
+        chip.classList.add('selected');
+        
+        if (navigator.vibrate) {
+          navigator.vibrate(20);
+        }
+        
+        console.log(`[CHIP SELECTION] Selected chip: ${selectedChip}`);
+      };
+      
+      chip.addEventListener('click', handleChipSelection);
+      chip.addEventListener('touchend', handleChipSelection);
+      
+      chip.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+      });
+    });
+  }
+
+  // Bet spot handlers (only if bet spots exist)
+  if (elements.betSpots) {
+    Object.entries(elements.betSpots).forEach(([type, spot]) => {
+      if (!spot) return; // Skip if spot doesn't exist
+      
+      let isProcessing = false;
+      let touchStartTime = 0;
+      
+      const handleBetPlacement = (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        
+        if (inPlay || !selectedChip || isProcessing) return;
+        
+        isProcessing = true;
+        setTimeout(() => { isProcessing = false; }, 400); // Debounce for bets
+        
+        // Use the enhanced bet validation
+        if (game?.canPlaceBet?.(selectedChip) && game?.placeBet?.(type === 'plus3' ? 'plus3' : type, selectedChip)) {
+          if (typeof animateChipToBetSpot === 'function') {
+            animateChipToBetSpot(type, selectedChip, spot, getBetStackCount(type));
+          }
+          updateBetsUI();
+          updateChipsDisplay();
+          saveChipsToFirebase();
+          showStatusToast(`Bet ${selectedChip} placed on ${type === 'main' ? 'Main' : type === 'pp' ? 'P / P' : '21+3'}`);
+          
+          if (navigator.vibrate) {
+            navigator.vibrate([40, 30, 40]);
+          }
+          
+          spot.style.boxShadow = '0 0 25px #00ff0066, 0 0 50px #00ff0033';
+          setTimeout(() => {
+            spot.style.boxShadow = '';
+          }, 300);
+        } else {
+          showStatusToast('Cannot place bet!', true);
+          
+          if (navigator.vibrate) {
+            navigator.vibrate([100, 50, 100]);
+          }
+          
+          spot.style.boxShadow = '0 0 20px #ff004466, 0 0 40px #ff004433';
+          setTimeout(() => {
+            spot.style.boxShadow = '';
+          }, 400);
+        }
+      };
+      
+      spot.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        touchStartTime = Date.now();
+        spot.style.transform = 'scale(0.98)';
+        spot.style.transition = 'transform 0.1s ease';
+        
+        if (navigator.vibrate && selectedChip) {
+          navigator.vibrate(25);
+        }
+      });
+      
+      spot.addEventListener('touchend', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        setTimeout(() => {
+          spot.style.transform = '';
+          spot.style.transition = '';
+        }, 100);
+        
+        const touchDuration = Date.now() - touchStartTime;
+        if (touchDuration < 500) {
+          handleBetPlacement(e);
+        }
+      });
+      
+      spot.addEventListener('touchcancel', (e) => {
+        spot.style.transform = '';
+        spot.style.transition = '';
+      });
+      
+      spot.addEventListener('click', handleBetPlacement);
+    });
+  }
+
+  // Game action button handlers (only if buttons exist)
+  if (elements.dealBtn) elements.dealBtn.addEventListener('click', () => { if (!inPlay) startRound(); });
+  if (elements.hitBtn) elements.hitBtn.addEventListener('click', () => handlePlayerAction('hit'));
+  if (elements.standBtn) elements.standBtn.addEventListener('click', () => handlePlayerAction('stand'));
+  if (elements.doubleBtn) elements.doubleBtn.addEventListener('click', () => handlePlayerAction('double'));
+  if (elements.splitBtn) elements.splitBtn.addEventListener('click', () => handlePlayerAction('split'));
+  if (elements.insuranceBtn) elements.insuranceBtn.addEventListener('click', () => handlePlayerAction('insurance'));
+  
+  // Betting control handlers
+  if (elements.clearBetsBtn) {
+    elements.clearBetsBtn.addEventListener('click', () => { 
+      if (!inPlay && game) { 
+        game.clearBets(); 
+        updateBetsUI(); 
+        updateChipsDisplay(); 
+        saveChipsToFirebase(); 
+        showStatusToast('Bets cleared!'); 
+      } 
+    });
+  }
+
+  if (elements.newBetBtn) {
+    elements.newBetBtn.addEventListener('click', () => {
+      hideEndButtons();
+      resetAllHandsAndUI();
+      if (game) game.clearBets();
+      updateBetsUI();
+      updateChipsDisplay();
+      saveChipsToFirebase();
+      updateHandsUI();
+      updateActionBarState();
+      showInPlayButtons(false);
+    });
+  }
+
+  if (elements.rebetBtn) {
+    elements.rebetBtn.addEventListener('click', () => {
+      hideEndButtons();
+      if (lastBets && game) {
+        let totalBet = 0;
+        const betBreakdown = [];
+        Object.keys(lastBets).forEach(k => { 
+          if (lastBets[k] > 0) {
+            totalBet += lastBets[k];
+            betBreakdown.push(`${k}: ${lastBets[k]}`);
+          }
+        });
+        
+        console.log(`[REBET DEBUG] Attempting rebet - Total needed: ${totalBet}, Available chips: ${game.chips}`);
+        console.log(`[REBET DEBUG] Bet breakdown: ${betBreakdown.join(', ')}`);
+        
+        // Enhanced validation with detailed feedback
+        if (totalBet <= 0) {
+          showStatusToast('No previous bets to repeat!', true);
+          showEndButtons();
+          return;
+        }
+        
+        if (totalBet > game.chips) {
+          console.log(`[REBET DEBUG] Insufficient chips: need ${totalBet}, have ${game.chips}`);
+          showStatusToast(`Not enough chips for rebet! Need ${totalBet}, have ${game.chips}`, true);
+          showEndButtons();
+          return;
+        }
+        
+        console.log(`[REBET DEBUG] Rebet validation passed, proceeding with game setup`);
+        
+        resetAllHandsAndUI();
+        game.clearBets();
+        Object.keys(lastBets).forEach(k => { 
+          if (lastBets[k] > 0) {
+            game.bets[k] = lastBets[k];
+          }
+        });
+        game.chips -= totalBet;
+        
+        console.log(`[REBET DEBUG] Bets placed, chips remaining: ${game.chips}`);
+        
+        updateBetsUI();
+        updateChipsDisplay();
+        saveChipsToFirebase();
+      } else {
+        showStatusToast('No previous bets available!', true);
+        showEndButtons();
+        return;
+      }
+      startRound();
+    });
+  }
+
+  if (elements.doubleBetBtn) {
+    elements.doubleBetBtn.addEventListener('click', () => {
+      hideEndButtons();
+      if (lastBets && game) {
+        let totalDoubleBet = 0;
+        Object.keys(lastBets).forEach(k => {
+          if (lastBets[k] * 2 > game.chips) totalDoubleBet = Infinity;
+          else totalDoubleBet += lastBets[k];
+        });
+        if (totalDoubleBet === Infinity || totalDoubleBet * 2 > game.chips) {
+          showStatusToast('Not enough chips for 2x bet!', true);
+          showEndButtons();
+          return;
+        }
+        resetAllHandsAndUI();
+        game.clearBets();
+        Object.keys(lastBets).forEach(k => {
+          if (lastBets[k] > 0) {
+            game.bets[k] = lastBets[k] * 2;
+          }
+        });
+        game.chips -= totalDoubleBet * 2;
+        updateBetsUI();
+        updateChipsDisplay();
+        saveChipsToFirebase();
+        startRound();
+      }
+    });
+  }
+
+  if (elements.logoutBtn) {
+    elements.logoutBtn.addEventListener('click', async () => {
+      await signOut(auth);
+      window.location.href = "construction21-login.html";
+    });
+  }
+}
+
+// Safe event handler setup for multiplayer compatibility
+export function setupEventHandlersSafe() {
+  // Only set up handlers for elements that actually exist
+  const elements = {
+    chips: chipTray?.querySelectorAll('.chip'),
+    betSpots: betSpots,
+    dealBtn,
+    hitBtn,
+    standBtn,
+    doubleBtn,
+    splitBtn,
+    insuranceBtn,
+    clearBetsBtn,
+    newBetBtn,
+    rebetBtn,
+    doubleBetBtn,
+    logoutBtn
+  };
+
+  // Chip selection handlers (only if chip tray exists)
+  if (elements.chips) {
+    elements.chips.forEach(chip => {
+      let isProcessing = false;
+      
+      const handleChipSelection = (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        
+        if (inPlay || isProcessing) return;
+        
+        isProcessing = true;
+        setTimeout(() => { isProcessing = false; }, 300);
+        
+        selectedChip = parseInt(chip.dataset.amount);
+        elements.chips.forEach(c => c.classList.remove('selected'));
+        chip.classList.add('selected');
+        
+        if (navigator.vibrate) {
+          navigator.vibrate(20);
+        }
+        
+        console.log(`[CHIP SELECTION] Selected chip: ${selectedChip}`);
+      };
+      
+      chip.addEventListener('click', handleChipSelection);
+      chip.addEventListener('touchend', handleChipSelection);
+      
+      chip.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+      });
+    });
+  }
+
+  // Bet spot handlers (only if bet spots exist)
+  if (elements.betSpots) {
+    Object.entries(elements.betSpots).forEach(([type, spot]) => {
+      if (!spot) return; // Skip if spot doesn't exist
+      
+      let isProcessing = false;
+      let touchStartTime = 0;
+      
+      const handleBetPlacement = (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        
+        if (inPlay || !selectedChip || isProcessing) return;
+        
+        isProcessing = true;
+        setTimeout(() => { isProcessing = false; }, 400); // Debounce for bets
+        
+        // Use the enhanced bet validation
+        if (game?.canPlaceBet?.(selectedChip) && game?.placeBet?.(type === 'plus3' ? 'plus3' : type, selectedChip)) {
+          if (typeof animateChipToBetSpot === 'function') {
+            animateChipToBetSpot(type, selectedChip, spot, getBetStackCount(type));
+          }
+          updateBetsUI();
+          updateChipsDisplay();
+          saveChipsToFirebase();
+          showStatusToast(`Bet ${selectedChip} placed on ${type === 'main' ? 'Main' : type === 'pp' ? 'P / P' : '21+3'}`);
+          
+          if (navigator.vibrate) {
+            navigator.vibrate([40, 30, 40]);
+          }
+          
+          spot.style.boxShadow = '0 0 25px #00ff0066, 0 0 50px #00ff0033';
+          setTimeout(() => {
+            spot.style.boxShadow = '';
+          }, 300);
+        } else {
+          showStatusToast('Cannot place bet!', true);
+          
+          if (navigator.vibrate) {
+            navigator.vibrate([100, 50, 100]);
+          }
+          
+          spot.style.boxShadow = '0 0 20px #ff004466, 0 0 40px #ff004433';
+          setTimeout(() => {
+            spot.style.boxShadow = '';
+          }, 400);
+        }
+      };
+      
+      spot.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        touchStartTime = Date.now();
+        spot.style.transform = 'scale(0.98)';
+        spot.style.transition = 'transform 0.1s ease';
+        
+        if (navigator.vibrate && selectedChip) {
+          navigator.vibrate(25);
+        }
+      });
+      
+      spot.addEventListener('touchend', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        setTimeout(() => {
+          spot.style.transform = '';
+          spot.style.transition = '';
+        }, 100);
+        
+        const touchDuration = Date.now() - touchStartTime;
+        if (touchDuration < 500) {
+          handleBetPlacement(e);
+        }
+      });
+      
+      spot.addEventListener('touchcancel', (e) => {
+        spot.style.transform = '';
+        spot.style.transition = '';
+      });
+      
+      spot.addEventListener('click', handleBetPlacement);
+    });
+  }
+
+  // Game action button handlers (only if buttons exist)
+  if (elements.dealBtn) elements.dealBtn.addEventListener('click', () => { if (!inPlay) startRound(); });
+  if (elements.hitBtn) elements.hitBtn.addEventListener('click', () => handlePlayerAction('hit'));
+  if (elements.standBtn) elements.standBtn.addEventListener('click', () => handlePlayerAction('stand'));
+  if (elements.doubleBtn) elements.doubleBtn.addEventListener('click', () => handlePlayerAction('double'));
+  if (elements.splitBtn) elements.splitBtn.addEventListener('click', () => handlePlayerAction('split'));
+  if (elements.insuranceBtn) elements.insuranceBtn.addEventListener('click', () => handlePlayerAction('insurance'));
+  
+  // Betting control handlers
+  if (elements.clearBetsBtn) {
+    elements.clearBetsBtn.addEventListener('click', () => { 
+      if (!inPlay && game) { 
+        game.clearBets(); 
+        updateBetsUI(); 
+        updateChipsDisplay(); 
+        saveChipsToFirebase(); 
+        showStatusToast('Bets cleared!'); 
+      } 
+    });
+  }
+
+  if (elements.newBetBtn) {
+    elements.newBetBtn.addEventListener('click', () => {
+      hideEndButtons();
+      resetAllHandsAndUI();
+      if (game) game.clearBets();
+      updateBetsUI();
+      updateChipsDisplay();
+      saveChipsToFirebase();
+      updateHandsUI();
+      updateActionBarState();
+      showInPlayButtons(false);
+    });
+  }
+
+  if (elements.rebetBtn) {
+    elements.rebetBtn.addEventListener('click', () => {
+      hideEndButtons();
+      if (lastBets && game) {
+        let totalBet = 0;
+        const betBreakdown = [];
+        Object.keys(lastBets).forEach(k => { 
+          if (lastBets[k] > 0) {
+            totalBet += lastBets[k];
+            betBreakdown.push(`${k}: ${lastBets[k]}`);
+          }
+        });
+        
+        console.log(`[REBET DEBUG] Attempting rebet - Total needed: ${totalBet}, Available chips: ${game.chips}`);
+        console.log(`[REBET DEBUG] Bet breakdown: ${betBreakdown.join(', ')}`);
+        
+        // Enhanced validation with detailed feedback
+        if (totalBet <= 0) {
+          showStatusToast('No previous bets to repeat!', true);
+          showEndButtons();
+          return;
+        }
+        
+        if (totalBet > game.chips) {
+          console.log(`[REBET DEBUG] Insufficient chips: need ${totalBet}, have ${game.chips}`);
+          showStatusToast(`Not enough chips for rebet! Need ${totalBet}, have ${game.chips}`, true);
+          showEndButtons();
+          return;
+        }
+        
+        console.log(`[REBET DEBUG] Rebet validation passed, proceeding with game setup`);
+        
+        resetAllHandsAndUI();
+        game.clearBets();
+        Object.keys(lastBets).forEach(k => { 
+          if (lastBets[k] > 0) {
+            game.bets[k] = lastBets[k];
+          }
+        });
+        game.chips -= totalBet;
+        
+        console.log(`[REBET DEBUG] Bets placed, chips remaining: ${game.chips}`);
+        
+        updateBetsUI();
+        updateChipsDisplay();
+        saveChipsToFirebase();
+      } else {
+        showStatusToast('No previous bets available!', true);
+        showEndButtons();
+        return;
+      }
+      startRound();
+    });
+  }
+
+  if (elements.doubleBetBtn) {
+    elements.doubleBetBtn.addEventListener('click', () => {
+      hideEndButtons();
+      if (lastBets && game) {
+        let totalDoubleBet = 0;
+        Object.keys(lastBets).forEach(k => {
+          if (lastBets[k] * 2 > game.chips) totalDoubleBet = Infinity;
+          else totalDoubleBet += lastBets[k];
+        });
+        if (totalDoubleBet === Infinity || totalDoubleBet * 2 > game.chips) {
+          showStatusToast('Not enough chips for 2x bet!', true);
+          showEndButtons();
+          return;
+        }
+        resetAllHandsAndUI();
+        game.clearBets();
+        Object.keys(lastBets).forEach(k => {
+          if (lastBets[k] > 0) {
+            game.bets[k] = lastBets[k] * 2;
+          }
+        });
+        game.chips -= totalDoubleBet * 2;
+        updateBetsUI();
+        updateChipsDisplay();
+        saveChipsToFirebase();
+        startRound();
+      }
+    });
+  }
+
+  if (elements.logoutBtn) {
+    elements.logoutBtn.addEventListener('click', async () => {
+      await signOut(auth);
+      window.location.href = "construction21-login.html";
+    });
+  }
+}
+
+// Safe event handler setup for multiplayer compatibility
+export function setupEventHandlersSafe() {
+  // Only set up handlers for elements that actually exist
+  const elements = {
+    chips: chipTray?.querySelectorAll('.chip'),
+    betSpots: betSpots,
+    dealBtn,
+    hitBtn,
+    standBtn,
+    doubleBtn,
+    splitBtn,
+    insuranceBtn,
+    clearBetsBtn,
+    newBetBtn,
+    rebetBtn,
+    doubleBetBtn,
+    logoutBtn
+  };
+
+  // Chip selection handlers (only if chip tray exists)
+  if (elements.chips) {
+    elements.chips.forEach(chip => {
+      let isProcessing = false;
+      
+      const handleChipSelection = (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        
+        if (inPlay || isProcessing) return;
+        
+        isProcessing = true;
+        setTimeout(() => { isProcessing = false; }, 300);
+        
+        selectedChip = parseInt(chip.dataset.amount);
+        elements.chips.forEach(c => c.classList.remove('selected'));
+        chip.classList.add('selected');
+        
+        if (navigator.vibrate) {
+          navigator.vibrate(20);
+        }
+        
+        console.log(`[CHIP SELECTION] Selected chip: ${selectedChip}`);
+      };
+      
+      chip.addEventListener('click', handleChipSelection);
+      chip.addEventListener('touchend', handleChipSelection);
+      
+      chip.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+      });
+    });
+  }
+
+  // Bet spot handlers (only if bet spots exist)
+  if (elements.betSpots) {
+    Object.entries(elements.betSpots).forEach(([type, spot]) => {
+      if (!spot) return; // Skip if spot doesn't exist
+      
+      let isProcessing = false;
+      let touchStartTime = 0;
+      
+      const handleBetPlacement = (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        
+        if (inPlay || !selectedChip || isProcessing) return;
+        
+        isProcessing = true;
+        setTimeout(() => { isProcessing = false; }, 400); // Debounce for bets
+        
+        // Use the enhanced bet validation
+        if (game?.canPlaceBet?.(selectedChip) && game?.placeBet?.(type === 'plus3' ? 'plus3' : type, selectedChip)) {
+          if (typeof animateChipToBetSpot === 'function') {
+            animateChipToBetSpot(type, selectedChip, spot, getBetStackCount(type));
+          }
+          updateBetsUI();
+          updateChipsDisplay();
+          saveChipsToFirebase();
+          showStatusToast(`Bet ${selectedChip} placed on ${type === 'main' ? 'Main' : type === 'pp' ? 'P / P' : '21+3'}`);
+          
+          if (navigator.vibrate) {
+            navigator.vibrate([40, 30, 40]);
+          }
+          
+          spot.style.boxShadow = '0 0 25px #00ff0066, 0 0 50px #00ff0033';
+          setTimeout(() => {
+            spot.style.boxShadow = '';
+          }, 300);
+        } else {
+          showStatusToast('Cannot place bet!', true);
+          
+          if (navigator.vibrate) {
+            navigator.vibrate([100, 50, 100]);
+          }
+          
+          spot.style.boxShadow = '0 0 20px #ff004466, 0 0 40px #ff004433';
+          setTimeout(() => {
+            spot.style.boxShadow = '';
+          }, 400);
+        }
+      };
+      
+      spot.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        touchStartTime = Date.now();
+        spot.style.transform = 'scale(0.98)';
+        spot.style.transition = 'transform 0.1s ease';
+        
+        if (navigator.vibrate && selectedChip) {
+          navigator.vibrate(25);
+        }
+      });
+      
+      spot.addEventListener('touchend', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        setTimeout(() => {
+          spot.style.transform = '';
+          spot.style.transition = '';
+        }, 100);
+        
+        const touchDuration = Date.now() - touchStartTime;
+        if (touchDuration < 500) {
+          handleBetPlacement(e);
+        }
+      });
+      
+      spot.addEventListener('touchcancel', (e) => {
+        spot.style.transform = '';
+        spot.style.transition = '';
+      });
+      
+      spot.addEventListener('click', handleBetPlacement);
+    });
+  }
+
+  // Game action button handlers (only if buttons exist)
+  if (elements.dealBtn) elements.dealBtn.addEventListener('click', () => { if (!inPlay) startRound(); });
+  if (elements.hitBtn) elements.hitBtn.addEventListener('click', () => handlePlayerAction('hit'));
+  if (elements.standBtn) elements.standBtn.addEventListener('click', () => handlePlayerAction('stand'));
+  if (elements.doubleBtn) elements.doubleBtn.addEventListener('click', () => handlePlayerAction('double'));
+  if (elements.splitBtn) elements.splitBtn.addEventListener('click', () => handlePlayerAction('split'));
+  if (elements.insuranceBtn) elements.insuranceBtn.addEventListener('click', () => handlePlayerAction('insurance'));
+  
+  // Betting control handlers
+  if (elements.clearBetsBtn) {
+    elements.clearBetsBtn.addEventListener('click', () => { 
+      if (!inPlay && game) { 
+        game.clearBets(); 
+        updateBetsUI(); 
+        updateChipsDisplay(); 
+        saveChipsToFirebase(); 
+        showStatusToast('Bets cleared!'); 
+      } 
+    });
+  }
+
+  if (elements.newBetBtn) {
+    elements.newBetBtn.addEventListener('click', () => {
+      hideEndButtons();
+      resetAllHandsAndUI();
+      if (game) game.clearBets();
+      updateBetsUI();
+      updateChipsDisplay();
+      saveChipsToFirebase();
+      updateHandsUI();
+      updateActionBarState();
+      showInPlayButtons(false);
+    });
+  }
+
+  if (elements.rebetBtn) {
+    elements.rebetBtn.addEventListener('click', () => {
+      hideEndButtons();
+      if (lastBets && game) {
+        let totalBet = 0;
+        const betBreakdown = [];
+        Object.keys(lastBets).forEach(k => { 
+          if (lastBets[k] > 0) {
+            totalBet += lastBets[k];
+            betBreakdown.push(`${k}: ${lastBets[k]}`);
+          }
+        });
+        
+        console.log(`[REBET DEBUG] Attempting rebet - Total needed: ${totalBet}, Available chips: ${game.chips}`);
+        console.log(`[REBET DEBUG] Bet breakdown: ${betBreakdown.join(', ')}`);
+        
+        // Enhanced validation with detailed feedback
+        if (totalBet <= 0) {
+          showStatusToast('No previous bets to repeat!', true);
+          showEndButtons();
+          return;
+        }
+        
+        if (totalBet > game.chips) {
+          console.log(`[REBET DEBUG] Insufficient chips: need ${totalBet}, have ${game.chips}`);
+          showStatusToast(`Not enough chips for rebet! Need ${totalBet}, have ${game.chips}`, true);
+          showEndButtons();
+          return;
+        }
+        
+        console.log(`[REBET DEBUG] Rebet validation passed, proceeding with game setup`);
+        
+        resetAllHandsAndUI();
+        game.clearBets();
+        Object.keys(lastBets).forEach(k => { 
+          if (lastBets[k] > 0) {
+            game.bets[k] = lastBets[k];
+          }
+        });
+        game.chips -= totalBet;
+        
+        console.log(`[REBET DEBUG] Bets placed, chips remaining: ${game.chips}`);
+        
+        updateBetsUI();
+        updateChipsDisplay();
+        saveChipsToFirebase();
+      } else {
+        showStatusToast('No previous bets available!', true);
+        showEndButtons();
+        return;
+      }
+      startRound();
+    });
+  }
+
+  if (elements.doubleBetBtn) {
+    elements.doubleBetBtn.addEventListener('click', () => {
+      hideEndButtons();
+      if (lastBets && game) {
+        let totalDoubleBet = 0;
+        Object.keys(lastBets).forEach(k => {
+          if (lastBets[k] * 2 > game.chips) totalDoubleBet = Infinity;
+          else totalDoubleBet += lastBets[k];
+        });
+        if (totalDoubleBet === Infinity || totalDoubleBet * 2 > game.chips) {
+          showStatusToast('Not enough chips for 2x bet!', true);
+          showEndButtons();
+          return;
+        }
+        resetAllHandsAndUI();
+        game.clearBets();
+        Object.keys(lastBets).forEach(k => {
+          if (lastBets[k] > 0) {
+            game.bets[k] = lastBets[k] * 2;
+          }
+        });
+        game.chips -= totalDoubleBet * 2;
+        updateBetsUI();
+        updateChipsDisplay();
+        saveChipsToFirebase();
+        startRound();
+      }
+    });
+  }
+
+  if (elements.logoutBtn) {
+    elements.logoutBtn.addEventListener('click', async () => {
+      await signOut(auth);
+      window.location.href = "construction21-login.html";
+    });
+  }
+}
+
+// Safe event handler setup for multiplayer compatibility
+export function setupEventHandlersSafe() {
+  // Only set up handlers for elements that actually exist
+  const elements = {
+    chips: chipTray?.querySelectorAll('.chip'),
+    betSpots: betSpots,
+    dealBtn,
+    hitBtn,
+    standBtn,
+    doubleBtn,
+    splitBtn,
+    insuranceBtn,
+    clearBetsBtn,
+    newBetBtn,
+    rebetBtn,
+    doubleBetBtn,
+    logoutBtn
+  };
+
+  // Chip selection handlers (only if chip tray exists)
+  if (elements.chips) {
+    elements.chips.forEach(chip => {
+      let isProcessing = false;
+      
+      const handleChipSelection = (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        
+        if (inPlay || isProcessing) return;
+        
+        isProcessing = true;
+        setTimeout(() => { isProcessing = false; }, 300);
+        
+        selectedChip = parseInt(chip.dataset.amount);
+        elements.chips.forEach(c => c.classList.remove('selected'));
+        chip.classList.add('selected');
+        
+        if (navigator.vibrate) {
+          navigator.vibrate(20);
+        }
+        
+        console.log(`[CHIP SELECTION] Selected chip: ${selectedChip}`);
+      };
+      
+      chip.addEventListener('click', handleChipSelection);
+      chip.addEventListener('touchend', handleChipSelection);
+      
+      chip.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+      });
+    });
+  }
+
+  // Bet spot handlers (only if bet spots exist)
+  if (elements.betSpots) {
+    Object.entries(elements.betSpots).forEach(([type, spot]) => {
+      if (!spot) return; // Skip if spot doesn't exist
+      
+      let isProcessing = false;
+      let touchStartTime = 0;
+      
+      const handleBetPlacement = (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        
+        if (inPlay || !selectedChip || isProcessing) return;
+        
+        isProcessing = true;
+        setTimeout(() => { isProcessing = false; }, 400); // Debounce for bets
+        
+        // Use the enhanced bet validation
+        if (game?.canPlaceBet?.(selectedChip) && game?.placeBet?.(type === 'plus3' ? 'plus3' : type, selectedChip)) {
+          if (typeof animateChipToBetSpot === 'function') {
+            animateChipToBetSpot(type, selectedChip, spot, getBetStackCount(type));
+          }
+          updateBetsUI();
+          updateChipsDisplay();
+          saveChipsToFirebase();
+          showStatusToast(`Bet ${selectedChip} placed on ${type === 'main' ? 'Main' : type === 'pp' ? 'P / P' : '21+3'}`);
+          
+          if (navigator.vibrate) {
+            navigator.vibrate([40, 30, 40]);
+          }
+          
+          spot.style.boxShadow = '0 0 25px #00ff0066, 0 0 50px #00ff0033';
+          setTimeout(() => {
+            spot.style.boxShadow = '';
+          }, 300);
+        } else {
+          showStatusToast('Cannot place bet!', true);
+          
+          if (navigator.vibrate) {
+            navigator.vibrate([100, 50, 100]);
+          }
+          
+          spot.style.boxShadow = '0 0 20px #ff004466, 0 0 40px #ff004433';
+          setTimeout(() => {
+            spot.style.boxShadow = '';
+          }, 400);
+        }
+      };
+      
+      spot.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        touchStartTime = Date.now();
+        spot.style.transform = 'scale(0.98)';
+        spot.style.transition = 'transform 0.1s ease';
+        
+        if (navigator.vibrate && selectedChip) {
+          navigator.vibrate(25);
+        }
+      });
+      
+      spot.addEventListener('touchend', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        setTimeout(() => {
+          spot.style.transform = '';
+          spot.style.transition = '';
+        }, 100);
+        
+        const touchDuration = Date.now() - touchStartTime;
+        if (touchDuration < 500) {
+          handleBetPlacement(e);
+        }
+      });
+      
+      spot.addEventListener('touchcancel', (e) => {
+        spot.style.transform = '';
+        spot.style.transition = '';
+      });
+      
+      spot.addEventListener('click', handleBetPlacement);
+    });
+  }
+
+  // Game action button handlers (only if buttons exist)
+  if (elements.dealBtn) elements.dealBtn.addEventListener('click', () => { if (!inPlay) startRound(); });
+  if (elements.hitBtn) elements.hitBtn.addEventListener('click', () => handlePlayerAction('hit'));
+  if (elements.standBtn) elements.standBtn.addEventListener('click', () => handlePlayerAction('stand'));
+  if (elements.doubleBtn) elements.doubleBtn.addEventListener('click', () => handlePlayerAction('double'));
+  if (elements.splitBtn) elements.splitBtn.addEventListener('click', () => handlePlayerAction('split'));
+  if (elements.insuranceBtn) elements.insuranceBtn.addEventListener('click', () => handlePlayerAction('insurance'));
+  
+  // Betting control handlers
+  if (elements.clearBetsBtn) {
+    elements.clearBetsBtn.addEventListener('click', () => { 
+      if (!inPlay && game) { 
+        game.clearBets(); 
+        updateBetsUI(); 
+        updateChipsDisplay(); 
+        saveChipsToFirebase(); 
+        showStatusToast('Bets cleared!'); 
+      } 
+    });
+  }
+
+  if (elements.newBetBtn) {
+    elements.newBetBtn.addEventListener('click', () => {
+      hideEndButtons();
+      resetAllHandsAndUI();
+      if (game) game.clearBets();
+      updateBetsUI();
+      updateChipsDisplay();
+      saveChipsToFirebase();
+      updateHandsUI();
+      updateActionBarState();
+      showInPlayButtons(false);
+    });
+  }
+
+  if (elements.rebetBtn) {
+    elements.rebetBtn.addEventListener('click', () => {
+      hideEndButtons();
+      if (lastBets && game) {
+        let totalBet = 0;
+        const betBreakdown = [];
+        Object.keys(lastBets).forEach(k => { 
+          if (lastBets[k] > 0) {
+            totalBet += lastBets[k];
+            betBreakdown.push(`${k}: ${lastBets[k]}`);
+          }
+        });
+        
+        console.log(`[REBET DEBUG] Attempting rebet - Total needed: ${totalBet}, Available chips: ${game.chips}`);
+        console.log(`[REBET DEBUG] Bet breakdown: ${betBreakdown.join(', ')}`);
+        
+        // Enhanced validation with detailed feedback
+        if (totalBet <= 0) {
+          showStatusToast('No previous bets to repeat!', true);
+          showEndButtons();
+          return;
+        }
+        
+        if (totalBet > game.chips) {
+          console.log(`[REBET DEBUG] Insufficient chips: need ${totalBet}, have ${game.chips}`);
+          showStatusToast(`Not enough chips for rebet! Need ${totalBet}, have ${game.chips}`, true);
+          showEndButtons();
+          return;
+        }
+        
+        console.log(`[REBET DEBUG] Rebet validation passed, proceeding with game setup`);
+        
+        resetAllHandsAndUI();
+        game.clearBets();
+        Object.keys(lastBets).forEach(k => { 
+          if (lastBets[k] > 0) {
+            game.bets[k] = lastBets[k];
+          }
+        });
+        game.chips -= totalBet;
+        
+        console.log(`[REBET DEBUG] Bets placed, chips remaining: ${game.chips}`);
+        
+        updateBetsUI();
+        updateChipsDisplay();
+        saveChipsToFirebase();
+      } else {
+        showStatusToast('No previous bets available!', true);
+        showEndButtons();
+        return;
+      }
+      startRound();
+    });
+  }
+
+  if (elements.doubleBetBtn) {
+    elements.doubleBetBtn.addEventListener('click', () => {
+      hideEndButtons();
+      if (lastBets && game) {
+        let totalDoubleBet = 0;
+        Object.keys(lastBets).forEach(k => {
+          if (lastBets[k] * 2 > game.chips) totalDoubleBet = Infinity;
+          else totalDoubleBet += lastBets[k];
+        });
+        if (totalDoubleBet === Infinity || totalDoubleBet * 2 > game.chips) {
+          showStatusToast('Not enough chips for 2x bet!', true);
+          showEndButtons();
+          return;
+        }
+        resetAllHandsAndUI();
+        game.clearBets();
+        Object.keys(lastBets).forEach(k => {
+          if (lastBets[k] > 0) {
+            game.bets[k] = lastBets[k] * 2;
+          }
+        });
+        game.chips -= totalDoubleBet * 2;
+        updateBetsUI();
+        updateChipsDisplay();
+        saveChipsToFirebase();
+        startRound();
+      }
+    });
+  }
+
+  if (elements.logoutBtn) {
+    elements.logoutBtn.addEventListener('click', async () => {
+      await signOut(auth);
+      window.location.href = "construction21-login.html";
+    });
+  }
+}
+
+// Safe event handler setup for multiplayer compatibility
+export function setupEventHandlersSafe() {
+  // Only set up handlers for elements that actually exist
+  const elements = {
+    chips: chipTray?.querySelectorAll('.chip'),
+    betSpots: betSpots,
+    dealBtn,
+    hitBtn,
+    standBtn,
+    doubleBtn,
+    splitBtn,
+    insuranceBtn,
+    clearBetsBtn,
+    newBetBtn,
+    rebetBtn,
+    doubleBetBtn,
+    logoutBtn
+  };
+
+  // Chip selection handlers (only if chip tray exists)
+  if (elements.chips) {
+    elements.chips.forEach(chip => {
+      let isProcessing = false;
+      
+      const handleChipSelection = (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        
+        if (inPlay || isProcessing) return;
+        
+        isProcessing = true;
+        setTimeout(() => { isProcessing = false; }, 300);
+        
+        selectedChip = parseInt(chip.dataset.amount);
+        elements.chips.forEach(c => c.classList.remove('selected'));
+        chip.classList.add('selected');
+        
+        if (navigator.vibrate) {
+          navigator.vibrate(20);
+        }
+        
+        console.log(`[CHIP SELECTION] Selected chip: ${selectedChip}`);
+      };
+      
+      chip.addEventListener('click', handleChipSelection);
+      chip.addEventListener('touchend', handleChipSelection);
+      
+      chip.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+      });
+    });
+  }
+
+  // Bet spot handlers (only if bet spots exist)
+  if (elements.betSpots) {
+    Object.entries(elements.betSpots).forEach(([type, spot]) => {
+      if (!spot) return; // Skip if spot doesn't exist
+      
+      let isProcessing = false;
+      let touchStartTime = 0;
+      
+      const handleBetPlacement = (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        
+        if (inPlay || !selectedChip || isProcessing) return;
+        
+        isProcessing = true;
+        setTimeout(() => { isProcessing = false; }, 400); // Debounce for bets
+        
+        // Use the enhanced bet validation
+        if (game?.canPlaceBet?.(selectedChip) && game?.placeBet?.(type === 'plus3' ? 'plus3' : type, selectedChip)) {
+          if (typeof animateChipToBetSpot === 'function') {
+            animateChipToBetSpot(type, selectedChip, spot, getBetStackCount(type));
+          }
+          updateBetsUI();
+          updateChipsDisplay();
+          saveChipsToFirebase();
+          showStatusToast(`Bet ${selectedChip} placed on ${type === 'main' ? 'Main' : type === 'pp' ? 'P / P' : '21+3'}`);
+          
+          if (navigator.vibrate) {
+            navigator.vibrate([40, 30, 40]);
+          }
+          
+          spot.style.boxShadow = '0 0 25px #00ff0066, 0 0 50px #00ff0033';
+          setTimeout(() => {
+            spot.style.boxShadow = '';
+          }, 300);
+        } else {
+          showStatusToast('Cannot place bet!', true);
+          
+          if (navigator.vibrate) {
+            navigator.vibrate([100, 50, 100]);
+          }
+          
+          spot.style.boxShadow = '0 0 20px #ff004466, 0 0 40px #ff004433';
+          setTimeout(() => {
+            spot.style.boxShadow = '';
+          }, 400);
+        }
+      };
+      
+      spot.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        touchStartTime = Date.now();
+        spot.style.transform = 'scale(0.98)';
+        spot.style.transition = 'transform 0.1s ease';
+        
+        if (navigator.vibrate && selectedChip) {
+          navigator.vibrate(25);
+        }
+      });
+      
+      spot.addEventListener('touchend', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        setTimeout(() => {
+          spot.style.transform = '';
+          spot.style.transition = '';
+        }, 100);
+        
+        const touchDuration = Date.now() - touchStartTime;
+        if (touchDuration < 500) {
+          handleBetPlacement(e);
+        }
+      });
+      
+      spot.addEventListener('touchcancel', (e) => {
+        spot.style.transform = '';
+        spot.style.transition = '';
+      });
+      
+      spot.addEventListener('click', handleBetPlacement);
+    });
+  }
+
+  // Game action button handlers (only if buttons exist)
+  if (elements.dealBtn) elements.dealBtn.addEventListener('click', () => { if (!inPlay) startRound(); });
+  if (elements.hitBtn) elements.hitBtn.addEventListener('click', () => handlePlayerAction('hit'));
+  if (elements.standBtn) elements.standBtn.addEventListener('click', () => handlePlayerAction('stand'));
+  if (elements.doubleBtn) elements.doubleBtn.addEventListener('click', () => handlePlayerAction('double'));
+  if (elements.splitBtn) elements.splitBtn.addEventListener('click', () => handlePlayerAction('split'));
+  if (elements.insuranceBtn) elements.insuranceBtn.addEventListener('click', () => handlePlayerAction('insurance'));
+  
+  // Betting control handlers
+  if (elements.clearBetsBtn) {
+    elements.clearBetsBtn.addEventListener('click', () => { 
+      if (!inPlay && game) { 
+        game.clearBets(); 
+        updateBetsUI(); 
+        updateChipsDisplay(); 
+        saveChipsToFirebase(); 
+        showStatusToast('Bets cleared!'); 
+      } 
+    });
+  }
+
+  if (elements.newBetBtn) {
+    elements.newBetBtn.addEventListener('click', () => {
+      hideEndButtons();
+      resetAllHandsAndUI();
+      if (game) game.clearBets();
+      updateBetsUI();
+      updateChipsDisplay();
+      saveChipsToFirebase();
+      updateHandsUI();
+      updateActionBarState();
+      showInPlayButtons(false);
+    });
+  }
+
+  if (elements.rebetBtn) {
+    elements.rebetBtn.addEventListener('click', () => {
+      hideEndButtons();
+      if (lastBets && game) {
+        let totalBet = 0;
+        const betBreakdown = [];
+        Object.keys(lastBets).forEach(k => { 
+          if (lastBets[k] > 0) {
+            totalBet += lastBets[k];
+            betBreakdown.push(`${k}: ${lastBets[k]}`);
+          }
+        });
+        
+        console.log(`[REBET DEBUG] Attempting rebet - Total needed: ${totalBet}, Available chips: ${game.chips}`);
+        console.log(`[REBET DEBUG] Bet breakdown: ${betBreakdown.join(', ')}`);
+        
+        // Enhanced validation with detailed feedback
+        if (totalBet <= 0) {
+          showStatusToast('No previous bets to repeat!', true);
+          showEndButtons();
+          return;
+        }
+        
+        if (totalBet > game.chips) {
+          console.log(`[REBET DEBUG] Insufficient chips: need ${totalBet}, have ${game.chips}`);
+          showStatusToast(`Not enough chips for rebet! Need ${totalBet}, have ${game.chips}`, true);
+          showEndButtons();
+          return;
+        }
+        
+        console.log(`[REBET DEBUG] Rebet validation passed, proceeding with game setup`);
+        
+        resetAllHandsAndUI();
+        game.clearBets();
+        Object.keys(lastBets).forEach(k => { 
+          if (lastBets[k] > 0) {
+            game.bets[k] = lastBets[k];
+          }
+        });
+        game.chips -= totalBet;
+        
+        console.log(`[REBET DEBUG] Bets placed, chips remaining: ${game.chips}`);
+        
+        updateBetsUI();
+        updateChipsDisplay();
+        saveChipsToFirebase();
+      } else {
+        showStatusToast('No previous bets available!', true);
+        showEndButtons();
+        return;
+      }
+      startRound();
+    });
+  }
+
+  if (elements.doubleBetBtn) {
+    elements.doubleBetBtn.addEventListener('click', () => {
+      hideEndButtons();
+      if (lastBets && game) {
+        let totalDoubleBet = 0;
+        Object.keys(lastBets).forEach(k => {
+          if (lastBets[k] * 2 > game.chips) totalDoubleBet = Infinity;
+          else totalDoubleBet += lastBets[k];
+        });
+        if (totalDoubleBet === Infinity || totalDoubleBet * 2 > game.chips) {
+          showStatusToast('Not enough chips for 2x bet!', true);
+          showEndButtons();
+          return;
+        }
+        resetAllHandsAndUI();
+        game.clearBets();
+        Object.keys(lastBets).forEach(k => {
+          if (lastBets[k] > 0) {
+            game.bets[k] = lastBets[k] * 2;
+          }
+        });
+        game.chips -= totalDoubleBet * 2;
+        updateBetsUI();
+        updateChipsDisplay();
+        saveChipsToFirebase();
+        startRound();
+      }
+    });
+  }
+
   if (elements.logoutBtn) {
     elements.logoutBtn.addEventListener('click', async () => {
       await signOut(auth);
@@ -1161,7 +2486,7 @@ function animateSplitCardMove() {
 
 function nextHandOrSettle() {
   game.activeHandIndex += 1;
-  if (game.activeHandIndex >= game.playerHands.length) {
+  if ( game.activeHandIndex >= game.playerHands.length) {
     // Only settle if not already started!
     if (!outcomeLock && inPlay) {
       console.log('[SETTLE DEBUG] settleAndEndRound called from nextHandOrSettle');
@@ -1353,6 +2678,7 @@ function showOutcomeDisplay(outcomeType, title, description, amount = null, isWi
   // Update content
   outcomeIcon.textContent = config.icon;
   outcomeTitle.textContent = title || config.title;
+
   outcomeTypeDisplay.textContent = description;
   outcomeIconSmall.textContent = config.smallIcon;
   
@@ -1620,6 +2946,7 @@ function optimizeForMobile() {
       // Enhance button touch targets
       const buttons = document.querySelectorAll('.btn-primary, .btn-secondary');
       buttons.forEach(button => {
+       
         button.addEventListener('touchstart', (e) => {
           button.style.transform = 'scale(0.97)';
           button.style.transition = 'transform 0.1s ease';
@@ -1827,11 +3154,9 @@ export {
   canSplitCurrentHand,
   canDoubleCurrentHand,
   canBuyInsurance,
-  canHitCurrentHand,
-  handlePlayerAction,
+  canHitCurrentHand,  handlePlayerAction,
   startRound,
   setupEventHandlers,
-  setupEventHandlersSafe,
   loadUserDataAndStartGame,
   saveChipsToFirebase
 };

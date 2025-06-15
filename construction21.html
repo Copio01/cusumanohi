@@ -921,15 +921,31 @@ main {
     </div>
   </div>
 
-  <!-- Scripts -->
-  <script type="module">
+  <!-- Scripts -->  <script type="module">
   // Voucher Redemption Functionality
+  import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-app.js";
   import { getFirestore, doc, getDoc, runTransaction } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-firestore.js";
   import { getAuth } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-auth.js";
   
-  // Get Firebase instances from the UI module (they're already initialized)
-  const auth = getAuth();
-  const db = getFirestore();
+  // Firebase configuration
+  const firebaseConfig = {
+    apiKey: "AIzaSyBVtq6dAEuybJNmTTv8dXBxTVUgw1t0ZMk",
+    authDomain: "cusumano-website.firebaseapp.com",
+    projectId: "cusumano-website",
+    storageBucket: "cusumano-website.appspot.com",
+    messagingSenderId: "20051552210",
+    appId: "1:20051552210:web:7eb3b22baa3fec184e4a0b"
+  };
+  
+  // Initialize Firebase only if not already initialized
+  let app;
+  if (getApps().length === 0) {
+    app = initializeApp(firebaseConfig);
+  } else {
+    app = getApps()[0];
+  }
+  const auth = getAuth(app);
+  const db = getFirestore(app);
   
   // Voucher elements
   const voucherCodeInput = document.getElementById('voucher-code-input');
