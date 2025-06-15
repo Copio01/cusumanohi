@@ -576,16 +576,19 @@
     <div id="login-screen">
         <h1 class="login-logo">Cusumano</h1>
         <p>Admin Panel</p>
-        <div class="form-group">
-            <label for="email">Email</label>
-            <input type="email" id="email" placeholder="Enter your email">
-        </div>
-        <div class="form-group password-group">
-            <label for="password">Password</label>
-            <input type="password" id="password" placeholder="Enter your password">
-            <button type="button" class="toggle-password" id="toggle-password" aria-label="Show password" title="Show/Hide Password">👁️</button>
-        </div>
-        <button id="login-btn" class="btn">Login</button>        <a href="#" id="play-games-launcher" style="display:inline-block;margin-left:1.2rem;padding:0.6rem 1.3rem;font-size:1.1rem;background:linear-gradient(90deg,#e0a106,#ff4e00);color:#fff;text-decoration:none;border-radius:8px;box-shadow:0 2px 8px rgba(224,161,6,0.13);font-weight:600;vertical-align:middle;transition:transform 0.15s;">
+        <form id="login-form" autocomplete="on">
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" placeholder="Enter your email" required>
+            </div>
+            <div class="form-group password-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" placeholder="Enter your password" required>
+                <button type="button" class="toggle-password" id="toggle-password" aria-label="Show password" title="Show/Hide Password">👁️</button>
+            </div>
+            <button id="login-btn" class="btn" type="submit">Login</button>
+        </form>
+        <a href="#" id="play-games-launcher" style="display:inline-block;margin-left:1.2rem;padding:0.6rem 1.3rem;font-size:1.1rem;background:linear-gradient(90deg,#e0a106,#ff4e00);color:#fff;text-decoration:none;border-radius:8px;box-shadow:0 2px 8px rgba(224,161,6,0.13);font-weight:600;vertical-align:middle;transition:transform 0.15s;">
             🎮 Games Launcher
         </a>
         <script>
@@ -1132,49 +1135,45 @@
         // Call this after Firebase init
         setTimeout(setupAuthListener, 500);
 
-        loginBtn.addEventListener('click', () => {
-            loginError.style.display = 'none';
-            const email = document.getElementById('email').value;
-            const pass = document.getElementById('password').value;
-            
-            if (!email || !pass) {
-                loginError.textContent = "Please enter both email and password.";
-                loginError.style.display = 'block';
-                return;
+        const loginForm = document.getElementById('login-form');
+loginForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    loginError.style.display = 'none';
+    const email = document.getElementById('email').value;
+    const pass = document.getElementById('password').value;
+    if (!email || !pass) {
+        loginError.textContent = "Please enter both email and password.";
+        loginError.style.display = 'block';
+        return;
+    }
+    if (!auth) {
+        loginError.textContent = "Authentication service unavailable. Please try again later.";
+        loginError.style.display = 'block';
+        return;
+    }
+    loginBtn.disabled = true;
+    loginBtn.textContent = "Logging in...";
+    signInWithEmailAndPassword(auth, email, pass)
+        .then(userCredential => {
+            // Success handled by onAuthStateChanged
+            loginBtn.textContent = "Login";
+            loginBtn.disabled = false;
+        })
+        .catch(err => {
+            console.error("Login error:", err.code, err.message);
+            loginBtn.textContent = "Login";
+            loginBtn.disabled = false;
+            if (err.code === 'auth/invalid-credential' || err.code === 'auth/user-not-found' || 
+                err.code === 'auth/wrong-password') {
+                loginError.textContent = "Invalid email or password. Please try again.";
+            } else if (err.code === 'auth/network-request-failed') {
+                loginError.textContent = "Network connection issue. Please check your internet connection.";
+            } else {
+                loginError.textContent = "Login failed: " + (err.message || "Unknown error");
             }
-            
-            if (!auth) {
-                loginError.textContent = "Authentication service unavailable. Please try again later.";
-                loginError.style.display = 'block';
-                return;
-            }
-            
-            loginBtn.disabled = true;
-            loginBtn.textContent = "Logging in...";
-            
-            signInWithEmailAndPassword(auth, email, pass)
-                .then(userCredential => {
-                    // Success handled by onAuthStateChanged
-                    loginBtn.textContent = "Login";
-                    loginBtn.disabled = false;
-                })
-                .catch(err => {
-                    console.error("Login error:", err.code, err.message);
-                    loginBtn.textContent = "Login";
-                    loginBtn.disabled = false;
-                    
-                    // More helpful error messages
-                    if (err.code === 'auth/invalid-credential' || err.code === 'auth/user-not-found' || 
-                        err.code === 'auth/wrong-password') {
-                        loginError.textContent = "Invalid email or password. Please try again.";
-                    } else if (err.code === 'auth/network-request-failed') {
-                        loginError.textContent = "Network connection issue. Please check your internet connection.";
-                    } else {
-                        loginError.textContent = "Login failed: " + (err.message || "Unknown error");
-                    }
-                    loginError.style.display = 'block';
-                });
-        });        logoutBtn.addEventListener('click', (e) => {
+            loginError.style.display = 'block';
+        });
+});        logoutBtn.addEventListener('click', (e) => {
             if (confirm('Are you sure you want to log out?')) {
                 try {
                     // First clean up any active Firebase listeners
@@ -1372,6 +1371,9 @@
                         const storageRef = ref(storage, storagePath);
                         await deleteObject(storageRef);
                     } catch (error) {
+
+
+
                         console.error("Error deleting image:", error);
                         alert("Could not delete image. See console for details.");
                     }
@@ -2013,8 +2015,6 @@
 
         // On page load, call loadSiteContentFromFirestore instead of just renderServiceFields
         loadSiteContentFromFirestore();        // --- Grant Chips to Player by Display Name ---
-        const grantChipsForm = document.getElementById('grant-chips-form');
-        const grantChipsMsg = document.getElementById('grant-chips-message');
 
         grantChipsForm.addEventListener('submit', async (e) => {
             e.preventDefault();
