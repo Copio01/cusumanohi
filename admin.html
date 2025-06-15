@@ -694,6 +694,74 @@
                 </form>
                 <div id="grant-chips-message" class="upload-message" style="display:none;margin-top:1.1rem;"></div>
             </div>
+
+            <div class="control-card" id="voucher-management-card">
+                <h2 style="display:flex;align-items:center;gap:0.5rem;">
+                    <span style="color:var(--primary-color);font-size:1.5em;">🎫</span> 
+                    Chip Voucher Management
+                </h2>
+                <p style="margin-bottom:1.2rem;">Generate one-time use voucher codes that players can redeem for chips.</p>
+                
+                <!-- Generate Voucher Section -->
+                <div style="background:rgba(240,246,250,0.85);padding:1.2rem;border-radius:12px;box-shadow:0 2px 8px #0a4d6810;margin-bottom:1.5rem;">
+                    <h3 style="margin:0 0 1rem 0;color:var(--primary-color);">Generate New Voucher</h3>
+                    <form id="generate-voucher-form" style="display:flex;flex-wrap:wrap;gap:1.2rem;align-items:end;">
+                        <div class="form-group" style="margin-bottom:0;min-width:160px;">
+                            <label for="voucher-chips-amount">Chip Amount</label>
+                            <input type="number" id="voucher-chips-amount" placeholder="Amount" min="1" max="50000" required 
+                                   style="width:100%;padding:0.7rem 1.1rem;border-radius:8px;border:1.5px solid #d1e3f8;font-size:1.08rem;background:#fff;">
+                        </div>
+                        <div class="form-group" style="margin-bottom:0;min-width:140px;">
+                            <label for="voucher-expiry-days">Expires In (Days)</label>
+                            <input type="number" id="voucher-expiry-days" placeholder="Days" min="1" max="365" value="30" required 
+                                   style="width:100%;padding:0.7rem 1.1rem;border-radius:8px;border:1.5px solid #d1e3f8;font-size:1.08rem;background:#fff;">
+                        </div>
+                        <div class="form-group" style="margin-bottom:0;min-width:200px;">
+                            <label for="voucher-description">Description (Optional)</label>
+                            <input type="text" id="voucher-description" placeholder="e.g., Welcome Bonus" maxlength="50"
+                                   style="width:100%;padding:0.7rem 1.1rem;border-radius:8px;border:1.5px solid #d1e3f8;font-size:1.08rem;background:#fff;">
+                        </div>
+                        <button type="submit" class="btn" style="background:var(--accent-color);min-width:140px;">
+                            Generate Voucher
+                        </button>
+                    </form>
+                    <div id="generate-voucher-message" class="upload-message" style="display:none;margin-top:1.1rem;"></div>
+                </div>
+                
+                <!-- Generated Voucher Display -->
+                <div id="generated-voucher-display" style="display:none;background:#e8f5e8;border:2px solid var(--success-color);border-radius:12px;padding:1.5rem;margin-bottom:1.5rem;">
+                    <h3 style="margin:0 0 1rem 0;color:var(--success-color);">✅ Voucher Generated Successfully!</h3>
+                    <div style="background:#fff;border-radius:8px;padding:1rem;margin-bottom:1rem;border:1px solid #ddd;">
+                        <div style="font-family:monospace;font-size:1.3rem;font-weight:bold;color:var(--primary-color);text-align:center;letter-spacing:2px;" id="generated-voucher-code">
+                            <!-- Voucher code will appear here -->
+                        </div>
+                    </div>
+                    <div style="display:flex;gap:1rem;flex-wrap:wrap;">
+                        <button id="copy-voucher-btn" class="btn" style="background:var(--secondary-color);width:auto;">
+                            📋 Copy Code
+                        </button>
+                        <button id="close-voucher-display-btn" class="btn" style="background:var(--medium-gray);width:auto;">
+                            Close
+                        </button>
+                    </div>
+                    <div style="margin-top:1rem;font-size:0.9rem;color:var(--medium-gray);">
+                        Share this code with players. Each code can only be used once.
+                    </div>
+                </div>
+                
+                <!-- Active Vouchers List -->
+                <div>
+                    <h3 style="margin:0 0 1rem 0;color:var(--primary-color);">Active Vouchers</h3>
+                    <div id="vouchers-list" style="max-height:400px;overflow-y:auto;">
+                        <!-- Vouchers will be loaded here -->
+                    </div>
+                    <div style="text-align:center;margin-top:1rem;">
+                        <button id="refresh-vouchers-btn" class="btn" style="background:var(--primary-color);width:auto;">
+                            🔄 Refresh List
+                        </button>
+                    </div>
+                </div>
+            </div>
         </main>
         
         <div class="site-return-float">
@@ -731,6 +799,7 @@
             query,
             where,
             orderBy,
+            runTransaction,
             enableIndexedDbPersistence,
             CACHE_SIZE_UNLIMITED 
         } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
@@ -942,9 +1011,22 @@
         const logoImageUploadInput = document.getElementById('logo-image-upload-input');
         const logoUploadBtn = document.getElementById('logo-upload-btn');
         const logoUploadPreview = document.getElementById('logo-upload-preview');
-        const logoUploadProgress = document.getElementById('logo-upload-progress');
-        const logoUploadMessage = document.getElementById('logo-upload-message');
+        const logoUploadProgress = document.getElementById('logo-upload-progress');        const logoUploadMessage = document.getElementById('logo-upload-message');
         const currentLogoImage = document.getElementById('current-logo-image');
+
+        // Grant chips elements
+        const grantChipsForm = document.getElementById('grant-chips-form');
+        const grantChipsMessage = document.getElementById('grant-chips-message');
+
+        // Voucher management elements
+        const generateVoucherForm = document.getElementById('generate-voucher-form');
+        const generateVoucherMsg = document.getElementById('generate-voucher-message');
+        const generatedVoucherDisplay = document.getElementById('generated-voucher-display');
+        const generatedVoucherCode = document.getElementById('generated-voucher-code');
+        const copyVoucherBtn = document.getElementById('copy-voucher-btn');
+        const closeVoucherDisplayBtn = document.getElementById('close-voucher-display-btn');
+        const vouchersList = document.getElementById('vouchers-list');
+        const refreshVouchersBtn = document.getElementById('refresh-vouchers-btn');
 
         // --- Static SVG Icon Picker ---
         const iconOptions = [
@@ -1005,8 +1087,7 @@
                 }, 10000);
             }
         }
-        
-        // --- Firebase logic with better error handling ---
+          // --- Firebase logic with better error handling ---
         function setupAuthListener() {
             if (!auth) {
                 console.error("Auth not initialized");
@@ -1016,13 +1097,24 @@
             onAuthStateChanged(auth, user => {
                 try {
                     if (user) {
-                        loginScreen.style.display = 'none';
-                        adminDashboard.style.display = 'flex';
-                        
-                        // Setup all listeners with error handling
-                        try { setupImageListener(); } catch (e) { console.error("Image listener error:", e); }
-                        try { setupHeroBannerListener(); } catch (e) { console.error("Banner listener error:", e); }
-                        try { setupLogoListener(); } catch (e) { console.error("Logo listener error:", e); }
+                        // Check if user is the authorized admin
+                        if (user.email === 'copio01@yahoo.com') {
+                            loginScreen.style.display = 'none';
+                            adminDashboard.style.display = 'flex';
+                            
+                            // Setup all listeners with error handling
+                            try { setupImageListener(); } catch (e) { console.error("Image listener error:", e); }
+                            try { setupHeroBannerListener(); } catch (e) { console.error("Banner listener error:", e); }
+                            try { setupLogoListener(); } catch (e) { console.error("Logo listener error:", e); }
+                            try { setupVoucherListener(); } catch (e) { console.error("Voucher listener error:", e); }
+                        } else {
+                            // User is authenticated but not authorized admin
+                            signOut(auth);
+                            loginError.textContent = "Access denied. This admin panel is restricted to authorized personnel only.";
+                            loginError.style.display = 'block';
+                            adminDashboard.style.display = 'none';
+                            loginScreen.style.display = 'block';
+                        }
                     } else {
                         adminDashboard.style.display = 'none';
                         loginScreen.style.display = 'block';
@@ -1958,8 +2050,7 @@
                 
                 // Update chips
                 await setDoc(doc(db, 'construction21_users', userDoc.id), { chips: newChips }, { merge: true });
-                
-                grantChipsMsg.textContent = `Granted ${chipsToAdd} chips to ${userData.displayName}. New balance: ${newChips}`;
+                  grantChipsMsg.textContent = `Granted ${chipsToAdd} chips to ${userData.displayName}. New balance: ${newChips}`;
                 grantChipsMsg.className = 'upload-message success';
                 grantChipsMsg.style.display = 'block';
                 grantChipsForm.reset();
@@ -1969,6 +2060,231 @@
                 grantChipsMsg.style.display = 'block';
             }
         });
+
+        // --- Voucher Management System ---
+        
+        // Generate random voucher code
+        function generateVoucherCode() {
+            const prefix = 'CHI'; // CHIps
+            const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            let code = prefix;
+            
+            // Add timestamp-based segment for uniqueness
+            const timeSegment = Date.now().toString(36).toUpperCase().slice(-3);
+            code += timeSegment;
+            
+            // Add random segment
+            for (let i = 0; i < 6; i++) {
+                code += characters.charAt(Math.floor(Math.random() * characters.length));
+            }
+            
+            return code;
+        }
+
+        // Format voucher code for display (add dashes)
+        function formatVoucherCode(code) {
+            return code.replace(/(.{3})/g, '$1-').slice(0, -1);
+        }
+
+        // Generate voucher
+        generateVoucherForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            generateVoucherMsg.style.display = 'none';
+            generatedVoucherDisplay.style.display = 'none';
+            
+            const chipsAmount = parseInt(document.getElementById('voucher-chips-amount').value, 10);
+            const expiryDays = parseInt(document.getElementById('voucher-expiry-days').value, 10);
+            const description = document.getElementById('voucher-description').value.trim();
+            
+            if (isNaN(chipsAmount) || chipsAmount <= 0 || chipsAmount > 50000) {
+                generateVoucherMsg.textContent = 'Enter a valid chip amount (1-50,000).';
+                generateVoucherMsg.className = 'upload-message error';
+                generateVoucherMsg.style.display = 'block';
+                return;
+            }
+            
+            if (isNaN(expiryDays) || expiryDays <= 0 || expiryDays > 365) {
+                generateVoucherMsg.textContent = 'Enter a valid expiry period (1-365 days).';
+                generateVoucherMsg.className = 'upload-message error';
+                generateVoucherMsg.style.display = 'block';
+                return;
+            }
+            
+            try {
+                const voucherCode = generateVoucherCode();
+                const expiryDate = new Date();
+                expiryDate.setDate(expiryDate.getDate() + expiryDays);
+                
+                const voucherData = {
+                    code: voucherCode,
+                    chips: chipsAmount,
+                    description: description || `${chipsAmount} Chips`,
+                    createdAt: new Date(),
+                    expiresAt: expiryDate,
+                    isRedeemed: false,
+                    redeemedBy: null,
+                    redeemedAt: null,
+                    createdBy: auth.currentUser.email
+                };
+                
+                // Save to Firestore
+                await setDoc(doc(db, 'chipVouchers', voucherCode), voucherData);
+                
+                // Show success
+                generatedVoucherCode.textContent = formatVoucherCode(voucherCode);
+                generatedVoucherDisplay.style.display = 'block';
+                generateVoucherForm.reset();
+                document.getElementById('voucher-expiry-days').value = '30'; // Reset to default
+                
+                generateVoucherMsg.textContent = 'Voucher generated successfully!';
+                generateVoucherMsg.className = 'upload-message success';
+                generateVoucherMsg.style.display = 'block';
+                
+                // Refresh vouchers list
+                loadVouchersList();
+                
+            } catch (err) {
+                console.error('Error generating voucher:', err);
+                generateVoucherMsg.textContent = 'Error generating voucher: ' + (err.message || err);
+                generateVoucherMsg.className = 'upload-message error';
+                generateVoucherMsg.style.display = 'block';
+            }
+        });
+
+        // Copy voucher code to clipboard
+        copyVoucherBtn.addEventListener('click', async () => {
+            try {
+                const code = generatedVoucherCode.textContent;
+                await navigator.clipboard.writeText(code.replace(/-/g, '')); // Copy without dashes
+                copyVoucherBtn.textContent = '✅ Copied!';
+                setTimeout(() => {
+                    copyVoucherBtn.textContent = '📋 Copy Code';
+                }, 2000);
+            } catch (err) {
+                console.error('Failed to copy:', err);
+                // Fallback for older browsers
+                const textArea = document.createElement('textarea');
+                textArea.value = generatedVoucherCode.textContent.replace(/-/g, '');
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                copyVoucherBtn.textContent = '✅ Copied!';
+                setTimeout(() => {
+                    copyVoucherBtn.textContent = '📋 Copy Code';
+                }, 2000);
+            }
+        });
+
+        // Close voucher display
+        closeVoucherDisplayBtn.addEventListener('click', () => {
+            generatedVoucherDisplay.style.display = 'none';
+        });
+
+        // Load vouchers list
+        async function loadVouchersList() {
+            if (!db) return;
+            
+            try {
+                vouchersList.innerHTML = '<div style="text-align:center;padding:1rem;color:var(--medium-gray);">Loading vouchers...</div>';
+                
+                const vouchersRef = collection(db, 'chipVouchers');
+                const q = query(vouchersRef, orderBy('createdAt', 'desc'));
+                const querySnapshot = await getDocs(q);
+                
+                if (querySnapshot.empty) {
+                    vouchersList.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--medium-gray);">No vouchers found.</div>';
+                    return;
+                }
+                
+                let vouchersHTML = '';
+                querySnapshot.forEach((doc) => {
+                    const voucher = doc.data();
+                    const isExpired = new Date() > voucher.expiresAt.toDate();
+                    const statusColor = voucher.isRedeemed ? '#e63946' : (isExpired ? '#f5a623' : '#2a9d8f');
+                    const statusText = voucher.isRedeemed ? 'REDEEMED' : (isExpired ? 'EXPIRED' : 'ACTIVE');
+                    
+                    vouchersHTML += `
+                        <div style="background:#fff;border-radius:8px;padding:1rem;margin-bottom:1rem;border-left:4px solid ${statusColor};box-shadow:0 2px 8px rgba(10,77,104,0.06);">
+                            <div style="display:flex;justify-content:space-between;align-items:start;flex-wrap:wrap;gap:1rem;">
+                                <div style="flex:1;min-width:200px;">
+                                    <div style="font-family:monospace;font-weight:bold;font-size:1.1rem;color:var(--primary-color);margin-bottom:0.5rem;">
+                                        ${formatVoucherCode(voucher.code)}
+                                    </div>
+                                    <div style="color:var(--dark-gray);margin-bottom:0.3rem;">
+                                        <strong>${voucher.chips} chips</strong> - ${voucher.description}
+                                    </div>
+                                    <div style="font-size:0.9rem;color:var(--medium-gray);">
+                                        Created: ${voucher.createdAt.toDate().toLocaleDateString()}
+                                        ${voucher.isRedeemed ? `<br>Redeemed by: ${voucher.redeemedBy} on ${voucher.redeemedAt.toDate().toLocaleDateString()}` : ''}
+                                    </div>
+                                </div>
+                                <div style="text-align:right;">
+                                    <div style="background:${statusColor};color:white;padding:0.3rem 0.7rem;border-radius:6px;font-size:0.8rem;font-weight:bold;margin-bottom:0.5rem;">
+                                        ${statusText}
+                                    </div>
+                                    <div style="font-size:0.8rem;color:var(--medium-gray);">
+                                        Expires: ${voucher.expiresAt.toDate().toLocaleDateString()}
+                                    </div>
+                                    ${!voucher.isRedeemed && !isExpired ? `
+                                        <button onclick="copyVoucherCode('${voucher.code}')" style="margin-top:0.5rem;padding:0.3rem 0.7rem;background:var(--secondary-color);color:white;border:none;border-radius:4px;cursor:pointer;font-size:0.8rem;">
+                                            Copy Code
+                                        </button>
+                                    ` : ''}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                vouchersList.innerHTML = vouchersHTML;
+                
+            } catch (err) {
+                console.error('Error loading vouchers:', err);
+                vouchersList.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--danger-color);">Error loading vouchers.</div>';
+            }
+        }
+
+        // Copy voucher code function for list items
+        window.copyVoucherCode = async function(code) {
+            try {
+                await navigator.clipboard.writeText(code);
+                // Find the button and update its text temporarily
+                event.target.textContent = '✅ Copied!';
+                setTimeout(() => {
+                    event.target.textContent = 'Copy Code';
+                }, 2000);
+            } catch (err) {
+                console.error('Failed to copy:', err);
+            }
+        };
+
+        // Setup voucher listener
+        function setupVoucherListener() {
+            if (!db) return;
+            
+            try {
+                const vouchersRef = collection(db, 'chipVouchers');
+                const q = query(vouchersRef, orderBy('createdAt', 'desc'));
+                
+                const unsubscribe = onSnapshot(q, (snapshot) => {
+                    loadVouchersList();
+                }, error => {
+                    console.error("Voucher listener error:", error);
+                });
+                
+                // Store unsubscribe function
+                firebaseListeners.vouchers = unsubscribe;
+            } catch (error) {
+                console.error("setupVoucherListener error:", error);
+            }
+        }
+
+        // Refresh vouchers button
+        refreshVouchersBtn.addEventListener('click', loadVouchersList);
+
+        // Initial load
+        setTimeout(loadVouchersList, 1000);
     </script>
 </body>
 </html>

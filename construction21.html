@@ -146,1981 +146,408 @@ body.modern-bg {
   margin-left: auto;
   margin-right: auto;
 }
-#center-chips-display {
-  background: rgba(36,36,28,0.8);
-  padding: 0.75rem 2rem;
+
+/* Voucher Interface Styling */
+.voucher-container {
+  margin: 0.75rem auto 0 auto;
+  width: fit-content;
+  max-width: 400px;
+}
+
+.voucher-input-section {
+  background: rgba(36,36,28,0.85);
+  backdrop-filter: blur(8px);
   border-radius: 16px;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.3), 0 0 0 2px rgba(255,215,0,0.3);
-  margin-bottom: 1.5rem;
-}
-#center-chips-amount {
-  font-size: 1.75rem;
-  color: #34c759;
-  font-weight: 800;
-  text-shadow: 0 0 10px rgba(52, 199, 89, 0.5);
-}
-/* --- Blackjack Table --- */
-#blackjack-table {
-  width: 100vw;
-  max-width: 1200px;
-  aspect-ratio: 2.5/1;
-  margin: 0 auto 1.5rem auto;
-  background:
-    repeating-linear-gradient(135deg, #385f38 0 3px, #305730 3px 7px), /* felt */
-    radial-gradient(ellipse at 60% 40%, #3a7d3a 0%, #1a4a1a 100%),
-    linear-gradient(135deg, #1a2d1a 0%, #2d3a2d 100%);
-  border-radius: 48% 48% 60% 60%/60% 60% 100% 100%;
-  border: 10px solid #ffd700;
-  box-shadow:
-    0 24px 80px #000b,
-    0 4px 24px #ffd70044 inset,
-    0 0 0 16px #fffbe622 inset,
-    0 0 64px 8px #ffd70044;
-  position: relative;
-  overflow: visible;
-  z-index: 2;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  align-items: center;
-  min-height: 520px;
-}
-/* Table "mat" lighting effect for dealer and player area */
-.table-area-dealer {
-  position: absolute;
-  top: 2.5%; left: 50%; transform: translateX(-50%);
-  width: 420px; height: 180px;
-  background: radial-gradient(ellipse at 50% 45%, #ffd70022 0, transparent 70%);
-  z-index: 1; pointer-events: none;
-  border-radius: 38% 38% 38% 38% / 58% 58% 38% 38%;
-  filter: blur(2.5px);
-}
-.table-area-player {
-  position: absolute;
-  bottom: 1.2%; left: 50%; transform: translateX(-50%);
-  width: 440px; height: 170px;
-  background: radial-gradient(ellipse at 50% 60%, #34c75922 0, transparent 80%);
-  z-index: 1; pointer-events: none;
-  border-radius: 40% 40% 44% 44% / 55% 55% 45% 45%;
-  filter: blur(3.2px);
-}
-#virtual-deck {
-  position: absolute;
-  top: 7.5%;
-  left: 11%;
-  width: 20px;
-  height: 30px;
-  pointer-events: none;
-  opacity: 0.01;
-  z-index: 20;
-}
-#blackjack-table::before {
-  content: '';
-  position: absolute;
-  inset: -18px;
-  border-radius: inherit;
-  border: 7px dashed #fffbe6cc;
-  pointer-events: none;
-  z-index: 2;
-  box-shadow: 0 0 32px #ffd70055;
-}
-#blackjack-table::after {
-  content: '';
-  position: absolute;
-  left: 50%;
-  bottom: 0;
-  transform: translateX(-50%);
-  width: 62%;
-  height: 28px;
-  background: 
-    repeating-linear-gradient(135deg, #ffd700 0 14px, #23232b 14px 28px),
-    linear-gradient(0deg, #ffd70011 0%, transparent 100%);
-  border-radius: 0 0 48% 48%/0 0 100% 100%;
-  opacity: 0.8;
-  z-index: 4;
-  pointer-events: none;
-  box-shadow: 0 4px 24px #ffd70055;
-}
-#table-vignette {
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  pointer-events: none;
-  background:
-    radial-gradient(ellipse at 50% 60%, transparent 60%, #000b 100%),
-    radial-gradient(ellipse at 50% 40%, #ffd70033 0%, transparent 80%);
-  z-index: 3;
-}
-#blackjack-table .table-logo {
-  position: absolute;
-  left: 50%;
-  top: 38%;
-  transform: translate(-50%, -50%);
-  z-index: 5;
-  opacity: 0.12;
-  pointer-events: none;
-  width: 480px;
-  max-width: 70vw;
-  filter: blur(0.5px) drop-shadow(0 2px 8px #ffd70055);
-}
-#blackjack-table .table-text {
-  position: absolute;
-  left: 50%;
-  color: #fffbe6;
-  font-family: 'Segoe UI', Arial, sans-serif;
-  font-weight: bold;
-  text-shadow: 0 2px 8px #23232b99, 0 0 8px #ffd70044;
-  pointer-events: none;
-  z-index: 6;
-  font-size: 1.35em;
-  letter-spacing: 1.5px;
-  user-select: none;
-}
-#blackjack-table .table-text.pays {
-  top: 12%;
-  transform: translateX(-50%) rotate(-7deg);
-  font-size: 1.18em;
-  color: #ffd700;
-  text-shadow: 0 2px 8px #23232b99, 0 0 16px #ffd70099;
-}
-#blackjack-table .table-text.rules {
-  top: 21%;
-  transform: translateX(-50%) rotate(-3deg);
-  font-size: 1.08em;
-  color: #fffbe6;
-}
-#blackjack-table .table-text.nosmoke {
-  bottom: 9%;
-  transform: translateX(-50%) rotate(3deg);
-  font-size: 1.08em;
-  color: #ffd700;
-  text-shadow: 0 2px 8px #23232b99, 0 0 8px #ffd70099;
-}
-#table-bet-spots {
-  position: absolute;
-  bottom: 17%;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  gap: 90px;
-  z-index: 8;
-}
-.table-bet-spot {
-  width: 120px; height: 120px;
-  background: rgba(255,255,255,0.13);
-  border: 5px solid #ffd700cc;
-  border-radius: 50%;
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  font-size: 1.18em;
-  color: #ffd700;
-  box-shadow: 0 6px 32px #ffd70033, 0 0 0 16px #fffbe622 inset, 0 2px 12px #23232b55;
-  position: relative;
-  transition: border 0.2s, box-shadow 0.2s;
-  filter: drop-shadow(0 2px 8px #23232b88);
-  overflow: visible;
-}
-.table-bet-spot .font-bold {
-  font-size: 1.5em;
-  margin-top: 2px;
-}
-.bet-spot-chips {
-  position: absolute;
-  left: 0; top: 0;
-  width: 100%; height: 100%;
-  pointer-events: none;
-  z-index: 15;
-}
-.bet-visual-chip {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  width: 64px;
-  height: 64px;
-  border-radius: 50%;
-  pointer-events: none;
-  opacity: 0.96;
-  z-index: 200;
-  box-shadow: 0 2px 6px #23232b44;
-  transition: all 0.25s ease;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 1em;
-  color: #fff;
-  font-weight: bold;
+  padding: 1rem 1.25rem;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.3), 0 0 0 1px rgba(255,215,0,0.2);
+  border: 1px solid rgba(255,215,0,0.15);
 }
 
-/* Responsive chip sizing based on bet spot size */
-@media (max-width: 768px) {
-  .bet-visual-chip {
-    width: 45px;
-    height: 45px;
-    font-size: 0.9em;
-  }
-}
-
-@media (max-width: 480px) {
-  .bet-visual-chip {
-    width: 38px;
-    height: 38px;
-    font-size: 0.8em;
-  }
-}
-.table-bet-spot.active {
-  border: 5px solid #fffbe6;
-  box-shadow: 0 0 40px #ffd70088, 0 0 0 22px #fffbe622 inset;
-}
-.table-bet-spot::after {
-  content: '\1F477';
-  position: absolute;
-  left: 50%; top: 50%;
-  transform: translate(-50%, -50%) scale(2.3);
-  opacity: 0.09;
-  font-size: 2.7em;
-  pointer-events: none;
-  z-index: 1;
-}
-#dealer-cards, #player-hands {
-  min-height: 140px;
-  display: flex;
-  gap: 22px;
-  justify-content: center;
-  align-items: center;
-  z-index: 10;
-  position: absolute;
-}
-#dealer-cards {
-  top: 5%;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 100%;
-  max-width: 600px;
-}
-#player-hands {
-  bottom: 3%;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 100%;
-  max-width: 600px;
-}
-.player-hand {
-  position: relative;
-  display: inline-block;
-  min-width: 160px;
-  vertical-align: top;
-  margin: 0 16px;
-  transition: box-shadow 0.25s, border 0.2s, filter 0.22s, opacity 0.15s;
-}
-.player-hand.active-hand {
-  box-shadow: 0 0 28px 6px #ffd70088, 0 2px 24px #ffd70055;
-  border: 2.5px solid #ffd700ee;
-  filter: brightness(1.06) drop-shadow(0 0 16px #ffd70066);
-  opacity: 1;
-}
-.player-hand:not(.active-hand) {
-  opacity: 0.89;
-  filter: grayscale(0.06) brightness(0.95);
-}
-.hand-cards {
-  display: flex;
-  gap: 0;
-  position: relative;
-  min-width: 140px;
-  z-index: 1;
-}
-.hand-cards .card {
-  transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94), box-shadow 0.35s ease-out;
-  animation: cardIn 0.55s cubic-bezier(0.25, 0.46, 0.45, 0.94) backwards;
-}
-@keyframes cardIn {
-  from { opacity: 0; transform: translateY(28px) scale(0.92);}
-  to   { opacity: 1; transform: none;}
-}
-
-.card {
-  width: 100px; height: 145px;
-  background: linear-gradient(145deg, #fff, #f5f5f4);
-  border-radius: 12px;
-  box-shadow: 0 6px 18px rgba(0,0,0,0.18), 0 2px 6px rgba(0,0,0,0.12);
-  border: 2.5px solid #bfa14a;
-  position: relative;
-  transform-style: preserve-3d;
-  transition: box-shadow 0.2s, border 0.2s, transform 0.3s cubic-bezier(0.4,0,0.2,1);
-  cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 2.1em;
-  color: #23232b;
-  user-select: none;
-}
-.card-face, .card-back {
-  position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-  backface-visibility: hidden;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 2em;
-}
-.card-back {
-  transform: rotateY(180deg);
-  background: repeating-linear-gradient(45deg, #bfa14a 0px, #bfa14a 8px, #23232b 8px, #23232b 16px), radial-gradient(circle at 50% 50%, #bfa14a 30%, #8b7a00 70%);
-  color: #23232b;
-}
-.card.flipped {
-  transform: rotateY(180deg);
-  transition: transform 0.65s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-}
-.card-deal-animate {
-  transition: left 0.65s cubic-bezier(0.25, 0.46, 0.45, 0.94), top 0.65s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.4s ease-out;
-}
-.card-fly {
-  box-shadow: 0 8px 32px #0008;
-  pointer-events: none;
-}
-
-/* Result banners with animated flair by outcome */
-.result-banner {
-  opacity: 0;
-  transform: translateY(-28px) scale(0.9);
-  background: #222c;
-  color: #ffd700;
-  font-weight: bold;
-  padding: 8px 24px;
-  border-radius: 18px;
-  position: absolute;
-  left: 50%; top: -38px;
-  transform: translate(-50%, -28px) scale(0.9);
-  font-size: 1.1em;
-  pointer-events: none;
-  box-shadow: 0 6px 22px #ffd70033, 0 2px 6px #23232b66;
-  z-index: 10;
-  transition: opacity 0.45s cubic-bezier(.68,-0.55,.27,1.55), transform 0.45s cubic-bezier(.68,-0.55,.27,1.55);
-}
-.result-banner.show {
-  opacity: 1;
-  transform: translate(-50%, 0) scale(1.06);
-}
-.result-banner.win {
-  background: linear-gradient(90deg, #e2ff7a 60%, #ffd700 120%);
-  color: #23232b;
-  box-shadow: 0 2px 18px #34c75955, 0 4px 8px #ffd700aa;
-}
-.result-banner.bust {
-  background: linear-gradient(90deg, #c0392b99 0%, #ffd70011 100%);
-  color: #fff;
-  box-shadow: 0 2px 18px #c0392b77, 0 4px 8px #ffd70044;
-}
-.result-banner.push {
-  background: linear-gradient(90deg, #434343 80%, #ffd70022 120%);
-  color: #ffd700;
-}
-.result-banner.dealer_bj {
-  background: linear-gradient(90deg, #9254de 80%, #ffd70022 120%);
-  color: #fff;
-}
-
-#action-bar {
-  background: rgba(36,36,28,0.92);
-  box-shadow: 0 4px 16px #ffd70044;
-  border-radius: 16px;
-  padding: 0.5em 1.5em;
-  display: flex;
-  gap: 1.5em;
-  z-index: 20;
-  transition: box-shadow 0.2s;
-}
-#action-bar button { min-width: 80px; }
-
-#status-toast {
-  background: rgba(36,36,28,0.98);
-  color: #ffd700;
-  font-size: 1.1rem;
-  font-weight: bold;
-  border-radius: 16px;
-  box-shadow: 0 4px 16px #23232b88;
-  padding: 12px 28px;
-  z-index: 100;
-  text-align: center;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.4s;
-  position: fixed;
-}
-#status-toast.active {
-  opacity: 1;
-  pointer-events: all;
-}
-
-/* Enhanced Outcome Display Panel */
-.outcome-display-panel {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  width: 380px;
-  backdrop-filter: blur(20px);
-  border-radius: 28px;
-  border: 4px solid;
-  z-index: 1000;
-  transform: translateX(480px) scale(0.7) rotateY(25deg);
-  opacity: 0;
-  transition: all 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-  overflow: hidden;
-  font-family: 'Segoe UI', Arial, sans-serif;  box-shadow: 
-    0 25px 80px rgba(0, 0, 0, 0.4),
-    0 8px 32px rgba(0, 0, 0, 0.2),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1);
-}
-
-/* Desktop-specific glass effect layer */
-@media (min-width: 769px) {
-  .outcome-display-panel::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    border-radius: inherit;
-    background: linear-gradient(135deg, 
-      rgba(255, 255, 255, 0.1) 0%, 
-      transparent 30%, 
-      transparent 70%, 
-      rgba(255, 255, 255, 0.05) 100%);
-    pointer-events: none;
-    z-index: 1;
-  }
-}
-
-.outcome-display-panel.show {
-  transform: translateX(0) scale(1) rotateY(0deg);
-  opacity: 1;
-}
-
-/* Desktop enhanced entrance animation */
-@media (min-width: 769px) {
-  .outcome-display-panel {
-    transform: translateX(500px) scale(0.6) rotateY(30deg);
-    transition: all 0.9s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-  }
-  
-  .outcome-display-panel.show {
-    transform: translateX(0) scale(1) rotateY(0deg);
-    animation: desktopBreathing 4s ease-in-out infinite;
-  }
-  
-  @keyframes desktopBreathing {
-    0%, 100% {
-      transform: translateX(0) scale(1) rotateY(0deg);
-    }
-    50% {
-      transform: translateX(0) scale(1.01) rotateY(0deg);
-    }
-  }
-  
-  /* Disable breathing during hover */
-  .outcome-display-panel.show:hover {
-    animation: none;
-  }
-}
-
-/* Desktop hover effects */
-@media (hover: hover) and (pointer: fine) {
-  .outcome-display-panel:hover {
-    transform: translateX(-10px) scale(1.02) rotateY(-2deg);
-    box-shadow: 
-      0 30px 100px rgba(0, 0, 0, 0.5),
-      0 12px 40px rgba(0, 0, 0, 0.3),
-      inset 0 1px 0 rgba(255, 255, 255, 0.15);
-    transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-    animation: none;
-  }
-  
-  .outcome-display-panel.show:hover {
-    transform: translateX(-10px) scale(1.02) rotateY(-2deg);
-    animation: none;
-  }
-}
-
-/* Win States */
-.outcome-display-panel.blackjack {
-  background: linear-gradient(145deg, 
-    rgba(255, 215, 0, 0.98) 0%, 
-    rgba(255, 140, 0, 0.95) 50%,
-    rgba(255, 69, 0, 0.98) 100%);
-  border-color: #ffd700;
-  color: #1a1a1a;
-  animation: blackjackPulse 2s ease-in-out infinite;
-  
-  /* Enhanced desktop glow */
-  box-shadow: 
-    0 25px 80px rgba(0, 0, 0, 0.4),
-    0 8px 32px rgba(255, 215, 0, 0.3),
-    0 0 60px rgba(255, 215, 0, 0.2),
-    inset 0 1px 0 rgba(255, 255, 255, 0.2);
-}
-
-.outcome-display-panel.win {
-  background: linear-gradient(145deg, 
-    rgba(76, 175, 80, 0.95) 0%, 
-    rgba(139, 195, 74, 0.98) 50%,
-    rgba(76, 175, 80, 0.95) 100%);
-  border-color: #4caf50;
-  color: #fff;
-  
-  /* Enhanced desktop glow */
-  box-shadow: 
-    0 25px 80px rgba(0, 0, 0, 0.4),
-    0 8px 32px rgba(76, 175, 80, 0.3),
-    0 0 40px rgba(76, 175, 80, 0.2),
-    inset 0 1px 0 rgba(255, 255, 255, 0.15);
-}
-
-.outcome-display-panel.side-bet-win {
-  background: linear-gradient(145deg, 
-    rgba(156, 39, 176, 0.95) 0%, 
-    rgba(233, 30, 99, 0.98) 50%,
-    rgba(255, 193, 7, 0.95) 100%);
-  border-color: #e91e63;
-  color: #fff;
-  animation: sideBetShimmer 1.5s ease-in-out infinite;
-  
-  /* Enhanced desktop glow */
-  box-shadow: 
-    0 25px 80px rgba(0, 0, 0, 0.4),
-    0 8px 32px rgba(233, 30, 99, 0.3),
-    0 0 50px rgba(233, 30, 99, 0.2),
-    inset 0 1px 0 rgba(255, 255, 255, 0.15);
-}
-
-/* Loss States */
-.outcome-display-panel.bust {
-  background: linear-gradient(145deg, 
-    rgba(244, 67, 54, 0.95) 0%, 
-    rgba(183, 28, 28, 0.98) 50%,
-    rgba(136, 14, 79, 0.95) 100%);
-  border-color: #f44336;
-  color: #fff;
-  animation: bustShake 0.8s ease-in-out infinite;
-  
-  /* Enhanced desktop styling */
-  box-shadow: 
-    0 25px 80px rgba(0, 0, 0, 0.4),
-    0 8px 32px rgba(244, 67, 54, 0.3),
-    0 0 40px rgba(244, 67, 54, 0.2),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1);
-}
-
-.outcome-display-panel.lose {
-  background: linear-gradient(145deg, 
-    rgba(96, 125, 139, 0.95) 0%, 
-    rgba(69, 90, 100, 0.98) 50%,
-    rgba(55, 71, 79, 0.95) 100%);
-  border-color: #607d8b;
-  color: #fff;
-  
-  /* Enhanced desktop styling */
-  box-shadow: 
-    0 25px 80px rgba(0, 0, 0, 0.4),
-    0 8px 32px rgba(96, 125, 139, 0.3),
-    0 0 30px rgba(96, 125, 139, 0.15),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1);
-}
-
-.outcome-display-panel.dealer-blackjack {
-  background: linear-gradient(145deg, 
-    rgba(63, 81, 181, 0.95) 0%, 
-    rgba(48, 63, 159, 0.98) 50%,
-    rgba(26, 35, 126, 0.95) 100%);
-  border-color: #3f51b5;
-  color: #fff;
-  animation: dealerBlackjackGlow 2s ease-in-out infinite;
-  
-  /* Enhanced desktop styling */
-  box-shadow: 
-    0 25px 80px rgba(0, 0, 0, 0.4),
-    0 8px 32px rgba(63, 81, 181, 0.3),
-    0 0 50px rgba(63, 81, 181, 0.2),
-    inset 0 1px 0 rgba(255, 255, 255, 0.15);
-}
-
-/* Neutral States */
-.outcome-display-panel.push {
-  background: linear-gradient(145deg, 
-    rgba(158, 158, 158, 0.95) 0%, 
-    rgba(117, 117, 117, 0.98) 50%,
-    rgba(97, 97, 97, 0.95) 100%);
-  border-color: #9e9e9e;
-  color: #fff;
-  
-  /* Enhanced desktop styling */
-  box-shadow: 
-    0 25px 80px rgba(0, 0, 0, 0.4),
-    0 8px 32px rgba(158, 158, 158, 0.3),
-    0 0 30px rgba(158, 158, 158, 0.15),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1);
-}
-
-.outcome-display-panel.insurance-win {
-  background: linear-gradient(145deg, 
-    rgba(0, 150, 136, 0.95) 0%, 
-    rgba(0, 121, 107, 0.98) 50%,
-    rgba(0, 95, 84, 0.95) 100%);
-  border-color: #009688;
-  color: #fff;
-  
-  /* Enhanced desktop styling */
-  box-shadow: 
-    0 25px 80px rgba(0, 0, 0, 0.4),
-    0 8px 32px rgba(0, 150, 136, 0.3),
-    0 0 40px rgba(0, 150, 136, 0.2),
-    inset 0 1px 0 rgba(255, 255, 255, 0.15);
-}
-
-.outcome-display-panel::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: radial-gradient(circle at 30% 20%, rgba(255, 255, 255, 0.25) 0%, transparent 50%);
-  pointer-events: none;
-  z-index: 2;
-}
-
-/* Desktop-specific glass effect layer */
-@media (min-width: 769px) {
-  .outcome-display-panel::after {
-    opacity: 1;
-    background: linear-gradient(135deg, 
-      rgba(255, 255, 255, 0.15) 0%, 
-      transparent 25%, 
-      transparent 75%, 
-      rgba(255, 255, 255, 0.08) 100%);
-  }
-}
-
-.win-panel-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 20px 24px 16px;
-  border-bottom: 2px solid rgba(255, 255, 255, 0.2);
-  background: linear-gradient(90deg, rgba(255, 255, 255, 0.18) 0%, transparent 100%);
-  position: relative;
-  z-index: 3;
-}
-
-/* Desktop enhanced header styling */
-@media (min-width: 769px) {
-  .win-panel-header {
-    padding: 22px 26px 18px;
-    border-bottom: 3px solid rgba(255, 255, 255, 0.25);
-    background: linear-gradient(90deg, 
-      rgba(255, 255, 255, 0.2) 0%, 
-      rgba(255, 255, 255, 0.1) 50%,
-      transparent 100%);
-  }
-}
-
-.outcome-icon {
-  font-size: 32px;
-  animation: bounce 1.2s infinite;
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
-  position: relative;
-  z-index: 4;
-}
-
-/* Desktop enhanced icon */
-@media (min-width: 769px) {
-  .outcome-icon {
-    font-size: 36px;
-    filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.4));
-  }
-}
-
-.outcome-title {
-  font-size: 20px;
-  font-weight: bold;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-  letter-spacing: 1.2px;
-  position: relative;
-  z-index: 4;
-}
-
-/* Desktop enhanced title */
-@media (min-width: 769px) {
-  .outcome-title {
-    font-size: 22px;
-    letter-spacing: 1.5px;
-    text-shadow: 0 3px 6px rgba(0, 0, 0, 0.4);
-  }
-}
-
-.close-win-btn {
-  background: rgba(0, 0, 0, 0.25);
-  border: none;
-  border-radius: 50%;
-  width: 36px;
-  height: 36px;
+.voucher-header {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: inherit;
-  font-size: 18px;
-  font-weight: bold;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  backdrop-filter: blur(10px);
-  position: relative;
-  z-index: 10;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
 }
 
-/* Desktop enhanced close button */
-@media (min-width: 769px) {
-  .close-win-btn {
-    width: 40px;
-    height: 40px;
-    font-size: 20px;
-    background: rgba(0, 0, 0, 0.3);
-    backdrop-filter: blur(15px);
-  }
+.voucher-icon {
+  font-size: 1.2rem;
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.3));
 }
 
-.close-win-btn:hover {
-  background: rgba(0, 0, 0, 0.5);
-  transform: scale(1.15) rotate(90deg);
-}
-
-/* Desktop enhanced hover effect */
-@media (min-width: 769px) {
-  .close-win-btn:hover {
-    background: rgba(0, 0, 0, 0.6);
-    transform: scale(1.2) rotate(90deg);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-  }
-}
-
-/* Enhanced mobile touch feedback */
-@media (hover: none) and (pointer: coarse) {
-  .close-win-btn {
-    transition: all 0.2s ease;
-    -webkit-tap-highlight-color: transparent;
-  }
-  
-  .close-win-btn:hover {
-    transform: scale(1.05);
-  }
-  
-  .close-win-btn:active {
-    transform: scale(0.95);
-    background: rgba(0, 0, 0, 0.5);
-  }
-}
-
-.outcome-details {
-  padding: 20px 24px;
-  position: relative;
-  z-index: 3;
-}
-
-/* Desktop enhanced details section */
-@media (min-width: 769px) {
-  .outcome-details {
-    padding: 22px 26px;
-  }
-}
-
-.outcome-type-section,
-.outcome-amount-section,
-.outcome-scores-section {
-  margin-bottom: 16px;
-}
-
-/* Desktop enhanced section spacing */
-@media (min-width: 769px) {
-  .outcome-type-section,
-  .outcome-amount-section,
-  .outcome-scores-section {
-    margin-bottom: 18px;
-  }
-}
-
-.outcome-type-label,
-.outcome-amount-label,
-.outcome-scores-label {
-  font-size: 14px;
+.voucher-title {
+  font-size: 1rem;
   font-weight: 600;
-  opacity: 0.9;
-  margin-bottom: 7px;
-  text-transform: uppercase;
-  letter-spacing: 0.6px;
-}
-
-/* Desktop enhanced labels */
-@media (min-width: 769px) {
-  .outcome-type-label,
-  .outcome-amount-label,
-  .outcome-scores-label {
-    font-size: 15px;
-    letter-spacing: 0.8px;
-    margin-bottom: 8px;
-  }
-}
-
-.outcome-type-value {
-  font-size: 24px;
-  font-weight: bold;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-  margin-bottom: 10px;
-}
-
-/* Desktop enhanced type value */
-@media (min-width: 769px) {
-  .outcome-type-value {
-    font-size: 26px;
-    text-shadow: 0 3px 6px rgba(0, 0, 0, 0.4);
-    margin-bottom: 12px;
-  }
-}
-
-/* Card Totals Styling */
-.outcome-scores-comparison {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background: rgba(255, 255, 255, 0.12);
-  border-radius: 14px;
-  padding: 14px 18px;
-  margin-top: 10px;
-  backdrop-filter: blur(15px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-/* Desktop enhanced scores comparison */
-@media (min-width: 769px) {
-  .outcome-scores-comparison {
-    background: rgba(255, 255, 255, 0.15);
-    border-radius: 16px;
-    padding: 16px 20px;
-    margin-top: 12px;
-    backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
-  }
-}
-
-.score-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 5px;
-  flex: 1;
-}
-
-.score-label {
-  font-size: 12px;
-  font-weight: 600;
-  opacity: 0.8;
-  text-transform: uppercase;
-  letter-spacing: 0.6px;
-}
-
-/* Desktop enhanced score labels */
-@media (min-width: 769px) {
-  .score-label {
-    font-size: 13px;
-    letter-spacing: 0.8px;
-  }
-}
-
-.score-value {
-  font-size: 26px;
-  font-weight: bold;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-}
-
-/* Desktop enhanced score values */
-@media (min-width: 769px) {
-  .score-value {
-    font-size: 28px;
-    text-shadow: 0 3px 6px rgba(0, 0, 0, 0.4);
-  }
-}
-
-.player-score .score-value {
-  color: #4CAF50;
-}
-
-.dealer-score .score-value {
-  color: #FF6B6B;
-}
-
-.score-vs {
-  font-size: 16px;
-  font-weight: bold;
-  opacity: 0.7;
-  margin: 0 10px;
-  text-transform: uppercase;
+  color: #ffd700;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.3);
   letter-spacing: 0.5px;
 }
 
-/* Desktop enhanced vs text */
-@media (min-width: 769px) {
-  .score-vs {
-    font-size: 18px;
-    margin: 0 12px;
-    letter-spacing: 0.8px;
-  }
+.voucher-form {
+  display: flex;
+  gap: 0.75rem;
+  align-items: stretch;
 }
 
-/* Special scoring states */
-.player-score.winning .score-value {
-  color: #FFD700;
-  animation: scoreGlow 2s ease-in-out infinite alternate;
+#voucher-code-input {
+  flex: 1;
+  padding: 0.75rem 1rem;
+  border: 2px solid rgba(255,215,0,0.3);
+  border-radius: 12px;
+  background: rgba(255,255,255,0.95);
+  font-size: 1rem;
+  font-family: 'Courier New', monospace;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #333;
+  outline: none;
+  transition: all 0.2s ease;
 }
 
-.dealer-score.winning .score-value {
-  color: #FFD700;
-  animation: scoreGlow 2s ease-in-out infinite alternate;
+#voucher-code-input:focus {
+  border-color: #ffd700;
+  box-shadow: 0 0 0 3px rgba(255,215,0,0.2), 0 2px 8px rgba(255,215,0,0.1);
+  background: rgba(255,255,255,1);
 }
 
-.player-score.bust .score-value,
-.dealer-score.bust .score-value {
-  color: #FF4444;
-  text-decoration: line-through;
-  opacity: 0.7;
+#voucher-code-input::placeholder {
+  color: #888;
+  font-weight: 400;
+  letter-spacing: 0.5px;
 }
 
-@keyframes scoreGlow {
-  0% {
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3), 0 0 20px rgba(255, 215, 0, 0.5);
-  }
-  100% {
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3), 0 0 30px rgba(255, 215, 0, 0.8);
-  }
-}
-
-.outcome-amount-value {
+.btn-voucher {
+  padding: 0.75rem 1.25rem;
+  border: none;
+  border-radius: 12px;
+  background: linear-gradient(90deg, #ffd700, #ffb700);
+  color: #23232b;
+  font-weight: bold;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(255,215,0,0.3);
+  min-width: 80px;
   display: flex;
   align-items: center;
-  gap: 12px;
-  font-size: 28px;
-  font-weight: bold;
+  justify-content: center;
+  gap: 0.5rem;
+  position: relative;
+  overflow: hidden;
 }
 
-/* Desktop enhanced amount value */
-@media (min-width: 769px) {
-  .outcome-amount-value {
-    gap: 14px;
-    font-size: 30px;
-  }
-}
-
-.outcome-icon-small {
-  font-size: 32px;
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
-  animation: spin 2s linear infinite;
-}
-
-/* Desktop enhanced small icon */
-@media (min-width: 769px) {
-  .outcome-icon-small {
-    font-size: 36px;
-    filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.4));
-  }
-}
-
-.amount-text {
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-}
-
-/* Desktop enhanced amount text */
-@media (min-width: 769px) {
-  .amount-text {
-    text-shadow: 0 3px 6px rgba(0, 0, 0, 0.4);
-  }
-}
-
-.outcome-effects {
+.btn-voucher::before {
+  content: '';
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
+  background: linear-gradient(180deg, rgba(255,255,255,0.25) 0%, transparent 60%);
   pointer-events: none;
-  overflow: hidden;
-  z-index: 1;
 }
 
-.effect-sparkle,
-.effect-fire,
-.effect-money {
-  position: absolute;
-  font-size: 18px;
-  animation: effectFloat 3s ease-in-out infinite;
+.btn-voucher:hover:not(:disabled) {
+  background: linear-gradient(90deg, #ffe066, #ffd700);
+  box-shadow: 0 4px 16px rgba(255,215,0,0.5);
+  transform: translateY(-1px);
 }
 
-/* Enhanced desktop effects */
-@media (min-width: 769px) {
-  .effect-sparkle,
-  .effect-fire,
-  .effect-money {
-    font-size: 22px;
-  }
-  
-  .effect-sparkle {
-    animation: desktopSparkleFloat 4s ease-in-out infinite;
-  }
-  
-  .effect-fire {
-    animation: desktopFireFlicker 0.4s ease-in-out infinite alternate;
-  }
-  
-  .effect-money {
-    animation: desktopMoneyBounce 1.2s ease-in-out infinite;
-  }
+.btn-voucher:active:not(:disabled) {
+  transform: translateY(1px);
+  box-shadow: 0 2px 8px rgba(255,215,0,0.2);
 }
 
-/* Desktop-specific enhanced effect animations */
-@media (min-width: 769px) {
-  @keyframes desktopSparkleFloat {
-    0%, 100% {
-      opacity: 0;
-      transform: scale(0.5) rotate(0deg) translateY(0px);
-    }
-    25% {
-      opacity: 0.8;
-      transform: scale(1.1) rotate(90deg) translateY(-8px);
-    }
-    50% {
-      opacity: 1;
-      transform: scale(1.3) rotate(180deg) translateY(-15px);
-    }
-    75% {
-      opacity: 0.8;
-      transform: scale(1.1) rotate(270deg) translateY(-8px);
-    }
-  }
-  
-  @keyframes desktopFireFlicker {
-    0% {
-      transform: scale(1) rotate(-3deg);
-      opacity: 0.9;
-      filter: hue-rotate(0deg);
-    }
-    100% {
-      transform: scale(1.15) rotate(3deg);
-      opacity: 1;
-      filter: hue-rotate(15deg);
-    }
-  }
-  
-  @keyframes desktopMoneyBounce {
-    0%, 100% {
-      transform: translateY(0) scale(1) rotate(0deg);
-    }
-    25% {
-      transform: translateY(-6px) scale(1.05) rotate(5deg);
-    }
-    50% {
-      transform: translateY(-12px) scale(1.1) rotate(0deg);
-    }
-    75% {
-      transform: translateY(-6px) scale(1.05) rotate(-5deg);
-    }
-  }
+.btn-voucher:disabled {
+  background: linear-gradient(90deg, #666, #555);
+  color: #999;
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
 }
 
-.effect-sparkle:nth-child(1) {
-  top: 20%;
-  left: 15%;
-  animation-delay: 0s;
-}
-
-.effect-sparkle:nth-child(2) {
-  top: 30%;
-  right: 20%;
-  animation-delay: 1s;
-}
-
-.effect-sparkle:nth-child(3) {
-  bottom: 25%;
-  left: 25%;
-  animation-delay: 2s;
-}
-
-.effect-fire {
-  top: 15%;
-  right: 15%;
-  animation: fireFlicker 0.5s ease-in-out infinite alternate;
-  display: none;
-}
-
-.effect-money {
-  bottom: 20%;
-  right: 25%;
-  animation: moneyBounce 1s ease-in-out infinite;
-  display: none;
-}
-
-/* Show specific effects for different outcomes */
-.outcome-display-panel.blackjack .effect-fire,
-.outcome-display-panel.side-bet-win .effect-fire {
-  display: block;
-}
-
-.outcome-display-panel.win .effect-money,
-.outcome-display-panel.side-bet-win .effect-money {
-  display: block;
-}
-
-/* Keyframe Animations */
-@keyframes blackjackPulse {
-  0%, 100% {
-    box-shadow: 0 0 30px rgba(255, 215, 0, 0.6);
-  }
-  50% {
-    box-shadow: 0 0 50px rgba(255, 215, 0, 0.9), 0 0 80px rgba(255, 140, 0, 0.4);
-  }
-}
-
-/* Enhanced desktop blackjack pulse */
-@media (min-width: 769px) {
-  @keyframes blackjackPulse {
-    0%, 100% {
-      box-shadow: 
-        0 25px 80px rgba(0, 0, 0, 0.4),
-        0 8px 32px rgba(255, 215, 0, 0.3),
-        0 0 40px rgba(255, 215, 0, 0.4),
-        inset 0 1px 0 rgba(255, 255, 255, 0.2);
-    }
-    50% {
-      box-shadow: 
-        0 30px 100px rgba(0, 0, 0, 0.5),
-        0 12px 40px rgba(255, 215, 0, 0.5),
-        0 0 80px rgba(255, 215, 0, 0.7),
-        0 0 120px rgba(255, 140, 0, 0.3),
-        inset 0 1px 0 rgba(255, 255, 255, 0.3);
-    }
-  }
-}
-
-@keyframes sideBetShimmer {
-  0%, 100% {
-    filter: hue-rotate(0deg) brightness(1);
-  }
-  50% {
-    filter: hue-rotate(30deg) brightness(1.2);
-  }
-}
-
-/* Enhanced desktop shimmer effect */
-@media (min-width: 769px) {
-  @keyframes sideBetShimmer {
-    0%, 100% {
-      filter: hue-rotate(0deg) brightness(1) saturate(1);
-      box-shadow: 
-        0 25px 80px rgba(0, 0, 0, 0.4),
-        0 8px 32px rgba(233, 30, 99, 0.3),
-        0 0 50px rgba(233, 30, 99, 0.2),
-        inset 0 1px 0 rgba(255, 255, 255, 0.15);
-    }
-    50% {
-      filter: hue-rotate(20deg) brightness(1.15) saturate(1.2);
-      box-shadow: 
-        0 30px 100px rgba(0, 0, 0, 0.5),
-        0 12px 40px rgba(233, 30, 99, 0.4),
-        0 0 70px rgba(233, 30, 99, 0.3),
-        0 0 100px rgba(255, 193, 7, 0.2),
-        inset 0 1px 0 rgba(255, 255, 255, 0.2);
-    }
-  }
-}
-
-@keyframes bustShake {
-  0%, 100% {
-    transform: translateX(0) scale(1) rotateY(0deg);
-  }
-  25% {
-    transform: translateX(-3px) scale(0.98) rotateY(-2deg);
-  }
-  75% {
-    transform: translateX(3px) scale(0.98) rotateY(2deg);
-  }
-}
-
-/* Enhanced desktop bust shake */
-@media (min-width: 769px) {
-  @keyframes bustShake {
-    0%, 100% {
-      transform: translateX(0) scale(1) rotateY(0deg);
-      box-shadow: 
-        0 25px 80px rgba(0, 0, 0, 0.4),
-        0 8px 32px rgba(244, 67, 54, 0.3),
-        0 0 40px rgba(244, 67, 54, 0.2),
-        inset 0 1px 0 rgba(255, 255, 255, 0.1);
-    }
-    25% {
-      transform: translateX(-5px) scale(0.97) rotateY(-3deg);
-      box-shadow: 
-        0 20px 70px rgba(0, 0, 0, 0.5),
-        0 6px 28px rgba(244, 67, 54, 0.4),
-        0 0 50px rgba(244, 67, 54, 0.3),
-        inset 0 1px 0 rgba(255, 255, 255, 0.08);
-    }
-    75% {
-      transform: translateX(5px) scale(0.97) rotateY(3deg);
-      box-shadow: 
-        0 20px 70px rgba(0, 0, 0, 0.5),
-        0 6px 28px rgba(244, 67, 54, 0.4),
-        0 0 50px rgba(244, 67, 54, 0.3),
-        inset 0 1px 0 rgba(255, 255, 255, 0.08);
-    }
-  }
-}
-
-@keyframes dealerBlackjackGlow {
-  0%, 100% {
-    box-shadow: 0 0 25px rgba(63, 81, 181, 0.5);
-  }
-  50% {
-    box-shadow: 0 0 40px rgba(63, 81, 181, 0.8), 0 0 60px rgba(48, 63, 159, 0.3);
-  }
-}
-
-/* Enhanced desktop dealer blackjack glow */
-@media (min-width: 769px) {
-  @keyframes dealerBlackjackGlow {
-    0%, 100% {
-      box-shadow: 
-        0 25px 80px rgba(0, 0, 0, 0.4),
-        0 8px 32px rgba(63, 81, 181, 0.3),
-        0 0 40px rgba(63, 81, 181, 0.4),
-        inset 0 1px 0 rgba(255, 255, 255, 0.15);
-    }
-    50% {
-      box-shadow: 
-        0 30px 100px rgba(0, 0, 0, 0.5),
-        0 12px 40px rgba(63, 81, 181, 0.5),
-        0 0 70px rgba(63, 81, 181, 0.6),
-        0 0 100px rgba(48, 63, 159, 0.4),
-        inset 0 1px 0 rgba(255, 255, 255, 0.2);
-    }
-  }
-}
-
-@keyframes bounce {
-  0%, 20%, 50%, 80%, 100% {
-    transform: translateY(0);
-  }
-  40% {
-    transform: translateY(-10px);
-  }
-  60% {
-    transform: translateY(-5px);
-  }
-}
-
-/* Enhanced desktop bounce animation */
-@media (min-width: 769px) {
-  @keyframes bounce {
-    0%, 20%, 50%, 80%, 100% {
-      transform: translateY(0) scale(1);
-    }
-    40% {
-      transform: translateY(-12px) scale(1.05);
-    }
-    60% {
-      transform: translateY(-6px) scale(1.02);
-    }
-  }
+.btn-voucher-spinner {
+  animation: spin 1s linear infinite;
 }
 
 @keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.voucher-message {
+  margin-top: 0.75rem;
+  padding: 0.6rem 1rem;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  text-align: center;
+  backdrop-filter: blur(4px);
+  animation: fadeInSlide 0.3s ease-out;
+}
+
+.voucher-message.success {
+  background: rgba(52,199,89,0.9);
+  color: white;
+  border: 1px solid rgba(52,199,89,0.5);
+  box-shadow: 0 2px 8px rgba(52,199,89,0.3);
+}
+
+.voucher-message.error {
+  background: rgba(255,59,48,0.9);
+  color: white;
+  border: 1px solid rgba(255,59,48,0.5);
+  box-shadow: 0 2px 8px rgba(255,59,48,0.3);
+}
+
+@keyframes fadeInSlide {
   from {
-    transform: rotate(0deg);
+    opacity: 0;
+    transform: translateY(-10px);
   }
   to {
-    transform: rotate(360deg);
-  }
-}
-
-/* Enhanced desktop spin for money icons */
-@media (min-width: 769px) {
-  @keyframes spin {
-    from {
-      transform: rotate(0deg) scale(1);
-    }
-    50% {
-      transform: rotate(180deg) scale(1.1);
-    }
-    to {
-      transform: rotate(360deg) scale(1);
-    }
-  }
-}
-
-@keyframes effectFloat {
-  0%, 100% {
-    opacity: 0;
-    transform: scale(0.5) rotate(0deg) translateY(0px);
-  }
-  50% {
     opacity: 1;
-    transform: scale(1.2) rotate(180deg) translateY(-10px);
+    transform: translateY(0);
   }
 }
 
-@keyframes fireFlicker {
-  0% {
-    transform: scale(1) rotate(-2deg);
-    opacity: 0.9;
-  }
-  100% {
-    transform: scale(1.1) rotate(2deg);
-    opacity: 1;
-  }
-}
-
-@keyframes moneyBounce {
-  0%, 100% {
-    transform: translateY(0) scale(1);
-  }
-  50% {
-    transform: translateY(-8px) scale(1.1);
-  }
-}
-
-/* Mobile responsive adjustments */
+/* Mobile responsive styling for voucher interface */
 @media (max-width: 768px) {
-  .outcome-display-panel {
-    width: 320px;
-    bottom: 8px;
-    right: 8px;
-    border-width: 2px;
-    border-radius: 20px;
+  .voucher-container {
+    margin: 0.5rem auto 0 auto;
+    padding: 0 1rem;
+    max-width: 95vw;
   }
   
-  .win-panel-header {
-    padding: 14px 18px 10px;
-    flex-wrap: wrap;
-    gap: 8px;
+  .voucher-input-section {
+    padding: 0.875rem 1rem;
   }
   
-  .outcome-title {
-    font-size: 16px;
-    flex: 1;
+  .voucher-form {
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+  
+  #voucher-code-input {
+    font-size: 0.95rem;
+    padding: 0.7rem 0.9rem;
+  }
+  
+  .btn-voucher {
+    padding: 0.7rem 1rem;
+    font-size: 0.9rem;
+    align-self: center;
     min-width: 120px;
   }
-  
-  .close-win-btn {
-    width: 36px;
-    height: 36px;
-    font-size: 18px;
-    /* Enhanced mobile touch target */
-    position: relative;
-  }
-  
-  .close-win-btn::before {
-    content: '';
-    position: absolute;
-    top: -8px;
-    left: -8px;
-    right: -8px;
-    bottom: -8px;
-    pointer-events: auto;
-    border-radius: 50%;
-    /* Invisible expanded touch area */
-  }
-  
-  .outcome-details {
-    padding: 12px 18px;
-  }
-    .outcome-type-section,
-  .outcome-amount-section,
-  .outcome-scores-section {
-    margin-bottom: 10px;
-  }
-  
-  .outcome-type-value {
-    font-size: 18px;
-  }
-  
-  .outcome-amount-value {
-    font-size: 22px;
-  }
-  
-  /* Mobile card totals adjustments */
-  .outcome-scores-comparison {
-    padding: 10px 14px;
-  }
-  
-  .score-value {
-    font-size: 20px;
-  }
-  
-  .score-label {
-    font-size: 10px;
-  }
-  
-  .score-vs {
-    font-size: 12px;
-  }
 }
 
 @media (max-width: 480px) {
-  .outcome-display-panel {
-    width: 300px;
-    bottom: 6px;
-    right: 6px;
-    transform: translateX(370px) scale(0.75) rotateY(20deg);
-    border-radius: 18px;
+  .voucher-input-section {
+    padding: 0.75rem 0.875rem;
   }
   
-  .outcome-display-panel.show {
-    transform: translateX(0) scale(0.95) rotateY(0deg);
+  .voucher-title {
+    font-size: 0.9rem;
   }
   
-  .win-panel-header {
-    padding: 12px 16px 8px;
+  #voucher-code-input {
+    font-size: 0.9rem;
+    padding: 0.65rem 0.8rem;
   }
   
-  .outcome-title {
-    font-size: 14px;
-  }
-  
-  .close-win-btn {
-    width: 32px;
-    height: 32px;
-    font-size: 16px;
-  }
-  
-  .close-win-btn::before {
-    top: -10px;
-    left: -10px;
-    right: -10px;
-    bottom: -10px;
-  }
-  
-  .outcome-details {
-    padding: 10px 16px;
-  }
-    .outcome-type-value {
-    font-size: 16px;
-  }
-  
-  .outcome-amount-value {
-    font-size: 20px;
-  }
-  
-  /* Smaller mobile card totals */
-  .outcome-scores-comparison {
-    padding: 8px 12px;
-  }
-  
-  .score-value {
-    font-size: 18px;
-  }
-  
-  .score-label {
-    font-size: 9px;
-  }
-  
-  .score-vs {
-    font-size: 11px;
-    margin: 0 6px;
+  .btn-voucher {
+    padding: 0.65rem 0.9rem;
+    font-size: 0.85rem;
   }
 }
-
-/* Enhanced mobile positioning and overflow handling */
-@media (max-width: 480px) and (max-height: 700px) {
-  .outcome-display-panel {
-    position: fixed;
-    bottom: 8px;
-    right: 8px;
-    left: 8px;
-    width: auto;
-    max-width: none;
-    transform: translateY(100%) scale(0.95);
-    transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-    z-index: 1001;
-  }
-  
-  .outcome-display-panel.show {
-    transform: translateY(0) scale(1);
-  }
-  
-  .outcome-details {
-    max-height: 40vh;
-    overflow-y: auto;
-    scrollbar-width: thin;
-  }
-  
-  .outcome-details::-webkit-scrollbar {
-    width: 4px;
-  }
-  
-  .outcome-details::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.3);
-    border-radius: 2px;
-  }
+body {
+  padding: 5px !important;
 }
 
-/* Smooth mobile animations */
+/* Header optimizations for mobile */
+header {
+  padding: 0.5rem 1rem !important;
+  margin-top: 0 !important;
+}
+
+header h1 {
+  font-size: 1.5rem !important;
+}
+
+header #profile {
+  gap: 0.5rem !important;
+}
+
+header #logout-btn {
+  padding: 0.4rem 0.8rem !important;
+  font-size: 0.9rem !important;
+}
+
+/* Hide chips display on mobile during gameplay for more space */
+body.mobile-gameplay #center-chips-display {
+  display: none !important;
+}
+
+/* Compact main container */
+main {
+  margin-top: 0.5rem !important;
+  max-width: 100vw !important;
+  padding: 0 0.5rem !important;
+}
+
+/* Mobile blackjack table optimizations */
+#blackjack-table { 
+  max-width: 98vw; 
+  min-height: 240px; 
+  margin-bottom: 0.5rem !important;
+}
+
+#blackjack-table .table-logo { 
+  width: 180px; 
+  opacity: 0.08 !important;
+}
+/* Compact bet spots */
+#table-bet-spots { 
+  gap: 20px; 
+  bottom: 12% !important;
+}
+
+.table-bet-spot { 
+  width: 60px; 
+  height: 60px; 
+  font-size: 0.8em; 
+}
+.table-bet-spot .font-bold {
+  font-size: 1.2em !important;
+}
+/* Mobile card sizing */
+.card { 
+  width: 42px; 
+  height: 60px; 
+  font-size: 1.6em !important;
+  border-radius: 8px !important;
+}
+
+/* Player hand adjustments for mobile */
+.player-hand {
+  margin: 0 8px !important;
+  min-width: 100px !important;
+}
+
+.hand-cards {
+  min-width: 100px !important;
+}
+/* Dealer cards adjustments */
+#dealer-cards {
+  gap: 16px !important;
+  top: 8% !important;
+  min-height: 80px !important;
+  max-width: 95vw !important;
+}
+
+#player-hands {
+  gap: 16px !important;
+  bottom: 8% !important;
+  min-height: 80px !important;
+  max-width: 95vw !important;
+}
+
+/* Ensure proper card spacing within hands */
+.hand-cards {
+  min-width: 80px !important;
+  justify-content: center !important;
+}
+
+/* Adjust player hand margins for mobile */
+.player-hand {
+  margin: 0 4px !important;
+  min-width: 80px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+}
+
+/* Mobile chip tray */
+.chip-tray-container {
+  margin-top: 0.25rem !important;
+  padding: 0.5rem 1rem !important;
+}
+
+/* Compact action buttons */
+.action-buttons-container {
+  gap: 0.5rem !important;
+  margin-top: 0.5rem !important;
+  margin-bottom: 1rem !important;
+}
+
+.betting-actions {
+  gap: 0.5rem !important;
+}
+
+.betting-actions button {
+  padding: 0.5rem 1.2rem !important;
+  font-size: 0.95rem !important;
+}
+
+#action-bar {
+  padding: 0.4rem 1rem !important;
+  gap: 0.8rem !important;
+  margin-top: 0.5rem !important;
+}
+
+#action-bar button {
+  padding: 0.5rem 1rem !important;
+  font-size: 0.9rem !important;
+  min-width: 60px !important;
+}
+
+#end-round-buttons {
+  margin: 0.5rem 0 !important;
+  gap: 0.8rem !important;
+}
+
+#end-round-buttons button {
+  padding: 0.5rem 1rem !important;
+  font-size: 0.9rem !important;
+}
+
+/* Mobile-specific styles for the voucher interface */
+.voucher-container {
+  margin: 0.5rem auto;
+  padding: 0 1rem;
+  width: calc(100% - 2rem);
+  max-width: none;
+}
+
+.voucher-input-section {
+  padding: 0.875rem 1rem;
+  border-radius: 12px;
+}
+
+.voucher-title {
+  font-size: 1.1rem;
+}
+
+.voucher-form {
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+#voucher-code-input {
+  padding: 0.7rem 0.9rem;
+  font-size: 0.95rem;
+}
+
+.btn-voucher {
+  padding: 0.7rem 1rem;
+  font-size: 0.9rem;
+  min-width: 100px;
+}
+
+/* Extra small mobile optimizations */
 @media (max-width: 480px) {
-  .outcome-display-panel {
-    transform: translateX(110%) scale(0.9);
-    transition: transform 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  }
-  
-  .outcome-display-panel.show {
-    transform: translateX(0) scale(1);
-  }
-}
-
-/* Landscape mobile optimizations */
-@media screen and (max-height: 600px) and (orientation: landscape) {
-  .outcome-display-panel {
-    bottom: 4px;
-    right: 4px;
-    width: 280px;
-    max-height: 90vh;
-  }
-  
-  .outcome-display-panel.show {
-    transform: translateX(0) scale(0.9) rotateY(0deg);
-  }
-  
-  .win-panel-header {
-    padding: 8px 14px 6px;
-  }
-  
-  .outcome-details {
-    padding: 8px 14px;
-    max-height: 60vh;
-    overflow-y: auto;
-  }
-  
-  .outcome-type-section,
-  .outcome-amount-section,
-  .outcome-scores-section {
-    margin-bottom: 8px;
-  }
-  
-  .outcome-scores-comparison {
-    padding: 6px 10px;
-  }
-  
-  .score-value {
-    font-size: 16px;
-  }
-}
-
-/* Prevent outcome display from interfering with game controls */
-@media (max-width: 768px) {
-  .outcome-display-panel {
-    pointer-events: auto;
-  }
-  
-  .outcome-display-panel:not(.show) {
-    pointer-events: none;
-  }
-  
-  /* Ensure it doesn't block betting area */
-  #table-bet-spots {
-    z-index: 8;
-  }
-  
-  .outcome-display-panel {
-    z-index: 1000;
-  }
-}
-.chip-flying {
-  pointer-events: none !important;
-  box-shadow: 0 8px 22px #ffd70077, 0 2px 2px #0006;
-  opacity: 0.95;
-  border-radius: 100px;
-  z-index: 9999;
-  transition: transform 0.45s cubic-bezier(.68,-0.55,.27,1.55), opacity 0.4s;
-}
-.bet-pulse {
-  animation: pulse-bet 0.24s linear;
-}
-@keyframes pulse-bet {
-  0% { box-shadow: 0 0 0 0 #ffd70066; }
-  60% { box-shadow: 0 0 0 16px #ffd70033; }
-  100% { box-shadow: 0 0 0 0 #ffd70000; }
-}
-/* Accessibility - visually hidden text */
-.sr-only {
-  position: absolute;
-  width: 1px; height: 1px;
-  padding: 0; margin: -1px;
-  overflow: hidden;
-  clip: rect(0,0,0,0);
-  border: 0;
-}
-/* Dynamic touch target sizing using CSS custom properties - Enhanced */
-:root {
-  --chip-touch-scale: 1.2;
-  --bet-spot-touch-scale: 1.3;
-  --min-touch-size: 48px;
-  --bet-spot-padding: 20px;
-}
-
-/* Enhanced mobile touch interactions with improved hitboxes */
-@media (hover: none) and (pointer: coarse) {
-  .btn-primary:hover,
-  .btn-secondary:hover,
-  .chip:hover {
-    /* Disable hover effects on touch devices */
-    transform: none;
-    box-shadow: inherit;
-  }
-  
-  .btn-primary:active {
-    transform: scale(0.96);
-    transition: transform 0.1s ease;
-  }
-  
-  .btn-secondary:active {
-    transform: scale(0.96);
-    transition: transform 0.1s ease;
-  }
-  
-  .chip:active {
-    transform: scale(0.94);
-    transition: transform 0.1s ease;
-  }
-  
-  .table-bet-spot:active {
-    transform: scale(0.96);
-    transition: transform 0.1s ease;
-  }
-    /* Enhanced chip touch targets for mobile */
-  .chip {
-    position: relative;
-    /* Ensure chips have minimum touch-friendly spacing */
-    margin: 4px;
-  }
-    .chip::before {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: calc(100% * var(--chip-touch-scale, 1.2));
-    height: calc(100% * var(--chip-touch-scale, 1.2));
-    min-width: var(--min-touch-size, 50px);
-    min-height: var(--min-touch-size, 50px);
-    z-index: -1;
-    pointer-events: auto;
-    border-radius: 50%;
-    /* Visual debug aid - remove in production */
-    /* background: rgba(255, 0, 0, 0.1); */
-  }
-  
-  /* Even larger touch targets for small mobile screens */
-  @media (max-width: 480px) {
-    .chip {
-      margin: 6px; /* More spacing on small screens */
-    }
-    
-    .chip::before {
-      width: 140%;
-      height: 140%;
-      min-width: 60px;
-      min-height: 60px;
-    }
-    
-    /* Increase chip row gap for better touch separation */
-    .chip-row {
-      gap: 1.2rem !important;
-    }
-  }
-    /* Enhanced bet spot touch targets - Full spot coverage */
-  .table-bet-spot {
-    position: relative;
-    /* Ensure full touch coverage for the betting area */
-    box-sizing: content-box;
-  }
-  
-  .table-bet-spot::after {
-    content: '\1F477';
-    position: absolute;
-    left: 50%; top: 50%;
-    transform: translate(-50%, -50%) scale(2.3);
-    opacity: 0.09;
-    font-size: 2.7em;
-    pointer-events: none;
-    z-index: 1;
-  }
-    /* Expand bet spot touch areas to cover full betting space */
-  .table-bet-spot::before {
-    content: '';
-    position: absolute;
-    /* Use dynamic padding for responsive touch coverage */
-    top: calc(-1 * var(--bet-spot-padding, 20px));
-    left: calc(-1 * var(--bet-spot-padding, 20px));
-    right: calc(-1 * var(--bet-spot-padding, 20px));
-    bottom: calc(-1 * var(--bet-spot-padding, 20px));
-    border-radius: 50%;
-    pointer-events: auto;
-    z-index: 0;
-    /* Visual debug aid for development - uncomment to see touch areas */
-    /* background: rgba(255, 0, 0, 0.1); */
-    /* border: 2px solid rgba(255, 0, 0, 0.3); */
-  }
-  
-  @media (max-width: 768px) {
-    .table-bet-spot::before {
-      /* Even more generous touch coverage on mobile */
-      top: -25px;
-      left: -25px;
-      right: -25px;
-      bottom: -25px;
-    }
-  }
-  
-  @media (max-width: 480px) {
-    .table-bet-spot::before {
-      /* Maximum touch coverage for small screens */
-      top: -30px;
-      left: -30px;
-      right: -30px;
-      bottom: -30px;
-    }
-    
-    /* Reduce bet spot gap to accommodate larger touch areas */
-    #table-bet-spots {
-      gap: 15px !important;
-    }
-  }
-  
-  /* Enhanced button touch targets */
-  .btn-primary, .btn-secondary {
-    min-height: 44px; /* Apple's recommended minimum touch target */
-    min-width: 44px;
-    position: relative;
-  }
-  
-  @media (max-width: 480px) {
-    .btn-primary, .btn-secondary {
-      min-height: 48px;
-      padding: 0.6rem 1.4rem !important;
-    }
-    
-    #action-bar button {
-      min-height: 44px !important;
-      min-width: 60px !important;
-    }
-  }
-  
-  /* Touch feedback animations */
-  .chip.touch-active {
-    transform: scale(0.95) !important;
-    transition: transform 0.1s ease !important;
-  }
-  
-  .table-bet-spot.touch-active {
-    transform: scale(0.96) !important;
-    transition: transform 0.1s ease !important;
-  }
-  
-  .btn-primary.touch-active,
-  .btn-secondary.touch-active {
-    transform: scale(0.97) !important;
-    transition: transform 0.1s ease !important;
-  }
-}
-
-/* Mobile-first responsive design */
-@media (max-width: 768px) {
-  body {
-    padding: 5px !important;
-  }
-  
-  /* Header optimizations for mobile */
-  header {
-    padding: 0.5rem 1rem !important;
-    margin-top: 0 !important;
-  }
-  
-  header h1 {
-    font-size: 1.5rem !important;
-  }
-  
-  header #profile {
-    gap: 0.5rem !important;
-  }
-  
-  header #logout-btn {
-    padding: 0.4rem 0.8rem !important;
-    font-size: 0.9rem !important;
-  }
-  
-  /* Hide chips display on mobile during gameplay for more space */
-  body.mobile-gameplay #center-chips-display {
-    display: none !important;
-  }
-  
-  /* Compact main container */
-  main {
-    margin-top: 0.5rem !important;
-    max-width: 100vw !important;
-    padding: 0 0.5rem !important;
-  }
-  
-  /* Mobile blackjack table optimizations */
-  #blackjack-table { 
-    max-width: 98vw; 
-    min-height: 240px; 
-    margin-bottom: 0.5rem !important;
-  }
-  
-  #blackjack-table .table-logo { 
-    width: 180px; 
-    opacity: 0.08 !important;
-  }
-    /* Compact bet spots */
-  #table-bet-spots { 
-    gap: 20px; 
-    bottom: 12% !important;
-  }
-  
-  .table-bet-spot { 
-    width: 60px; 
-    height: 60px; 
-    font-size: 0.8em; 
-  }
-    .table-bet-spot .font-bold {
-    font-size: 1.2em !important;
-  }
-    /* Mobile card sizing */
-  .card { 
-    width: 42px; 
-    height: 60px; 
-    font-size: 1.6em !important;
-    border-radius: 8px !important;
-  }
-  
-  /* Player hand adjustments for mobile */
-  .player-hand {
-    margin: 0 8px !important;
-    min-width: 100px !important;
-  }
-  
-  .hand-cards {
-    min-width: 100px !important;
-  }
-    /* Dealer cards adjustments */
-  #dealer-cards {
-    gap: 16px !important;
-    top: 8% !important;
-    min-height: 80px !important;
-    max-width: 95vw !important;
-  }
-  
-  #player-hands {
-    gap: 16px !important;
-    bottom: 8% !important;
-    min-height: 80px !important;
-    max-width: 95vw !important;
-  }
-  
-  /* Ensure proper card spacing within hands */
-  .hand-cards {
-    min-width: 80px !important;
-    justify-content: center !important;
-  }
-  
-  /* Adjust player hand margins for mobile */
-  .player-hand {
-    margin: 0 4px !important;
-    min-width: 80px !important;
-    display: flex !important;
-    flex-direction: column !important;
-    align-items: center !important;
-  }
-  
-  /* Mobile chip tray */
-  .chip-tray-container {
-    margin-top: 0.25rem !important;
-    padding: 0.5rem 1rem !important;
-  }
-  
-  .chip { 
-    width: 45px; 
-    height: 45px; 
-    font-size: 0.9em !important;
-  }
-  
-  .chip-row { 
-    gap: 0.8rem; 
-  }
-  
-  /* Compact action buttons */
-  .action-buttons-container {
-    gap: 0.5rem !important;
-    margin-top: 0.5rem !important;
-    margin-bottom: 1rem !important;
-  }
-  
-  .betting-actions {
-    gap: 0.5rem !important;
-  }
-  
-  .betting-actions button {
-    padding: 0.5rem 1.2rem !important;
-    font-size: 0.95rem !important;
-  }
-  
-  #action-bar {
-    padding: 0.4rem 1rem !important;
-    gap: 0.8rem !important;
-    margin-top: 0.5rem !important;
-  }
-  
-  #action-bar button {
-    padding: 0.5rem 1rem !important;
-    font-size: 0.9rem !important;
-    min-width: 60px !important;
-  }
-  
-  #end-round-buttons {
-    margin: 0.5rem 0 !important;
-    gap: 0.8rem !important;
-  }
-  
-  #end-round-buttons button {
-    padding: 0.5rem 1rem !important;
-    font-size: 0.9rem !important;
-  }
-  
-  /* Mobile dealer/player areas */
-  .table-area-dealer { 
-    width: 180px; 
-    height: 80px; 
-  }
-  
-  .table-area-player { 
-    width: 200px; 
-    height: 75px; 
-  }
-  
-  /* Table text adjustments */
-  #blackjack-table .table-text {
-    font-size: 1em !important;
-  }
-  
-  #blackjack-table .table-text.rules {
-    font-size: 0.85em !important;
-  }
-  
-  #blackjack-table .table-text.nosmoke {
-    font-size: 0.85em !important;
-  }
-}
-
-@media (max-width: 480px) {
-  /* Extra small mobile optimizations */
   header h1 {
     font-size: 1.3rem !important;
   }
@@ -2269,10 +696,6 @@ body.modern-bg {
     opacity: 1;
   }
   100% {
-    transform: translateX(0) translateY(0) scale(1) rotate(0deg);
-    opacity: 1;
-  }
-}
     transform: translateX(0) translateY(0) rotateY(0deg) scale(1);
     opacity: 1;
   }
@@ -2405,6 +828,32 @@ body.modern-bg {
       </div>
     </div>
 
+    <!-- Voucher Redemption Interface -->
+    <div class="voucher-container">
+      <div class="voucher-input-section">
+        <div class="voucher-header">
+          <span class="voucher-icon">🎫</span>
+          <span class="voucher-title">Redeem Voucher</span>
+        </div>
+        <div class="voucher-form">
+          <input 
+            type="text" 
+            id="voucher-code-input" 
+            placeholder="Enter voucher code" 
+            maxlength="13"
+            autocomplete="off"
+            autocapitalize="characters"
+            spellcheck="false"
+          >
+          <button id="redeem-voucher-btn" class="btn-voucher" disabled>
+            <span class="btn-voucher-text">Redeem</span>
+            <span class="btn-voucher-spinner" style="display: none;">⏳</span>
+          </button>
+        </div>
+        <div id="voucher-message" class="voucher-message" style="display: none;"></div>
+      </div>
+    </div>
+
     <!-- Game Action Buttons -->
     <div class="action-buttons-container flex flex-col items-center justify-center gap-4 mt-6 mb-8">
       <!-- Deal/Clear Bets -->
@@ -2473,6 +922,214 @@ body.modern-bg {
   </div>
 
   <!-- Scripts -->
+  <script type="module">
+  // Voucher Redemption Functionality
+  import { getFirestore, doc, getDoc, runTransaction } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-firestore.js";
+  import { getAuth } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-auth.js";
+  
+  // Get Firebase instances from the UI module (they're already initialized)
+  const auth = getAuth();
+  const db = getFirestore();
+  
+  // Voucher elements
+  const voucherCodeInput = document.getElementById('voucher-code-input');
+  const redeemVoucherBtn = document.getElementById('redeem-voucher-btn');
+  const voucherMessage = document.getElementById('voucher-message');
+  const voucherSpinner = document.querySelector('.btn-voucher-spinner');
+  const voucherBtnText = document.querySelector('.btn-voucher-text');
+  
+  // Enable/disable redeem button based on input
+  voucherCodeInput.addEventListener('input', () => {
+    const code = voucherCodeInput.value.replace(/[^A-Z0-9]/g, '').toUpperCase();
+    voucherCodeInput.value = code;
+    redeemVoucherBtn.disabled = code.length < 10; // Minimum viable code length
+  });
+  
+  // Format voucher code as user types (add dashes)
+  voucherCodeInput.addEventListener('blur', () => {
+    const code = voucherCodeInput.value.replace(/[^A-Z0-9]/g, '');
+    if (code.length >= 10) {
+      // Format as CHI-XXX-XXXXXX
+      const formatted = code.replace(/(.{3})(.{3})(.*)/, '$1-$2-$3');
+      voucherCodeInput.value = formatted;
+    }
+  });
+  
+  // Show voucher message
+  function showVoucherMessage(message, isSuccess = true) {
+    voucherMessage.textContent = message;
+    voucherMessage.className = `voucher-message ${isSuccess ? 'success' : 'error'}`;
+    voucherMessage.style.display = 'block';
+    
+    // Auto-hide after 5 seconds
+    setTimeout(() => {
+      if (voucherMessage.style.display !== 'none') {
+        voucherMessage.style.display = 'none';
+      }
+    }, 5000);
+  }
+  
+  // Set loading state for redeem button
+  function setRedeemLoading(loading) {
+    if (loading) {
+      redeemVoucherBtn.disabled = true;
+      voucherBtnText.style.display = 'none';
+      voucherSpinner.style.display = 'inline-block';
+    } else {
+      redeemVoucherBtn.disabled = voucherCodeInput.value.length < 10;
+      voucherBtnText.style.display = 'inline-block';
+      voucherSpinner.style.display = 'none';
+    }
+  }
+  
+  // Redeem voucher functionality
+  async function redeemVoucher() {
+    const currentUser = auth.currentUser;
+    if (!currentUser) {
+      showVoucherMessage('Please log in to redeem vouchers.', false);
+      return;
+    }
+    
+    const voucherCode = voucherCodeInput.value.replace(/[^A-Z0-9]/g, '').toUpperCase();
+    
+    if (voucherCode.length < 10) {
+      showVoucherMessage('Please enter a valid voucher code.', false);
+      return;
+    }
+    
+    setRedeemLoading(true);
+    voucherMessage.style.display = 'none';
+    
+    try {
+      // Use a transaction to ensure atomic voucher redemption
+      await runTransaction(db, async (transaction) => {
+        // Get voucher document
+        const voucherRef = doc(db, 'chipVouchers', voucherCode);
+        const voucherDoc = await transaction.get(voucherRef);
+        
+        if (!voucherDoc.exists()) {
+          throw new Error('Invalid voucher code. Please check your code and try again.');
+        }
+        
+        const voucherData = voucherDoc.data();
+        
+        // Check if voucher is already redeemed
+        if (voucherData.isRedeemed) {
+          throw new Error('This voucher has already been redeemed.');
+        }
+        
+        // Check if voucher is expired
+        const now = new Date();
+        const expiryDate = voucherData.expiresAt.toDate();
+        if (now > expiryDate) {
+          throw new Error('This voucher has expired.');
+        }
+        
+        // Get user's current chip balance
+        const userRef = doc(db, 'construction21_users', currentUser.uid);
+        const userDoc = await transaction.get(userRef);
+        
+        let currentChips = 100; // Default chips
+        if (userDoc.exists()) {
+          currentChips = userDoc.data().chips || 100;
+        }
+        
+        // Calculate new chip balance
+        const newChips = currentChips + voucherData.chips;
+        const maxChips = 1000000; // Match game logic max
+        const finalChips = Math.min(newChips, maxChips);
+        
+        // Update voucher as redeemed
+        transaction.update(voucherRef, {
+          isRedeemed: true,
+          redeemedBy: currentUser.uid,
+          redeemedAt: new Date()
+        });
+        
+        // Update user's chips
+        transaction.set(userRef, {
+          chips: finalChips,
+          lastLogin: new Date()
+        }, { merge: true });
+        
+        return { 
+          addedChips: voucherData.chips,
+          finalChips: finalChips,
+          description: voucherData.description
+        };
+      });
+      
+      // If we get here, the transaction succeeded
+      const result = await runTransaction(db, async (transaction) => {
+        const voucherRef = doc(db, 'chipVouchers', voucherCode);
+        const voucherDoc = await transaction.get(voucherRef);
+        const voucherData = voucherDoc.data();
+        
+        const userRef = doc(db, 'construction21_users', currentUser.uid);
+        const userDoc = await transaction.get(userRef);
+        let currentChips = userDoc.exists() ? userDoc.data().chips || 100 : 100;
+        
+        return {
+          addedChips: voucherData.chips,
+          finalChips: currentChips,
+          description: voucherData.description
+        };
+      });
+      
+      // Update the game's chip count and UI
+      if (window.game) {
+        const userRef = doc(db, 'construction21_users', currentUser.uid);
+        const userDoc = await getDoc(userRef);
+        if (userDoc.exists()) {
+          window.game.chips = userDoc.data().chips || 100;
+          
+          // Update UI displays
+          const profileChipsEl = document.getElementById('profile-chips');
+          const centerChipsAmountEl = document.getElementById('center-chips-amount');
+          if (profileChipsEl) profileChipsEl.textContent = window.game.chips;
+          if (centerChipsAmountEl) centerChipsAmountEl.textContent = window.game.chips;
+        }
+      }
+      
+      // Clear the input and show success message
+      voucherCodeInput.value = '';
+      showVoucherMessage(
+        `Voucher redeemed successfully! Added ${result.addedChips} chips. Total: ${result.finalChips}`,
+        true
+      );
+      
+      // Show a celebration toast
+      const statusToast = document.getElementById('status-toast');
+      if (statusToast) {
+        statusToast.textContent = `🎉 +${result.addedChips} chips redeemed!`;
+        statusToast.style.display = 'block';
+        statusToast.style.background = 'rgba(52,199,89,0.95)';
+        statusToast.style.color = 'white';
+        setTimeout(() => {
+          statusToast.style.display = 'none';
+          statusToast.style.background = '';
+          statusToast.style.color = '';
+        }, 4000);
+      }
+      
+    } catch (error) {
+      console.error('Voucher redemption error:', error);
+      showVoucherMessage(error.message || 'Failed to redeem voucher. Please try again.', false);
+    } finally {
+      setRedeemLoading(false);
+    }
+  }
+  
+  // Event listener for redeem button
+  redeemVoucherBtn.addEventListener('click', redeemVoucher);
+  
+  // Allow Enter key to redeem
+  voucherCodeInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter' && !redeemVoucherBtn.disabled) {
+      redeemVoucher();
+    }
+  });
+  </script>
   <script type="module" src="js/construction21-ui.js"></script>
 </body>
 </html>

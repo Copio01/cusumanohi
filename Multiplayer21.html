@@ -3,9 +3,42 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Construction 21 Multiplayer</title>
+  <title>Construction 21 - Multiplayer</title>
   <link rel="icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2NCIgaGVpZ2h0PSI2NCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiNlMGExMDYiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBkPSJNMTUuMDUgNWEzIDMgMCAwIDEgNC41IDBIM05NMTUuMDUgNU0xOSA4LjVjMCAxLjUtLjUgMy41LTIgNC41di4wNUgxN2EyIDIgMCAwIDAgLTIgLTIgYSAyIDIgMCAwIDAgLTIgMkgxM3YtNkgxNlY4LjVNOSA2LjVWNE02IDcgTDUuNSAxNC41TWwwIDE1IDguOTkgMy04IGMxLjUgLTRoMmMwIDAuNSAwLjUgMSAwLjUgMnYxSDEwdjNjMCAxIDAgMi40IC0xIDN2XzIgYzAgMC41IDAuMiAwLjUgMC41IDAuNXMwLjUgLTAuMiAwLjUgLTAuNVYyMUg0LjA3bDEuOCAtMTQuMjUgYTEgMSAwIDAgMSAwLjE5IC0wLjA3IHoiLz48L3N2Zz4=" type="image/svg+xml">
-  <link href="css/tailwind.output.css" rel="stylesheet">
+  
+  <!-- Firebase v9 SDK -->
+  <script type="module">
+    import { initializeApp, getApps } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+    import { getFirestore, doc, setDoc, getDoc, updateDoc, onSnapshot, collection, addDoc, query, where, orderBy, deleteDoc, runTransaction, deleteField } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+    import { getAuth, onAuthStateChanged, signInAnonymously } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+
+    // Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyBVtq6dAEuybJNmTTv8dXBxTVUgw1t0ZMk",
+      authDomain: "cusumano-website.firebaseapp.com",
+      projectId: "cusumano-website",
+      storageBucket: "cusumano-website.appspot.com",
+      messagingSenderId: "20051552210",
+      appId: "1:20051552210:web:7eb3b22baa3fec184e4a0b"
+    };
+
+    // Initialize Firebase only if not already initialized
+    let app;
+    if (getApps().length === 0) {
+      app = initializeApp(firebaseConfig);
+    } else {
+      app = getApps()[0];
+    }
+
+    window.db = getFirestore(app);
+    window.auth = getAuth(app);
+    
+    // Global Firebase utilities
+    window.firebaseUtils = {
+      doc, setDoc, getDoc, updateDoc, onSnapshot, collection, addDoc, query, where, orderBy, deleteDoc, runTransaction, deleteField,
+      onAuthStateChanged, signInAnonymously
+    };
+  </script>
   <style>
 body.modern-bg {
   background: radial-gradient(ellipse at 60% 40%, #ffd70033 0%, #23232b 100%), linear-gradient(135deg, #23232b 0%, #2d2d3a 100%);
@@ -40,7 +73,7 @@ body.modern-bg {
 }
 .btn-primary:hover {
   background: linear-gradient(90deg, #ffe066, #ffd700);
-  box-shadow: 0 4px 16px rgba(255, 215, 0, 0.5), 0 0 0 2px rgba(255, 215, 0, 0.3);
+  box-shadow: 0 4px 16px rgba(255,215,0,0.5), 0 0 0 2px rgba(255,215,0,0.3);
   transform: translateY(-2px) scale(1.04);
 }
 .btn-primary:active {
@@ -129,1201 +162,129 @@ body.modern-bg {
   margin-right: auto;
 }
 
-/* Center Chips Display */
-#center-chips-display {
-  background: rgba(36,36,28,0.8);
-  padding: 0.75rem 2rem;
+/* Voucher Interface Styling */
+.voucher-container {
+  margin: 0.75rem auto 0 auto;
+  width: fit-content;
+  max-width: 400px;
+}
+
+.voucher-input-section {
+  background: rgba(36,36,28,0.85);
+  backdrop-filter: blur(8px);
   border-radius: 16px;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.3), 0 0 0 2px rgba(255,215,0,0.3);
-  margin-bottom: 1.5rem;
-}
-#center-chips-amount {
-  font-size: 1.75rem;
-  color: #34c759;
-  font-weight: 800;
-  text-shadow: 0 0 10px rgba(52, 199, 89, 0.5);
+  padding: 1rem 1.25rem;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.3), 0 0 0 1px rgba(255,215,0,0.2);
+  border: 1px solid rgba(255,215,0,0.15);
 }
 
-/* Blackjack Table */
-#blackjack-table {
-  width: 100vw;
-  max-width: 1200px;
-  aspect-ratio: 2.5/1;
-  margin: 0 auto 1.5rem auto;
-  background:
-    repeating-linear-gradient(135deg, #385f38 0 3px, #305730 3px 7px),
-    radial-gradient(ellipse at 60% 40%, #3a7d3a 0%, #1a4a1a 100%),
-    linear-gradient(135deg, #1a2d1a 0%, #2d3a2d 100%);
-  border-radius: 48% 48% 60% 60%/60% 60% 100% 100%;
-  border: 10px solid #ffd700;
-  box-shadow:
-    0 24px 80px #000b,
-    0 4px 24px #ffd70044 inset,
-    0 0 0 16px #fffbe622 inset,
-    0 0 64px 8px #ffd70044;
-  position: relative;
-  overflow: visible;
-  z-index: 2;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  align-items: center;
-  min-height: 520px;
-}
-
-/* Table Areas */
-.table-area-dealer {
-  position: absolute;
-  top: 2.5%; left: 50%; transform: translateX(-50%);
-  width: 420px; height: 180px;
-  background: radial-gradient(ellipse at 50% 45%, #ffd70022 0, transparent 70%);
-  z-index: 1; pointer-events: none;
-  border-radius: 38% 38% 38% 38% / 58% 58% 38% 38%;
-  filter: blur(2.5px);
-}
-.table-area-player {
-  position: absolute;
-  bottom: 1.2%; left: 50%; transform: translateX(-50%);
-  width: 440px; height: 170px;
-  background: radial-gradient(ellipse at 50% 60%, #34c75922 0, transparent 80%);
-  z-index: 1; pointer-events: none;
-  border-radius: 40% 40% 44% 44% / 55% 55% 45% 45%;
-  filter: blur(3.2px);
-}
-
-/* Virtual Deck */
-#virtual-deck {
-  position: absolute;
-  top: 7.5%;
-  left: 11%;
-  width: 20px;
-  height: 30px;
-  pointer-events: none;
-  opacity: 0.01;
-  z-index: 20;
-}
-
-/* Table Decorations */
-#blackjack-table::before {
-  content: '';
-  position: absolute;
-  inset: -18px;
-  border-radius: inherit;
-  border: 7px dashed #fffbe6cc;
-  pointer-events: none;
-  z-index: 2;
-  box-shadow: 0 0 32px #ffd70055;
-}
-
-#blackjack-table::after {
-  content: '';
-  position: absolute;
-  left: 50%;
-  bottom: 0;
-  transform: translateX(-50%);
-  width: 62%;
-  height: 28px;
-  background: 
-    repeating-linear-gradient(135deg, #ffd700 0 14px, #23232b 14px 28px),
-    linear-gradient(0deg, #ffd70011 0%, transparent 100%);
-  border-radius: 0 0 48% 48%/0 0 100% 100%;
-  opacity: 0.8;
-  z-index: 4;
-  pointer-events: none;
-  box-shadow: 0 4px 24px #ffd70055;
-}
-
-#table-vignette {
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  pointer-events: none;
-  background:
-    radial-gradient(ellipse at 50% 60%, transparent 60%, #000b 100%),
-    radial-gradient(ellipse at 50% 40%, #ffd70033 0%, transparent 80%);
-  z-index: 3;
-}
-
-/* Table Logo */
-#blackjack-table .table-logo {
-  position: absolute;
-  left: 50%;
-  top: 38%;
-  transform: translate(-50%, -50%);
-  z-index: 5;
-  opacity: 0.12;
-  pointer-events: none;
-  width: 480px;
-  max-width: 70vw;
-  filter: blur(0.5px) drop-shadow(0 2px 8px #ffd70055);
-}
-
-/* Table Text */
-#blackjack-table .table-text {
-  position: absolute;
-  left: 50%;
-  color: #fffbe6;
-  font-family: 'Segoe UI', Arial, sans-serif;
-  font-weight: bold;
-  text-shadow: 0 2px 8px #23232b99, 0 0 8px #ffd70044;
-  pointer-events: none;
-  z-index: 6;
-  font-size: 1.35em;
-  letter-spacing: 1.5px;
-  user-select: none;
-}
-
-#blackjack-table .table-text.rules {
-  top: 21%;
-  transform: translateX(-50%) rotate(-3deg);
-  font-size: 1.08em;
-  color: #fffbe6;
-}
-
-#blackjack-table .table-text.nosmoke {
-  bottom: 9%;
-  transform: translateX(-50%) rotate(3deg);
-  font-size: 1.08em;
-  color: #ffd700;
-  text-shadow: 0 2px 8px #23232b99, 0 0 8px #ffd70099;
-}
-
-/* Bet Spots */
-#table-bet-spots {
-  position: absolute;
-  bottom: 17%;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  gap: 90px;
-  z-index: 8;
-}
-
-.table-bet-spot {
-  width: 120px; height: 120px;
-  background: rgba(255,255,255,0.13);
-  border: 5px solid #ffd700cc;
-  border-radius: 50%;
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  font-size: 1.18em;
-  color: #ffd700;
-  text-shadow: 0 2px 8px #23232b88;
-  font-weight: bold;
-  letter-spacing: 0.4px;
-  text-align: center;
-  line-height: 1.35;
-  cursor: pointer;
-  user-select: none;
-  box-shadow: 0 6px 32px #ffd70033, 0 0 0 16px #fffbe622 inset, 0 2px 12px #23232b55;
-  position: relative;
-  transition: border 0.2s, box-shadow 0.2s;
-  filter: drop-shadow(0 2px 8px #23232b88);
-  overflow: visible;
-}
-
-.table-bet-spot .font-bold {
-  font-size: 1.5em;
-  margin-top: 2px;
-}
-
-.bet-spot-chips {
-  position: absolute;
-  left: 0; top: 0;
-  width: 100%; height: 100%;
-  pointer-events: none;
-  z-index: 15;
-}
-
-.table-bet-spot::after {
-  content: '\1F477';
-  position: absolute;
-  left: 50%; top: 50%;
-  transform: translate(-50%, -50%) scale(2.3);
-  opacity: 0.09;
-  font-size: 2.7em;
-  pointer-events: none;
-  z-index: 1;
-}
-
-/* Card and Hand Areas */
-#dealer-cards, #player-hands {
-  min-height: 140px;
-  display: flex;
-  gap: 22px;
-  justify-content: center;
-  align-items: center;
-  z-index: 10;
-  position: absolute;
-}
-
-#dealer-cards {
-  top: 5%;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 100%;
-  max-width: 600px;
-}
-
-#player-hands {
-  bottom: 3%;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 100%;
-  max-width: 600px;
-}
-
-/* Player Hands */
-.player-hand {
-  position: relative;
-  display: inline-block;
-  background: rgba(36, 36, 28, 0.4);
-  border: 2px solid rgba(255, 215, 0, 0.3);
-  border-radius: 16px;
-  padding: 16px 20px 12px 20px;
-  min-width: 160px;
-  vertical-align: top;
-  margin: 0 16px;
-  transition: box-shadow 0.25s, border 0.2s, filter 0.22s, opacity 0.15s;
-}
-
-.player-hand.active-hand {
-  box-shadow: 0 0 28px 6px #ffd70088, 0 2px 24px #ffd70055;
-  border: 2.5px solid #ffd700ee;
-  filter: brightness(1.06) drop-shadow(0 0 16px #ffd70066);
-  opacity: 1;
-}
-
-.player-hand:not(.active-hand) {
-  opacity: 0.89;
-  filter: grayscale(0.06) brightness(0.95);
-}
-
-.hand-cards {
-  display: flex;
-  gap: 0;
-  position: relative;
-  min-width: 140px;
-  z-index: 1;
-}
-
-/* Cards */
-.card {
-  width: 72px;
-  height: 100px;
-  background: 
-    radial-gradient(ellipse at 30% 20%, #fff8 10%, transparent 50%),
-    linear-gradient(135deg, #f8f8f8 0%, #e8e8e8 100%);
-  border: 2px solid #ccc;
-  border-radius: 14px;
-  box-shadow: 0 4px 12px #0005, 0 1px 3px #0008;
-  transition: box-shadow 0.2s, border 0.2s, transform 0.3s cubic-bezier(0.4,0,0.2,1);
-  cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 2.1em;
-  color: #23232b;
-  user-select: none;
-}
-
-.card-face, .card-back {
-  position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-  backface-visibility: hidden;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 2em;
-}
-
-.card-back {
-  transform: rotateY(180deg);
-  background: repeating-linear-gradient(45deg, #bfa14a 0px, #bfa14a 8px, #23232b 8px, #23232b 16px), radial-gradient(circle at 50% 50%, #bfa14a 30%, #8b7a00 70%);
-  color: #23232b;
-}
-
-/* Status Toast */
-#status-toast {
-  position: fixed;
-  top: 24px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: rgba(36,36,28,0.98);
-  color: #ffd700;
-  font-size: 1.1rem;
-  font-weight: bold;
-  border-radius: 16px;
-  box-shadow: 0 4px 16px #23232b88;
-  padding: 12px 28px;
-  z-index: 100;
-  text-align: center;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.4s;
-}
-
-#status-toast.active {
-  opacity: 1;
-  pointer-events: all;
-}
-
-/* Action Bar */
-#action-bar {
-  display: flex;
-  gap: 1rem;
-  justify-content: center;
-  align-items: center;
-  padding: 0.75rem 1.5rem;
-  background: rgba(36,36,28,0.8);
-  border-radius: 16px;
-  margin-top: 1rem;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.3);
-}
-
-#action-bar button {
-  min-width: 80px;
-}
-
-/* Mobile Optimizations */
-@media (max-width: 768px) {
-  body {
-    padding: 5px !important;
-  }
-  
-  header {
-    padding: 0.5rem 1rem !important;
-    margin-top: 0 !important;
-  }
-  
-  header h1 {
-    font-size: 1.5rem !important;
-  }
-  
-  #blackjack-table { 
-    max-width: 98vw; 
-    min-height: 240px; 
-    margin-bottom: 0.5rem !important;
-  }
-  
-  #blackjack-table .table-logo { 
-    width: 180px; 
-    opacity: 0.08 !important;
-  }
-  
-  #table-bet-spots { 
-    gap: 20px; 
-    bottom: 12% !important;
-  }
-  
-  .table-bet-spot { 
-    width: 60px; 
-    height: 60px; 
-    font-size: 0.8em; 
-  }
-  
-  .card { 
-    width: 42px; 
-    height: 60px; 
-    font-size: 1.6em !important;
-    border-radius: 8px !important;
-  }
-  
-  .player-hand {
-    margin: 0 8px !important;
-    min-width: 100px !important;
-  }
-  
-  .chip { 
-    width: 45px; 
-    height: 45px; 
-    font-size: 0.9em !important;
-  }
-  
-  .chip-row { 
-    gap: 0.8rem; 
-  }
-  
-  .action-buttons-container {
-    gap: 0.5rem !important;
-    margin-top: 0.5rem !important;
-    margin-bottom: 1rem !important;
-  }
-}
-
-@media (max-width: 480px) {
-  #table-bet-spots { 
-    gap: 15px !important;
-  }
-  
-  .table-bet-spot { 
-    width: 50px !important; 
-    height: 50px !important; 
-    font-size: 0.7em !important;
-  }
-  
-  .card { 
-    width: 38px !important; 
-    height: 54px !important; 
-    font-size: 1.4em !important;
-  }
-  
-  .chip { 
-    width: 38px !important; 
-    height: 38px !important; 
-    font-size: 0.8em !important;
-  }
-    .chip-row { 
-    gap: 0.5rem !important;
-  }
-}
-
-/* Enhanced Outcome Display Panel Styling (complete CSS from single-player version) */
-#status-toast {
-  background: rgba(36,36,28,0.98);
-  color: #ffd700;
-  font-size: 1.1rem;
-  font-weight: bold;
-  border-radius: 16px;
-  box-shadow: 0 4px 16px #23232b88;
-  padding: 12px 28px;
-  z-index: 100;
-  text-align: center;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.4s;
-  position: fixed;
-}
-#status-toast.active {
-  opacity: 1;
-  pointer-events: all;
-}
-
-.outcome-display-panel {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  width: 380px;
-  backdrop-filter: blur(20px);
-  border-radius: 28px;
-  border: 4px solid;
-  z-index: 1000;
-  transform: translateX(480px) scale(0.7) rotateY(25deg);
-  opacity: 0;
-  transition: all 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-  overflow: hidden;
-  font-family: 'Segoe UI', Arial, sans-serif;
-  box-shadow: 
-    0 25px 80px rgba(0, 0, 0, 0.4),
-    0 8px 32px rgba(0, 0, 0, 0.2),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1);
-}
-
-.outcome-display-panel::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: radial-gradient(circle at 30% 20%, rgba(255, 255, 255, 0.25) 0%, transparent 50%);
-  pointer-events: none;
-  z-index: 2;
-}
-
-@media (min-width: 769px) {
-  .outcome-display-panel::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    border-radius: inherit;
-    background: linear-gradient(135deg, 
-      rgba(255, 255, 255, 0.1) 0%, 
-      transparent 30%, 
-      transparent 70%, 
-      rgba(255, 255, 255, 0.05) 100%);
-    pointer-events: none;
-    z-index: 1;
-  }
-}
-
-.outcome-display-panel.show {
-  transform: translateX(0) scale(1) rotateY(0deg);
-  opacity: 1;
-}
-
-@media (min-width: 769px) {
-  .outcome-display-panel {
-    transform: translateX(500px) scale(0.6) rotateY(30deg);
-    transition: all 0.9s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-  }
-  
-  .outcome-display-panel.show {
-    transform: translateX(0) scale(1) rotateY(0deg);
-    animation: desktopBreathing 4s ease-in-out infinite;
-  }
-  
-  @keyframes desktopBreathing {
-    0%, 100% {
-      transform: translateX(0) scale(1) rotateY(0deg);
-    }
-    50% {
-      transform: translateX(0) scale(1.01) rotateY(0deg);
-    }
-  }
-  
-  .outcome-display-panel.show:hover {
-    animation: none;
-  }
-}
-
-@media (hover: hover) and (pointer: fine) {
-  .outcome-display-panel:hover {
-    transform: translateX(-10px) scale(1.02) rotateY(-2deg);
-    box-shadow: 
-      0 30px 100px rgba(0, 0, 0, 0.5),
-      0 12px 40px rgba(0, 0, 0, 0.3),
-      inset 0 1px 0 rgba(255, 255, 255, 0.15);
-    transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-    animation: none;
-  }
-  
-  .outcome-display-panel.show:hover {
-    transform: translateX(-10px) scale(1.02) rotateY(-2deg);
-    animation: none;
-  }
-}
-
-/* Win States */
-.outcome-display-panel.blackjack {
-  background: linear-gradient(145deg, 
-    rgba(255, 215, 0, 0.98) 0%, 
-    rgba(255, 140, 0, 0.95) 50%,
-    rgba(255, 69, 0, 0.98) 100%);
-  border-color: #ffd700;
-  color: #1a1a1a;
-  animation: blackjackPulse 2s ease-in-out infinite;
-  
-  box-shadow: 
-    0 25px 80px rgba(0, 0, 0, 0.4),
-    0 8px 32px rgba(255, 215, 0, 0.3),
-    0 0 60px rgba(255, 215, 0, 0.2),
-    inset 0 1px 0 rgba(255, 255, 255, 0.2);
-}
-
-.outcome-display-panel.win {
-  background: linear-gradient(145deg, 
-    rgba(76, 175, 80, 0.95) 0%, 
-    rgba(139, 195, 74, 0.98) 50%,
-    rgba(76, 175, 80, 0.95) 100%);
-  border-color: #4caf50;
-  color: #fff;
-  
-  box-shadow: 
-    0 25px 80px rgba(0, 0, 0, 0.4),
-    0 8px 32px rgba(76, 175, 80, 0.3),
-    0 0 40px rgba(76, 175, 80, 0.2),
-    inset 0 1px 0 rgba(255, 255, 255, 0.15);
-}
-
-.outcome-display-panel.side-bet-win {
-  background: linear-gradient(145deg, 
-    rgba(156, 39, 176, 0.95) 0%, 
-    rgba(233, 30, 99, 0.98) 50%,
-    rgba(255, 193, 7, 0.95) 100%);
-  border-color: #e91e63;
-  color: #fff;
-  animation: sideBetShimmer 1.5s ease-in-out infinite;
-  
-  box-shadow: 
-    0 25px 80px rgba(0, 0, 0, 0.4),
-    0 8px 32px rgba(233, 30, 99, 0.3),
-    0 0 50px rgba(233, 30, 99, 0.2),
-    inset 0 1px 0 rgba(255, 255, 255, 0.15);
-}
-
-/* Loss States */
-.outcome-display-panel.bust {
-  background: linear-gradient(145deg, 
-    rgba(244, 67, 54, 0.95) 0%, 
-    rgba(183, 28, 28, 0.98) 50%,
-    rgba(136, 14, 79, 0.95) 100%);
-  border-color: #f44336;
-  color: #fff;
-  animation: bustShake 0.8s ease-in-out infinite;
-  
-  box-shadow: 
-    0 25px 80px rgba(0, 0, 0, 0.4),
-    0 8px 32px rgba(244, 67, 54, 0.3),
-    0 0 40px rgba(244, 67, 54, 0.2),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1);
-}
-
-.outcome-display-panel.lose {
-  background: linear-gradient(145deg, 
-    rgba(96, 125, 139, 0.95) 0%, 
-    rgba(69, 90, 100, 0.98) 50%,
-    rgba(55, 71, 79, 0.95) 100%);
-  border-color: #607d8b;
-  color: #fff;
-  
-  box-shadow: 
-    0 25px 80px rgba(0, 0, 0, 0.4),
-    0 8px 32px rgba(96, 125, 139, 0.3),
-    0 0 30px rgba(96, 125, 139, 0.15),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1);
-}
-
-.outcome-display-panel.dealer-blackjack {
-  background: linear-gradient(145deg, 
-    rgba(63, 81, 181, 0.95) 0%, 
-    rgba(48, 63, 159, 0.98) 50%,
-    rgba(26, 35, 126, 0.95) 100%);
-  border-color: #3f51b5;
-  color: #fff;
-  animation: dealerBlackjackGlow 2s ease-in-out infinite;
-  
-  box-shadow: 
-    0 25px 80px rgba(0, 0, 0, 0.4),
-    0 8px 32px rgba(63, 81, 181, 0.3),
-    0 0 50px rgba(63, 81, 181, 0.2),
-    inset 0 1px 0 rgba(255, 255, 255, 0.15);
-}
-
-/* Neutral States */
-.outcome-display-panel.push {
-  background: linear-gradient(145deg, 
-    rgba(158, 158, 158, 0.95) 0%, 
-    rgba(117, 117, 117, 0.98) 50%,
-    rgba(97, 97, 97, 0.95) 100%);
-  border-color: #9e9e9e;
-  color: #fff;
-  
-  box-shadow: 
-    0 25px 80px rgba(0, 0, 0, 0.4),
-    0 8px 32px rgba(158, 158, 158, 0.3),
-    0 0 30px rgba(158, 158, 158, 0.15),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1);
-}
-
-.outcome-display-panel.insurance-win {
-  background: linear-gradient(145deg, 
-    rgba(0, 150, 136, 0.95) 0%, 
-    rgba(0, 121, 107, 0.98) 50%,
-    rgba(0, 95, 84, 0.95) 100%);
-  border-color: #009688;
-  color: #fff;
-  
-  box-shadow: 
-    0 25px 80px rgba(0, 0, 0, 0.4),
-    0 8px 32px rgba(0, 150, 136, 0.3),
-    0 0 40px rgba(0, 150, 136, 0.2),
-    inset 0 1px 0 rgba(255, 255, 255, 0.15);
-}
-
-.win-panel-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 20px 24px 16px;
-  border-bottom: 2px solid rgba(255, 255, 255, 0.2);
-  background: linear-gradient(90deg, rgba(255, 255, 255, 0.18) 0%, transparent 100%);
-  position: relative;
-  z-index: 3;
-}
-
-@media (min-width: 769px) {
-  .win-panel-header {
-    padding: 22px 26px 18px;
-    border-bottom: 3px solid rgba(255, 255, 255, 0.25);
-    background: linear-gradient(90deg, 
-      rgba(255, 255, 255, 0.2) 0%, 
-      rgba(255, 255, 255, 0.1) 50%,
-      transparent 100%);
-  }
-}
-
-.outcome-icon {
-  font-size: 32px;
-  animation: bounce 1.2s infinite;
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
-  position: relative;
-  z-index: 4;
-}
-
-@media (min-width: 769px) {
-  .outcome-icon {
-    font-size: 36px;
-    filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.4));
-  }
-}
-
-.outcome-title {
-  font-size: 20px;
-  font-weight: bold;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-  letter-spacing: 1.2px;
-  position: relative;
-  z-index: 4;
-}
-
-@media (min-width: 769px) {
-  .outcome-title {
-    font-size: 22px;
-    letter-spacing: 1.5px;
-    text-shadow: 0 3px 6px rgba(0, 0, 0, 0.4);
-  }
-}
-
-.close-win-btn {
-  background: rgba(0, 0, 0, 0.25);
-  border: none;
-  border-radius: 50%;
-  width: 36px;
-  height: 36px;
+.voucher-header {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: inherit;
-  font-size: 18px;
-  font-weight: bold;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  backdrop-filter: blur(10px);
-  position: relative;
-  z-index: 10;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
 }
 
-@media (min-width: 769px) {
-  .close-win-btn {
-    width: 40px;
-    height: 40px;
-    font-size: 20px;
-    background: rgba(0, 0, 0, 0.3);
-    backdrop-filter: blur(15px);
-  }
+.voucher-icon {
+  font-size: 1.2rem;
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.3));
 }
 
-.close-win-btn:hover {
-  background: rgba(0, 0, 0, 0.5);
-  transform: scale(1.15) rotate(90deg);
-}
-
-@media (min-width: 769px) {
-  .close-win-btn:hover {
-    background: rgba(0, 0, 0, 0.6);
-    transform: scale(1.2) rotate(90deg);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-  }
-}
-
-@media (hover: none) and (pointer: coarse) {
-  .close-win-btn {
-    transition: all 0.2s ease;
-    -webkit-tap-highlight-color: transparent;
-  }
-  
-  .close-win-btn:hover {
-    transform: scale(1.05);
-  }
-  
-  .close-win-btn:active {
-    transform: scale(0.95);
-    background: rgba(0, 0, 0, 0.5);
-  }
-}
-
-.outcome-details {
-  padding: 20px 24px;
-  position: relative;
-  z-index: 3;
-}
-
-@media (min-width: 769px) {
-  .outcome-details {
-    padding: 22px 26px;
-  }
-}
-
-.outcome-type-section,
-.outcome-amount-section,
-.outcome-scores-section {
-  margin-bottom: 16px;
-}
-
-@media (min-width: 769px) {
-  .outcome-type-section,
-  .outcome-amount-section,
-  .outcome-scores-section {
-    margin-bottom: 18px;
-  }
-}
-
-.outcome-type-label,
-.outcome-amount-label,
-.outcome-scores-label {
-  font-size: 14px;
+.voucher-title {
+  font-size: 1rem;
   font-weight: 600;
-  opacity: 0.9;
-  margin-bottom: 7px;
-  text-transform: uppercase;
-  letter-spacing: 0.6px;
-}
-
-@media (min-width: 769px) {
-  .outcome-type-label,
-  .outcome-amount-label,
-  .outcome-scores-label {
-    font-size: 15px;
-    letter-spacing: 0.8px;
-    margin-bottom: 8px;
-  }
-}
-
-.outcome-type-value {
-  font-size: 24px;
-  font-weight: bold;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-  margin-bottom: 10px;
-}
-
-@media (min-width: 769px) {
-  .outcome-type-value {
-    font-size: 26px;
-    text-shadow: 0 3px 6px rgba(0, 0, 0, 0.4);
-    margin-bottom: 12px;
-  }
-}
-
-.outcome-scores-comparison {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background: rgba(255, 255, 255, 0.12);
-  border-radius: 14px;
-  padding: 14px 18px;
-  margin-top: 10px;
-  backdrop-filter: blur(15px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-@media (min-width: 769px) {
-  .outcome-scores-comparison {
-    background: rgba(255, 255, 255, 0.15);
-    border-radius: 16px;
-    padding: 16px 20px;
-    margin-top: 12px;
-    backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
-  }
-}
-
-.score-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 5px;
-  flex: 1;
-}
-
-.score-label {
-  font-size: 12px;
-  font-weight: 600;
-  opacity: 0.8;
-  text-transform: uppercase;
-  letter-spacing: 0.6px;
-}
-
-@media (min-width: 769px) {
-  .score-label {
-    font-size: 13px;
-    letter-spacing: 0.8px;
-  }
-}
-
-.score-value {
-  font-size: 26px;
-  font-weight: bold;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-}
-
-@media (min-width: 769px) {
-  .score-value {
-    font-size: 28px;
-    text-shadow: 0 3px 6px rgba(0, 0, 0, 0.4);
-  }
-}
-
-.player-score .score-value {
-  color: #4CAF50;
-}
-
-.dealer-score .score-value {
-  color: #FF6B6B;
-}
-
-.score-vs {
-  font-size: 16px;
-  font-weight: bold;
-  opacity: 0.7;
-  margin: 0 10px;
-  text-transform: uppercase;
+  color: #ffd700;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.3);
   letter-spacing: 0.5px;
 }
 
-@media (min-width: 769px) {
-  .score-vs {
-    font-size: 18px;
-    margin: 0 12px;
-    letter-spacing: 0.8px;
-  }
+.voucher-form {
+  display: flex;
+  gap: 0.75rem;
+  align-items: stretch;
 }
 
-.player-score.winning .score-value {
-  color: #FFD700;
-  animation: scoreGlow 2s ease-in-out infinite alternate;
+#voucher-code-input {
+  flex: 1;
+  padding: 0.75rem 1rem;
+  border: 2px solid rgba(255,215,0,0.3);
+  border-radius: 12px;
+  background: rgba(255,255,255,0.95);
+  font-size: 1rem;
+  font-family: 'Courier New', monospace;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #333;
+  outline: none;
+  transition: all 0.2s ease;
 }
 
-.dealer-score.winning .score-value {
-  color: #FFD700;
-  animation: scoreGlow 2s ease-in-out infinite alternate;
+#voucher-code-input:focus {
+  border-color: #ffd700;
+  box-shadow: 0 0 0 3px rgba(255,215,0,0.2), 0 2px 8px rgba(255,215,0,0.1);
+  background: rgba(255,255,255,1);
 }
 
-.player-score.bust .score-value,
-.dealer-score.bust .score-value {
-  color: #FF4444;
-  text-decoration: line-through;
-  opacity: 0.7;
+#voucher-code-input::placeholder {
+  color: #888;
+  font-weight: 400;
+  letter-spacing: 0.5px;
 }
 
-@keyframes scoreGlow {
-  0% {
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3), 0 0 20px rgba(255, 215, 0, 0.5);
-  }
-  100% {
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3), 0 0 30px rgba(255, 215, 0, 0.8);
-  }
-}
-
-.outcome-amount-value {
+.btn-voucher {
+  padding: 0.75rem 1.25rem;
+  border: none;
+  border-radius: 12px;
+  background: linear-gradient(90deg, #ffd700, #ffb700);
+  color: #23232b;
+  font-weight: bold;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(255,215,0,0.3);
+  min-width: 80px;
   display: flex;
   align-items: center;
-  gap: 12px;
-  font-size: 28px;
-  font-weight: bold;
+  justify-content: center;
+  gap: 0.5rem;
+  position: relative;
+  overflow: hidden;
 }
 
-@media (min-width: 769px) {
-  .outcome-amount-value {
-    gap: 14px;
-    font-size: 30px;
-  }
-}
-
-.outcome-icon-small {
-  font-size: 32px;
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
-  animation: spin 2s linear infinite;
-}
-
-@media (min-width: 769px) {
-  .outcome-icon-small {
-    font-size: 36px;
-    filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.4));
-  }
-}
-
-.amount-text {
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-}
-
-@media (min-width: 769px) {
-  .amount-text {
-    text-shadow: 0 3px 6px rgba(0, 0, 0, 0.4);
-  }
-}
-
-.outcome-effects {
+.btn-voucher::before {
+  content: '';
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
+  background: linear-gradient(180deg, rgba(255,255,255,0.25) 0%, transparent 60%);
   pointer-events: none;
-  overflow: hidden;
-  z-index: 1;
 }
 
-.effect-sparkle,
-.effect-fire,
-.effect-money {
-  position: absolute;
-  font-size: 18px;
-  animation: effectFloat 3s ease-in-out infinite;
+.btn-voucher:hover:not(:disabled) {
+  background: linear-gradient(90deg, #ffe066, #ffd700);
+  box-shadow: 0 4px 16px rgba(255,215,0,0.5);
+  transform: translateY(-1px);
 }
 
-@media (min-width: 769px) {
-  .effect-sparkle,
-  .effect-fire,
-  .effect-money {
-    font-size: 22px;
-  }
-  
-  .effect-sparkle {
-    animation: desktopSparkleFloat 4s ease-in-out infinite;
-  }
-  
-  .effect-fire {
-    animation: desktopFireFlicker 0.4s ease-in-out infinite alternate;
-  }
-  
-  .effect-money {
-    animation: desktopMoneyBounce 1.2s ease-in-out infinite;
-  }
+.btn-voucher:active:not(:disabled) {
+  transform: translateY(1px);
+  box-shadow: 0 2px 8px rgba(255,215,0,0.2);
 }
 
-.effect-sparkle:nth-child(1) {
-  top: 20%;
-  left: 15%;
-  animation-delay: 0s;
+.btn-voucher:disabled {
+  background: linear-gradient(90deg, #666, #555);
+  color: #999;
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
 }
 
-.effect-sparkle:nth-child(2) {
-  top: 30%;
-  right: 20%;
-  animation-delay: 1s;
-}
-
-.effect-sparkle:nth-child(3) {
-  bottom: 25%;
-  left: 25%;
-  animation-delay: 2s;
-}
-
-.effect-fire {
-  top: 15%;
-  right: 15%;
-  animation: fireFlicker 0.5s ease-in-out infinite alternate;
-  display: none;
-}
-
-.effect-money {
-  bottom: 20%;
-  right: 25%;
-  animation: moneyBounce 1s ease-in-out infinite;
-  display: none;
-}
-
-.outcome-display-panel.blackjack .effect-fire,
-.outcome-display-panel.side-bet-win .effect-fire {
-  display: block;
-}
-
-.outcome-display-panel.win .effect-money,
-.outcome-display-panel.side-bet-win .effect-money {
-  display: block;
-}
-
-/* Keyframe Animations */
-@keyframes blackjackPulse {
-  0%, 100% {
-    box-shadow: 0 0 30px rgba(255, 215, 0, 0.6);
-  }
-  50% {
-    box-shadow: 0 0 50px rgba(255, 215, 0, 0.9), 0 0 80px rgba(255, 140, 0, 0.4);
-  }
-}
-
-@media (min-width: 769px) {
-  @keyframes blackjackPulse {
-    0%, 100% {
-      box-shadow: 
-        0 25px 80px rgba(0, 0, 0, 0.4),
-        0 8px 32px rgba(255, 215, 0, 0.3),
-        0 0 40px rgba(255, 215, 0, 0.4),
-        inset 0 1px 0 rgba(255, 255, 255, 0.2);
-    }
-    50% {
-      box-shadow: 
-        0 30px 100px rgba(0, 0, 0, 0.5),
-        0 12px 40px rgba(255, 215, 0, 0.5),
-        0 0 80px rgba(255, 215, 0, 0.7),
-        0 0 120px rgba(255, 140, 0, 0.3),
-        inset 0 1px 0 rgba(255, 255, 255, 0.3);
-    }
-  }
-}
-
-@keyframes sideBetShimmer {
-  0%, 100% {
-    filter: hue-rotate(0deg) brightness(1);
-  }
-  50% {
-    filter: hue-rotate(30deg) brightness(1.2);
-  }
-}
-
-@media (min-width: 769px) {
-  @keyframes sideBetShimmer {
-    0%, 100% {
-      filter: hue-rotate(0deg) brightness(1) saturate(1);
-    }
-    25% {
-      filter: hue-rotate(15deg) brightness(1.1) saturate(1.1);
-    }
-    50% {
-      filter: hue-rotate(30deg) brightness(1.25) saturate(1.2);
-    }
-    75% {
-      filter: hue-rotate(15deg) brightness(1.1) saturate(1.1);
-    }
-  }
-}
-
-@keyframes bustShake {
-  0%, 100% {
-    transform: translateX(0) scale(1) rotateY(0deg);
-    box-shadow: 
-      0 25px 80px rgba(0, 0, 0, 0.4),
-      0 8px 32px rgba(244, 67, 54, 0.3),
-      0 0 40px rgba(244, 67, 54, 0.2),
-      inset 0 1px 0 rgba(255, 255, 255, 0.1);
-  }
-  25% {
-    transform: translateX(-5px) scale(0.97) rotateY(-3deg);
-    box-shadow: 
-      0 20px 70px rgba(0, 0, 0, 0.5),
-      0 6px 28px rgba(244, 67, 54, 0.4),
-      0 0 50px rgba(244, 67, 54, 0.3),
-      inset 0 1px 0 rgba(255, 255, 255, 0.08);
-  }
-  75% {
-    transform: translateX(5px) scale(0.97) rotateY(3deg);
-    box-shadow: 
-      0 20px 70px rgba(0, 0, 0, 0.5),
-      0 6px 28px rgba(244, 67, 54, 0.4),
-      0 0 50px rgba(244, 67, 54, 0.3),
-      inset 0 1px 0 rgba(255, 255, 255, 0.08);
-  }
-}
-
-@keyframes dealerBlackjackGlow {
-  0%, 100% {
-    box-shadow: 0 0 25px rgba(63, 81, 181, 0.5);
-  }
-  50% {
-    box-shadow: 0 0 45px rgba(63, 81, 181, 0.8), 0 0 70px rgba(48, 63, 159, 0.4);
-  }
-}
-
-@keyframes bounce {
-  0%, 20%, 50%, 80%, 100% {
-    transform: translateY(0);
-  }
-  40% {
-    transform: translateY(-10px);
-  }
-  60% {
-    transform: translateY(-5px);
-  }
+.btn-voucher-spinner {
+  animation: spin 1s linear infinite;
 }
 
 @keyframes spin {
@@ -1331,354 +292,472 @@ body.modern-bg {
   to { transform: rotate(360deg); }
 }
 
-@keyframes effectFloat {
-  0%, 100% {
+.voucher-message {
+  margin-top: 0.75rem;
+  padding: 0.6rem 1rem;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  text-align: center;
+  backdrop-filter: blur(4px);
+  animation: fadeInSlide 0.3s ease-out;
+}
+
+.voucher-message.success {
+  background: rgba(52,199,89,0.9);
+  color: white;
+  border: 1px solid rgba(52,199,89,0.5);
+  box-shadow: 0 2px 8px rgba(52,199,89,0.3);
+}
+
+.voucher-message.error {
+  background: rgba(255,59,48,0.9);
+  color: white;
+  border: 1px solid rgba(255,59,48,0.5);
+  box-shadow: 0 2px 8px rgba(255,59,48,0.3);
+}
+
+@keyframes fadeInSlide {
+  from {
     opacity: 0;
-    transform: scale(0.8) translateY(0px);
+    transform: translateY(-10px);
   }
-  25% {
-    opacity: 0.6;
-    transform: scale(1) translateY(-5px);
-  }
-  50% {
-    opacity: 0.8;
-    transform: scale(1.1) translateY(-8px);
-  }
-  75% {
-    opacity: 0.4;
-    transform: scale(0.9) translateY(-3px);
-  }
-}
-
-@keyframes fireFlicker {
-  0% {
-    transform: scale(1) rotate(0deg);
-    opacity: 0.8;
-  }
-  50% {
-    transform: scale(1.1) rotate(5deg);
+  to {
     opacity: 1;
-  }
-  100% {
-    transform: scale(0.9) rotate(-3deg);
-    opacity: 0.9;
+    transform: translateY(0);
   }
 }
 
-@keyframes moneyBounce {
-  0%, 100% {
-    transform: translateY(0) scale(1);
+/* ===== MULTIPLAYER TABLE STYLING ===== */
+
+/* Main multiplayer table container */
+#multiplayer-blackjack-table {
+  position: relative;
+  width: 100%;
+  max-width: 1200px;
+  min-height: 450px;
+  margin: 0 auto;
+  background: linear-gradient(135deg, 
+    rgba(0, 100, 0, 0.9) 0%, 
+    rgba(0, 80, 0, 0.95) 50%, 
+    rgba(0, 60, 0, 0.9) 100%);
+  border-radius: 200px 200px 50px 50px;
+  border: 8px solid #ffd700;
+  box-shadow: 
+    0 10px 30px rgba(0,0,0,0.5),
+    inset 0 0 30px rgba(255,215,0,0.1),
+    0 0 0 2px rgba(255,215,0,0.3);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 20px;
+}
+
+/* Table areas for visual depth */
+.table-area-dealer {
+  position: absolute;
+  top: 10%;
+  left: 25%;
+  width: 50%;
+  height: 20%;
+  background: radial-gradient(ellipse, rgba(0,0,0,0.1) 0%, transparent 70%);
+  border-radius: 50%;
+  z-index: 1;
+}
+
+.table-area-players {
+  position: absolute;
+  bottom: 15%;
+  left: 10%;
+  width: 80%;
+  height: 35%;
+  background: radial-gradient(ellipse, rgba(0,0,0,0.08) 0%, transparent 70%);
+  border-radius: 50%;
+  z-index: 1;
+}
+
+/* Dealer section */
+.dealer-section {
+  position: absolute;
+  top: 15px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  z-index: 10;
+}
+
+.dealer-label {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #ffd700;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.7);
+  margin-bottom: 10px;
+  letter-spacing: 2px;
+}
+
+.dealer-cards-area {
+  min-height: 80px;
+  min-width: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: -20px;
+}
+
+.dealer-score-display {
+  margin-top: 10px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  color: #fff;
+  background: rgba(0,0,0,0.3);
+  padding: 4px 12px;
+  border-radius: 15px;
+  border: 1px solid rgba(255,215,0,0.4);
+  text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+}
+
+/* Player positions container */
+.player-positions {
+  position: absolute;
+  bottom: 20px;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: space-between;
+  padding: 0 40px;
+  z-index: 10;
+}
+
+/* Individual player position styling */
+.player-position {
+  width: 45%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+}
+
+.player-position.active {
+  background: radial-gradient(circle, rgba(255,215,0,0.1) 0%, transparent 70%);
+  border-radius: 20px;
+  padding: 10px;
+  box-shadow: 0 0 20px rgba(255,215,0,0.3);
+}
+
+/* Player headers */
+.player-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+}
+
+.player-label {
+  font-size: 1.1rem;
+  font-weight: bold;
+  color: #ffd700;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.7);
+  letter-spacing: 1px;
+}
+
+.player-status {
+  font-size: 0.9rem;
+  color: #ccc;
+  background: rgba(0,0,0,0.4);
+  padding: 2px 8px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.2);
+}
+
+.player-status.active {
+  color: #ffd700;
+  background: rgba(255,215,0,0.1);
+  border-color: rgba(255,215,0,0.4);
+  box-shadow: 0 0 8px rgba(255,215,0,0.3);
+}
+
+/* Player betting areas */
+.player-betting-area {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.bet-spots-row {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+/* Enhanced bet spots for multiplayer */
+.table-bet-spot {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,215,0,0.15) 0%, rgba(0,0,0,0.4) 100%);
+  border: 3px dashed rgba(255,215,0,0.6);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  font-size: 0.7rem;
+  color: #ffd700;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+  font-weight: bold;
+}
+
+.table-bet-spot:hover {
+  transform: scale(1.05);
+  border-color: #ffd700;
+  box-shadow: 0 0 15px rgba(255,215,0,0.4);
+}
+
+.table-bet-spot.main-bet {
+  width: 70px;
+  height: 70px;
+  border-width: 4px;
+  font-size: 0.8rem;
+}
+
+.player1-bet {
+  border-color: rgba(52, 120, 246, 0.7);
+  background: radial-gradient(circle, rgba(52,120,246,0.15) 0%, rgba(0,0,0,0.4) 100%);
+  color: #7fb3ff;
+}
+
+.player1-bet:hover {
+  border-color: #3478f6;
+  box-shadow: 0 0 15px rgba(52,120,246,0.4);
+}
+
+.player2-bet {
+  border-color: rgba(255, 45, 85, 0.7);
+  background: radial-gradient(circle, rgba(255,45,85,0.15) 0%, rgba(0,0,0,0.4) 100%);
+  color: #ff7f7f;
+}
+
+.player2-bet:hover {
+  border-color: #ff2d55;
+  box-shadow: 0 0 15px rgba(255,45,85,0.4);
+}
+
+/* Player hands areas */
+.player-hands-area {
+  min-height: 90px;
+  min-width: 180px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  background: rgba(0,0,0,0.1);
+  border-radius: 15px;
+  border: 2px dashed rgba(255,255,255,0.2);
+  padding: 10px;
+}
+
+/* Player chip displays */
+.player-chips-display {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(0,0,0,0.4);
+  padding: 6px 12px;
+  border-radius: 20px;
+  border: 1px solid rgba(255,215,0,0.3);
+  min-width: 100px;
+  justify-content: center;
+}
+
+.chip-amount {
+  font-size: 1.1rem;
+  font-weight: bold;
+  color: #ffd700;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+}
+
+.chip-label {
+  font-size: 0.8rem;
+  color: #ccc;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* Table logo adjustments for multiplayer */
+.table-logo {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 400px;
+  height: 60px;
+  opacity: 0.4;
+  z-index: 2;
+  pointer-events: none;
+}
+
+/* Table text positioning */
+.table-text.rules {
+  position: absolute;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.8rem;
+  color: rgba(255,215,0,0.8);
+  text-align: center;
+  z-index: 5;
+  background: rgba(0,0,0,0.3);
+  padding: 4px 12px;
+  border-radius: 10px;
+  letter-spacing: 1px;
+}
+
+.table-text.nosmoke {
+  position: absolute;
+  top: 20px;
+  right: 30px;
+  font-size: 0.7rem;
+  color: rgba(255,255,255,0.6);
+  z-index: 5;
+}
+
+/* Virtual deck positioning */
+#virtual-deck {
+  position: absolute;
+  top: 30px;
+  right: 30px;
+  width: 50px;
+  height: 70px;
+  background: linear-gradient(135deg, #1a1a2e, #16213e);
+  border: 2px solid #ffd700;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.5);
+  z-index: 5;
+}
+
+#virtual-deck::before {
+  content: "🂠";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 1.5rem;
+  opacity: 0.7;
+}
+
+/* Table vignette effect */
+#table-vignette {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.1) 100%);
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 3;
+}
+
+/* Responsive adjustments for multiplayer table */
+@media (max-width: 1000px) {
+  #multiplayer-blackjack-table {
+    max-width: 95vw;
+    min-height: 400px;
+    padding: 15px;
   }
-  50% {
-    transform: translateY(-6px) scale(1.05) rotate(-5deg);
+  
+  .player-positions {
+    padding: 0 20px;
+  }
+  
+  .table-bet-spot {
+    width: 50px;
+    height: 50px;
+    font-size: 0.6rem;
+  }
+  
+  .table-bet-spot.main-bet {
+    width: 60px;
+    height: 60px;
+  }
+  
+  .player-hands-area {
+    min-width: 150px;
+    min-height: 80px;
   }
 }
 
-@media (min-width: 769px) {
-  @keyframes desktopSparkleFloat {
-    0%, 100% {
-      opacity: 0;
-      transform: scale(0.5) rotate(0deg) translateY(0px);
-    }
-    25% {
-      opacity: 0.8;
-      transform: scale(1.1) rotate(90deg) translateY(-8px);
-    }
-    50% {
-      opacity: 1;
-      transform: scale(1.2) rotate(180deg) translateY(-12px);
-    }
-    75% {
-      opacity: 0.6;
-      transform: scale(0.9) rotate(270deg) translateY(-6px);
-    }
-  }
-
-  @keyframes desktopFireFlicker {
-    0% {
-      transform: scale(1) rotate(0deg);
-      opacity: 0.9;
-      filter: hue-rotate(0deg);
-    }
-    25% {
-      transform: scale(1.15) rotate(8deg);
-      opacity: 1;
-      filter: hue-rotate(10deg);
-    }
-    50% {
-      transform: scale(1.05) rotate(-5deg);
-      opacity: 0.95;
-      filter: hue-rotate(5deg);
-    }
-    75% {
-      transform: scale(1.1) rotate(3deg);
-      opacity: 1;
-      filter: hue-rotate(-5deg);
-    }
-    100% {
-      transform: scale(0.95) rotate(-2deg);
-      opacity: 0.9;
-      filter: hue-rotate(0deg);
-    }
-  }
-
-  @keyframes desktopMoneyBounce {
-    0%, 100% {
-      transform: translateY(0) scale(1) rotate(0deg);
-      opacity: 0.9;
-    }
-    25% {
-      transform: translateY(-8px) scale(1.1) rotate(-8deg);
-      opacity: 1;
-    }
-    50% {
-      transform: translateY(-12px) scale(1.15) rotate(5deg);
-      opacity: 1;
-    }
-    75% {
-      transform: translateY(-6px) scale(1.05) rotate(-3deg);
-      opacity: 0.95;
-    }
-  }
-}
-
-/* Mobile Responsive Styles */
 @media (max-width: 768px) {
-  .outcome-display-panel {
-    width: 320px;
-    bottom: 8px;
-    right: 8px;
-    border-width: 2px;
-    border-radius: 20px;
+  #multiplayer-blackjack-table {
+    min-height: 350px;
+    padding: 10px;
   }
   
-  .win-panel-header {
-    padding: 14px 18px 10px;
-    flex-wrap: wrap;
-    gap: 8px;
+  .player-positions {
+    flex-direction: column;
+    gap: 20px;
+    padding: 0 10px;
   }
   
-  .outcome-title {
-    font-size: 16px;
-    flex: 1;
-    min-width: 120px;
+  .player-position {
+    width: 100%;
   }
   
-  .close-win-btn {
-    width: 36px;
-    height: 36px;
-    font-size: 18px;
+  .dealer-section {
     position: relative;
+    top: 0;
+    transform: none;
+    margin-bottom: 20px;
   }
   
-  .close-win-btn::before {
-    content: '';
-    position: absolute;
-    top: -8px;
-    left: -8px;
-    right: -8px;
-    bottom: -8px;
-    pointer-events: auto;
-    border-radius: 50%;
-  }
-  
-  .outcome-details {
-    padding: 12px 18px;
-  }
-  
-  .outcome-type-section,
-  .outcome-amount-section,
-  .outcome-scores-section {
-    margin-bottom: 10px;
-  }
-  
-  .outcome-type-value {
-    font-size: 18px;
-  }
-  
-  .outcome-amount-value {
-    font-size: 22px;
-  }
-  
-  .outcome-scores-comparison {
-    padding: 10px 14px;
-  }
-  
-  .score-value {
-    font-size: 20px;
-  }
-  
-  .score-label {
-    font-size: 10px;
-  }
-  
-  .score-vs {
-    font-size: 12px;
-  }
-}
-
-@media (max-width: 480px) {
-  .outcome-display-panel {
+  .table-logo {
     width: 300px;
-    bottom: 6px;
-    right: 6px;
-    transform: translateX(370px) scale(0.75) rotateY(20deg);
-    border-radius: 18px;
-  }
-  
-  .outcome-display-panel.show {
-    transform: translateX(0) scale(0.95) rotateY(0deg);
-  }
-  
-  .win-panel-header {
-    padding: 12px 16px 8px;
-  }
-  
-  .outcome-title {
-    font-size: 14px;
-  }
-  
-  .close-win-btn {
-    width: 32px;
-    height: 32px;
-    font-size: 16px;
-  }
-  
-  .close-win-btn::before {
-    top: -10px;
-    left: -10px;
-    right: -10px;
-    bottom: -10px;
-  }
-  
-  .outcome-details {
-    padding: 10px 16px;
-  }
-  
-  .outcome-type-value {
-    font-size: 16px;
-  }
-  
-  .outcome-amount-value {
-    font-size: 20px;
-  }
-  
-  .outcome-scores-comparison {
-    padding: 8px 12px;
-  }
-  
-  .score-value {
-    font-size: 18px;
-  }
-  
-  .score-label {
-    font-size: 9px;
-  }
-  
-  .score-vs {
-    font-size: 11px;
-    margin: 0 6px;
+    height: 45px;
   }
 }
 
-@media (max-width: 480px) {
-  .outcome-display-panel {
-    transform: translateX(110%) scale(0.9);
-    transition: transform 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  }
-  
-  .outcome-display-panel.show {
-    transform: translateX(0) scale(1);
-  }
+/* Card styling compatibility */
+.card {
+  width: 50px;
+  height: 70px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #fff 0%, #f5f5f5 100%);
+  border: 2px solid #333;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  font-weight: bold;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  transition: transform 0.2s ease;
+  margin: 0 -10px;
+  position: relative;
+  z-index: 10;
 }
 
-@media screen and (max-height: 600px) and (orientation: landscape) {
-  .outcome-display-panel {
-    bottom: 4px;
-    right: 4px;
-    width: 280px;
-    max-height: 90vh;
-  }
-  
-  .outcome-display-panel.show {
-    transform: translateX(0) scale(0.9) rotateY(0deg);
-  }
-  
-  .win-panel-header {
-    padding: 8px 14px 6px;
-  }
-  
-  .outcome-details {
-    padding: 8px 14px;
-    max-height: 60vh;
-    overflow-y: auto;
-  }
-  
-  .outcome-type-section,
-  .outcome-amount-section,
-  .outcome-scores-section {
-    margin-bottom: 8px;
-  }
-  
-  .outcome-scores-comparison {
-    padding: 6px 10px;
-  }
-  
-  .score-value {
-    font-size: 16px;
-  }
+.card:hover {
+  transform: translateY(-5px);
+  z-index: 20;
 }
 
-@media (max-width: 480px) and (max-height: 700px) {
-  .outcome-display-panel {
-    position: fixed;
-    bottom: 8px;
-    right: 8px;
-    left: 8px;
-    width: auto;
-    max-width: none;
-    transform: translateY(100%) scale(0.95);
-    transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-    z-index: 1001;
-  }
-  
-  .outcome-display-panel.show {
-    transform: translateY(0) scale(1);
-  }
-  
-  .outcome-details {
-    max-height: 40vh;
-    overflow-y: auto;
-    scrollbar-width: thin;
-  }
-  
-  .outcome-details::-webkit-scrollbar {
-    width: 4px;
-  }
-  
-  .outcome-details::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.3);
-    border-radius: 2px;
-  }
+/* Turn indicator animations */
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.7; transform: scale(1.05); }
 }
 
-@media (max-width: 768px) {
-  .outcome-display-panel {
-    pointer-events: auto;
-  }
-  
-  .outcome-display-panel:not(.show) {
-    pointer-events: none;
-  }
-  
-  #table-bet-spots {
-    z-index: 8;
-  }
-  
-  .outcome-display-panel {
-    z-index: 1000;
-  }
+.player-position.active .player-label {
+  animation: pulse 2s infinite;
 }
+
+/* ===== END MULTIPLAYER TABLE STYLING ===== */
   </style>
 </head>
 <body class="modern-bg flex flex-col items-center justify-center">
@@ -1708,43 +787,113 @@ body.modern-bg {
         <button id="start-game-btn" class="btn-primary">Start Game</button>
       </div>
     </div>
-    <!-- Game Area (unchanged, but now inside <main>) -->
-    <div id="game-area" class="hidden w-full">
+    <!-- Game Area (unchanged, but now inside <main>) -->    <div id="game-area" class="hidden w-full">
       <div id="center-chips-display" class="mb-4"></div>
-      <div id="blackjack-table">
+      
+      <!-- Two-Player Blackjack Table -->
+      <div id="multiplayer-blackjack-table">
         <div class="table-area-dealer"></div>
-        <div class="table-area-player"></div>
+        <div class="table-area-players"></div>
         <div id="virtual-deck"></div>
         <div id="table-vignette"></div>
+        
+        <!-- Dealer Section -->
+        <div class="dealer-section">
+          <div class="dealer-label">DEALER</div>
+          <div id="dealer-cards" class="dealer-cards-area"></div>
+          <div id="dealer-score" class="dealer-score-display">0</div>
+        </div>
+        
+        <!-- Two Player Positions -->
+        <div class="player-positions">
+          <!-- Player 1 (Left Side) -->
+          <div class="player-position player-1" id="player1-area">
+            <div class="player-header">
+              <div class="player-label" id="player1-name">Player 1</div>
+              <div class="player-status" id="player1-status">Waiting...</div>
+            </div>
+            
+            <!-- Player 1 Betting Area -->
+            <div class="player-betting-area">
+              <div class="bet-spots-row">
+                <div class="table-bet-spot player1-bet" id="player1-pp-bet-spot">
+                  <span>P/P</span>
+                  <span id="player1-pp-bet-amount" class="font-bold">0</span>
+                  <div class="bet-spot-chips"></div>
+                </div>
+                <div class="table-bet-spot player1-bet main-bet" id="player1-main-bet-spot">
+                  <span>Main</span>
+                  <span id="player1-main-bet-amount" class="font-bold">0</span>
+                  <div class="bet-spot-chips"></div>
+                </div>
+                <div class="table-bet-spot player1-bet" id="player1-plus3-bet-spot">
+                  <span>21+3</span>
+                  <span id="player1-plus3-bet-amount" class="font-bold">0</span>
+                  <div class="bet-spot-chips"></div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Player 1 Cards -->
+            <div id="player1-hands" class="player-hands-area"></div>
+            
+            <!-- Player 1 Chip Display -->
+            <div class="player-chips-display">
+              <span id="player1-chips" class="chip-amount">0</span>
+              <span class="chip-label">Chips</span>
+            </div>
+          </div>
+          
+          <!-- Player 2 (Right Side) -->
+          <div class="player-position player-2" id="player2-area">
+            <div class="player-header">
+              <div class="player-label" id="player2-name">Player 2</div>
+              <div class="player-status" id="player2-status">Waiting...</div>
+            </div>
+            
+            <!-- Player 2 Betting Area -->
+            <div class="player-betting-area">
+              <div class="bet-spots-row">
+                <div class="table-bet-spot player2-bet" id="player2-pp-bet-spot">
+                  <span>P/P</span>
+                  <span id="player2-pp-bet-amount" class="font-bold">0</span>
+                  <div class="bet-spot-chips"></div>
+                </div>
+                <div class="table-bet-spot player2-bet main-bet" id="player2-main-bet-spot">
+                  <span>Main</span>
+                  <span id="player2-main-bet-amount" class="font-bold">0</span>
+                  <div class="bet-spot-chips"></div>
+                </div>
+                <div class="table-bet-spot player2-bet" id="player2-plus3-bet-spot">
+                  <span>21+3</span>
+                  <span id="player2-plus3-bet-amount" class="font-bold">0</span>
+                  <div class="bet-spot-chips"></div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Player 2 Cards -->
+            <div id="player2-hands" class="player-hands-area"></div>
+            
+            <!-- Player 2 Chip Display -->
+            <div class="player-chips-display">
+              <span id="player2-chips" class="chip-amount">0</span>
+              <span class="chip-label">Chips</span>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Table Branding and Rules -->
         <svg class="table-logo" viewBox="0 0 800 120" fill="none">
-          <text x="50%" y="50%" text-anchor="middle" fill="#ffd700" font-size="64" font-family="Segoe UI, Arial, sans-serif" font-weight="bold" opacity="0.9" dy=".35em" stroke="#bfa14a" stroke-width="3">CONSTRUCTION 21</text>
-          <g opacity="0.18">
+          <text x="50%" y="50%" text-anchor="middle" fill="#ffd700" font-size="48" font-family="Segoe UI, Arial, sans-serif" font-weight="bold" opacity="0.6" dy=".35em" stroke="#bfa14a" stroke-width="2">MULTIPLAYER 21</text>
+          <g opacity="0.15">
             <rect x="80" y="90" width="640" height="18" rx="9" fill="#23232b"/>
             <rect x="80" y="90" width="640" height="9" rx="4.5" fill="#ffd700"/>
             <rect x="80" y="99" width="640" height="9" rx="4.5" fill="#bfa14a"/>
           </g>
         </svg>
-        <div class="table-text rules">DEALER HITS SOFT 17 • BLACKJACK PAYS 3:2</div>
+        <div class="table-text rules">DEALER HITS SOFT 17 • BLACKJACK PAYS 3:2 • MULTIPLAYER</div>
         <div class="table-text nosmoke">NO SMOKING 🚭</div>
-        <div id="table-bet-spots">
-          <div class="table-bet-spot" id="pp-bet-spot">
-            <span>P / P</span>
-            <span id="pp-bet-amount" class="font-bold">0</span>
-            <div class="bet-spot-chips"></div>
-          </div>
-          <div class="table-bet-spot" id="main-bet-spot">
-            <span>Main Bet</span>
-            <span id="main-bet-amount" class="font-bold">0</span>
-            <div class="bet-spot-chips"></div>
-          </div>
-          <div class="table-bet-spot" id="plus3-bet-spot">
-            <span>21+3</span>
-            <span id="plus3-bet-amount" class="font-bold">0</span>
-            <div class="bet-spot-chips"></div>
-          </div>
-        </div>
-        <div id="dealer-cards"></div>
-        <div id="player-hands"></div>
       </div>
       <div class="chip-tray-container">
         <div class="chip-row">
@@ -1754,7 +903,39 @@ body.modern-bg {
           <button class="chip" data-amount="100"><span class="chip-value">100</span><span class="sr-only">Bet 100 chips</span></button>
         </div>
       </div>
+
+      <!-- Voucher Redemption Interface -->
+      <div class="voucher-container">
+        <div class="voucher-input-section">
+          <div class="voucher-header">
+            <span class="voucher-icon">🎫</span>
+            <span class="voucher-title">Redeem Voucher</span>
+          </div>
+          <div class="voucher-form">
+            <input 
+              type="text" 
+              id="voucher-code-input" 
+              placeholder="Enter voucher code" 
+              maxlength="13"
+              autocomplete="off"
+              autocapitalize="characters"
+              spellcheck="false"
+            >
+            <button id="redeem-voucher-btn" class="btn-voucher" disabled>
+              <span class="btn-voucher-text">Redeem</span>
+              <span class="btn-voucher-spinner" style="display: none;">⏳</span>
+            </button>
+          </div>
+          <div id="voucher-message" class="voucher-message" style="display: none;"></div>
+        </div>
+      </div>
+      
       <div class="action-buttons-container flex flex-col items-center justify-center gap-4 mt-6 mb-8">
+        <!-- Room Controls -->
+        <div class="room-controls flex flex-row justify-center items-center gap-4 mb-2">
+          <button id="leave-room-btn" class="btn-secondary px-6 py-2">Leave Room</button>
+        </div>
+        
         <div class="betting-actions flex flex-row justify-center items-center gap-4">
           <button id="clear-bets-btn" class="btn-secondary px-8 py-2">Clear Bets</button>
           <button id="deal-btn" class="btn-primary px-8 py-2">Deal</button>
@@ -1816,9 +997,7 @@ body.modern-bg {
           <div class="effect-fire">🔥</div>
           <div class="effect-money">💰</div>
         </div>
-      </div>
-    </div>  </main>
-  <script src="https://unpkg.com/peerjs@1.5.0/dist/peerjs.min.js"></script>
+      </div>    </div>  </main>
   <script>
     // Global function for closing outcome display panel
     function closeOutcomeDisplay() {
@@ -1829,46 +1008,27 @@ body.modern-bg {
     }
     // Make it globally available
     window.closeOutcomeDisplay = closeOutcomeDisplay;
-  </script>
-  <script type="module">    // --- Multiplayer 21 Final Polish ---
-    const Peer = window.Peer;
+  </script>  <script type="module">
+    // --- Multiplayer 21 Final Polish ---
     import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-app.js";
     import { getAuth, onAuthStateChanged, signInWithPopup, GoogleAuthProvider, signOut } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-auth.js";
-    import { getFirestore, doc, getDoc, setDoc, updateDoc, runTransaction } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-firestore.js";
+    import { getFirestore, doc, getDoc, setDoc, updateDoc, runTransaction, onSnapshot, deleteDoc } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-firestore.js";
     import { Construction21Game } from './js/construction21-logic.js';
-    import { renderGameUI, updateChipsUI, showToast, showOutcome, resetUI, setupEventHandlersSafe } from './js/construction21-ui.js';
-
+    import { renderGameUI, updateChipsUI, showToast, showOutcome, resetUI, setupEventHandlersSafe, renderCard } from './js/construction21-ui.js';
+    
     // --- SessionStorage handoff from login page ---
     let sessionUser = null;
     try {
       const stored = sessionStorage.getItem('c21user');
       if (stored) sessionUser = JSON.parse(stored);
-    } catch (e) { sessionUser = null; }    // --- Firebase Config (reuse from construction21-login.html) ---
-    // Use singleton pattern to avoid duplicate app initialization
-    let app, auth, db;
-    
-    try {
-      // Try to get existing Firebase app first
-      app = getApps().length ? getApps()[0] : null;
-    } catch (e) {
-      app = null;
+    } catch (e) { 
+      sessionUser = null;
     }
     
-    if (!app) {
-      // Only initialize if no app exists
-      const firebaseConfig = {
-        apiKey: "AIzaSyBVtq6dAEuybJNmTTv8dXBxTVUgw1t0ZMk",
-        authDomain: "cusumano-website.firebaseapp.com",
-        projectId: "cusumano-website",
-        storageBucket: "cusumano-website.appspot.com",
-        messagingSenderId: "20051552210",
-        appId: "1:20051552210:web:7eb3b22baa3fec184e4a0b"
-      };
-      app = initializeApp(firebaseConfig);
-    }
-    
-    auth = getAuth(app);
-    db = getFirestore(app);
+    // --- Use existing Firebase instance ---
+    // Firebase is already initialized in the first script block
+    const auth = window.auth;
+    const db = window.db;
 
     // --- UI Elements ---
     const userInfoDiv = document.getElementById('user-info');
@@ -1881,6 +1041,16 @@ body.modern-bg {
     const createRoomBtn = document.getElementById('create-room-btn');
     const joinRoomBtn = document.getElementById('join-room-btn');
     const joinRoomInput = document.getElementById('join-room-id');
+    const leaveRoomBtn = document.getElementById('leave-room-btn');
+
+    // --- Setup Leave Room Handler ---
+    if (leaveRoomBtn) {
+      leaveRoomBtn.addEventListener('click', async () => {
+        if (confirm('Are you sure you want to leave the room?')) {
+          await leaveRoom();
+        }
+      });
+    }
 
     // --- Auth & Chip Management ---
     let currentUser = sessionUser ? {
@@ -1932,20 +1102,59 @@ body.modern-bg {
         updateUserInfoUI();
         lobbyDiv.classList.remove('hidden');
       }
-    });
-
-    // --- PeerJS Multiplayer Lobby & Sync ---
-    let peer = null;
-    let conn = null;
+    });    // --- Multiplayer State Variables ---
     let isHost = false;
     let roomId = null;
     let players = [];
-    let connections = [];
     let game = null;
     let gameStarted = false;
-
+    
+    // --- Room Cleanup Functions ---
+    async function leaveRoom() {
+      if (!roomId || !currentUser) return;
+      
+      try {
+        const roomRef = doc(db, 'multiplayerRooms', roomId);
+        const roomDoc = await getDoc(roomRef);
+        
+        if (roomDoc.exists()) {
+          const roomData = roomDoc.data();
+          const updatedPlayers = roomData.players.filter(p => p.uid !== currentUser.uid);
+          
+          if (updatedPlayers.length === 0) {
+            // Last player leaving, delete the room
+            await deleteDoc(roomRef);
+          } else {
+            // Update players list
+            await updateDoc(roomRef, { players: updatedPlayers });
+          }
+        }
+      } catch (error) {
+        console.error('Error leaving room:', error);
+      }
+      
+      // Clean up local state
+      roomId = null;
+      players = [];
+      gameStarted = false;
+      isHost = false;
+      
+      // Unsubscribe from room updates
+      if (window.roomUnsubscribe) {
+        window.roomUnsubscribe();
+        window.roomUnsubscribe = null;
+      }
+      
+      showLobby();
+    }
+    
+    // Add cleanup on page unload
+    window.addEventListener('beforeunload', leaveRoom);
+    
     function updatePlayerListUI() {
       playerListDiv.innerHTML = '<b>Players:</b><ul>' + players.map(p => `<li>${p.name}${p.uid === currentUser?.uid ? ' (You)' : ''}</li>`).join('') + '</ul>';
+      // Update the multiplayer table UI as well
+      updateMultiplayerTableUI();
     }
     function showRoomStatus(msg) {
       roomStatusDiv.textContent = msg;
@@ -1956,125 +1165,264 @@ body.modern-bg {
       gameAreaDiv.classList.add('hidden');
       resetUI();
     }
+    
     function showGame() {
       lobbyDiv.classList.add('hidden');
       gameAreaDiv.classList.remove('hidden');
-      renderGameUI(game.getState());
+      
+      // Use the enhanced multiplayer render function
+      if (game) {
+        multiplayerRenderGameUI(game.getState());
+      }
       updateChipsUI(userChips);
-    }
-
-    // --- Room Creation ---
-    createRoomBtn.onclick = () => {
+      updateMultiplayerTableUI();
+    }    // --- Room Creation ---
+    createRoomBtn.onclick = async () => {
       if (!currentUser) return showToast('Login first!');
       isHost = true;
-      peer = new Peer();
-      peer.on('open', id => {
-        roomId = id;
-        players = [{ uid: currentUser.uid, name: currentUser.displayName || currentUser.email, peerId: id }];
+      
+      // Generate 6-character room code
+      roomId = generateRoomCode();
+      
+      // Create room in Firebase
+      try {
+        await setDoc(doc(db, 'multiplayerRooms', roomId), {
+          hostId: currentUser.uid,
+          players: [{ 
+            uid: currentUser.uid, 
+            name: currentUser.displayName || currentUser.email,
+            chips: userChips,
+            isHost: true 
+          }],
+          gameState: null,
+          createdAt: new Date(),
+          status: 'waiting'
+        });
+        
+        players = [{ uid: currentUser.uid, name: currentUser.displayName || currentUser.email, isHost: true }];
         updatePlayerListUI();
         showRoomStatus(`Room created! Share this code: <b>${roomId}</b>`);
         startGameArea.classList.remove('hidden');
         joinRoomInput.value = roomId;
-      });
-      peer.on('connection', c => {
-        c.on('data', data => handlePeerData(c, data));
-        c.on('close', () => handlePeerDisconnect(c));
-        connections.push(c);
-        showRoomStatus('A player joined!');
-      });
-      peer.on('error', err => showToast('PeerJS error: ' + err));
+        
+        // Start listening for room updates
+        startRoomListener();
+        
+      } catch (error) {
+        console.error('Error creating room:', error);
+        showToast('Failed to create room');
+      }
     };
 
     // --- Room Join ---
-    joinRoomBtn.onclick = () => {
+    joinRoomBtn.onclick = async () => {
       if (!currentUser) return showToast('Login first!');
-      const id = joinRoomInput.value.trim();
-      if (!id) return showToast('Enter a room code!');
+      const id = joinRoomInput.value.trim().toUpperCase();
+      if (!id || id.length !== 6) return showToast('Enter a valid 6-character room code!');
+      
       isHost = false;
-      peer = new Peer();
-      peer.on('open', () => {
-        conn = peer.connect(id);
-        conn.on('open', () => {
-          conn.send({ type: 'join', user: { uid: currentUser.uid, name: currentUser.displayName || currentUser.email, peerId: peer.id } });
-          showRoomStatus('Joined room! Waiting for host...');
-        });
-        conn.on('data', data => handlePeerData(conn, data));
-        conn.on('close', () => handlePeerDisconnect(conn));
-      });
-      peer.on('error', err => showToast('PeerJS error: ' + err));
-    };
-
-    // --- Peer Data Handling ---
-    function handlePeerData(connection, data) {
-      if (data.type === 'join' && isHost) {
-        // New player joined
-        if (!players.find(p => p.uid === data.user.uid)) {
-          players.push(data.user);
+      roomId = id;
+      
+      try {
+        const roomRef = doc(db, 'multiplayerRooms', roomId);
+        const roomDoc = await getDoc(roomRef);
+        
+        if (!roomDoc.exists()) {
+          showToast('Room not found!');
+          return;
         }
-        updatePlayerListUI();
-        // Inform all players
-        for (const c of connections) c.send({ type: 'player-list', players });
-        connection.send({ type: 'player-list', players });
-        showRoomStatus('A player joined!');
-      } else if (data.type === 'player-list') {
-        players = data.players;
-        updatePlayerListUI();
-      } else if (data.type === 'start-game') {
-        startMultiplayerGame(data.state);
-        showRoomStatus('Game started!');
-      } else if (data.type === 'game-action') {
-        if (!gameStarted) return;
-        applyRemoteAction(data.action);
-      } else if (data.type === 'chips-update') {
-        userChips = data.chips;
-        updateChipsUI(userChips);
+        
+        const roomData = roomDoc.data();
+        if (roomData.players.length >= 2) {
+          showToast('Room is full!');
+          return;
+        }
+        
+        // Add player to room
+        const newPlayer = { 
+          uid: currentUser.uid, 
+          name: currentUser.displayName || currentUser.email,
+          chips: userChips,
+          isHost: false 
+        };
+        
+        await updateDoc(roomRef, {
+          players: [...roomData.players, newPlayer]
+        });
+        
+        showRoomStatus('Joined room! Waiting for host...');
+        startRoomListener();
+        
+      } catch (error) {
+        console.error('Error joining room:', error);
+        showToast('Failed to join room');
       }
+    };
+    
+    // Generate 6-character room code
+    function generateRoomCode() {
+      const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // Removed confusing chars
+      let result = '';
+      for (let i = 0; i < 6; i++) {
+        result += chars.charAt(Math.floor(Math.random() * chars.length));
+      }      return result;
     }
-    function handlePeerDisconnect(connection) {
-      // Remove player from list
-      connections = connections.filter(c => c !== connection);
-      // Remove from players array
-      const idx = players.findIndex(p => p.peerId === connection.peer);
-      if (idx !== -1) players.splice(idx, 1);
-      updatePlayerListUI();
-      showRoomStatus('A player disconnected.');
+      // Listen for room updates
+    function startRoomListener() {
+      if (!roomId) return;
+      
+      const roomRef = doc(db, 'multiplayerRooms', roomId);
+      const unsubscribe = onSnapshot(roomRef, (doc) => {
+        if (doc.exists()) {
+          const roomData = doc.data();
+          players = roomData.players || [];
+          updatePlayerListUI();
+          
+          // Show start button only to host
+          if (isHost && players.length >= 2) {
+            startGameArea.classList.remove('hidden');
+          } else if (!isHost) {
+            startGameArea.classList.add('hidden');
+          }
+          
+          // Handle game state updates
+          if (roomData.gameState && !gameStarted) {
+            startMultiplayerGame(roomData.gameState);
+          } else if (roomData.gameState && gameStarted && game) {
+            // Sync game state for non-host players
+            if (!isHost && roomData.lastAction) {
+              applyRemoteAction(roomData.lastAction);
+            }
+          }
+          
+          // Update chip displays
+          updateMultiplayerChipsDisplay();
+        } else {
+          // Room was deleted
+          showToast('Room no longer exists');
+          leaveRoom();
+        }
+      }, (error) => {
+        console.error('Room listener error:', error);
+        showToast('Connection error. Please try rejoining.');
+      });
+      
+      // Store unsubscribe function for cleanup
+      window.roomUnsubscribe = unsubscribe;
     }
-
+    
+    // Apply remote actions from Firebase
+    function applyRemoteAction(actionData) {
+      if (!game || !actionData || actionData.playerId === currentUser?.uid) return;
+      
+      const action = actionData;
+      switch (action.type) {
+        case 'deal':
+          if (game.canDeal && game.canDeal()) game.deal();
+          break;
+        case 'hit':
+          if (game.canHit && game.canHit()) game.hit();
+          break;
+        case 'stand':
+          if (game.canStand && game.canStand()) game.stand();
+          break;
+        case 'double':
+          if (game.canDouble && game.canDouble()) game.double();
+          break;
+        case 'split':
+          if (game.canSplit && game.canSplit()) game.split();
+          break;
+        case 'insurance':
+          if (game.canInsurance && game.canInsurance()) game.insurance();
+          break;
+        case 'clear-bets':
+          if (game.clearBets) game.clearBets();
+          break;
+        case 'place-bet':
+          if (game.placeBet && action.amount) {
+            game.placeBet(action.amount);
+          }
+          break;      }
+      multiplayerRenderGameUI(game.getState());
+    }
+    
     // --- Start Game ---
-    startGameBtn.onclick = () => {
+    startGameBtn.onclick = async () => {
       if (!isHost) return;
       if (players.length < 2) return showToast('Need 2 players to start!');
+      
       game = new Construction21Game();
       gameStarted = true;
-      showGame();
-      // Broadcast start
-      for (const c of connections) c.send({ type: 'start-game', state: game.getState() });
-      // Host also starts
-      startMultiplayerGame(game.getState());
-      showRoomStatus('Game started!');
+      
+      try {
+        // Update room with game state
+        await updateDoc(doc(db, 'multiplayerRooms', roomId), {
+          gameState: game.getState(),
+          status: 'playing'
+        });
+        
+        showGame();
+        setupMultiplayerUI();
+        showRoomStatus('Game started!');
+        
+      } catch (error) {
+        console.error('Error starting game:', error);
+        showToast('Failed to start game');
+      }
     };
+    
     function startMultiplayerGame(state) {
-      game = new Construction21Game(state); // Accepts state for sync
+      game = new Construction21Game();
+      // Apply state if provided
+      if (state) {
+        Object.assign(game, state);
+      }
       gameStarted = true;
       showGame();
       setupMultiplayerUI();
     }
 
     // --- Multiplayer UI & Action Sync ---
-    function broadcastAction(action) {
-      if (isHost) {
-        for (const c of connections) c.send({ type: 'game-action', action });
-      } else if (conn) {
-        conn.send({ type: 'game-action', action });
+    async function broadcastAction(action) {
+      if (!roomId || !isHost) return;
+      
+      try {
+        // Update game state in Firebase
+        await updateDoc(doc(db, 'multiplayerRooms', roomId), {
+          gameState: game.getState(),
+          lastAction: {
+            ...action,
+            timestamp: new Date(),
+            playerId: currentUser.uid
+          }
+        });
+      } catch (error) {
+        console.error('Error broadcasting action:', error);
       }
     }
-    function broadcastChipsUpdate() {
-      if (isHost) {
-        for (const c of connections) c.send({ type: 'chips-update', chips: userChips });
-      } else if (conn) {
-        conn.send({ type: 'chips-update', chips: userChips });
+    
+    async function broadcastChipsUpdate() {
+      if (!roomId) return;
+      
+      try {
+        // Update player chips in room
+        const roomRef = doc(db, 'multiplayerRooms', roomId);
+        const roomDoc = await getDoc(roomRef);
+        
+        if (roomDoc.exists()) {
+          const roomData = roomDoc.data();
+          const updatedPlayers = roomData.players.map(p => 
+            p.uid === currentUser.uid ? { ...p, chips: userChips } : p
+          );
+          
+          await updateDoc(roomRef, { players: updatedPlayers });
+        }
+      } catch (error) {
+        console.error('Error updating chips:', error);
       }
-    }    function setupMultiplayerUI() {
+    }
+    
+    function setupMultiplayerUI() {
       // Use the safe event handler setup from the UI module
       setupEventHandlersSafe();
       
@@ -2092,7 +1440,7 @@ body.modern-bg {
           if (!gameStarted) return;
           if (game.canDeal && game.canDeal()) {
             game.deal();
-            renderGameUI(game.getState());
+            multiplayerRenderGameUI(game.getState());
             broadcastAction({ type: 'deal' });
           } else {
             showToast('Place a bet first!');
@@ -2105,7 +1453,7 @@ body.modern-bg {
           if (!gameStarted) return;
           if (game.canHit && game.canHit()) {
             game.hit();
-            renderGameUI(game.getState());
+            multiplayerRenderGameUI(game.getState());
             broadcastAction({ type: 'hit' });
           }
         };
@@ -2116,7 +1464,7 @@ body.modern-bg {
           if (!gameStarted) return;
           if (game.canStand && game.canStand()) {
             game.stand();
-            renderGameUI(game.getState());
+            multiplayerRenderGameUI(game.getState());
             broadcastAction({ type: 'stand' });
           }
         };
@@ -2127,7 +1475,7 @@ body.modern-bg {
           if (!gameStarted) return;
           if (game.canDouble && game.canDouble()) {
             game.double();
-            renderGameUI(game.getState());
+            multiplayerRenderGameUI(game.getState());
             broadcastAction({ type: 'double' });
           }
         };
@@ -2138,7 +1486,7 @@ body.modern-bg {
           if (!gameStarted) return;
           if (game.canSplit && game.canSplit()) {
             game.split();
-            renderGameUI(game.getState());
+            multiplayerRenderGameUI(game.getState());
             broadcastAction({ type: 'split' });
           }
         };
@@ -2149,81 +1497,380 @@ body.modern-bg {
           if (!gameStarted) return;
           if (game.canInsurance && game.canInsurance()) {
             game.insurance();
-            renderGameUI(game.getState());
+            multiplayerRenderGameUI(game.getState());
             broadcastAction({ type: 'insurance' });
           }
         };
       }
-      
-      if (clearBetsBtn) {
+        if (clearBetsBtn) {
         clearBetsBtn.onclick = () => {
           if (!gameStarted) return;
           if (game.clearBets) {
             game.clearBets();
-            renderGameUI(game.getState());
+            multiplayerRenderGameUI(game.getState());
             broadcastAction({ type: 'clear-bets' });
           }
-        };      }
+        };
+      }
       
       // Chip tray buttons for multiplayer betting
       document.querySelectorAll('.chip').forEach(btn => {
         btn.onclick = () => {
           if (!gameStarted) return;
           const amt = parseInt(btn.dataset.amount);
-          if (userChips >= amt) {
-            if (game.placeBet && typeof game.placeBet === 'function') {
+          if (userChips >= amt) {            if (game.placeBet && typeof game.placeBet === 'function') {
               game.placeBet(amt);
             }
             updateChipsInFirestore(currentUser.uid, -amt);
-            renderGameUI(game.getState());
+            multiplayerRenderGameUI(game.getState());
             updateChipsUI(userChips);
             broadcastAction({ type: 'place-bet', amount: amt });
-            broadcastChipsUpdate();
-          } else {
+            broadcastChipsUpdate();          } else {
             showToast('Not enough chips!');
           }
         };
       });
-      
-      // Initial UI update
-      renderGameUI(game.getState());
+        // Initial UI update
+      if (game) {
+        multiplayerRenderGameUI(game.getState());
+      }
       updateChipsUI(userChips);
     }
-    function applyRemoteAction(action) {
-      // Apply the action to the local game instance
-      switch (action.type) {
-        case 'deal':
-          if (game.canDeal()) game.deal();
-          break;
-        case 'hit':
-          if (game.canHit()) game.hit();
-          break;
-        case 'stand':
-          if (game.canStand()) game.stand();
-          break;
-        case 'double':
-          if (game.canDouble()) game.double();
-          break;
-        case 'split':
-          if (game.canSplit()) game.split();
-          break;
-        case 'insurance':
-          if (game.canInsurance()) game.insurance();
-          break;
-        case 'clear-bets':
-          game.clearBets();
-          break;
-        case 'place-bet':
-          if (userChips >= action.amount) {
-            game.placeBet(action.amount);
-            updateChipsInFirestore(currentUser.uid, -action.amount);
-            updateChipsUI(userChips);
-          }
-          break;
-        // ...add more as needed
+    
+    // --- Two-Player Table Management ---
+    function updateMultiplayerTableUI() {
+      // Update player names and status
+      const player1Name = document.getElementById('player1-name');
+      const player2Name = document.getElementById('player2-name');
+      const player1Status = document.getElementById('player1-status');
+      const player2Status = document.getElementById('player2-status');
+      const player1Area = document.getElementById('player1-area');
+      const player2Area = document.getElementById('player2-area');
+      
+      // Set player names based on connected players
+      if (players.length >= 1) {
+        if (player1Name) player1Name.textContent = players[0].name || 'Player 1';
+        if (player1Status) player1Status.textContent = 'Connected';
+        if (player1Area) player1Area.classList.add('connected');
+      } else {
+        if (player1Name) player1Name.textContent = 'Player 1';
+        if (player1Status) player1Status.textContent = 'Waiting...';
+        if (player1Area) player1Area.classList.remove('connected');
       }
-      renderGameUI(game.getState());
+      
+      if (players.length >= 2) {
+        if (player2Name) player2Name.textContent = players[1].name || 'Player 2';
+        if (player2Status) player2Status.textContent = 'Connected';
+        if (player2Area) player2Area.classList.add('connected');
+      } else {
+        if (player2Name) player2Name.textContent = 'Player 2';
+        if (player2Status) player2Status.textContent = 'Waiting...';
+        if (player2Area) player2Area.classList.remove('connected');
+      }
+        // Update chip displays
+      updateMultiplayerChipsDisplay();
     }
+    
+    function updateMultiplayerChipsDisplay() {
+      const player1Chips = document.getElementById('player1-chips');
+      const player2Chips = document.getElementById('player2-chips');
+      
+      // Show actual player chip counts from the room data
+      if (players.length >= 1 && player1Chips) {
+        const player1 = players[0];
+        const chips1 = player1.chips || 1000;
+        player1Chips.textContent = chips1.toLocaleString();
+      }
+      
+      if (players.length >= 2 && player2Chips) {
+        const player2 = players[1];
+        const chips2 = player2.chips || 1000;
+        player2Chips.textContent = chips2.toLocaleString();
+      }
+      
+      // If only one player, show placeholder for the empty slot
+      if (players.length < 2 && player2Chips) {
+        player2Chips.textContent = '---';
+      }
+      if (players.length < 1 && player1Chips) {
+        player1Chips.textContent = '---';
+      }
+    }
+    
+    function setActivePlayer(playerIndex) {
+      const player1Area = document.getElementById('player1-area');
+      const player2Area = document.getElementById('player2-area');
+      const player1Status = document.getElementById('player1-status');
+      const player2Status = document.getElementById('player2-status');
+      
+      // Remove active class from both players
+      if (player1Area) player1Area.classList.remove('active');
+      if (player2Area) player2Area.classList.remove('active');
+      
+      // Add active class to current player
+      if (playerIndex === 0 && player1Area) {
+        player1Area.classList.add('active');
+        if (player1Status) player1Status.textContent = 'Your Turn';
+        if (player2Status) player2Status.textContent = 'Waiting';
+      } else if (playerIndex === 1 && player2Area) {
+        player2Area.classList.add('active');
+        if (player2Status) player2Status.textContent = 'Your Turn';
+        if (player1Status) player1Status.textContent = 'Waiting';
+      }
+    }
+    
+    function clearActivePlayer() {
+      const player1Area = document.getElementById('player1-area');
+      const player2Area = document.getElementById('player2-area');
+      const player1Status = document.getElementById('player1-status');
+      const player2Status = document.getElementById('player2-status');
+      
+      if (player1Area) player1Area.classList.remove('active');
+      if (player2Area) player2Area.classList.remove('active');
+      
+      if (player1Status) player1Status.textContent = 'Ready';
+      if (player2Status) player2Status.textContent = 'Ready';
+    }
+    
+    function updateMultiplayerCards() {
+      // Update dealer cards in the new location
+      const dealerCardsArea = document.getElementById('dealer-cards');
+      const dealerScore = document.getElementById('dealer-score');
+      
+      if (dealerCardsArea && game && game.dealerHand) {
+        dealerCardsArea.innerHTML = '';
+        
+        game.dealerHand.cards.forEach((card, idx) => {
+          const cardEl = document.createElement('div');
+          cardEl.className = 'card';
+          cardEl.innerHTML = renderCard(card);
+          cardEl.style.marginLeft = idx > 0 ? '-20px' : '0';
+          cardEl.style.zIndex = 10 + idx;
+          dealerCardsArea.appendChild(cardEl);
+        });
+        
+        if (dealerScore) {
+          const score = game.calculateScore(game.dealerHand.cards);
+          dealerScore.textContent = score;
+        }
+      }
+      
+      // Update player hands in their respective areas
+      updatePlayerHandsInAreas();
+    }
+    
+    function updatePlayerHandsInAreas() {
+      const player1Hands = document.getElementById('player1-hands');
+      const player2Hands = document.getElementById('player2-hands');
+      
+      // For now, show current player's hands in their area
+      // In full implementation, this would route based on actual player assignments
+      if (currentUser && players.length >= 1) {
+        const isPlayer1 = players[0].uid === currentUser.uid;
+        const targetArea = isPlayer1 ? player1Hands : player2Hands;
+        
+        if (targetArea && game && game.playerHands) {
+          targetArea.innerHTML = '';
+          
+          game.playerHands.forEach((hand, hIdx) => {
+            const handDiv = document.createElement('div');
+            handDiv.className = 'player-hand';
+            if (hIdx === game.activeHandIndex) handDiv.classList.add('active-hand');
+            
+            const handCardsDiv = document.createElement('div');
+            handCardsDiv.className = 'hand-cards';
+            
+            hand.cards.forEach((card, idx) => {
+              const cardDiv = document.createElement('div');
+              cardDiv.className = 'card';
+              cardDiv.innerHTML = renderCard(card);
+              const fanGap = Math.min(15, 80 / hand.cards.length);
+              cardDiv.style.transform = `translateX(${fanGap * (idx - (hand.cards.length - 1) / 2)}px)`;
+              cardDiv.style.zIndex = 10 + idx;
+              handCardsDiv.appendChild(cardDiv);
+            });
+            
+            handDiv.appendChild(handCardsDiv);
+            
+            // Add hand info
+            const handInfo = document.createElement('div');
+            handInfo.className = 'hand-info';
+            handInfo.innerHTML = `
+              <span>Bet: ${hand.bet}</span> 
+              <span>Score: ${game.calculateScore(hand.cards)}</span>
+            `;
+            handDiv.appendChild(handInfo);
+            
+            targetArea.appendChild(handDiv);
+          });
+        }
+      }
+    }
+    
+    // Override the renderGameUI function for multiplayer
+    function multiplayerRenderGameUI(gameState) {
+      // Update the standard game UI first
+      if (typeof renderGameUI === 'function') {
+        renderGameUI(gameState);
+      }
+      
+      // Then update multiplayer-specific elements
+      updateMultiplayerCards();
+      updateMultiplayerTableUI();
+    }
+    
+    // --- Voucher Redemption Logic ---
+    function initializeVoucherSystem() {
+      const voucherInput = document.getElementById('voucher-code-input');
+      const redeemBtn = document.getElementById('redeem-voucher-btn');
+      const messageDiv = document.getElementById('voucher-message');
+      
+      if (!voucherInput || !redeemBtn) return;
+      
+      // Format voucher code input as user types
+      voucherInput.addEventListener('input', function(e) {
+        let value = e.target.value.replace(/[^A-Z0-9]/g, '').toUpperCase();
+        if (value.length > 3) {
+          value = value.substring(0, 3) + '-' + value.substring(3);
+        }
+        if (value.length > 7) {
+          value = value.substring(0, 7) + '-' + value.substring(7);
+        }
+        if (value.length > 13) {
+          value = value.substring(0, 13);
+        }
+        e.target.value = value;
+      });
+      
+      // Handle voucher redemption
+      redeemBtn.addEventListener('click', async function() {
+        const voucherCode = voucherInput.value.trim();
+        
+        if (!voucherCode) {
+          showVoucherMessage('Please enter a voucher code', 'error');
+          return;
+        }
+        
+        if (!currentUser) {
+          showVoucherMessage('Please log in to redeem vouchers', 'error');
+          return;
+        }
+        
+        try {
+          redeemBtn.disabled = true;
+          redeemBtn.innerHTML = '<span class="spinner"></span> Redeeming...';
+          
+          await redeemVoucher(voucherCode, currentUser.uid);
+          
+          voucherInput.value = '';
+          showVoucherMessage('Voucher redeemed successfully! 🎉', 'success');
+          
+        } catch (error) {
+          console.error('Voucher redemption error:', error);
+          showVoucherMessage(error.message || 'Failed to redeem voucher', 'error');
+        } finally {
+          redeemBtn.disabled = false;
+          redeemBtn.innerHTML = 'Redeem';
+        }
+      });
+      
+      // Allow Enter key to redeem
+      voucherInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+          redeemBtn.click();
+        }
+      });
+    }
+    
+    async function redeemVoucher(voucherCode, userId) {
+      try {
+        // Use atomic transaction to prevent double redemption
+        await runTransaction(db, async (transaction) => {
+          const voucherRef = doc(db, 'chipVouchers', voucherCode);
+          const voucherDoc = await transaction.get(voucherRef);
+          
+          if (!voucherDoc.exists()) {
+            throw new Error('Invalid voucher code');
+          }
+          
+          const voucherData = voucherDoc.data();
+          const now = new Date();
+          const expiryDate = voucherData.expiryDate.toDate();
+          
+          // Validate voucher
+          if (voucherData.isRedeemed) {
+            throw new Error('This voucher has already been redeemed');
+          }
+          
+          if (now > expiryDate) {
+            throw new Error('This voucher has expired');
+          }
+          
+          // Get current user chips from multiplayer collection
+          const userRef = doc(db, 'users', userId);
+          const userDoc = await transaction.get(userRef);
+          const currentChips = userDoc.exists() ? (userDoc.data().chips || 0) : 0;
+          const newChips = currentChips + voucherData.chipAmount;
+          
+          // Update voucher as redeemed
+          transaction.update(voucherRef, {
+            isRedeemed: true,
+            redeemedBy: userId,
+            redeemedAt: new Date()
+          });
+          
+          // Update user chips in multiplayer collection
+          transaction.set(userRef, { 
+            chips: newChips,
+            lastUpdated: new Date()
+          }, { merge: true });
+            // Update local variables
+          userChips = newChips;
+        });
+        
+        // Update UI after successful redemption
+        updateChipsUI(userChips);
+        broadcastChipsUpdate();
+        
+      } catch (error) {
+        console.error('Voucher redemption failed:', error);
+        throw error;
+      }
+    }
+    
+    function showVoucherMessage(message, type) {
+      const messageDiv = document.getElementById('voucher-message');
+      if (!messageDiv) return;
+      
+      messageDiv.textContent = message;
+      messageDiv.className = `voucher-message ${type}`;
+      messageDiv.style.display = 'block';
+      messageDiv.style.opacity = '0';
+      
+      // Fade in animation
+      setTimeout(() => {
+        messageDiv.style.opacity = '1';
+      }, 10);
+      
+      // Auto-hide after 5 seconds for success messages
+      if (type === 'success') {
+        setTimeout(() => {
+          messageDiv.style.opacity = '0';
+          setTimeout(() => {
+            messageDiv.style.display = 'none';
+          }, 300);
+        }, 5000);
+      }
+    }
+    
+    // Initialize voucher system when page loads
+    document.addEventListener('DOMContentLoaded', function() {
+      // Wait a bit for other initialization to complete
+      setTimeout(initializeVoucherSystem, 1000);
+    });
+    
+    // --- End Voucher Logic ---
+    
     // --- End Multiplayer Logic ---
   </script>
 </body>
