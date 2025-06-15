@@ -399,25 +399,59 @@ main {
 
 /* Mobile blackjack table optimizations */
 #blackjack-table { 
-  max-width: 98vw; 
-  min-height: 240px; 
-  margin-bottom: 0.5rem !important;
+  position: relative;
+  width: 100%;
+  max-width: 1200px;
+  min-height: 450px;
+  margin: 0 auto 0.5rem auto;
+  background: linear-gradient(135deg, 
+    rgba(0, 100, 0, 0.9) 0%, 
+    rgba(0, 80, 0, 0.95) 50%, 
+    rgba(0, 60, 0, 0.9) 100%);
+  border-radius: 200px 200px 50px 50px;
+  border: 8px solid #ffd700;
+  box-shadow: 
+    0 10px 30px rgba(0,0,0,0.5),
+    inset 0 0 30px rgba(255,215,0,0.1),
+    0 0 0 2px rgba(255,215,0,0.3);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 20px;
 }
 
 #blackjack-table .table-logo { 
   width: 180px; 
   opacity: 0.08 !important;
 }
-/* Compact bet spots */
+/* Bet spots positioning */
 #table-bet-spots { 
-  gap: 20px; 
-  bottom: 12% !important;
+  position: absolute;
+  bottom: 12%;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 20px;
+  z-index: 10;
 }
 
 .table-bet-spot { 
+  position: relative;
   width: 60px; 
   height: 60px; 
-  font-size: 0.8em; 
+  border-radius: 50%;
+  background: rgba(0, 50, 0, 0.8);
+  border: 2px dashed #ffd700;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #ffd700;
+  font-size: 0.8em;
+  font-weight: bold;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
 }
 .table-bet-spot .font-bold {
   font-size: 1.2em !important;
@@ -551,9 +585,9 @@ main {
   header h1 {
     font-size: 1.3rem !important;
   }
-  
-  #blackjack-table { 
-    min-height: 200px !important;
+    #blackjack-table { 
+    min-height: 300px !important;
+    max-width: 98vw !important;
   }
   
   #blackjack-table .table-logo { 
@@ -633,9 +667,8 @@ main {
   main {
     margin-top: 0.25rem !important;
   }
-  
-  #blackjack-table { 
-    min-height: 160px !important;
+    #blackjack-table { 
+    min-height: 240px !important;
     margin-bottom: 0.25rem !important;
   }
   
@@ -743,6 +776,116 @@ main {
   .smooth-animation {
     contain: layout style paint;
   }
+}
+
+/* Table areas for visual depth */
+.table-area-dealer {
+  position: absolute;
+  top: 10%;
+  left: 25%;
+  width: 50%;
+  height: 20%;
+  background: radial-gradient(ellipse, rgba(0,0,0,0.1) 0%, transparent 70%);
+  border-radius: 50%;
+  z-index: 1;
+}
+
+.table-area-player {
+  position: absolute;
+  bottom: 15%;
+  left: 10%;
+  width: 80%;
+  height: 35%;
+  background: radial-gradient(ellipse, rgba(0,0,0,0.08) 0%, transparent 70%);
+  border-radius: 50%;
+  z-index: 1;
+}
+
+/* Dealer cards positioning */
+#dealer-cards {
+  position: absolute;
+  top: 15%;
+  left: 50%;
+  transform: translateX(-50%);
+  min-height: 80px;
+  min-width: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: -20px;
+  z-index: 10;
+}
+
+/* Player hands positioning */
+#player-hands {
+  position: absolute;
+  bottom: 25%;
+  left: 50%;
+  transform: translateX(-50%);
+  min-height: 80px;
+  min-width: 300px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 20px;
+  z-index: 10;
+}
+
+/* Virtual deck positioning */
+#virtual-deck {
+  position: absolute;
+  top: 15%;
+  right: 20px;
+  width: 60px;
+  height: 84px;
+  background: linear-gradient(135deg, #1a365d, #2d4a73);
+  border: 2px solid #ffd700;
+  border-radius: 8px;
+  z-index: 5;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+}
+
+/* Table vignette for depth */
+#table-vignette {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(ellipse at center, transparent 30%, rgba(0,0,0,0.1) 70%);
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* Table logo positioning */
+.table-logo {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 3;
+}
+
+/* Table text rules positioning */
+.table-text {
+  position: absolute;
+  color: #ffd700;
+  font-weight: bold;
+  font-size: 0.9rem;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+  z-index: 4;
+}
+
+.table-text.rules {
+  top: 20px;
+  left: 20px;
+}
+
+.table-text.nosmoke {
+  top: 20px;
+  right: 20px;
 }
     </style>
 </head>
