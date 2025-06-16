@@ -254,12 +254,142 @@ function resetAllHandsAndUI() {
   inPlay = false;
   outcomeLock = false;
   resultsCache = null;
-  
-  // Reset mobile gameplay mode
+    // Reset mobile gameplay mode
   setMobileGameplayMode(false);
   
   if (dealerCardsEl) dealerCardsEl.innerHTML = '';
   if (playerHandsEl) playerHandsEl.innerHTML = '';
+}
+
+// --- Bet Placement Animation and Utilities ---
+function animateChipToBetSpot(spotType, chipValue, spotElement, stackCount = 0) {
+  console.log(`[ANIM] Animating chip ${chipValue} to ${spotType} spot`);
+  try {
+    // Create animated chip element
+    const animChip = document.createElement('div');
+    animChip.className = 'chip chip-fly';
+    animChip.innerHTML = `<span class="chip-value">${chipValue}</span>`;
+    animChip.setAttribute('data-amount', chipValue);
+    
+    // Apply chip styling based on value
+    const chipColors = {
+      5: 'linear-gradient(135deg, #ff2d55, #d30000)',
+      10: 'linear-gradient(135deg, #3478f6, #0035aa)', 
+      25: 'linear-gradient(135deg, #34c759, #00701a)',
+      100: 'linear-gradient(135deg, #9254de, #5e00c0)'
+    };
+    
+    animChip.style.background = chipColors[chipValue] || chipColors[5];
+    animChip.style.width = '56px';
+    animChip.style.height = '56px';
+    animChip.style.borderRadius = '50%';
+    animChip.style.display = 'flex';
+    animChip.style.alignItems = 'center';
+    animChip.style.justifyContent = 'center';
+    animChip.style.color = '#fff';
+    animChip.style.fontWeight = 'bold';
+    animChip.style.border = '3px dashed rgba(255,255,255,0.6)';
+    animChip.style.boxShadow = '0 3px 6px rgba(0,0,0,0.4)';
+    animChip.style.textShadow = '0 1px 2px rgba(0,0,0,0.5)';
+    
+    // Get selected chip position (source)
+    const selectedChipEl = document.querySelector('.chip.selected') || 
+                          document.querySelector('.chip[data-amount="' + chipValue + '"]');
+    
+    if (!selectedChipEl || !spotElement) {
+      console.warn('[ANIM] Missing elements for chip animation');
+      return Promise.resolve();
+    }
+    
+    const fromRect = selectedChipEl.getBoundingClientRect();
+    const toRect = spotElement.getBoundingClientRect();
+    
+    // Position chip at source
+    animChip.style.position = 'fixed';
+    animChip.style.left = fromRect.left + 'px';
+    animChip.style.top = fromRect.top + 'px';
+    animChip.style.zIndex = '9999';
+    animChip.style.pointerEvents = 'none';
+    
+    document.body.appendChild(animChip);
+    
+    // Animate to destination
+    return new Promise(resolve => {
+      requestAnimationFrame(() => {
+        const targetX = toRect.left + (toRect.width / 2) - 28; // Center chip
+        const targetY = toRect.top + (toRect.height / 2) - 28 - (stackCount * 4); // Stack effect
+        
+        animChip.style.transition = 'all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+        animChip.style.left = targetX + 'px';
+        animChip.style.top = targetY + 'px';
+        animChip.style.transform = `scale(0.8) rotate(${Math.random() * 360}deg)`;
+      });
+      
+      setTimeout(() => {
+        animChip.remove();
+        resolve();
+      }, 800);
+    });
+  } catch (error) {
+    console.error('[ERROR] animateChipToBetSpot failed:', error);
+    return Promise.resolve();
+  }
+}
+
+function getBetStackCount(spotType) {
+  try {
+    if (!game || !game.bets) return 0;
+    
+    const currentBet = game.bets[spotType] || 0;
+    // Each chip represents its face value, so stack count is bet amount divided by smallest chip
+    return Math.floor(currentBet / 5); // Assuming 5 is the smallest chip
+  } catch (error) {
+    console.error('[ERROR] getBetStackCount failed:', error);
+    return 0;
+  }
+}
+
+function updateSelectedChip() {
+  console.log('[UI] Updating selected chip display');
+  try {
+    const chipTray = document.querySelector('.chip-row');
+    if (!chipTray) return;
+    
+    chipTray.querySelectorAll('.chip').forEach(chip => {
+      chip.classList.remove('selected');
+      if (parseInt(chip.dataset.amount) === selectedChip) {
+        chip.classList.add('selected');
+      }
+    });
+  } catch (error) {
+    console.error('[ERROR] updateSelectedChip failed:', error);
+  }
+}
+
+// Add missing setMobileGameplayMode function
+function setMobileGameplayMode(active) {
+  console.log('[UI] Mobile gameplay mode:', active ? 'active' : 'inactive');
+  
+  try {
+    const body = document.body;
+    const gameContainer = document.querySelector('.game-container');
+    const chipTray = document.getElementById('chip-tray');
+    const actionButtons = document.getElementById('action-bar');
+    
+    if (active) {
+      if (body) body.classList.add('mobile-gameplay-mode');
+      if (gameContainer) gameContainer.classList.add('mobile-gameplay-mode');
+      if (chipTray) chipTray.classList.add('minimized');
+      if (actionButtons) actionButtons.classList.add('gameplay-mode');
+    } else {
+      if (body) body.classList.remove('mobile-gameplay-mode');
+      if (gameContainer) gameContainer.classList.remove('mobile-gameplay-mode');
+      if (chipTray) chipTray.classList.remove('minimized');
+      if (actionButtons) actionButtons.classList.remove('gameplay-mode');
+    }
+  } catch (error) {
+    console.error('[ERROR] setMobileGameplayMode failed:', error);
+  }
 }
 
 // --- Simplified Visual Card Dealing Animation ---
@@ -1617,41 +1747,42 @@ async function checkAndHandleBlackjacks() {
   }
 }
 
-// Firebase Auth State Management
-onAuthStateChanged(auth, (user) => {
-  if (user) {
-    debugLog('AUTH', 'User logged in:', user.email);
-    loadUserDataAndStartGame(user);
-  } else {
-    debugLog('AUTH', 'User logged out, redirecting...');
-    window.location.href = "construction21-login.html";
-  }
-});
-
-// Window load event to trigger initial debug
-window.addEventListener('load', () => {
-  setTimeout(() => {
-    debugLog('INIT', 'Page loaded, running initial debug...');
-    debugAllButtons();
-  }, 1000);
-});
-
-function showStatusToast(message, isError = false, duration = 3000) {
-  console.log('[TOAST]', isError ? 'ERROR:' : 'INFO:', message);
+function processRoundCompletion() {
+  debugLog('ROUND', 'Processing round completion...');
+  
   try {
-    const statusToast = document.getElementById('status-toast');
-    if (!statusToast) return;
+    // End the game properly
+    inPlay = false;
+    setMobileGameplayMode(false);
     
-    statusToast.textContent = message;
-    statusToast.style.color = isError ? '#ff4e4e' : '#ffd700';
-    statusToast.style.backgroundColor = isError ? 'rgba(255, 78, 78, 0.2)' : 'rgba(255, 215, 0, 0.2)';
-    statusToast.classList.add('active');
+    // Reveal dealer's hole card if not already revealed
+    if (game.dealerHand.cards.length > 1 && !game.dealerHand.cards[1].isFaceUp) {
+      game.dealerHand.cards[1].isFaceUp = true;
+    }
     
-    // Auto-hide after duration
-    setTimeout(() => {
-      statusToast.classList.remove('active');
-    }, duration);
+    // Update final UI
+    updateHandsUI();
+    
+    // Calculate and apply winnings
+    let totalWinnings = 0;
+    if (game.playerHands && game.playerHands.length > 0) {
+      game.playerHands.forEach(hand => {
+        const result = determineHandResult(hand, game.dealerHand);
+        if (result === 'win' || result === 'blackjack') {
+          const winAmount = result === 'blackjack' ? hand.bet * 2.5 : hand.bet * 2;
+          totalWinnings += winAmount;
+        } else if (result === 'push') {
+          totalWinnings += hand.bet; // Return original bet
+        }
+      });
+    }    // Update chips
+    game.chips += totalWinnings;
+    updateChipsDisplay();
+    saveChipsToFirebase();
+    
+    // Update statistics
+    gameStats.handsPlayed++;
   } catch (error) {
-    console.error('[ERROR] showStatusToast failed:', error);
+    console.error('[ERROR] processRoundCompletion failed:', error);
   }
 }

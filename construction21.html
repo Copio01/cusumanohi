@@ -80,28 +80,30 @@ body.modern-bg {
 .action-buttons-container { width: fit-content; margin-left: auto; margin-right: auto; }
 
 .chip {
-  width: 64px; height: 64px;
+  width: 56px; height: 56px;
   border-radius: 50%;
   position: relative;
   display: flex;
   justify-content: center; align-items: center;
   font-weight: bold; color: #fff;
-  border: 4px dashed rgba(255,255,255,0.7);
+  border: 3px dashed rgba(255,255,255,0.6);
   transition: transform 0.1s, box-shadow 0.1s;
   cursor: pointer; user-select: none;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.5), inset 0 0 10px rgba(0,0,0,0.3);
+  box-shadow: 0 3px 6px rgba(0,0,0,0.4), inset 0 0 8px rgba(0,0,0,0.2);
   text-shadow: 0 1px 2px rgba(0,0,0,0.5);
-  font-size: 1.1em;
+  font-size: 1rem;
+  margin: 0 8px;
 }
 .chip[data-amount="5"]    { background: linear-gradient(135deg, #ff2d55, #d30000); border-color: #ff7f7f; }
 .chip[data-amount="10"]   { background: linear-gradient(135deg, #3478f6, #0035aa); border-color: #7fb3ff; }
 .chip[data-amount="25"]   { background: linear-gradient(135deg, #34c759, #00701a); border-color: #7fff8e; }
 .chip[data-amount="100"]  { background: linear-gradient(135deg, #9254de, #5e00c0); border-color: #d5b8ff; }
 .chip .chip-value { 
-  font-size: 1.5rem; 
+  font-size: 1.2rem; 
   z-index: 3; 
-  pointer-events: none; /* Allow clicks to pass through to parent chip */
+  pointer-events: none;
   user-select: none;
+  font-weight: 700;
 }
 .chip .sr-only {
   pointer-events: none; /* Ensure screen reader text doesn't block clicks */
@@ -133,14 +135,15 @@ body.modern-bg {
   flex-direction: row;
   justify-content: center;
   align-items: center;
-  gap: 1.5rem;
+  gap: 0.8rem;
   width: 100%;
+  padding: 0 10px;
 }
 .chip-tray-container {
-  margin-top: 0.5rem;
-  padding: 1rem 1.5rem;
+  margin-top: 1rem;
+  padding: 0.8rem 1.2rem;
   background: rgba(36,36,28,0.7);
-  border-radius: 16px;
+  border-radius: 12px;
   box-shadow: 0 4px 16px rgba(0,0,0,0.3);
   width: fit-content;
   margin-left: auto;
@@ -402,23 +405,23 @@ main {
   position: relative;
   width: 100%;
   max-width: 1200px;
-  min-height: 450px;
-  margin: 0 auto 0.5rem auto;
+  min-height: 360px;
+  margin: 0 auto 1rem auto;
   background: linear-gradient(135deg, 
     rgba(0, 100, 0, 0.9) 0%, 
     rgba(0, 80, 0, 0.95) 50%, 
     rgba(0, 60, 0, 0.9) 100%);
   border-radius: 200px 200px 50px 50px;
-  border: 8px solid #ffd700;
+  border: 6px solid #ffd700;
   box-shadow: 
-    0 10px 30px rgba(0,0,0,0.5),
-    inset 0 0 30px rgba(255,215,0,0.1),
+    0 8px 24px rgba(0,0,0,0.4),
+    inset 0 0 25px rgba(255,215,0,0.1),
     0 0 0 2px rgba(255,215,0,0.3);
   overflow: hidden;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  padding: 20px;
+  padding: 16px;
 }
 
 #blackjack-table .table-logo { 
@@ -438,23 +441,31 @@ main {
 
 .table-bet-spot { 
   position: relative;
-  width: 60px; 
-  height: 60px; 
+  width: 70px; 
+  height: 70px; 
   border-radius: 50%;
   background: rgba(0, 50, 0, 0.8);
-  border: 2px dashed #ffd700;
+  border: 3px dashed #ffd700;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   color: #ffd700;
-  font-size: 0.8em;
+  font-size: 0.8rem;
   font-weight: bold;
   text-shadow: 0 1px 2px rgba(0,0,0,0.8);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  box-shadow: 0 3px 10px rgba(0,0,0,0.4);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.table-bet-spot:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(255,215,0,0.3);
+  border-color: #ffed4e;
 }
 .table-bet-spot .font-bold {
-  font-size: 1.2em !important;
+  font-size: 1.1rem !important;
+  margin-top: 2px;
 }
 /* Mobile card sizing */
 .card { 
@@ -1648,12 +1659,19 @@ main {
       <div class="chip-tray-header">
         <span class="chip-tray-icon">🎰</span>
         <span class="chip-tray-title">Betting Chips</span>
-      </div>
-      <div class="chip-row">
-        <button class="chip" data-amount="5"><span class="chip-value">5</span><span class="sr-only">Bet 5 chips</span></button>
-        <button class="chip" data-amount="10"><span class="chip-value">10</span><span class="sr-only">Bet 10 chips</span></button>
-        <button class="chip" data-amount="25"><span class="chip-value">25</span><span class="sr-only">Bet 25 chips</span></button>
-        <button class="chip" data-amount="100"><span class="chip-value">100</span><span class="sr-only">Bet 100 chips</span></button>
+      </div>      <div class="chip-row">
+        <button class="chip" data-amount="5">
+          <span class="chip-value">5</span>
+        </button>
+        <button class="chip" data-amount="10">
+          <span class="chip-value">10</span>
+        </button>
+        <button class="chip" data-amount="25">
+          <span class="chip-value">25</span>
+        </button>
+        <button class="chip" data-amount="100">
+          <span class="chip-value">100</span>
+        </button>
       </div>
       <!-- Quick Bet Presets -->
       <div class="quick-bet-row">

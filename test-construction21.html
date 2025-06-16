@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Construction21 Game Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #1a1a1a;
+            color: #fff;
+        }
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: #2a2a2a;
+            padding: 20px;
+            border-radius: 10px;
+        }
+        .test-section {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #333;
+            border-radius: 8px;
+        }
+        .test-result {
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 5px;
+        }
+        .pass {
+            background: #2d5016;
+            border-left: 4px solid #4caf50;
+        }
+        .fail {
+            background: #5d1a1a;
+            border-left: 4px solid #f44336;
+        }
+        button {
+            background: #007cba;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 5px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #005a87;
+        }
+        iframe {
+            width: 100%;
+            height: 600px;
+            border: 2px solid #555;
+            border-radius: 8px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🃏 Construction21 Blackjack Game - Test Suite</h1>
+        
+        <div class="test-section">
+            <h2>Critical Function Tests</h2>
+            <div id="function-tests">
+                <div class="test-result" id="setMobileGameplayMode-test">
+                    <strong>setMobileGameplayMode Function:</strong> <span id="setMobileGameplayMode-status">Testing...</span>
+                </div>
+                <div class="test-result" id="animateChipToBetSpot-test">
+                    <strong>animateChipToBetSpot Function:</strong> <span id="animateChipToBetSpot-status">Testing...</span>
+                </div>
+                <div class="test-result" id="getBetStackCount-test">
+                    <strong>getBetStackCount Function:</strong> <span id="getBetStackCount-status">Testing...</span>
+                </div>
+                <div class="test-result" id="updateSelectedChip-test">
+                    <strong>updateSelectedChip Function:</strong> <span id="updateSelectedChip-status">Testing...</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2>Interactive Game Test</h2>
+            <p>Test the actual game below. Try the following:</p>
+            <ul>
+                <li>✅ <strong>Chip Selection:</strong> Click on chips to select them</li>
+                <li>✅ <strong>Bet Placement:</strong> Click on bet spots after selecting a chip</li>
+                <li>✅ <strong>Deal Button:</strong> Place a main bet and click Deal</li>
+                <li>✅ <strong>Game Actions:</strong> Use Hit/Stand buttons during play</li>
+            </ul>
+            <button onclick="testChipSelection()">Test Chip Selection</button>
+            <button onclick="testBetPlacement()">Test Bet Placement</button>
+            <button onclick="testGameFlow()">Test Game Flow</button>
+            <div id="interactive-results"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>Live Game</h2>
+            <iframe src="construction21.html" id="game-frame"></iframe>
+        </div>
+    </div>
+
+    <script>
+        // Test critical functions by checking if they exist in the game frame
+        function testFunctions() {
+            const iframe = document.getElementById('game-frame');
+            
+            setTimeout(() => {
+                try {
+                    const gameWindow = iframe.contentWindow;
+                    
+                    // Test setMobileGameplayMode
+                    const setMobileTest = document.getElementById('setMobileGameplayMode-test');
+                    const setMobileStatus = document.getElementById('setMobileGameplayMode-status');
+                    if (typeof gameWindow.setMobileGameplayMode === 'function') {
+                        setMobileStatus.textContent = 'PASS - Function exists and callable';
+                        setMobileTest.className = 'test-result pass';
+                    } else {
+                        setMobileStatus.textContent = 'FAIL - Function not found';
+                        setMobileTest.className = 'test-result fail';
+                    }
+
+                    // Test animateChipToBetSpot
+                    const animateTest = document.getElementById('animateChipToBetSpot-test');
+                    const animateStatus = document.getElementById('animateChipToBetSpot-status');
+                    if (typeof gameWindow.animateChipToBetSpot === 'function') {
+                        animateStatus.textContent = 'PASS - Function exists and callable';
+                        animateTest.className = 'test-result pass';
+                    } else {
+                        animateStatus.textContent = 'FAIL - Function not found';
+                        animateTest.className = 'test-result fail';
+                    }
+
+                    // Test getBetStackCount
+                    const stackTest = document.getElementById('getBetStackCount-test');
+                    const stackStatus = document.getElementById('getBetStackCount-status');
+                    if (typeof gameWindow.getBetStackCount === 'function') {
+                        stackStatus.textContent = 'PASS - Function exists and callable';
+                        stackTest.className = 'test-result pass';
+                    } else {
+                        stackStatus.textContent = 'FAIL - Function not found';
+                        stackTest.className = 'test-result fail';
+                    }
+
+                    // Test updateSelectedChip
+                    const updateTest = document.getElementById('updateSelectedChip-test');
+                    const updateStatus = document.getElementById('updateSelectedChip-status');
+                    if (typeof gameWindow.updateSelectedChip === 'function') {
+                        updateStatus.textContent = 'PASS - Function exists and callable';
+                        updateTest.className = 'test-result pass';
+                    } else {
+                        updateStatus.textContent = 'FAIL - Function not found';
+                        updateTest.className = 'test-result fail';
+                    }
+                    
+                } catch (error) {
+                    console.error('Testing error:', error);
+                    document.querySelectorAll('[id$="-status"]').forEach(el => {
+                        el.textContent = 'ERROR - Cannot access game frame';
+                        el.parentElement.className = 'test-result fail';
+                    });
+                }
+            }, 3000); // Wait for game to load
+        }
+
+        function testChipSelection() {
+            const resultsDiv = document.getElementById('interactive-results');
+            resultsDiv.innerHTML = '<p>🧪 Chip Selection Test: Click on the $5 chip in the game above and watch for visual feedback.</p>';
+        }
+
+        function testBetPlacement() {
+            const resultsDiv = document.getElementById('interactive-results');
+            resultsDiv.innerHTML = '<p>🧪 Bet Placement Test: Select a chip, then click on the "Main Bet" spot. You should see chip animation.</p>';
+        }
+
+        function testGameFlow() {
+            const resultsDiv = document.getElementById('interactive-results');
+            resultsDiv.innerHTML = '<p>🧪 Game Flow Test: Place a main bet and click "Deal". The game should start without errors.</p>';
+        }
+
+        // Start testing when page loads
+        window.addEventListener('load', () => {
+            testFunctions();
+        });
+    </script>
+</body>
+</html>
