@@ -694,8 +694,8 @@
                         <input type="number" id="grant-chips-amount" placeholder="Amount" min="1" required style="width:100%;padding:0.7rem 1.1rem;border-radius:8px;border:1.5px solid #d1e3f8;font-size:1.08rem;background:#fff;">
                     </div>
                     <button type="submit" class="btn" style="background:var(--success-color);margin-top:1.7rem;min-width:160px;">Grant Chips</button>
+                    <div id="grant-chips-msg" style="display:none;width:100%;margin-top:10px;" class="upload-message"></div>
                 </form>
-                <div id="grant-chips-message" class="upload-message" style="display:none;margin-top:1.1rem;"></div>
             </div>
 
             <div class="control-card" id="voucher-management-card">
@@ -1019,7 +1019,7 @@
 
         // Grant chips elements
         const grantChipsForm = document.getElementById('grant-chips-form');
-        const grantChipsMessage = document.getElementById('grant-chips-message');
+        const grantChipsMsg = document.getElementById('grant-chips-msg');
 
         // Voucher management elements
         const generateVoucherForm = document.getElementById('generate-voucher-form');
@@ -1199,9 +1199,7 @@ loginForm.addEventListener('submit', (e) => {
         });
         uploadBtn.addEventListener('click', () => imageUploadInput.click());
         heroUploadBtn.addEventListener('click', () => heroImageUploadInput.click());
-        logoUploadBtn.addEventListener('click', () => logoImageUploadInput.click());
-
-        togglePasswordBtn.addEventListener('click', () => {
+        logoUploadBtn.addEventListener('click', () => logoImageUploadInput.click());        togglePasswordBtn.addEventListener('click', () => {
             if (passwordInput.type === 'password') {
                 passwordInput.type = 'text';
                 togglePasswordBtn.textContent = '🙈';
@@ -1209,7 +1207,7 @@ loginForm.addEventListener('submit', (e) => {
                 passwordInput.type = 'password';
                 togglePasswordBtn.textContent = '👁️';
             }
-        });        function setupImageListener() {
+        });function setupImageListener() {
             if (!db) {
                 console.error("Firestore not initialized");
                 galleryContainer.innerHTML = '<div class="error-message">Database connection not available.</div>';
@@ -2225,9 +2223,8 @@ loginForm.addEventListener('submit', (e) => {
                                     </div>
                                     <div style="font-size:0.8rem;color:var(--medium-gray);">
                                         Expires: ${voucher.expiresAt.toDate().toLocaleDateString()}
-                                    </div>
-                                    ${!voucher.isRedeemed && !isExpired ? `
-                                        <button onclick="copyVoucherCode('${voucher.code}')" style="margin-top:0.5rem;padding:0.3rem 0.7rem;background:var(--secondary-color);color:white;border:none;border-radius:4px;cursor:pointer;font-size:0.8rem;">
+                                    </div>                                    ${!voucher.isRedeemed && !isExpired ? `
+                                        <button onclick="copyVoucherCode('${voucher.code}', event)" style="margin-top:0.5rem;padding:0.3rem 0.7rem;background:var(--secondary-color);color:white;border:none;border-radius:4px;cursor:pointer;font-size:0.8rem;">
                                             Copy Code
                                         </button>
                                     ` : ''}
@@ -2243,17 +2240,18 @@ loginForm.addEventListener('submit', (e) => {
                 console.error('Error loading vouchers:', err);
                 vouchersList.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--danger-color);">Error loading vouchers.</div>';
             }
-        }
-
-        // Copy voucher code function for list items
-        window.copyVoucherCode = async function(code) {
+        }        // Copy voucher code function for list items
+        window.copyVoucherCode = async function(code, event) {
             try {
                 await navigator.clipboard.writeText(code);
                 // Find the button and update its text temporarily
-                event.target.textContent = '✅ Copied!';
-                setTimeout(() => {
-                    event.target.textContent = 'Copy Code';
-                }, 2000);
+                const button = event ? event.target : document.querySelector(`button[onclick="copyVoucherCode('${code}')"]`);
+                if (button) {
+                    button.textContent = '✅ Copied!';
+                    setTimeout(() => {
+                        button.textContent = 'Copy Code';
+                    }, 2000);
+                }
             } catch (err) {
                 console.error('Failed to copy:', err);
             }
