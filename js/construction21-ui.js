@@ -92,14 +92,17 @@ async function loadUserDataAndStartGame(user) {
     }
   } catch (e) {
     showStatusToast("Couldn't load chips from server", true);
-  }
-  userDisplayName = displayName;
+  }  userDisplayName = displayName;
   if (profileNameEl) profileNameEl.textContent = userDisplayName;
   
   // Create game with userId and set chips manually
   game = new Construction21Game(userId);
   game.chips = chipCount;
   updateChipsDisplay();
+  
+  // Initialize enhanced features
+  await initializeEnhancedFeatures();
+  
   setupEventHandlers();
   updateBetsUI();
   resetAllHandsAndUI();
@@ -139,7 +142,35 @@ const debouncedSaveToFirebase = debounce(async function() {
 
 function updateChipsDisplay() {
   if (profileChipsEl) profileChipsEl.textContent = game.chips;
-  if (centerChipsAmountEl) centerChipsAmountEl.textContent = game.chips;
+  if (centerChipsAmountEl) {
+    const currentAmount = parseInt(centerChipsAmountEl.textContent) || 0;
+    const newAmount = game.chips;
+    
+    if (currentAmount !== newAmount) {
+      // Animate chip count change
+      animateNumberChange(centerChipsAmountEl, currentAmount, newAmount);
+    }
+  }
+}
+
+function animateNumberChange(element, from, to) {
+  const duration = 500;
+  const steps = 20;
+  const stepValue = (to - from) / steps;
+  let current = from;
+  let step = 0;
+  
+  const interval = setInterval(() => {
+    current += stepValue;
+    step++;
+    
+    element.textContent = Math.round(current);
+    
+    if (step >= steps) {
+      clearInterval(interval);
+      element.textContent = to;
+    }
+  }, duration / steps);
 }
 
 // ---------- Utility Functions ----------
@@ -306,6 +337,429 @@ async function dealOpeningCards() {
   await checkAndHandleBlackjacks();
   
   updateActionBarState(); // <-- ENSURE action bar is updated after opening deal!
+}
+
+// ================================
+// COMPREHENSIVE UI ENHANCEMENTS
+// ================================
+
+// Game Statistics Tracking
+let gameStats = {
+  handsPlayed: 0,
+  handsWon: 0,
+  totalWinnings: 0,
+  biggestWin: 0,
+  sessionStart: Date.now()
+};
+
+// Enhanced Animation System
+class AdvancedAnimationSystem {
+  static dealCard(targetElement, fromElement, delay = 0) {
+    return new Promise(resolve => {
+      setTimeout(() => {
+        const card = document.createElement('div');
+        card.className = 'card card-fly dealing';
+        card.innerHTML = '🂠'; // Card back
+        
+        const fromRect = fromElement.getBoundingClientRect();
+        const toRect = targetElement.getBoundingClientRect();
+        
+        card.style.position = 'fixed';
+        card.style.left = fromRect.left + 'px';
+        card.style.top = fromRect.top + 'px';
+        card.style.zIndex = '10000';
+        
+        document.body.appendChild(card);
+        
+        requestAnimationFrame(() => {
+          card.style.left = toRect.left + 'px';
+          card.style.top = toRect.top + 'px';
+          card.style.transform = `rotate(${Math.random() * 10 - 5}deg)`;
+        });
+        
+        setTimeout(() => {
+          card.remove();
+          resolve();
+        }, 600);
+      }, delay);
+    });
+  }
+  
+  static animateChipToSpot(chipValue, fromElement, toElement) {
+    return new Promise(resolve => {
+      const chip = document.createElement('div');
+      chip.className = 'chip chip-fly';
+      chip.innerHTML = `<span class="chip-value">${chipValue}</span>`;
+      chip.setAttribute('data-amount', chipValue);
+      
+      const fromRect = fromElement.getBoundingClientRect();
+      const toRect = toElement.getBoundingClientRect();
+      
+      chip.style.position = 'fixed';
+      chip.style.left = fromRect.left + 'px';
+      chip.style.top = fromRect.top + 'px';
+      chip.style.zIndex = '9999';
+      
+      document.body.appendChild(chip);
+      
+      requestAnimationFrame(() => {
+        chip.style.left = toRect.left + toRect.width/2 - 32 + 'px';
+        chip.style.top = toRect.top + toRect.height/2 - 32 + 'px';
+      });
+      
+      setTimeout(() => {
+        chip.remove();
+        resolve();
+      }, 800);
+    });
+  }
+  
+  static celebrateWin(element, amount) {
+    element.classList.add('celebrate');
+    
+    // Add confetti effect for big wins
+    if (amount > 100) {
+      this.createConfetti(element);
+    }
+    
+    setTimeout(() => {
+      element.classList.remove('celebrate');
+    }, 600);
+  }
+  
+  static createConfetti(element) {
+    const rect = element.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+    
+    for (let i = 0; i < 20; i++) {
+      const confetti = document.createElement('div');
+      confetti.style.position = 'fixed';
+      confetti.style.left = centerX + 'px';
+      confetti.style.top = centerY + 'px';
+      confetti.style.width = '4px';
+      confetti.style.height = '4px';
+      confetti.style.background = ['#ffd700', '#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4'][Math.floor(Math.random() * 5)];
+      confetti.style.zIndex = '10001';
+      confetti.style.pointerEvents = 'none';
+      
+      document.body.appendChild(confetti);
+      
+      const angle = (i / 20) * Math.PI * 2;
+      const velocity = 50 + Math.random() * 50;
+      const gravity = 0.5;
+      
+      let x = 0, y = 0, vx = Math.cos(angle) * velocity, vy = Math.sin(angle) * velocity;
+      
+      const animate = () => {
+        x += vx;
+        y += vy;
+        vy += gravity;
+        
+        confetti.style.transform = `translate(${x}px, ${y}px) rotate(${x}deg)`;
+        
+        if (y < 300) {
+          requestAnimationFrame(animate);
+        } else {
+          confetti.remove();
+        }
+      };
+      
+      animate();
+    }
+  }
+}
+
+// Enhanced Gesture Controls
+function setupGestureControls() {
+  const table = document.getElementById('blackjack-table');
+  if (!table) return;
+  
+  let startY, endY, startTime;
+  
+  table.addEventListener('touchstart', e => {
+    startY = e.touches[0].clientY;
+    startTime = Date.now();
+  }, { passive: true });
+  
+  table.addEventListener('touchend', e => {
+    if (!inPlay) return;
+    
+    endY = e.changedTouches[0].clientY;
+    const duration = Date.now() - startTime;
+    const distance = Math.abs(startY - endY);
+    
+    if (duration < 300 && distance > 50) {
+      if (startY - endY > 50) {
+        // Swipe up - Stand
+        handlePlayerAction('stand');
+        showStatusToast('👆 Swipe Stand');
+      } else if (endY - startY > 50) {
+        // Swipe down - Hit
+        handlePlayerAction('hit');
+        showStatusToast('👇 Swipe Hit');
+      }
+    }
+  }, { passive: true });
+}
+
+// Voucher System Integration
+function setupVoucherSystem() {
+  const showVoucherBtn = document.getElementById('show-voucher-btn');
+  const voucherDropdown = document.getElementById('voucher-dropdown');
+  const voucherInput = document.getElementById('voucher-code-input');
+  const redeemBtn = document.getElementById('redeem-voucher-btn');
+  
+  if (!showVoucherBtn || !voucherDropdown) return;
+  
+  // Toggle dropdown
+  showVoucherBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    voucherDropdown.classList.toggle('hidden');
+  });
+  
+  // Close dropdown when clicking outside
+  document.addEventListener('click', (e) => {
+    if (!voucherDropdown.contains(e.target) && !showVoucherBtn.contains(e.target)) {
+      voucherDropdown.classList.add('hidden');
+    }
+  });
+  
+  // Format voucher input
+  if (voucherInput) {
+    voucherInput.addEventListener('input', function(e) {
+      let value = e.target.value.replace(/[^A-Z0-9]/g, '').toUpperCase();
+      if (value.length > 3) {
+        value = value.substring(0, 3) + '-' + value.substring(3);
+      }
+      if (value.length > 7) {
+        value = value.substring(0, 7) + '-' + value.substring(7);
+      }
+      if (value.length > 13) {
+        value = value.substring(0, 13);
+      }
+      e.target.value = value;
+      
+      if (redeemBtn) {
+        redeemBtn.disabled = value.length < 10;
+      }
+    });
+    
+    voucherInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter' && redeemBtn && !redeemBtn.disabled) {
+        redeemBtn.click();
+      }
+    });
+  }
+}
+
+// Quick Bet Presets
+function setupQuickBets() {
+  const quickBetBtns = document.querySelectorAll('.quick-bet-btn');
+  
+  quickBetBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const preset = btn.getAttribute('data-preset');
+      
+      switch (preset) {
+        case 'min':
+          placeQuickBet(5);
+          break;
+        case 'double':
+          if (lastBets && lastBets.main > 0) {
+            placeQuickBet(lastBets.main * 2);
+          }
+          break;
+        case 'max':
+          placeQuickBet(Math.min(game.chips, 1000));
+          break;
+      }
+    });
+  });
+}
+
+function placeQuickBet(amount) {
+  if (!game || inPlay || !selectedChip) return;
+  
+  selectedChip = amount;
+  updateSelectedChip();
+  
+  // Place on main bet spot
+  const mainBetSpot = document.getElementById('main-bet-spot');
+  if (mainBetSpot && game.canPlaceBet(amount)) {
+    game.placeBet('main', amount);
+    updateBetsUI();
+    updateChipsDisplay();
+    saveChipsToFirebase();
+    showStatusToast(`Quick bet: ${amount} chips`);
+  }
+}
+
+// Update Statistics Display
+function updateGameStats() {
+  const handsPlayedEl = document.getElementById('hands-played');
+  const winRateEl = document.getElementById('win-rate');
+  
+  if (handsPlayedEl) {
+    handsPlayedEl.textContent = gameStats.handsPlayed;
+  }
+  
+  if (winRateEl) {
+    const winRate = gameStats.handsPlayed > 0 
+      ? Math.round((gameStats.handsWon / gameStats.handsPlayed) * 100)
+      : 0;
+    winRateEl.textContent = `${winRate}%`;
+  }
+}
+
+// Enhanced Hand Value Display
+function addHandValueDisplay(handElement, value, isSoft = false, isBust = false) {
+  // Remove existing hand value display
+  const existingValue = handElement.querySelector('.hand-value');
+  if (existingValue) {
+    existingValue.remove();
+  }
+  
+  const valueDisplay = document.createElement('div');
+  valueDisplay.className = 'hand-value';
+  if (isSoft) valueDisplay.classList.add('soft');
+  if (isBust) valueDisplay.classList.add('bust');
+  
+  valueDisplay.textContent = value;
+  
+  // Position based on whether it's dealer or player
+  if (handElement.closest('#dealer-cards')) {
+    valueDisplay.classList.add('dealer-hand-value');
+  } else {
+    valueDisplay.classList.add('player-hand-value');
+  }
+  
+  handElement.style.position = 'relative';
+  handElement.appendChild(valueDisplay);
+}
+
+// Progressive Asset Loading
+async function loadGameAssets() {
+  // Show loading indicator
+  const loadingEl = document.createElement('div');
+  loadingEl.id = 'loading-screen';
+  loadingEl.innerHTML = `
+    <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+                background: rgba(0,0,0,0.9); display: flex; align-items: center; 
+                justify-content: center; z-index: 10000; color: #ffd700;">
+      <div style="text-align: center;">
+        <div style="font-size: 2rem; margin-bottom: 1rem;">🔨</div>
+        <div style="font-size: 1.2rem; margin-bottom: 1rem;">Loading Construction 21...</div>
+        <div style="width: 200px; height: 4px; background: rgba(255,215,0,0.3); border-radius: 2px; overflow: hidden;">
+          <div id="loading-progress" style="width: 0%; height: 100%; background: #ffd700; transition: width 0.3s ease;"></div>
+        </div>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(loadingEl);
+  
+  const progressEl = document.getElementById('loading-progress');
+  
+  // Simulate progressive loading
+  const steps = [
+    { progress: 20, delay: 100 },
+    { progress: 40, delay: 200 },
+    { progress: 60, delay: 150 },
+    { progress: 80, delay: 100 },
+    { progress: 100, delay: 200 }
+  ];
+  
+  for (const step of steps) {
+    await new Promise(resolve => {
+      setTimeout(() => {
+        progressEl.style.width = `${step.progress}%`;
+        resolve();
+      }, step.delay);
+    });
+  }
+  
+  // Hide loading screen
+  setTimeout(() => {
+    loadingEl.style.opacity = '0';
+    setTimeout(() => {
+      loadingEl.remove();
+    }, 300);
+  }, 500);
+}
+
+// Enhanced Status Toast with Types
+function showEnhancedToast(message, type = 'info', duration = 3000) {
+  const toast = document.getElementById('status-toast');
+  if (!toast) return;
+  
+  toast.textContent = message;
+  toast.className = 'fixed top-6 left-1/2 -translate-x-1/2 glassy px-6 py-3 rounded-lg shadow-lg text-lg z-50';
+  
+  switch (type) {
+    case 'success':
+      toast.style.background = 'rgba(52,199,89,0.95)';
+      toast.style.color = 'white';
+      break;
+    case 'error':
+      toast.style.background = 'rgba(255,59,48,0.95)';
+      toast.style.color = 'white';
+      break;
+    case 'warning':
+      toast.style.background = 'rgba(255,149,0,0.95)';
+      toast.style.color = 'white';
+      break;
+    default:
+      toast.style.background = 'rgba(255,215,0,0.95)';
+      toast.style.color = '#000';
+  }
+  
+  toast.style.display = 'block';
+  toast.style.animation = 'slideInDown 0.3s ease-out';
+  
+  setTimeout(() => {
+    toast.style.opacity = '0';
+    setTimeout(() => {
+      toast.style.display = 'none';
+      toast.style.opacity = '1';
+    }, 300);
+  }, duration);
+}
+
+// Performance Optimizations
+function optimizePerformance() {
+  // Use passive event listeners where possible
+  const passiveEvents = ['touchstart', 'touchmove', 'wheel'];
+  passiveEvents.forEach(eventName => {
+    document.addEventListener(eventName, () => {}, { passive: true });
+  });
+  
+  // Optimize animations with will-change
+  const animatedElements = document.querySelectorAll('.card, .chip, .action-button');
+  animatedElements.forEach(el => {
+    el.style.willChange = 'transform';
+  });
+}
+
+// Enhanced Game Initialization
+async function initializeEnhancedFeatures() {
+  try {
+    // Show loading screen
+    await loadGameAssets();
+    
+    // Initialize all enhanced systems
+    setupGestureControls();
+    setupVoucherSystem();
+    setupQuickBets();
+    optimizePerformance();
+    
+    // Initialize game statistics
+    gameStats.sessionStart = Date.now();
+    updateGameStats();
+    
+    console.log('[ENHANCED] All enhanced features initialized successfully');
+  } catch (error) {
+    console.error('[ENHANCED] Error initializing enhanced features:', error);
+  }
 }
 
 // --- Event handlers and UI logic ---

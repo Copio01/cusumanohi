@@ -887,29 +887,685 @@ main {
   top: 20px;
   right: 20px;
 }
+
+/* ================================
+   COMPREHENSIVE LAYOUT IMPROVEMENTS
+   ================================ */
+
+/* Modern Dashboard Layout */
+.game-dashboard {
+  display: grid;
+  grid-template-columns: 1fr 2fr 1fr;
+  gap: 15px;
+  padding: 15px 20px;
+  background: rgba(0,0,0,0.9);
+  backdrop-filter: blur(12px);
+  border-bottom: 2px solid #ffd700;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+  position: relative;
+  z-index: 100;
+}
+
+/* Stats Panel (Left) */
+.stats-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.game-title-section {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.game-title {
+  font-size: 1.4rem;
+  font-weight: bold;
+  color: #ffd700;
+  margin: 0;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+}
+
+.session-stats {
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.stat-label {
+  font-size: 0.75rem;
+  color: #ccc;
+  margin-bottom: 2px;
+}
+
+.stat-value {
+  font-size: 0.9rem;
+  font-weight: bold;
+  color: #fff;
+}
+
+/* Balance Display (Center) */
+.balance-display-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.balance-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(255,215,0,0.1);
+  padding: 8px 16px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,215,0,0.3);
+}
+
+.balance-icon svg {
+  filter: drop-shadow(0 2px 4px rgba(255,215,0,0.3));
+}
+
+.balance-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.balance-label {
+  font-size: 0.8rem;
+  color: #ffd700;
+  margin-bottom: 2px;
+}
+
+.balance-amount {
+  font-size: 1.8rem;
+  font-weight: bold;
+  color: #fff;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+}
+
+/* User Panel (Right) */
+.user-panel {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.user-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.username {
+  color: #fff;
+  font-weight: 500;
+}
+
+.username-display {
+  color: #ffd700;
+}
+
+.user-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Compact Voucher System */
+.compact-voucher {
+  position: relative;
+}
+
+.voucher-toggle {
+  background: linear-gradient(135deg, #ffd700, #ffb700);
+  color: #000;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: bold;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(255,215,0,0.3);
+}
+
+.voucher-toggle:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(255,215,0,0.4);
+}
+
+.voucher-dropdown {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 8px);
+  background: rgba(0,0,0,0.95);
+  border: 1px solid #ffd700;
+  padding: 12px;
+  border-radius: 8px;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 280px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+}
+
+.voucher-dropdown.hidden {
+  display: none;
+}
+
+.voucher-dropdown input {
+  padding: 8px 12px;
+  border: 1px solid rgba(255,215,0,0.3);
+  border-radius: 6px;
+  background: rgba(255,255,255,0.95);
+  font-family: 'Courier New', monospace;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-size: 0.9rem;
+}
+
+.voucher-dropdown .redeem-btn {
+  background: linear-gradient(135deg, #34c759, #28a745);
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: all 0.2s ease;
+}
+
+.voucher-dropdown .redeem-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(52,199,89,0.3);
+}
+
+.voucher-dropdown .redeem-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.logout-btn {
+  background: rgba(150,0,0,0.8);
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: all 0.2s ease;
+}
+
+.logout-btn:hover {
+  background: rgba(150,0,0,1);
+  transform: translateY(-1px);
+}
+
+/* Enhanced Game Layout */
+.game-layout {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 20px;
+  gap: 20px;
+}
+
+/* Enhanced Blackjack Table */
+#blackjack-table {
+  position: relative;
+  width: 100%;
+  max-width: 1200px;
+  height: 65vh;
+  min-height: 450px;
+  margin: 0 auto;
+  background: 
+    radial-gradient(ellipse at 50% 30%, rgba(0,100,0,0.15) 0%, transparent 50%),
+    radial-gradient(ellipse at center, rgba(0,80,0,0.9) 0%, rgba(0,60,0,0.95) 50%, rgba(0,40,0,0.9) 100%);
+  border-radius: 200px 200px 50px 50px;
+  border: 8px solid #ffd700;
+  box-shadow: 
+    0 10px 30px rgba(0,0,0,0.6),
+    inset 0 0 30px rgba(255,215,0,0.1),
+    0 0 0 2px rgba(255,215,0,0.3),
+    inset 0 0 100px rgba(0,0,0,0.3);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 20px;
+}
+
+/* Professional Action Buttons */
+.action-button {
+  background: linear-gradient(to bottom, #ffd700, #b8860b);
+  color: #000;
+  font-weight: bold;
+  text-transform: uppercase;
+  border-radius: 8px;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.3);
+  letter-spacing: 0.5px;
+  border: none;
+  padding: 12px 24px;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  font-size: 0.95rem;
+}
+
+.action-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.4);
+}
+
+.action-button:active {
+  transform: translateY(1px);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+.action-button::after {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: rgba(255,255,255,0.1);
+  transform: rotate(45deg);
+  transition: all 0.3s ease;
+  z-index: 1;
+}
+
+.action-button:hover::after {
+  left: 100%;
+}
+
+.action-button.secondary {
+  background: linear-gradient(to bottom, #666, #444);
+  color: #fff;
+}
+
+.action-button.primary {
+  background: linear-gradient(to bottom, #ffd700, #e6c200);
+}
+
+/* Enhanced Chip Tray */
+.chip-tray-container {
+  background: 
+    linear-gradient(135deg, rgba(36,36,28,0.9) 0%, rgba(24,24,20,0.95) 100%);
+  backdrop-filter: blur(8px);
+  border-radius: 16px;
+  padding: 16px 20px;
+  box-shadow: 
+    0 8px 24px rgba(0,0,0,0.4),
+    inset 0 1px 0 rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,215,0,0.2);
+  width: fit-content;
+  margin: 0 auto;
+}
+
+.chip-tray-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  color: #ffd700;
+  font-weight: bold;
+}
+
+.chip-tray-icon {
+  font-size: 1.2rem;
+}
+
+.chip-tray-title {
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.quick-bet-row {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.quick-bet-btn {
+  background: rgba(255,215,0,0.1);
+  color: #ffd700;
+  border: 1px solid rgba(255,215,0,0.3);
+  padding: 4px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.75rem;
+  transition: all 0.2s ease;
+}
+
+.quick-bet-btn:hover {
+  background: rgba(255,215,0,0.2);
+  transform: translateY(-1px);
+}
+
+/* Enhanced Action Buttons Container */
+.action-buttons-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+}
+
+.betting-actions {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+}
+
+.action-bar {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  background: rgba(36,36,28,0.9);
+  backdrop-filter: blur(8px);
+  padding: 12px 20px;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+  border: 1px solid rgba(255,215,0,0.1);
+}
+
+.end-round-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  margin: 8px 0;
+}
+
+/* Hand Value Display Enhancement */
+.hand-value {
+  position: absolute;
+  background: rgba(0,0,0,0.8);
+  color: white;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 0.9rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+  border: 2px solid #ffd700;
+  z-index: 20;
+}
+
+.hand-value.soft {
+  background: rgba(0,100,0,0.8);
+  border-color: #90EE90;
+}
+
+.hand-value.bust {
+  background: rgba(150,0,0,0.8);
+  border-color: #ff6b6b;
+}
+
+.dealer-hand-value {
+  top: -18px;
+  right: 10px;
+}
+
+.player-hand-value {
+  bottom: -18px;
+  right: 10px;
+}
+
+/* Card Animation Enhancements */
+.card {
+  transition: all 0.3s ease;
+  cursor: pointer;
+  position: relative;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+}
+
+.card-fly {
+  position: fixed;
+  z-index: 10000;
+  pointer-events: none;
+  transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.dealing {
+  animation: cardDeal 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+@keyframes cardDeal {
+  0% {
+    transform: scale(0.8) rotateY(180deg);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.1) rotateY(90deg);
+    opacity: 0.7;
+  }
+  100% {
+    transform: scale(1) rotateY(0deg);
+    opacity: 1;
+  }
+}
+
+/* Chip Movement Animation */
+.chip-fly {
+  position: fixed;
+  z-index: 9999;
+  pointer-events: none;
+  transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+@keyframes chipCollect {
+  0% {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.2) rotate(180deg);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(0.5) rotate(360deg);
+    opacity: 0;
+  }
+}
+
+/* Win/Loss Celebration Effects */
+@keyframes celebration {
+  0%, 100% { transform: scale(1); }
+  25% { transform: scale(1.05); }
+  50% { transform: scale(1.1); }
+  75% { transform: scale(1.05); }
+}
+
+.celebrate {
+  animation: celebration 0.6s ease-in-out;
+}
+
+/* Improved Voucher Message Styling */
+.voucher-message {
+  margin-top: 8px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  text-align: center;
+  animation: slideInDown 0.3s ease-out;
+}
+
+.voucher-message.success {
+  background: rgba(52,199,89,0.9);
+  color: white;
+  border: 1px solid rgba(52,199,89,0.3);
+}
+
+.voucher-message.error {
+  background: rgba(255,59,48,0.9);
+  color: white;
+  border: 1px solid rgba(255,59,48,0.3);
+}
+
+@keyframes slideInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Enhanced Responsive Design */
+@media (max-width: 1024px) {
+  .game-dashboard {
+    grid-template-columns: 1fr;
+    gap: 10px;
+    text-align: center;
+  }
+  
+  .stats-panel {
+    order: 3;
+    flex-direction: row;
+    justify-content: center;
+  }
+  
+  .balance-display-center {
+    order: 1;
+  }
+  
+  .user-panel {
+    order: 2;
+    justify-content: center;
+  }
+  
+  #blackjack-table {
+    height: 50vh;
+    min-height: 350px;
+  }
+}
+
+@media (max-width: 768px) {
+  .game-dashboard {
+    padding: 10px 15px;
+  }
+  
+  .balance-container {
+    padding: 6px 12px;
+  }
+  
+  .balance-amount {
+    font-size: 1.4rem;
+  }
+  
+  .chip-tray-container {
+    padding: 12px 16px;
+  }
+  
+  .action-button {
+    padding: 10px 20px;
+    font-size: 0.9rem;
+  }
+  
+  .voucher-dropdown {
+    width: 260px;
+    right: -20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .session-stats {
+    justify-content: center;
+  }
+  
+  .user-actions {
+    flex-direction: column;
+    gap: 6px;
+  }
+  
+  .chip-row {
+    gap: 1rem;
+  }
+  
+  .action-bar {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  
+  .betting-actions {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .voucher-dropdown {
+    width: 240px;
+    right: -40px;
+  }
+}
+
+/* Performance Optimizations */
+.game-layout * {
+  contain: layout style;
+}
+
+.card, .chip {
+  will-change: transform;
+}
+
+.action-button {
+  will-change: transform, box-shadow;
+}
     </style>
 </head>
-<body class="modern-bg flex flex-col items-center justify-center">
-  <!-- Header -->
-  <header class="w-full flex justify-between items-center px-6 py-4 glassy mt-2">
-    <div class="flex items-center gap-2">
-      <span class="text-3xl">🔨</span>
-      <h1 class="text-2xl font-bold text-yellow-400 tracking-wide">Construction 21</h1>
+<body class="modern-bg flex flex-col items-center justify-center">  <!-- Enhanced Header with Dashboard Layout -->
+  <header class="game-dashboard">
+    <!-- Left: Game Stats Panel -->
+    <div class="stats-panel">
+      <div class="game-title-section">
+        <span class="text-3xl">🔨</span>
+        <h1 class="game-title">Construction 21</h1>
+      </div>
+      <div class="session-stats">
+        <div class="stat-item">
+          <span class="stat-label">Hands:</span>
+          <span id="hands-played" class="stat-value">0</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Win Rate:</span>
+          <span id="win-rate" class="stat-value">0%</span>
+        </div>
+      </div>
     </div>
-    <div id="profile" class="flex items-center gap-3">
-      <span id="profile-name" class="font-semibold text-white"></span>
-      <button id="logout-btn" class="btn-secondary">Logout</button>
-    </div>
-  </header>
-
-  <!-- Game Table -->
-  <main class="w-full max-w-2xl flex flex-col items-center mt-6">
-    <!-- Chips Display -->
-    <div id="center-chips-display" class="flex flex-col items-center mb-2">
-      <span class="text-lg text-yellow-300 font-bold">Your Balance</span>
-      <div class="flex items-center justify-center">
-        <div class="mr-2">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+    
+    <!-- Center: Balance Display -->
+    <div class="balance-display-center">
+      <div class="balance-container">
+        <div class="balance-icon">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
             <circle cx="12" cy="12" r="10" fill="url(#chipGradient)" stroke="#FFD700" stroke-width="1.5"/>
             <circle cx="12" cy="12" r="7" fill="transparent" stroke="#FFD700" stroke-width="1.5" stroke-dasharray="2 2"/>
             <defs>
@@ -920,10 +1576,38 @@ main {
             </defs>
           </svg>
         </div>
-        <span id="center-chips-amount" class="text-2xl font-extrabold text-green-400">0</span>
+        <div class="balance-info">
+          <span class="balance-label">Your Balance</span>
+          <span id="center-chips-amount" class="balance-amount">0</span>
+        </div>
       </div>
     </div>
-
+    
+    <!-- Right: User Panel with Compact Voucher -->
+    <div class="user-panel">
+      <div class="user-info">
+        <span class="username">
+          <span id="profile-name" class="username-display">Player</span>
+        </span>
+        <div class="user-actions">
+          <div class="compact-voucher">
+            <button id="show-voucher-btn" class="voucher-toggle">🎟️ Redeem</button>
+            <div id="voucher-dropdown" class="voucher-dropdown hidden">
+              <input type="text" id="voucher-code-input" placeholder="Enter code" maxlength="13" autocomplete="off" autocapitalize="characters" spellcheck="false">
+              <button id="redeem-voucher-btn" class="redeem-btn" disabled>
+                <span class="btn-voucher-text">Redeem</span>
+                <span class="btn-voucher-spinner" style="display: none;">⏳</span>
+              </button>
+            </div>
+            <div id="voucher-message" class="voucher-message" style="display: none;"></div>
+          </div>
+          <button id="logout-btn" class="logout-btn">Logout</button>
+        </div>
+      </div>
+    </div>
+  </header>
+  <!-- Enhanced Game Table -->
+  <main class="game-layout">
     <!-- Blackjack Table -->
     <div id="blackjack-table">
       <div class="table-area-dealer"></div>
@@ -959,63 +1643,45 @@ main {
       </div>
       <div id="dealer-cards"></div>
       <div id="player-hands"></div>
-    </div>
-
-    <!-- Chip Tray -->
+    </div>    <!-- Enhanced Chip Tray -->
     <div class="chip-tray-container">
+      <div class="chip-tray-header">
+        <span class="chip-tray-icon">🎰</span>
+        <span class="chip-tray-title">Betting Chips</span>
+      </div>
       <div class="chip-row">
         <button class="chip" data-amount="5"><span class="chip-value">5</span><span class="sr-only">Bet 5 chips</span></button>
         <button class="chip" data-amount="10"><span class="chip-value">10</span><span class="sr-only">Bet 10 chips</span></button>
         <button class="chip" data-amount="25"><span class="chip-value">25</span><span class="sr-only">Bet 25 chips</span></button>
         <button class="chip" data-amount="100"><span class="chip-value">100</span><span class="sr-only">Bet 100 chips</span></button>
       </div>
-    </div>
-
-    <!-- Voucher Redemption Interface -->
-    <div class="voucher-container">
-      <div class="voucher-input-section">
-        <div class="voucher-header">
-          <span class="voucher-icon">🎫</span>
-          <span class="voucher-title">Redeem Voucher</span>
-        </div>
-        <div class="voucher-form">
-          <input 
-            type="text" 
-            id="voucher-code-input" 
-            placeholder="Enter voucher code" 
-            maxlength="13"
-            autocomplete="off"
-            autocapitalize="characters"
-            spellcheck="false"
-          >
-          <button id="redeem-voucher-btn" class="btn-voucher" disabled>
-            <span class="btn-voucher-text">Redeem</span>
-            <span class="btn-voucher-spinner" style="display: none;">⏳</span>
-          </button>
-        </div>
-        <div id="voucher-message" class="voucher-message" style="display: none;"></div>
+      <!-- Quick Bet Presets -->
+      <div class="quick-bet-row">
+        <button class="quick-bet-btn" data-preset="min">Min Bet</button>
+        <button class="quick-bet-btn" data-preset="double">2x Last</button>
+        <button class="quick-bet-btn" data-preset="max">Max Bet</button>
       </div>
     </div>
 
-    <!-- Game Action Buttons -->
-    <div class="action-buttons-container flex flex-col items-center justify-center gap-4 mt-6 mb-8">
+    <!-- Enhanced Game Action Buttons -->
+    <div class="action-buttons-container">
       <!-- Deal/Clear Bets -->
-      <div class="betting-actions flex flex-row justify-center items-center gap-4">
-        <button id="clear-bets-btn" class="btn-secondary px-8 py-2">Clear Bets</button>
-        <button id="deal-btn" class="btn-primary px-8 py-2">Deal</button>
+      <div class="betting-actions">
+        <button id="clear-bets-btn" class="action-button secondary">Clear Bets</button>
+        <button id="deal-btn" class="action-button primary">Deal</button>
       </div>
       <!-- Game Actions -->
-      <div id="action-bar" class="flex flex-row justify-center items-center gap-4 glassy p-3 rounded-xl shadow-lg z-20 mt-2">
-        <button id="hit-btn" class="btn-primary">Hit</button>
-        <button id="stand-btn" class="btn-primary">Stand</button>
-        <button id="double-btn" class="btn-primary" style="display:none;">Double</button>
-        <button id="split-btn" class="btn-primary" style="display:none;">Split</button>
-        <button id="insurance-btn" class="btn-primary" style="display:none;">Insurance</button>
+      <div id="action-bar" class="action-bar">
+        <button id="hit-btn" class="action-button">Hit</button>
+        <button id="stand-btn" class="action-button">Stand</button>
+        <button id="double-btn" class="action-button" style="display:none;">Double</button>
+        <button id="split-btn" class="action-button" style="display:none;">Split</button>
+        <button id="insurance-btn" class="action-button" style="display:none;">Insurance</button>
       </div>
-      <div id="end-round-buttons" style="display:flex;gap:1.5em;justify-content:center;margin:16px 0;">
-        <button id="new-bet-btn" class="btn-primary" style="display:none;">New Bet</button>
-        <button id="rebet-btn" class="btn-primary" style="display:none;">Re-bet</button>
-        <button id="double-bet-btn" class="btn-primary" style="display:none;">2x Bet</button>
+      <div id="end-round-buttons" class="end-round-buttons">
+        <button id="new-bet-btn" class="action-button primary" style="display:none;">New Bet</button>
+        <button id="rebet-btn" class="action-button primary" style="display:none;">Re-bet</button>
+        <button id="double-bet-btn" class="action-button primary" style="display:none;">2x Bet</button>
       </div>
     </div>
   </main>
