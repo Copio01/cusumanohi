@@ -340,6 +340,182 @@ async function dealOpeningCards() {
 }
 
 // ================================
+// MISSING UI UPDATE FUNCTIONS
+// ================================
+
+function updateBetsUI() {
+  console.log('[UI] Updating bets UI');
+  try {
+    // Update bet amounts on all hands
+    if (game && game.playerHands) {
+      game.playerHands.forEach((hand, index) => {
+        const handEl = playerHandsEl.querySelector(`.player-hand[data-hand-index="${index}"]`);
+        if (handEl && hand.bet > 0) {
+          const betEl = handEl.querySelector('.hand-bet-amount');
+          if (betEl) {
+            betEl.textContent = `$${hand.bet}`;
+          }
+        }
+      });
+    }
+    
+    // Update total bet display
+    const totalBet = game.playerHands ? game.playerHands.reduce((sum, hand) => sum + hand.bet, 0) : 0;
+    const totalBetEl = document.getElementById('total-bet-amount');
+    if (totalBetEl) {
+      totalBetEl.textContent = totalBet;
+    }
+    
+    // Update chips display
+    updateChipsDisplay();
+    
+  } catch (error) {
+    console.error('[ERROR] updateBetsUI failed:', error);
+  }
+}
+
+function updateHandsUI() {
+  console.log('[UI] Updating hands UI');
+  try {
+    // Update dealer hand
+    if (dealerCardsEl && game.dealerHand) {
+      const dealerHtml = game.dealerHand.cards.map(card => 
+        `<div class="card">${renderCard(card)}</div>`
+      ).join('');
+      dealerCardsEl.innerHTML = dealerHtml;
+      
+      // Update dealer score
+      const dealerScoreEl = document.querySelector('.dealer-score');
+      if (dealerScoreEl) {
+        if (game.dealerHand.cards.some(card => !card.isFaceUp)) {
+          dealerScoreEl.textContent = '?';
+        } else {
+          dealerScoreEl.textContent = game.dealerHand.score;
+        }
+      }
+    }
+    
+    // Update player hands
+    if (playerHandsEl && game.playerHands) {
+      let handsHtml = '';
+      game.playerHands.forEach((hand, index) => {
+        const isActive = index === game.activeHandIndex;
+        const cardsHtml = hand.cards.map(card => 
+          `<div class="card">${renderCard(card)}</div>`
+        ).join('');
+        
+        handsHtml += `
+          <div class="player-hand ${isActive ? 'active-hand' : ''}" data-hand-index="${index}">
+            <div class="hand-header">
+              <div class="hand-label">Hand ${index + 1}</div>
+              <div class="hand-value ${hand.score > 21 ? 'bust' : ''}">${hand.score}</div>
+            </div>
+            <div class="hand-cards">${cardsHtml}</div>
+            <div class="hand-bet">Bet: $${hand.bet}</div>
+          </div>
+        `;
+      });
+      playerHandsEl.innerHTML = handsHtml;
+    }
+    
+  } catch (error) {
+    console.error('[ERROR] updateHandsUI failed:', error);
+  }
+}
+
+function updateActionBarState() {
+  console.log('[UI] Updating action bar state');
+  try {
+    if (!inPlay) {
+      showInPlayButtons(false);
+      hideEndButtons();
+      return;
+    }
+    
+    const activeHand = game.getActiveHand();
+    if (!activeHand) {
+      showInPlayButtons(false);
+      return;
+    }
+    
+    // Show appropriate buttons based on game state
+    showInPlayButtons(true);
+    
+    // Update button states
+    const hitBtn = document.getElementById('hit-btn');
+    const standBtn = document.getElementById('stand-btn');
+    const doubleBtn = document.getElementById('double-btn');
+    const splitBtn = document.getElementById('split-btn');
+    
+    if (hitBtn) hitBtn.disabled = false;
+    if (standBtn) standBtn.disabled = false;
+    
+    // Double down availability
+    if (doubleBtn) {
+      doubleBtn.disabled = !canDoubleCurrentHand();
+      doubleBtn.style.opacity = canDoubleCurrentHand() ? '1' : '0.5';
+    }
+    
+    // Split availability
+    if (splitBtn) {
+      splitBtn.disabled = !canSplitCurrentHand();
+      splitBtn.style.opacity = canSplitCurrentHand() ? '1' : '0.5';
+    }
+    
+  } catch (error) {
+    console.error('[ERROR] updateActionBarState failed:', error);
+  }
+}
+
+// --- Button Visibility Control Functions ---
+function showInPlayButtons(show) {
+  console.log('[UI] showInPlayButtons:', show);
+  try {
+    const actionBar = document.getElementById('action-bar');
+    const dealBtn = document.getElementById('deal-btn');
+    
+    if (actionBar) {
+      actionBar.style.display = show ? 'flex' : 'none';
+    }
+    if (dealBtn) {
+      dealBtn.style.display = show ? 'none' : 'block';
+    }
+  } catch (error) {
+    console.error('[ERROR] showInPlayButtons failed:', error);
+  }
+}
+
+function hideEndButtons() {
+  console.log('[UI] hideEndButtons called');
+  try {
+    const newBetBtn = document.getElementById('new-bet-btn');
+    const rebetBtn = document.getElementById('rebet-btn');
+    const doubleBetBtn = document.getElementById('double-bet-btn');
+    
+    if (newBetBtn) newBetBtn.style.display = 'none';
+    if (rebetBtn) rebetBtn.style.display = 'none';
+    if (doubleBetBtn) doubleBetBtn.style.display = 'none';
+  } catch (error) {
+    console.error('[ERROR] hideEndButtons failed:', error);
+  }
+}
+
+function showEndButtons() {
+  console.log('[UI] showEndButtons called');
+  try {
+    const newBetBtn = document.getElementById('new-bet-btn');
+    const rebetBtn = document.getElementById('rebet-btn');
+    const doubleBetBtn = document.getElementById('double-bet-btn');
+    
+    if (newBetBtn) newBetBtn.style.display = 'block';
+    if (rebetBtn) rebetBtn.style.display = 'block';
+    if (doubleBetBtn) doubleBetBtn.style.display = 'block';
+  } catch (error) {
+    console.error('[ERROR] showEndButtons failed:', error);
+  }
+}
+
+// ================================
 // COMPREHENSIVE UI ENHANCEMENTS
 // ================================
 
@@ -913,6 +1089,191 @@ if (DEBUG_BUTTONS) {
   });
 }
 
+// --- Player Action Handler ---
+function handlePlayerAction(action) {
+  debugLog('PLAYER_ACTION', `Handling action: ${action}`);
+  
+  if (!inPlay) {
+    console.warn('[WARN] Cannot perform action - game not in play');
+    return;
+  }
+  
+  const activeHand = game.getActiveHand();
+  if (!activeHand) {
+    console.warn('[WARN] No active hand found');
+    return;
+  }
+  
+  try {
+    switch(action) {
+      case 'hit':
+        if (activeHand.cards.length >= 2) {
+          game.dealCard(activeHand, true);
+          updateHandsUI();
+          
+          if (activeHand.score > 21) {
+            debugLog('PLAYER_ACTION', 'Hand busted, moving to next');
+            moveToNextHandOrFinish();
+          } else {
+            updateActionBarState();
+          }
+        }
+        break;
+        
+      case 'stand':
+        debugLog('PLAYER_ACTION', 'Player stands');
+        moveToNextHandOrFinish();
+        break;
+        
+      case 'double':
+        if (canDoubleCurrentHand()) {
+          activeHand.bet *= 2;
+          game.chips -= activeHand.bet / 2; // Subtract the additional bet
+          game.dealCard(activeHand, true);
+          updateBetsUI();
+          updateHandsUI();
+          updateChipsDisplay();
+          
+          // After doubling, automatically stand
+          moveToNextHandOrFinish();
+        }
+        break;
+        
+      case 'split':
+        if (canSplitCurrentHand()) {
+          game.splitHand(game.activeHandIndex);
+          game.chips -= activeHand.bet; // Deduct bet for split hand
+          updateBetsUI();
+          updateHandsUI();
+          updateChipsDisplay();
+          updateActionBarState();
+        }
+        break;
+        
+      case 'insurance':
+        if (game.dealerHand.cards[0] && game.dealerHand.cards[0].value === 'A') {
+          activeHand.hasInsurance = true;
+          game.chips -= activeHand.bet / 2; // Insurance costs half the bet
+          updateBetsUI();
+          updateChipsDisplay();
+        }
+        break;
+        
+      default:
+        console.warn('[WARN] Unknown action:', action);
+    }
+  } catch (error) {
+    console.error('[ERROR] handlePlayerAction failed:', error);
+  }
+}
+
+function moveToNextHandOrFinish() {
+  if (game.activeHandIndex < game.playerHands.length - 1) {
+    game.activeHandIndex++;
+    updateHandsUI();
+    updateActionBarState();
+  } else {
+    // All hands complete, finish round
+    finishRound();
+  }
+}
+
+function finishRound() {
+  debugLog('ROUND', 'Finishing round...');
+  inPlay = false;
+  
+  // Reveal dealer's hole card
+  if (game.dealerHand.cards[1]) {
+    game.dealerHand.cards[1].isFaceUp = true;
+  }
+  
+  // Dealer plays
+  while (game.dealerHand.score < 17) {
+    game.dealCard(game.dealerHand, true);
+  }
+  
+  updateHandsUI();
+  
+  // Determine outcomes and update chips
+  let totalWinnings = 0;
+  game.playerHands.forEach(hand => {
+    const result = determineHandResult(hand, game.dealerHand);
+    if (result === 'win' || result === 'blackjack') {
+      const winAmount = result === 'blackjack' ? hand.bet * 2.5 : hand.bet * 2;
+      totalWinnings += winAmount;
+    } else if (result === 'push') {
+      totalWinnings += hand.bet; // Return bet
+    }
+  });
+  
+  game.chips += totalWinnings;
+  updateChipsDisplay();
+  
+  showInPlayButtons(false);
+  hideEndButtons();
+  
+  // Update statistics
+  gameStats.handsPlayed++;
+  if (totalWinnings > 0) {
+    gameStats.handsWon++;
+    gameStats.totalWinnings += totalWinnings;
+    if (totalWinnings > gameStats.biggestWin) {
+      gameStats.biggestWin = totalWinnings;
+    }
+  }
+  updateGameStatistics();
+}
+
+function updateGameStatistics() {
+  try {
+    // Update hands played
+    const handsPlayedEl = document.querySelector('.stat-value');
+    if (handsPlayedEl) {
+      handsPlayedEl.textContent = gameStats.handsPlayed;
+    }
+    
+    // Update win rate
+    const winRateEl = document.querySelectorAll('.stat-value')[1];
+    if (winRateEl && gameStats.handsPlayed > 0) {
+      const winRate = ((gameStats.handsWon / gameStats.handsPlayed) * 100).toFixed(1);
+      winRateEl.textContent = `${winRate}%`;
+    }
+    
+    // Update session stats in dashboard
+    const sessionStatsEl = document.querySelector('.session-stats');
+    if (sessionStatsEl) {
+      sessionStatsEl.innerHTML = `
+        <div class="stat-item">
+          <span class="stat-label">Hands:</span>
+          <span class="stat-value">${gameStats.handsPlayed}</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Win Rate:</span>
+          <span class="stat-value">${gameStats.handsPlayed > 0 ? ((gameStats.handsWon / gameStats.handsPlayed) * 100).toFixed(1) + '%' : '0%'}</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Biggest Win:</span>
+          <span class="stat-value">$${gameStats.biggestWin}</span>
+        </div>
+      `;
+    }
+    
+    debugLog('STATS', `Updated stats - Hands: ${gameStats.handsPlayed}, Win Rate: ${gameStats.handsPlayed > 0 ? ((gameStats.handsWon / gameStats.handsPlayed) * 100).toFixed(1) + '%' : '0%'}`);
+  } catch (error) {
+    console.error('[ERROR] updateGameStatistics failed:', error);
+  }
+}
+
+function determineHandResult(playerHand, dealerHand) {
+  if (playerHand.score > 21) return 'lose';
+  if (dealerHand.score > 21) return 'win';
+  if (playerHand.isBlackjack && !dealerHand.isBlackjack) return 'blackjack';
+  if (dealerHand.isBlackjack && !playerHand.isBlackjack) return 'lose';
+  if (playerHand.score > dealerHand.score) return 'win';
+  if (playerHand.score < dealerHand.score) return 'lose';
+  return 'push';
+}
+
 // --- Event handlers and UI logic ---
 function setupEventHandlers() {
   debugLog('SETUP', 'Setting up event handlers...');
@@ -1275,4 +1636,22 @@ window.addEventListener('load', () => {
   }, 1000);
 });
 
-// ...existing code...
+function showStatusToast(message, isError = false, duration = 3000) {
+  console.log('[TOAST]', isError ? 'ERROR:' : 'INFO:', message);
+  try {
+    const statusToast = document.getElementById('status-toast');
+    if (!statusToast) return;
+    
+    statusToast.textContent = message;
+    statusToast.style.color = isError ? '#ff4e4e' : '#ffd700';
+    statusToast.style.backgroundColor = isError ? 'rgba(255, 78, 78, 0.2)' : 'rgba(255, 215, 0, 0.2)';
+    statusToast.classList.add('active');
+    
+    // Auto-hide after duration
+    setTimeout(() => {
+      statusToast.classList.remove('active');
+    }, duration);
+  } catch (error) {
+    console.error('[ERROR] showStatusToast failed:', error);
+  }
+}
