@@ -762,45 +762,203 @@ async function initializeEnhancedFeatures() {
   }
 }
 
+// Enhanced Debug System for Button Issues
+const DEBUG_BUTTONS = true; // Set to false to disable debugging
+
+function debugLog(category, message, data = null) {
+  if (!DEBUG_BUTTONS) return;
+  const timestamp = new Date().toLocaleTimeString();
+  console.log(`[${timestamp}] [${category}] ${message}`, data || '');
+}
+
+function debugButtonState(buttonName, button) {
+  if (!DEBUG_BUTTONS || !button) return;
+  
+  const rect = button.getBoundingClientRect();
+  const computedStyle = window.getComputedStyle(button);
+  
+  debugLog('BUTTON_DEBUG', `${buttonName} State:`, {
+    exists: !!button,
+    disabled: button.disabled,
+    hidden: computedStyle.display === 'none',
+    visible: rect.width > 0 && rect.height > 0,
+    clickable: !button.disabled && computedStyle.pointerEvents !== 'none',
+    position: `${rect.left}, ${rect.top}`,
+    size: `${rect.width}x${rect.height}`,
+    zIndex: computedStyle.zIndex,
+    hasEventListeners: button._hasDebugListeners || false,
+    className: button.className,
+    innerHTML: button.innerHTML.substring(0, 50)
+  });
+}
+
+function debugGameState() {
+  if (!DEBUG_BUTTONS) return;
+  
+  debugLog('GAME_STATE', 'Current Game State:', {
+    inPlay: inPlay,
+    outcomeLock: outcomeLock,
+    gameExists: !!game,
+    selectedChip: selectedChip,
+    userLoggedIn: !!userId,
+    handsCount: game?.hands?.length || 0,
+    currentHandIndex: game?.currentHandIndex || 0,
+    dealerHand: game?.dealer?.cards?.length || 0,
+    lastBets: lastBets
+  });
+}
+
+function addDebugEventListener(element, eventType, handler, label) {
+  if (!element) {
+    debugLog('EVENT_DEBUG', `❌ Cannot add ${eventType} listener to ${label} - element not found`);
+    return;
+  }
+  
+  const debugHandler = function(event) {
+    debugLog('EVENT_DEBUG', `🖱️ ${label} ${eventType} triggered`, {
+      inPlay: inPlay,
+      disabled: element.disabled,
+      eventType: event.type,
+      target: event.target.tagName + (event.target.id ? '#' + event.target.id : ''),
+      timestamp: Date.now()
+    });
+    
+    try {
+      return handler.call(this, event);
+    } catch (error) {
+      debugLog('EVENT_ERROR', `❌ Error in ${label} ${eventType} handler:`, error);
+      throw error;
+    }
+  };
+  
+  element.addEventListener(eventType, debugHandler);
+  element._hasDebugListeners = true;
+  debugLog('EVENT_DEBUG', `✅ Added ${eventType} listener to ${label}`);
+}
+
+// Enhanced Game Action Debugging
+function debugPlayerAction(action) {
+  debugLog('PLAYER_ACTION', `Attempting action: ${action}`, {
+    inPlay: inPlay,
+    canPerformAction: game && typeof game[`can${action.charAt(0).toUpperCase() + action.slice(1)}`] === 'function' 
+      ? game[`can${action.charAt(0).toUpperCase() + action.slice(1)}`]() 
+      : 'method not found',
+    currentHand: game?.getCurrentHand?.() || 'no current hand',
+    gameState: game?.getState?.() || 'no state method'
+  });
+}
+
+// Debug All Buttons Function
+function debugAllButtons() {
+  if (!DEBUG_BUTTONS) return;
+  
+  debugLog('BUTTON_AUDIT', '🔍 BUTTON DEBUG AUDIT STARTING');
+  debugLog('BUTTON_AUDIT', '=====================================');
+  
+  // Debug game action buttons
+  debugButtonState('Hit Button', hitBtn);
+  debugButtonState('Stand Button', standBtn);
+  debugButtonState('Double Button', doubleBtn);
+  debugButtonState('Split Button', splitBtn);
+  debugButtonState('Deal Button', dealBtn);
+  debugButtonState('Insurance Button', insuranceBtn);
+  debugButtonState('Clear Bets Button', clearBetsBtn);
+  debugButtonState('New Bet Button', newBetBtn);
+  debugButtonState('Rebet Button', rebetBtn);
+  debugButtonState('Double Bet Button', doubleBetBtn);
+  
+  // Debug action bar visibility
+  const actionBar = document.getElementById('action-bar');
+  if (actionBar) {
+    const actionBarStyle = window.getComputedStyle(actionBar);
+    debugLog('ACTION_BAR', 'Action Bar State:', {
+      display: actionBarStyle.display,
+      visibility: actionBarStyle.visibility,
+      opacity: actionBarStyle.opacity,
+      zIndex: actionBarStyle.zIndex
+    });
+  }
+  
+  // Debug game state
+  debugGameState();
+  
+  debugLog('BUTTON_AUDIT', '=====================================');
+  debugLog('BUTTON_AUDIT', '🔍 BUTTON DEBUG AUDIT COMPLETE');
+}
+
+// Expose debug functions globally for console access
+window.debugAllButtons = debugAllButtons;
+window.debugGameState = debugGameState;
+window.debugButtonState = debugButtonState;
+
+// Add debug buttons audit to page
+if (DEBUG_BUTTONS) {
+  document.addEventListener('keydown', function(e) {
+    if (e.ctrlKey && e.key === '`') { // Ctrl + ` to trigger debug
+      debugAllButtons();
+    }
+  });
+  
+  // Auto-debug when game state changes
+  const originalInPlay = inPlay;
+  Object.defineProperty(window, 'inPlay', {
+    get: function() { return originalInPlay; },
+    set: function(value) {
+      if (value !== originalInPlay) {
+        debugLog('GAME_STATE_CHANGE', `inPlay changed: ${originalInPlay} → ${value}`);
+        setTimeout(debugAllButtons, 100); // Debug after state settles
+      }
+      originalInPlay = value;
+    }
+  });
+}
+
 // --- Event handlers and UI logic ---
 function setupEventHandlers() {
+  debugLog('SETUP', 'Setting up event handlers...');
+  
   // Enhanced chip selection with touch support and debouncing
-  chipTray.querySelectorAll('.chip').forEach(chip => {
-    let isProcessing = false;
-    
-    // Handle both click and touch events
-    const handleChipSelection = (event) => {
-      event.preventDefault();
-      event.stopPropagation();
+  if (chipTray) {
+    chipTray.querySelectorAll('.chip').forEach(chip => {
+      let isProcessing = false;
       
-      if (inPlay || isProcessing) return;
+      // Handle both click and touch events
+      const handleChipSelection = (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        
+        if (inPlay || isProcessing) return;
+        
+        isProcessing = true;
+        setTimeout(() => { isProcessing = false; }, 300); // Debounce for 300ms
+        
+        selectedChip = parseInt(chip.dataset.amount);
+        chipTray.querySelectorAll('.chip').forEach(c => c.classList.remove('selected'));
+        chip.classList.add('selected');
+        
+        // Enhanced haptic feedback for chip selection
+        if (navigator.vibrate) {
+          navigator.vibrate(20);
+        }
+        
+        debugLog('CHIP_SELECTION', `Selected chip: ${selectedChip}`);
+      };
       
-      isProcessing = true;
-      setTimeout(() => { isProcessing = false; }, 300); // Debounce for 300ms
+      // Add both touch and click handlers
+      addDebugEventListener(chip, 'click', handleChipSelection, `Chip ${chip.dataset.amount}`);
+      addDebugEventListener(chip, 'touchend', handleChipSelection, `Chip ${chip.dataset.amount} Touch`);
       
-      selectedChip = parseInt(chip.dataset.amount);
-      chipTray.querySelectorAll('.chip').forEach(c => c.classList.remove('selected'));
-      chip.classList.add('selected');
-      
-      // Enhanced haptic feedback for chip selection
-      if (navigator.vibrate) {
-        navigator.vibrate(20);
-      }
-      
-      console.log(`[CHIP SELECTION] Selected chip: ${selectedChip}`);
-    };
-    
-    // Add both touch and click handlers
-    chip.addEventListener('click', handleChipSelection);
-    chip.addEventListener('touchend', handleChipSelection);
-    
-    // Prevent touch from triggering additional events
-    chip.addEventListener('touchstart', (e) => {
-      e.preventDefault();
+      // Prevent touch from triggering additional events
+      chip.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+      });
     });
-  });
+  }
+
   // Enhanced bet spot handling with full area touch support
   Object.entries(betSpots).forEach(([type, spot]) => {
+    if (!spot) return;
+    
     let isProcessing = false;
     let touchStartTime = 0;
     
@@ -886,349 +1044,108 @@ function setupEventHandlers() {
     });
     
     // Standard click handler for desktop
-    spot.addEventListener('click', handleBetPlacement);
+    addDebugEventListener(spot, 'click', handleBetPlacement, `Bet Spot ${type}`);
   });
 
-  dealBtn.addEventListener('click', () => { if (!inPlay) startRound(); });
-  hitBtn.addEventListener('click', () => handlePlayerAction('hit'));
-  standBtn.addEventListener('click', () => handlePlayerAction('stand'));
-  doubleBtn.addEventListener('click', () => handlePlayerAction('double'));
-  splitBtn.addEventListener('click', () => handlePlayerAction('split'));
-  if (insuranceBtn) insuranceBtn.addEventListener('click', () => handlePlayerAction('insurance'));
-  if (clearBetsBtn) clearBetsBtn.addEventListener('click', () => { if (!inPlay) { game.clearBets(); updateBetsUI(); updateChipsDisplay(); saveChipsToFirebase(); showStatusToast('Bets cleared!'); } });
-
-  newBetBtn.addEventListener('click', () => {
-    hideEndButtons();
-    resetAllHandsAndUI();
-    game.clearBets();
-    updateBetsUI();
-    updateChipsDisplay();
-    saveChipsToFirebase();
-    updateHandsUI();
-    updateActionBarState();
-    showInPlayButtons(false);
-  });  rebetBtn.addEventListener('click', () => {
-    hideEndButtons();
-    if (lastBets) {
-      // Calculate total rebet amount with detailed logging
-      let totalBet = 0;
-      const betBreakdown = [];
-      Object.keys(lastBets).forEach(k => { 
-        if (lastBets[k] > 0) {
-          totalBet += lastBets[k];
-          betBreakdown.push(`${k}: ${lastBets[k]}`);
-        }
-      });
-      
-      console.log(`[REBET DEBUG] Attempting rebet - Total needed: ${totalBet}, Available chips: ${game.chips}`);
-      console.log(`[REBET DEBUG] Bet breakdown: ${betBreakdown.join(', ')}`);
-      
-      // Enhanced validation with detailed feedback
-      if (totalBet <= 0) {
-        showStatusToast('No previous bets to repeat!', true);
-        showEndButtons();
-        return;
-      }
-      
-      if (totalBet > game.chips) {
-        console.log(`[REBET DEBUG] Insufficient chips: need ${totalBet}, have ${game.chips}`);
-        showStatusToast(`Not enough chips for rebet! Need ${totalBet}, have ${game.chips}`, true);
-        showEndButtons();
-        return;
-      }
-      
-      console.log(`[REBET DEBUG] Rebet validation passed, proceeding with game setup`);
-      
-      resetAllHandsAndUI();
-      game.clearBets();
-      // Deduct chips for re-bet
-      Object.keys(lastBets).forEach(k => { 
-        if (lastBets[k] > 0) {
-          game.bets[k] = lastBets[k];
-        }
-      });
-      game.chips -= totalBet;
-      
-      console.log(`[REBET DEBUG] Bets placed, chips remaining: ${game.chips}`);
-      
-      updateBetsUI();
-      updateChipsDisplay();
-      saveChipsToFirebase();
+  // Enhanced button event handlers with debugging
+  addDebugEventListener(dealBtn, 'click', () => { 
+    debugLog('DEAL_BUTTON', 'Deal button clicked', { inPlay: inPlay });
+    if (!inPlay) {
+      debugLog('DEAL_BUTTON', 'Starting round...');
+      startRound(); 
     } else {
-      showStatusToast('No previous bets available!', true);
-      showEndButtons();
-      return;
+      debugLog('DEAL_BUTTON', 'Cannot deal - game in play');
     }
-    startRound();
-  });doubleBetBtn.addEventListener('click', () => {
-    hideEndButtons();
-    if (lastBets) {
-      let totalDoubleBet = 0;
-      Object.keys(lastBets).forEach(k => {
-        if (lastBets[k] * 2 > game.chips) totalDoubleBet = Infinity;
-        else totalDoubleBet += lastBets[k];
-      });
-      if (totalDoubleBet === Infinity || totalDoubleBet * 2 > game.chips) {
-        showStatusToast('Not enough chips for 2x bet!', true);
-        showEndButtons();
-        return;
-      }
-      resetAllHandsAndUI();
-      game.clearBets();
-      // Deduct chips for double bet
-      Object.keys(lastBets).forEach(k => {
-        if (lastBets[k] > 0) {
-          game.bets[k] = lastBets[k] * 2;
-        }
-      });
-      game.chips -= totalDoubleBet * 2;
-      updateBetsUI();
-      updateChipsDisplay();
-      saveChipsToFirebase();
-      startRound();
-    }
-  });
-
-  if (logoutBtn) {
-    logoutBtn.addEventListener('click', async () => {
-      await signOut(auth);
-      window.location.href = "construction21-login.html";
-    });
-  }
-}
-
-// Safe event handler setup for multiplayer compatibility
-export function setupEventHandlersSafe() {
-  // Only set up handlers for elements that actually exist
-  const elements = {
-    chips: chipTray?.querySelectorAll('.chip'),
-    betSpots: betSpots,
-    dealBtn,
-    hitBtn,
-    standBtn,
-    doubleBtn,
-    splitBtn,
-    insuranceBtn,
-    clearBetsBtn,
-    newBetBtn,
-    rebetBtn,
-    doubleBetBtn,
-    logoutBtn
-  };
-
-  // Chip selection handlers (only if chip tray exists)
-  if (elements.chips) {
-    elements.chips.forEach(chip => {
-      let isProcessing = false;
-      
-      const handleChipSelection = (event) => {
-        event.preventDefault();
-        event.stopPropagation();
-        
-        if (inPlay || isProcessing) return;
-        
-        isProcessing = true;
-        setTimeout(() => { isProcessing = false; }, 300);
-        
-        selectedChip = parseInt(chip.dataset.amount);
-        elements.chips.forEach(c => c.classList.remove('selected'));
-        chip.classList.add('selected');
-        
-        if (navigator.vibrate) {
-          navigator.vibrate(20);
-        }
-        
-        console.log(`[CHIP SELECTION] Selected chip: ${selectedChip}`);
-      };
-      
-      chip.addEventListener('click', handleChipSelection);
-      chip.addEventListener('touchend', handleChipSelection);
-      
-      chip.addEventListener('touchstart', (e) => {
-        e.preventDefault();
-      });
-    });
-  }
-
-  // Bet spot handlers (only if bet spots exist)
-  if (elements.betSpots) {
-    Object.entries(elements.betSpots).forEach(([type, spot]) => {
-      if (!spot) return; // Skip if spot doesn't exist
-      
-      let isProcessing = false;
-      let touchStartTime = 0;
-      
-      const handleBetPlacement = (event) => {
-        event.preventDefault();
-        event.stopPropagation();
-        
-        if (inPlay || !selectedChip || isProcessing) return;
-        
-        isProcessing = true;
-        setTimeout(() => { isProcessing = false; }, 400); // Debounce for bets
-        
-        // Use the enhanced bet validation
-        if (game?.canPlaceBet?.(selectedChip) && game?.placeBet?.(type === 'plus3' ? 'plus3' : type, selectedChip)) {
-          if (typeof animateChipToBetSpot === 'function') {
-            animateChipToBetSpot(type, selectedChip, spot, getBetStackCount(type));
-          }
-          updateBetsUI();
-          updateChipsDisplay();
-          saveChipsToFirebase();
-          showStatusToast(`Bet ${selectedChip} placed on ${type === 'main' ? 'Main' : type === 'pp' ? 'P / P' : '21+3'}`);
-          
-          if (navigator.vibrate) {
-            navigator.vibrate([40, 30, 40]);
-          }
-          
-          spot.style.boxShadow = '0 0 25px #00ff0066, 0 0 50px #00ff0033';
-          setTimeout(() => {
-            spot.style.boxShadow = '';
-          }, 300);
-        } else {
-          showStatusToast('Cannot place bet!', true);
-          
-          if (navigator.vibrate) {
-            navigator.vibrate([100, 50, 100]);
-          }
-          
-          spot.style.boxShadow = '0 0 20px #ff004466, 0 0 40px #ff004433';
-          setTimeout(() => {
-            spot.style.boxShadow = '';
-          }, 400);
-        }
-      };
-      
-      spot.addEventListener('touchstart', (e) => {
-        e.preventDefault();
-        touchStartTime = Date.now();
-        spot.style.transform = 'scale(0.98)';
-        spot.style.transition = 'transform 0.1s ease';
-        
-        if (navigator.vibrate && selectedChip) {
-          navigator.vibrate(25);
-        }
-      });
-      
-      spot.addEventListener('touchend', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        
-        setTimeout(() => {
-          spot.style.transform = '';
-          spot.style.transition = '';
-        }, 100);
-        
-        const touchDuration = Date.now() - touchStartTime;
-        if (touchDuration < 500) {
-          handleBetPlacement(e);
-        }
-      });
-      
-      spot.addEventListener('touchcancel', (e) => {
-        spot.style.transform = '';
-        spot.style.transition = '';
-      });
-      
-      spot.addEventListener('click', handleBetPlacement);
-    });
-  }
-
-  // Game action button handlers (only if buttons exist)
-  if (elements.dealBtn) elements.dealBtn.addEventListener('click', () => { if (!inPlay) startRound(); });
-  if (elements.hitBtn) elements.hitBtn.addEventListener('click', () => handlePlayerAction('hit'));
-  if (elements.standBtn) elements.standBtn.addEventListener('click', () => handlePlayerAction('stand'));
-  if (elements.doubleBtn) elements.doubleBtn.addEventListener('click', () => handlePlayerAction('double'));
-  if (elements.splitBtn) elements.splitBtn.addEventListener('click', () => handlePlayerAction('split'));
-  if (elements.insuranceBtn) elements.insuranceBtn.addEventListener('click', () => handlePlayerAction('insurance'));
+  }, 'Deal Button');
   
-  // Betting control handlers
-  if (elements.clearBetsBtn) {
-    elements.clearBetsBtn.addEventListener('click', () => { 
-      if (!inPlay && game) { 
+  addDebugEventListener(hitBtn, 'click', () => {
+    debugPlayerAction('hit');
+    handlePlayerAction('hit');
+  }, 'Hit Button');
+  
+  addDebugEventListener(standBtn, 'click', () => {
+    debugPlayerAction('stand');
+    handlePlayerAction('stand');
+  }, 'Stand Button');
+  
+  addDebugEventListener(doubleBtn, 'click', () => {
+    debugPlayerAction('double');
+    handlePlayerAction('double');
+  }, 'Double Button');
+  
+  addDebugEventListener(splitBtn, 'click', () => {
+    debugPlayerAction('split');
+    handlePlayerAction('split');
+  }, 'Split Button');
+  
+  if (insuranceBtn) {
+    addDebugEventListener(insuranceBtn, 'click', () => {
+      debugPlayerAction('insurance');
+      handlePlayerAction('insurance');
+    }, 'Insurance Button');
+  }
+
+  // Enhanced betting control handlers
+  if (clearBetsBtn) {
+    addDebugEventListener(clearBetsBtn, 'click', () => { 
+      if (!inPlay) { 
         game.clearBets(); 
         updateBetsUI(); 
         updateChipsDisplay(); 
         saveChipsToFirebase(); 
         showStatusToast('Bets cleared!'); 
       } 
-    });
+    }, 'Clear Bets Button');
   }
 
-  if (elements.newBetBtn) {
-    elements.newBetBtn.addEventListener('click', () => {
+  // End game buttons
+  if (newBetBtn) {
+    addDebugEventListener(newBetBtn, 'click', () => {
       hideEndButtons();
       resetAllHandsAndUI();
-      if (game) game.clearBets();
+      game.clearBets();
       updateBetsUI();
       updateChipsDisplay();
       saveChipsToFirebase();
       updateHandsUI();
       updateActionBarState();
       showInPlayButtons(false);
-    });
+    }, 'New Bet Button');
   }
 
-  if (elements.rebetBtn) {
-    elements.rebetBtn.addEventListener('click', () => {
+  if (rebetBtn) {
+    addDebugEventListener(rebetBtn, 'click', () => {
       hideEndButtons();
-      if (lastBets && game) {
+      if (lastBets) {
         let totalBet = 0;
-        const betBreakdown = [];
         Object.keys(lastBets).forEach(k => { 
-          if (lastBets[k] > 0) {
-            totalBet += lastBets[k];
-            betBreakdown.push(`${k}: ${lastBets[k]}`);
-          }
+          if (lastBets[k] > 0) totalBet += lastBets[k]; 
         });
-        
-        console.log(`[REBET DEBUG] Attempting rebet - Total needed: ${totalBet}, Available chips: ${game.chips}`);
-        console.log(`[REBET DEBUG] Bet breakdown: ${betBreakdown.join(', ')}`);
-        
-        // Enhanced validation with detailed feedback
-        if (totalBet <= 0) {
-          showStatusToast('No previous bets to repeat!', true);
-          showEndButtons();
-          return;
-        }
-        
         if (totalBet > game.chips) {
-          console.log(`[REBET DEBUG] Insufficient chips: need ${totalBet}, have ${game.chips}`);
-          showStatusToast(`Not enough chips for rebet! Need ${totalBet}, have ${game.chips}`, true);
+          showStatusToast('Not enough chips for rebet!', true);
           showEndButtons();
           return;
         }
-        
-        console.log(`[REBET DEBUG] Rebet validation passed, proceeding with game setup`);
-        
         resetAllHandsAndUI();
         game.clearBets();
-        // Deduct chips for re-bet
-        Object.keys(lastBets).forEach(k => { 
+        Object.keys(lastBets).forEach(k => {
           if (lastBets[k] > 0) {
             game.bets[k] = lastBets[k];
           }
         });
         game.chips -= totalBet;
-        
-        console.log(`[REBET DEBUG] Bets placed, chips remaining: ${game.chips}`);
-        
         updateBetsUI();
         updateChipsDisplay();
         saveChipsToFirebase();
-      } else {
-        showStatusToast('No previous bets available!', true);
-        showEndButtons();
-        return;
+        startRound();
       }
-      startRound();
-    });
+    }, 'Rebet Button');
   }
 
-  if (elements.doubleBetBtn) {
-    elements.doubleBetBtn.addEventListener('click', () => {
+  if (doubleBetBtn) {
+    addDebugEventListener(doubleBetBtn, 'click', () => {
       hideEndButtons();
-      if (lastBets && game) {
+      if (lastBets) {
         let totalDoubleBet = 0;
         Object.keys(lastBets).forEach(k => {
           if (lastBets[k] * 2 > game.chips) totalDoubleBet = Infinity;
@@ -1241,7 +1158,6 @@ export function setupEventHandlersSafe() {
         }
         resetAllHandsAndUI();
         game.clearBets();
-        // Deduct chips for double bet
         Object.keys(lastBets).forEach(k => {
           if (lastBets[k] > 0) {
             game.bets[k] = lastBets[k] * 2;
@@ -1253,40 +1169,110 @@ export function setupEventHandlersSafe() {
         saveChipsToFirebase();
         startRound();
       }
-    });
+    }, 'Double Bet Button');
   }
 
   if (logoutBtn) {
-    logoutBtn.addEventListener('click', async () => {
+    addDebugEventListener(logoutBtn, 'click', async () => {
       await signOut(auth);
       window.location.href = "construction21-login.html";
-    });
+    }, 'Logout Button');
+  }
+  
+  debugLog('SETUP', 'All event handlers set up successfully');
+}
+
+// --- Game Flow Functions ---
+async function startRound() {
+  debugLog('GAME_FLOW', 'Starting new round...');
+  
+  if (!game) {
+    debugLog('GAME_FLOW', 'Cannot start round - no game instance');
+    return;
+  }
+  
+  // Check if player has placed bets
+  const totalBets = (game.bets.main || 0) + (game.bets.pp || 0) + (game.bets.plus3 || 0);
+  if (totalBets === 0) {
+    showStatusToast('Please place a bet first!', true);
+    debugLog('GAME_FLOW', 'Cannot start round - no bets placed');
+    return;
+  }
+  
+  // Store last bets for rebet functionality
+  lastBets = { ...game.bets };
+  
+  // Initialize game state
+  inPlay = true;
+  outcomeLock = false;
+  
+  // Set mobile gameplay mode for touch devices
+  setMobileGameplayMode(true);
+  
+  // Start the game logic
+  try {
+    game.startRound();
+    
+    // Deal opening cards
+    await dealOpeningCards();
+    
+    // Update UI state
+    updateHandsUI();
+    updateActionBarState();
+    showInPlayButtons(true);
+    hideEndButtons();
+    
+    debugLog('GAME_FLOW', 'Round started successfully');
+  } catch (error) {
+    debugLog('GAME_FLOW_ERROR', 'Error starting round:', error);
+    showStatusToast('Error starting round', true);
+    inPlay = false;
+    setMobileGameplayMode(false);
   }
 }
 
-// --- Event Listener Cleanup for Memory Management ---
-function cleanupEventListeners() {
-  // Clean up chip selection event listeners
-  if (chipTray) {
-    chipTray.querySelectorAll('.chip').forEach(chip => {
-      chip.replaceWith(chip.cloneNode(true)); // Remove all listeners by replacing node
-    });
-  }
-  // Clean up bet spot event listeners
-  Object.values(betSpots).forEach(spot => {
-    if (spot) {
-      spot.replaceWith(spot.cloneNode(true));
+async function checkAndHandleBlackjacks() {
+  debugLog('GAME_FLOW', 'Checking for blackjacks...');
+  
+  if (!game || !game.playerHands || !game.dealerHand) return;
+  
+  const playerHasBlackjack = game.playerHands[0] && game.calculateScore(game.playerHands[0].cards) === 21;
+  const dealerHasBlackjack = game.calculateScore(game.dealerHand.cards) === 21;
+  
+  if (playerHasBlackjack || dealerHasBlackjack) {
+    debugLog('GAME_FLOW', `Blackjack detected - Player: ${playerHasBlackjack}, Dealer: ${dealerHasBlackjack}`);
+    
+    // Reveal dealer's hole card if there's a blackjack
+    if (game.dealerHand.cards.length > 1 && !game.dealerHand.cards[1].isFaceUp) {
+      game.dealerHand.cards[1].isFaceUp = true;
+      updateHandsUI();
+      await delay(1000);
     }
-  });
-  // Clean up button event listeners
-  [dealBtn, hitBtn, standBtn, doubleBtn, splitBtn, insuranceBtn, clearBetsBtn, newBetBtn, rebetBtn, doubleBetBtn, logoutBtn].forEach(btn => {
-    if (btn) btn.replaceWith(btn.cloneNode(true));
-  });
-  // Remove page unload handler
-  window.removeEventListener('beforeunload', cleanupEventListeners);
-  // Optionally log cleanup
-  // console.log('[CLEANUP] Event listeners successfully removed');
+    
+    // Handle round completion
+    setTimeout(() => {
+      processRoundCompletion();
+    }, 1500);
+  }
 }
-window.addEventListener('beforeunload', cleanupEventListeners);
 
-// For future: consider adding event listener cleanup for memory management.
+// Firebase Auth State Management
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    debugLog('AUTH', 'User logged in:', user.email);
+    loadUserDataAndStartGame(user);
+  } else {
+    debugLog('AUTH', 'User logged out, redirecting...');
+    window.location.href = "construction21-login.html";
+  }
+});
+
+// Window load event to trigger initial debug
+window.addEventListener('load', () => {
+  setTimeout(() => {
+    debugLog('INIT', 'Page loaded, running initial debug...');
+    debugAllButtons();
+  }, 1000);
+});
+
+// ...existing code...

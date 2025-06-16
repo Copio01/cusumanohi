@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Button Test - Construction 21</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background: #2d2d3a;
+            color: #fff;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #444;
+            border-radius: 8px;
+            background: #333;
+        }
+        .test-button {
+            margin: 5px;
+            padding: 10px 15px;
+            background: #ffd700;
+            color: #000;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .test-button:hover {
+            background: #ffed4e;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            background: #444;
+        }
+        .success { background: #4caf50; }
+        .error { background: #f44336; }
+        .warning { background: #ff9800; }
+        pre {
+            background: #222;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔨 Construction 21 Button Debugging Tool</h1>
+    
+    <div class="test-section">
+        <h3>📋 Game Status</h3>
+        <div id="game-status" class="status">Loading...</div>
+        <button class="test-button" onclick="updateGameStatus()">Refresh Status</button>
+    </div>
+    
+    <div class="test-section">
+        <h3>🖱️ Button Tests</h3>
+        <button class="test-button" onclick="testButtonById('hit-btn')">Test Hit Button</button>
+        <button class="test-button" onclick="testButtonById('stand-btn')">Test Stand Button</button>
+        <button class="test-button" onclick="testButtonById('deal-btn')">Test Deal Button</button>
+        <button class="test-button" onclick="testButtonById('double-btn')">Test Double Button</button>
+        <button class="test-button" onclick="testButtonById('split-btn')">Test Split Button</button>
+        <button class="test-button" onclick="testAllButtons()">Test All Buttons</button>
+    </div>
+    
+    <div class="test-section">
+        <h3>🔍 Debug Functions</h3>
+        <button class="test-button" onclick="runDebugAllButtons()">Run Button Audit</button>
+        <button class="test-button" onclick="runGameStateDebug()">Check Game State</button>
+        <button class="test-button" onclick="runValidationTests()">Run All Validation Tests</button>
+        <button class="test-button" onclick="clearLog()">Clear Log</button>
+    </div>
+    
+    <div class="test-section">
+        <h3>📝 Debug Log</h3>
+        <pre id="debug-log"></pre>
+    </div>
+    
+    <script>
+        // Redirect to main game with parent access
+        let parentWindow = null;
+        let game = null;
+        let inPlay = false;
+        
+        // Try to access parent window (if opened from main game)
+        try {
+            if (window.opener && window.opener.game) {
+                parentWindow = window.opener;
+                game = parentWindow.game;
+                inPlay = parentWindow.inPlay;
+                log('✅ Connected to parent game window');
+            } else {
+                log('⚠️ Not opened from main game. Opening main game...');
+                window.open('/construction21.html', 'maingame');
+            }
+        } catch (error) {
+            log('❌ Cannot access parent window:', error.message);
+        }
+        
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const logEl = document.getElementById('debug-log');
+            const prefix = type === 'error' ? '❌' : type === 'success' ? '✅' : type === 'warning' ? '⚠️' : 'ℹ️';
+            logEl.textContent += `[${timestamp}] ${prefix} ${message}\n`;
+            logEl.scrollTop = logEl.scrollHeight;
+            console.log(message);
+        }
+        
+        function clearLog() {
+            document.getElementById('debug-log').textContent = '';
+        }
+        
+        function updateGameStatus() {
+            const statusEl = document.getElementById('game-status');
+            
+            if (parentWindow) {
+                try {
+                    const status = {
+                        gameExists: !!parentWindow.game,
+                        inPlay: parentWindow.inPlay || false,
+                        selectedChip: parentWindow.selectedChip || 'none',
+                        chips: parentWindow.game?.chips || 'N/A',
+                        userId: parentWindow.userId || 'N/A'
+                    };
+                    
+                    statusEl.innerHTML = `
+                        <strong>Connection:</strong> ✅ Connected to main game<br>
+                        <strong>Game Instance:</strong> ${status.gameExists ? '✅ Exists' : '❌ Missing'}<br>
+                        <strong>In Play:</strong> ${status.inPlay ? '🎮 Yes' : '⏸️ No'}<br>
+                        <strong>Selected Chip:</strong> ${status.selectedChip}<br>
+                        <strong>Chips:</strong> ${status.chips}<br>
+                        <strong>User ID:</strong> ${status.userId ? '✅ Logged in' : '❌ Not logged in'}
+                    `;
+                    statusEl.className = 'status success';
+                } catch (error) {
+                    statusEl.innerHTML = `❌ Error accessing game state: ${error.message}`;
+                    statusEl.className = 'status error';
+                }
+            } else {
+                statusEl.innerHTML = '❌ Not connected to main game window';
+                statusEl.className = 'status error';
+            }
+        }
+        
+        function testButtonById(buttonId) {
+            if (!parentWindow) {
+                log(`❌ Cannot test ${buttonId} - not connected to main game`, 'error');
+                return;
+            }
+            
+            try {
+                const button = parentWindow.document.getElementById(buttonId);
+                if (!button) {
+                    log(`❌ Button ${buttonId} not found`, 'error');
+                    return;
+                }
+                
+                const rect = button.getBoundingClientRect();
+                const style = parentWindow.getComputedStyle(button);
+                
+                log(`🔍 Testing ${buttonId}:`);
+                log(`  - Exists: ✅`);
+                log(`  - Disabled: ${button.disabled ? '❌ Yes' : '✅ No'}`);
+                log(`  - Visible: ${style.display !== 'none' ? '✅ Yes' : '❌ No'}`);
+                log(`  - Size: ${rect.width}x${rect.height}`);
+                log(`  - Position: ${rect.left}, ${rect.top}`);
+                log(`  - Event Listeners: ${button._hasDebugListeners ? '✅ Debug listeners attached' : '⚠️ No debug listeners'}`);
+                
+                // Try to click the button
+                if (!button.disabled && style.display !== 'none') {
+                    log(`🖱️ Attempting to click ${buttonId}...`);
+                    button.click();
+                    log(`✅ Click triggered for ${buttonId}`, 'success');
+                } else {
+                    log(`⚠️ Cannot click ${buttonId} - disabled or hidden`, 'warning');
+                }
+                
+            } catch (error) {
+                log(`❌ Error testing ${buttonId}: ${error.message}`, 'error');
+            }
+        }
+        
+        function testAllButtons() {
+            const buttons = ['hit-btn', 'stand-btn', 'deal-btn', 'double-btn', 'split-btn', 'clear-bets-btn'];
+            log('🚀 Testing all game buttons...');
+            
+            buttons.forEach((buttonId, index) => {
+                setTimeout(() => {
+                    testButtonById(buttonId);
+                }, index * 500); // Stagger the tests
+            });
+        }
+        
+        function runDebugAllButtons() {
+            if (!parentWindow || !parentWindow.debugAllButtons) {
+                log('❌ debugAllButtons function not available', 'error');
+                return;
+            }
+            
+            try {
+                log('🔍 Running debugAllButtons from main game...');
+                parentWindow.debugAllButtons();
+                log('✅ debugAllButtons completed - check main game console', 'success');
+            } catch (error) {
+                log(`❌ Error running debugAllButtons: ${error.message}`, 'error');
+            }
+        }
+        
+        function runGameStateDebug() {
+            if (!parentWindow || !parentWindow.debugGameState) {
+                log('❌ debugGameState function not available', 'error');
+                return;
+            }
+            
+            try {
+                log('🎮 Running debugGameState from main game...');
+                parentWindow.debugGameState();
+                log('✅ debugGameState completed - check main game console', 'success');
+            } catch (error) {
+                log(`❌ Error running debugGameState: ${error.message}`, 'error');
+            }
+        }
+        
+        function runValidationTests() {
+            if (!parentWindow || !parentWindow.validateEnhancedFeatures) {
+                log('❌ validateEnhancedFeatures function not available', 'error');
+                return;
+            }
+            
+            try {
+                log('🧪 Running validation tests from main game...');
+                parentWindow.validateEnhancedFeatures();
+                log('✅ Validation tests completed - check main game console', 'success');
+            } catch (error) {
+                log(`❌ Error running validation tests: ${error.message}`, 'error');
+            }
+        }
+        
+        // Auto-update status when page loads
+        setTimeout(updateGameStatus, 1000);
+        
+        // Periodically update status
+        setInterval(updateGameStatus, 5000);
+        
+        log('🔨 Construction 21 Button Debug Tool initialized');
+        log('💡 TIP: Open this from the main game for full functionality');
+    </script>
+</body>
+</html>

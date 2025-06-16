@@ -132,6 +132,110 @@ function testAnimationSystem() {
   return hasAdvancedAnimations;
 }
 
+// Test 8: Button Debugging System
+function testButtonDebugging() {
+  console.log('\n🐛 Testing Button Debugging System...');
+  
+  // Check if debug functions exist
+  const hasDebugAllButtons = typeof debugAllButtons !== 'undefined';
+  const hasDebugGameState = typeof debugGameState !== 'undefined';
+  const hasDebugButtonState = typeof debugButtonState !== 'undefined';
+  
+  console.log('✓ debugAllButtons function:', hasDebugAllButtons);
+  console.log('✓ debugGameState function:', hasDebugGameState);
+  console.log('✓ debugButtonState function:', hasDebugButtonState);
+  
+  // Test if buttons have debug event listeners
+  const hitBtn = document.getElementById('hit-btn');
+  const dealBtn = document.getElementById('deal-btn');
+  const standBtn = document.getElementById('stand-btn');
+  
+  console.log('✓ Hit button has debug listeners:', hitBtn?._hasDebugListeners || false);
+  console.log('✓ Deal button has debug listeners:', dealBtn?._hasDebugListeners || false);
+  console.log('✓ Stand button has debug listeners:', standBtn?._hasDebugListeners || false);
+  
+  // Run a quick button audit if available
+  if (hasDebugAllButtons) {
+    console.log('✓ Running button audit...');
+    try {
+      debugAllButtons();
+      console.log('✓ Button audit completed successfully');
+    } catch (error) {
+      console.log('❌ Button audit failed:', error.message);
+    }
+  }
+  
+  return hasDebugAllButtons && hasDebugGameState && hasDebugButtonState;
+}
+
+// Test 9: Game Logic Integration
+function testGameLogicIntegration() {
+  console.log('\n🎯 Testing Game Logic Integration...');
+  
+  // Check if game instance exists
+  const hasGame = typeof game !== 'undefined' && game !== null;
+  console.log('✓ Game instance exists:', hasGame);
+  
+  // Check critical game functions
+  if (hasGame) {
+    const hasCanHit = typeof game.canHit === 'function';
+    const hasCanStand = typeof game.canStand === 'function';
+    const hasCanDouble = typeof game.canDouble === 'function';
+    const hasCanSplit = typeof game.canSplit === 'function';
+    const hasPlaceBet = typeof game.placeBet === 'function';
+    const hasStartRound = typeof game.startRound === 'function';
+    
+    console.log('✓ canHit method:', hasCanHit);
+    console.log('✓ canStand method:', hasCanStand);
+    console.log('✓ canDouble method:', hasCanDouble);
+    console.log('✓ canSplit method:', hasCanSplit);
+    console.log('✓ placeBet method:', hasPlaceBet);
+    console.log('✓ startRound method:', hasStartRound);
+    
+    // Check game state
+    console.log('✓ Current chips:', game.chips || 'N/A');
+    console.log('✓ Current bets:', game.bets || 'N/A');
+    
+    return hasCanHit && hasCanStand && hasCanDouble && hasCanSplit && hasPlaceBet && hasStartRound;
+  }
+  
+  return false;
+}
+
+// Test 10: Event Handler Setup
+function testEventHandlerSetup() {
+  console.log('\n🔗 Testing Event Handler Setup...');
+  
+  // Check if setupEventHandlers function exists
+  const hasSetupEventHandlers = typeof setupEventHandlers !== 'undefined';
+  console.log('✓ setupEventHandlers function:', hasSetupEventHandlers);
+  
+  // Check critical UI functions
+  const hasHandlePlayerAction = typeof handlePlayerAction !== 'undefined';
+  const hasUpdateHandsUI = typeof updateHandsUI !== 'undefined';
+  const hasUpdateBetsUI = typeof updateBetsUI !== 'undefined';
+  const hasUpdateActionBarState = typeof updateActionBarState !== 'undefined';
+  const hasStartRound = typeof startRound !== 'undefined';
+  
+  console.log('✓ handlePlayerAction function:', hasHandlePlayerAction);
+  console.log('✓ updateHandsUI function:', hasUpdateHandsUI);
+  console.log('✓ updateBetsUI function:', hasUpdateBetsUI);
+  console.log('✓ updateActionBarState function:', hasUpdateActionBarState);
+  console.log('✓ startRound function:', hasStartRound);
+  
+  // Check global variables
+  const hasInPlay = typeof inPlay !== 'undefined';
+  const hasSelectedChip = typeof selectedChip !== 'undefined';
+  const hasBetSpots = typeof betSpots !== 'undefined';
+  
+  console.log('✓ inPlay variable:', hasInPlay);
+  console.log('✓ selectedChip variable:', hasSelectedChip);
+  console.log('✓ betSpots variable:', hasBetSpots);
+  
+  return hasSetupEventHandlers && hasHandlePlayerAction && hasUpdateHandsUI && 
+         hasUpdateBetsUI && hasUpdateActionBarState && hasStartRound;
+}
+
 // Test 7: Mobile Responsiveness
 function testMobileFeatures() {
   console.log('\n📱 Testing Mobile Features...');
@@ -171,7 +275,10 @@ function runAllTests() {
     styling: testEnhancedStyling(),
     statistics: testGameStatistics(),
     animations: testAnimationSystem(),
-    mobile: testMobileFeatures()
+    mobile: testMobileFeatures(),
+    debugging: testButtonDebugging(),
+    gameLogic: testGameLogicIntegration(),
+    eventHandlers: testEventHandlerSetup()
   };
   
   console.log('\n' + '='.repeat(50));
@@ -194,6 +301,10 @@ function runAllTests() {
     console.log('🎉 ALL ENHANCED FEATURES VALIDATED SUCCESSFULLY!');
   } else {
     console.log('⚠️  Some features need attention - check individual test results above');
+    console.log('\n🔧 DEBUG TIPS:');
+    console.log('- Press Ctrl + ` in game to run button debug audit');
+    console.log('- Check browser console for detailed debug logs');
+    console.log('- Try clicking buttons and watch for debug output');
   }
   
   return results;
@@ -204,4 +315,55 @@ setTimeout(runAllTests, 1000);
 
 // Export for manual testing
 window.validateEnhancedFeatures = runAllTests;
-console.log('\n💡 You can run "validateEnhancedFeatures()" anytime to re-test all features');
+window.testButtonDebugging = testButtonDebugging;
+window.testGameLogicIntegration = testGameLogicIntegration;
+window.testEventHandlerSetup = testEventHandlerSetup;
+
+console.log('\n💡 DEBUGGING COMMANDS AVAILABLE:');
+console.log('- validateEnhancedFeatures() - Run all tests');
+console.log('- testButtonDebugging() - Test button debugging system');
+console.log('- testGameLogicIntegration() - Test game logic');
+console.log('- testEventHandlerSetup() - Test event handlers');
+console.log('- debugAllButtons() - Run button audit (if available)');
+console.log('- debugGameState() - Check current game state (if available)');
+console.log('- Press Ctrl + ` in game for live button debugging');
+
+// Additional helper functions for debugging
+window.clickAllButtons = function() {
+  console.log('🖱️ Testing all button clicks...');
+  const buttons = ['hit-btn', 'stand-btn', 'deal-btn', 'double-btn', 'split-btn', 'clear-bets-btn'];
+  
+  buttons.forEach(btnId => {
+    const btn = document.getElementById(btnId);
+    if (btn && !btn.disabled && window.getComputedStyle(btn).display !== 'none') {
+      console.log(`Clicking ${btnId}...`);
+      try {
+        btn.click();
+      } catch (error) {
+        console.error(`Error clicking ${btnId}:`, error);
+      }
+    } else {
+      console.log(`${btnId} not available or disabled`);
+    }
+  });
+};
+
+window.checkButtonStates = function() {
+  console.log('🔍 Checking all button states...');
+  const buttons = ['hit-btn', 'stand-btn', 'deal-btn', 'double-btn', 'split-btn', 'clear-bets-btn'];
+  
+  buttons.forEach(btnId => {
+    const btn = document.getElementById(btnId);
+    if (btn) {
+      const style = window.getComputedStyle(btn);
+      console.log(`${btnId}:`, {
+        exists: true,
+        disabled: btn.disabled,
+        visible: style.display !== 'none',
+        clickable: !btn.disabled && style.pointerEvents !== 'none'
+      });
+    } else {
+      console.log(`${btnId}: NOT FOUND`);
+    }
+  });
+};
