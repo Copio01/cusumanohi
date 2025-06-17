@@ -144,13 +144,21 @@
   </style>
 </head>
 <body>
+  <div id="loading-indicator" style="display: flex; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(35,35,43,0.9); justify-content: center; align-items: center; z-index: 10000; color: #ffd700; font-size: 1.2rem; flex-direction: column;">
+    <svg aria-hidden="true" class="w-10 h-10 text-gray-200 animate-spin dark:text-gray-600 fill-yellow-400" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="currentColor"/>
+        <path d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0492C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z" fill="currentFill"/>
+    </svg>
+    <span class="sr-only">Loading...</span>
+    <p style="margin-top:10px;">Initializing...</p>
+  </div>
   <div class="login-bg-animation">
     <div class="bg-shape bg-shape1"></div>
     <div class="bg-shape bg-shape2"></div>
     <div class="bg-shape bg-shape3"></div>
   </div>
   <a href="Games.html" class="back-to-home">← Back to Games</a>
-  <div class="login-container">
+  <div class="login-container" id="login-container">
     <div class="barrier-tape"></div>
     <div style="height:20px;"></div>
     <div class="game-title">
@@ -210,6 +218,7 @@
             <button type="button" class="show-pass-btn" tabindex="-1" onclick="togglePassword('signup-password', this)" aria-label="Show password">👁️</button>
           </div>
         </div>
+        <div id="form-loading-indicator" style="display: none; color: #ffd700; margin-bottom: 10px; text-align:center;">Processing...</div>
         <button id="signup-btn" class="auth-btn" type="submit">Create Account & Play</button>
         <div id="signup-message" class="message"></div>
       </form>
@@ -219,7 +228,7 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-app.js";
     import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-auth.js";
-    import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-firestore.js";
+    import { getFirestore, doc, setDoc, getDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-firestore.js";
     const firebaseConfig = {
       apiKey: "AIzaSyBVtq6dAEuybJNmTTv8dXBxTVUgw1t0ZMk",
       authDomain: "cusumano-website.firebaseapp.com",
@@ -281,6 +290,7 @@
     // Auth State
     if (auth) {
       onAuthStateChanged(auth, async (user) => {
+        const globalLoader = document.getElementById('loading-indicator');
         if (user) {
           // User is signed in
           const uid = user.uid;
@@ -293,53 +303,27 @@
           } else {
             // New user, create document
             try {
+              // Attempt to get displayName from auth, fallback to generating one if needed
+              const displayName = user.displayName || `Player${uid.substring(0, 5)}`;
               await setDoc(userDocRef, {
                 email: user.email,
+                displayName: displayName, // Store displayName
                 chips: 1000, // Default chips for new user
                 createdAt: serverTimestamp()
               });
               window.location.href = 'construction21.html';
             } catch (error) {
               console.error("Error creating user document:", error);
+              if (globalLoader) globalLoader.style.display = 'none'; // Hide loader on error too
               alert("Error setting up your account. Please try again.");
             }
           }
         } else {
           // User is signed out
           // Show login/signup forms
-          document.getElementById('loading-indicator').style.display = 'none';
-          document.getElementById('auth-container').style.display = 'block';
-        }
-      });
-
-      // Handle Sign Up
-      const signupForm = document.getElementById('signup-form');
-      signupForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const email = signupForm.email.value;
-        const password = signupForm.password.value;
-        const loadingIndicator = document.getElementById('form-loading-indicator');
-        const errorMessageElement = document.getElementById('signup-error-message');
-
-        loadingIndicator.style.display = 'block';
-        errorMessageElement.textContent = ''; // Clear previous errors
-
-        try {
-          const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-          const user = userCredential.user;
-          // Create a new document for the user in Firestore with initial chip amount
-          await setDoc(doc(db, "users", user.uid), {
-            email: user.email,
-            chips: 1000, // Default chips for new user
-            createdAt: serverTimestamp()
-          });
-          // Redirect to game page (onAuthStateChanged will also handle this)
-          // window.location.href = 'construction21.html';
-        } catch (error) {
-          console.error("Error signing up:", error);
-          errorMessageElement.textContent = getFirebaseAuthErrorMessage(error.code);
-        } finally {
-          loadingIndicator.style.display = 'none';
+          if (globalLoader) globalLoader.style.display = 'none';
+          const authContainer = document.getElementById('login-container'); // Use existing login-container
+          if (authContainer) authContainer.style.display = 'block'; // Ensure it's visible
         }
       });
 
@@ -381,41 +365,45 @@
         }
       });
 
-      // Signup
+      // Signup (Main listener)
       signupForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const name = document.getElementById('signup-name').value.trim();
-        const email = document.getElementById('signup-email').value.trim();
-        const password = document.getElementById('signup-password').value;
-        if (!name || !email || !password) return showMessage(signupMessage, 'Please fill in all fields.', 'error');
-        if (name.length < 2) return showMessage(signupMessage, 'Name must be at least 2 characters.', 'error');
-        if (!email.includes('@')) return showMessage(signupMessage, 'Please enter a valid email.', 'error');
-        if (password.length < 6) return showMessage(signupMessage, 'Password 6+ chars.', 'error');
-        if (!auth || !db) return showMessage(signupMessage, 'Auth unavailable. Refresh.', 'error');
-        setButtonLoading(signupBtn, 'Creating account...');
+        const email = document.getElementById('signup-email').value.trim(); // Corrected to get value from signup-email
+        const password = document.getElementById('signup-password').value; // Corrected to get value from signup-password
+        const loadingIndicator = document.getElementById('form-loading-indicator');
+        const errorMessageElement = document.getElementById('signup-message'); 
+
+        if (!name || !email || !password) return showMessage(errorMessageElement, 'Please fill in all fields.', 'error');
+        if (name.length < 2) return showMessage(errorMessageElement, 'Name must be at least 2 characters.', 'error');
+        if (!email.includes('@')) return showMessage(errorMessageElement, 'Please enter a valid email.', 'error');
+        if (password.length < 6) return showMessage(errorMessageElement, 'Password 6+ chars.', 'error');
+        if (!auth || !db) return showMessage(errorMessageElement, 'Auth unavailable. Refresh.', 'error');
+
+        if (loadingIndicator) loadingIndicator.style.display = 'block';
+        if (errorMessageElement) errorMessageElement.textContent = ''; 
+
         try {
           const userCredential = await createUserWithEmailAndPassword(auth, email, password);
           const user = userCredential.user;
+          // Create a new document for the user in Firestore with initial chip amount and display name
           await setDoc(doc(db, "users", user.uid), {
-            email: email,
-            chips: 1000, // Default chips for new user
+            email: user.email, 
+            displayName: name, // Store the name from the form
+            chips: 1000, 
             createdAt: serverTimestamp()
           });
-          // Store user info for multiplayer handoff
-          sessionStorage.setItem('c21user', JSON.stringify({
-            uid: user.uid,
-            displayName: name,
-            email,
-            chips: 1000
-          }));
-          showMessage(signupMessage, 'Account created! Redirecting...', 'success');
+          // Redirect to game page (onAuthStateChanged will also handle this)
+          // window.location.href = 'construction21.html';
         } catch (error) {
-          setButtonLoading(signupBtn, 'Create Account & Play', false);
-          showMessage(signupMessage, getErrorMessage(error.code), 'error');
+          console.error("Error signing up:", error);
+          if (errorMessageElement) errorMessageElement.textContent = getFirebaseAuthErrorMessage(error.code); // Corrected function name
+        } finally {
+          if (loadingIndicator) loadingIndicator.style.display = 'none';
         }
       });
 
-      // Forgot password flow
+      // Forgot Password
       forgotLink.addEventListener('click', () => {
         loginForm.style.display = 'none';
         forgotForm.style.display = '';
@@ -457,8 +445,15 @@
           case 'auth/weak-password': return 'Password too short.';
           case 'auth/invalid-email': return 'Invalid email address.';
           case 'auth/too-many-requests': return 'Too many failed attempts. Try again later.';
+          case 'auth/operation-not-allowed': return 'Email/password accounts are not enabled.'; // Added
+          case 'auth/invalid-credential': return 'Invalid credentials. Please check your email and password.'; // Added for general login failures
           default: return 'An error occurred. Try again.';
         }
+      }
+
+      // Helper function for Firebase Auth error messages (if you have a specific one for signup)
+      function getFirebaseAuthErrorMessage(code) { // Added this function based on usage
+        return getErrorMessage(code); // For now, it can reuse the general one
       }
 
       document.addEventListener('keypress', (e) => {

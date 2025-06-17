@@ -2,71 +2,102 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
+    // Helper functions for better security
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isAdmin() {
+      // Only allow specific email addresses as admins
+      return isAuthenticated() && 
+             (request.auth.token.email == 'copio01@yahoo.com' || 
+              request.auth.token.email == 'admin@cusumano.com');
+    }
+    
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
 
     // --- Website Content Rules ---
     match /sliderImages/{docId} {
       allow read: if true;
-      allow write: if request.auth != null;
+      allow write: if isAdmin(); // Changed from isAuthenticated
     }
     
     match /siteContent/{docId} {
       allow read: if true;
-      allow write: if request.auth != null;
+      allow write: if isAdmin(); // Changed from isAuthenticated
     }
     
     // --- Game Leaderboard Rules (Public Read/Write) ---
     match /snakeLeaderboard/{docId} {
       allow read: if true;
-      allow write: if true;
+      allow write: if isAuthenticated(); // Changed from true
     }
     
     match /hammerballLeaderboard/{docId} {
       allow read: if true;
-      allow write: if true;
+      allow write: if isAuthenticated(); // Changed from true
     }
 
     // --- Construction 21 Game Rules (Firebase Auth Users) ---
     
     // User game data for Construction 21 - using Firebase Auth
-    match /construction21_users/{userId} {
+    // IMPORTANT: Client-side code (e.g., construction21-login.html) uses "users" collection.
+    match /users/{userId} { // Path changed from construction21_users to users to match client
       // Allow authenticated users to read/write their own data
-      allow read, write: if request.auth != null && request.auth.uid == userId;
+      allow read, write: if isOwner(userId);
       
-      // Allow reading for leaderboard purposes (but limit sensitive data)
-      allow read: if request.auth != null;
+      // Allow admins to update chip counts (for granting chips)
+      // This rule allows an admin to update ONLY the chips field.
+      allow update: if isAdmin() && 
+                    request.resource.data.diff(resource.data).affectedKeys().hasOnly(['chips']);
     }
     
     // Construction 21 Leaderboard
     match /construction21_leaderboard/{userId} {
       // Allow authenticated users to read leaderboard
-      allow read: if request.auth != null;
+      allow read: if isAuthenticated();
       
       // Allow authenticated users to update their own leaderboard entry
-      allow write: if request.auth != null && request.auth.uid == userId;
+      allow write: if isOwner(userId);
     }
 
     // --- Legacy Rules (if needed for backwards compatibility) ---
     // Remove these once you've migrated existing data
     match /game_users_custom_auth/{userId} {
       // Temporarily allow reads for data migration
-      allow read: if request.auth != null;
+      allow read: if isAuthenticated();
       // Prevent new writes to old collection
       allow write: if false;
     }
     
     // --- Artifacts Rules (if using for other games) ---
     match /artifacts/{appId}/users/{userId}/{data=**} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
+      allow read, write: if isOwner(userId);
     }
 
     match /artifacts/{appId}/public/data/leaderboard/{userId} {
-      allow read: if request.auth != null; 
-      allow write: if request.auth != null && request.auth.uid == userId;
+      allow read: if isAuthenticated(); 
+      allow write: if isOwner(userId);
     }
 
     // --- Chip Voucher Rules ---
     match /chipVouchers/{voucherId} {
-      allow read, write: if request.auth != null;
+      // Only admin users can create or manage vouchers
+      allow create, update, delete: if isAdmin();
+      
+      // Authenticated users can read vouchers (for redemption UI)
+      allow read: if isAuthenticated();
+      
+      // Allow players to redeem vouchers by updating specific fields only
+      allow update: if isAuthenticated() &&
+                     !resource.data.isRedeemed &&
+                     request.resource.data.isRedeemed == true &&
+                     request.resource.data.redeemedBy == request.auth.token.email &&
+                     request.resource.data.redeemedAt != null &&
+                     request.resource.data.diff(resource.data).affectedKeys()
+                       .hasOnly(['isRedeemed', 'redeemedBy', 'redeemedAt']);
     }
   }
 }
