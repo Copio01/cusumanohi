@@ -46,40 +46,7 @@ export class Construction21Game {
         this.MAX_CARDS_PER_HAND = 11; // Theoretical maximum (4 Aces + 7 other cards)
         
         this.resetGame(100);
-    }
-
-    // ---- CHIP STORAGE ----
-    
-    async loadChipsFromFirebase() {
-        if (!this.userId) {
-            console.warn('No userId provided, cannot load chips from Firebase');
-            return;
-        }
-        
-        try {
-            const userDocRef = doc(this.db, "construction21_users", this.userId);
-            const docSnap = await getDoc(userDocRef);
-            
-            if (docSnap.exists()) {
-                const data = docSnap.data();
-                const loadedChips = data.chips || 100;
-                
-                // Validate loaded chips
-                if (typeof loadedChips !== 'number' || loadedChips < this.MIN_CHIPS || loadedChips > this.MAX_CHIPS) {
-                    console.warn(`Invalid chips value loaded: ${loadedChips}, using default`);
-                    this.chips = 100;
-                } else {
-                    this.chips = Math.floor(loadedChips); // Ensure integer
-                }
-            } else {
-                this.chips = 100;
-                await setDoc(userDocRef, { chips: this.chips });
-            }
-        } catch (error) {
-            console.error('Error loading chips from Firebase:', error);
-            this.chips = 100; // Fallback to default
-        }
-    }
+    }    // ---- CHIP STORAGE ----
     
     async saveChipsToFirebase() {
         if (!this.userId) {

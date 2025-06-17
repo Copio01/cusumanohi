@@ -37,7 +37,6 @@ const splitBtn = document.getElementById('split-btn');
 const dealBtn = document.getElementById('deal-btn');
 const insuranceBtn = document.getElementById('insurance-btn');
 const statusToast = document.getElementById('status-toast');
-const profileChipsEl = document.getElementById('profile-chips');
 const centerChipsAmountEl = document.getElementById('center-chips-amount');
 const profileNameEl = document.getElementById('profile-name');
 const clearBetsBtn = document.getElementById('clear-bets-btn');
@@ -111,20 +110,7 @@ async function loadUserDataAndStartGame(user) {
   hideEndButtons();
 }
 
-async function saveChipsToFirebase() {
-  if (!userDocRef || !game) return;
-  try {
-    await updateDoc(userDocRef, {
-      chips: game.chips,
-      lastLogin: new Date()
-    });
-  } catch (e) {
-    console.error('[FIREBASE] Save error:', e);
-    showStatusToast("Couldn't save chips! Please reload the game.", true);
-  }
-}
-
-// Debounced version of saveChipsToFirebase
+// Firebase chips saving function with debounce to prevent excessive writes
 const debouncedSaveToFirebase = debounce(async function() {
   if (!userDocRef || !game) return;
   try {
@@ -140,8 +126,7 @@ const debouncedSaveToFirebase = debounce(async function() {
   }
 }, 500);
 
-function updateChipsDisplay() {
-  if (profileChipsEl) profileChipsEl.textContent = game.chips;
+function updateChipsDisplay() {  // Display chips in the UI
   if (centerChipsAmountEl) {
     const currentAmount = parseInt(centerChipsAmountEl.textContent) || 0;
     const newAmount = game.chips;
@@ -461,7 +446,7 @@ async function dealOpeningCards() {
   
   await animateDealCard(game.dealerHand, false, true, 1);       // Dealer card 2 (face down)
   console.log('[DEAL] Dealer second card dealt (face down)');
-    console.log('[DEAL] Opening deal complete, dealer cards:', game.dealerHand.cards.map((c, i) => `${i}: ${c.value}${c.suit} (${c.isFaceUp ? 'up' : 'down'})`));
+  console.log('[DEAL] Opening deal complete, dealer cards:', game.dealerHand.cards.map((c, i) => `${i}: ${c.value}${c.suit} (${c.isFaceUp ? 'up' : 'down'})`));
   
   // Check for auto-stand conditions (blackjacks)
   await checkAndHandleBlackjacks();
@@ -889,14 +874,13 @@ function placeQuickBet(amount) {
   
   selectedChip = amount;
   updateSelectedChip();
-  
-  // Place on main bet spot
+    // Place on main bet spot
   const mainBetSpot = document.getElementById('main-bet-spot');
   if (mainBetSpot && game.canPlaceBet(amount)) {
     game.placeBet('main', amount);
     updateBetsUI();
     updateChipsDisplay();
-    saveChipsToFirebase();
+    debouncedSaveToFirebase();
     showStatusToast(`Quick bet: ${amount} chips`);
   }
 }
@@ -1241,7 +1225,7 @@ function handlePlayerAction(action) {
           game.dealCard(activeHand, true);
           updateHandsUI();
           
-          if (activeHand.score > 21) {
+          if (game.calculateScore(activeHand.cards) > 21) {
             debugLog('PLAYER_ACTION', 'Hand busted, moving to next');
             moveToNextHandOrFinish();
           } else {
@@ -1257,35 +1241,41 @@ function handlePlayerAction(action) {
         
       case 'double':
         if (canDoubleCurrentHand()) {
-          activeHand.bet *= 2;
-          game.chips -= activeHand.bet / 2; // Subtract the additional bet
-          game.dealCard(activeHand, true);
-          updateBetsUI();
-          updateHandsUI();
-          updateChipsDisplay();
-          
-          // After doubling, automatically stand
-          moveToNextHandOrFinish();
+          // Use the game's doubleDown method instead of manually modifying the bet
+          if (game.doubleDown()) {
+            updateBetsUI();
+            updateHandsUI();
+            updateChipsDisplay();
+            debouncedSaveToFirebase(); // Use debounced version
+            
+            // After doubling, automatically stand
+            moveToNextHandOrFinish();
+          }
         }
         break;
         
       case 'split':
         if (canSplitCurrentHand()) {
-          game.splitHand(game.activeHandIndex);
-          game.chips -= activeHand.bet; // Deduct bet for split hand
-          updateBetsUI();
-          updateHandsUI();
-          updateChipsDisplay();
-          updateActionBarState();
+          // Use the game's splitHand method
+          if (game.splitHand()) {
+            updateBetsUI();
+            updateHandsUI();
+            updateChipsDisplay();
+            debouncedSaveToFirebase(); // Use debounced version
+            updateActionBarState();
+          }
         }
         break;
         
       case 'insurance':
         if (game.dealerHand.cards[0] && game.dealerHand.cards[0].value === 'A') {
-          activeHand.hasInsurance = true;
-          game.chips -= activeHand.bet / 2; // Insurance costs half the bet
-          updateBetsUI();
-          updateChipsDisplay();
+          // Use the game's placeInsurance method instead of manual modification
+          const insuranceAmount = Math.ceil(activeHand.bet / 2);
+          if (game.placeInsurance(insuranceAmount)) {
+            updateBetsUI();
+            updateChipsDisplay();
+            debouncedSaveToFirebase(); // Use debounced version
+          }
         }
         break;
         
@@ -1463,11 +1453,10 @@ function setupEventHandlers() {
       setTimeout(() => { isProcessing = false; }, 400); // Debounce for bets
       
       // Use the enhanced bet validation
-      if (game.canPlaceBet(selectedChip) && game.placeBet(type === 'plus3' ? 'plus3' : type, selectedChip)) {
-        animateChipToBetSpot(type, selectedChip, spot, getBetStackCount(type));
+      if (game.canPlaceBet(selectedChip) && game.placeBet(type === 'plus3' ? 'plus3' : type, selectedChip)) {          animateChipToBetSpot(type, selectedChip, spot, getBetStackCount(type));
         updateBetsUI();
         updateChipsDisplay();
-        saveChipsToFirebase();
+        debouncedSaveToFirebase();
         showStatusToast(`Bet ${selectedChip} placed on ${type === 'main' ? 'Main' : type === 'pp' ? 'P / P' : '21+3'}`);
         
         // Enhanced haptic feedback for successful bet
@@ -1577,13 +1566,12 @@ function setupEventHandlers() {
   }
 
   // Enhanced betting control handlers
-  if (clearBetsBtn) {
-    addDebugEventListener(clearBetsBtn, 'click', () => { 
+  if (clearBetsBtn) {    addDebugEventListener(clearBetsBtn, 'click', () => { 
       if (!inPlay) { 
         game.clearBets(); 
         updateBetsUI(); 
         updateChipsDisplay(); 
-        saveChipsToFirebase(); 
+        debouncedSaveToFirebase(); 
         showStatusToast('Bets cleared!'); 
       } 
     }, 'Clear Bets Button');
@@ -1592,12 +1580,11 @@ function setupEventHandlers() {
   // End game buttons
   if (newBetBtn) {
     addDebugEventListener(newBetBtn, 'click', () => {
-      hideEndButtons();
-      resetAllHandsAndUI();
+      hideEndButtons();      resetAllHandsAndUI();
       game.clearBets();
       updateBetsUI();
       updateChipsDisplay();
-      saveChipsToFirebase();
+      debouncedSaveToFirebase();
       updateHandsUI();
       updateActionBarState();
       showInPlayButtons(false);
@@ -1623,11 +1610,10 @@ function setupEventHandlers() {
           if (lastBets[k] > 0) {
             game.bets[k] = lastBets[k];
           }
-        });
-        game.chips -= totalBet;
+        });        game.chips -= totalBet;
         updateBetsUI();
         updateChipsDisplay();
-        saveChipsToFirebase();
+        debouncedSaveToFirebase();
         startRound();
       }
     }, 'Rebet Button');
@@ -1653,11 +1639,10 @@ function setupEventHandlers() {
           if (lastBets[k] > 0) {
             game.bets[k] = lastBets[k] * 2;
           }
-        });
-        game.chips -= totalDoubleBet * 2;
+        });        game.chips -= totalDoubleBet * 2;
         updateBetsUI();
         updateChipsDisplay();
-        saveChipsToFirebase();
+        debouncedSaveToFirebase();
         startRound();
       }
     }, 'Double Bet Button');
@@ -1775,10 +1760,9 @@ function processRoundCompletion() {
           totalWinnings += hand.bet; // Return original bet
         }
       });
-    }    // Update chips
-    game.chips += totalWinnings;
+    }    // Update chips    game.chips += totalWinnings;
     updateChipsDisplay();
-    saveChipsToFirebase();
+    debouncedSaveToFirebase();
     
     // Update statistics
     gameStats.handsPlayed++;
@@ -1786,3 +1770,15 @@ function processRoundCompletion() {
     console.error('[ERROR] processRoundCompletion failed:', error);
   }
 }
+
+// Initialize Firebase auth state listener
+onAuthStateChanged(auth, async (user) => {
+  if (user) {
+    console.log('[AUTH] User authenticated:', user.uid);
+    // Load user data and initialize game
+    await loadUserDataAndStartGame(user);
+  } else {
+    console.log('[AUTH] No authenticated user, redirecting to login');
+    window.location.href = "construction21-login.html";
+  }
+});
