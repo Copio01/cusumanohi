@@ -45,47 +45,9 @@ export class Construction21Game {
         this.MAX_HANDS = 4; // Maximum hands after splitting
         this.MAX_CARDS_PER_HAND = 11; // Theoretical maximum (4 Aces + 7 other cards)
         
-        this.resetGame(100);
-    }    // ---- CHIP STORAGE ----
-    
-    async saveChipsToFirebase() {
-        if (!this.userId) {
-            console.warn('No userId provided, cannot save chips to Firebase');
-            return false;
-        }
-        
-        // Validate chips before saving
-        if (typeof this.chips !== 'number' || this.chips < this.MIN_CHIPS || this.chips > this.MAX_CHIPS) {
-            console.error(`Invalid chips value: ${this.chips}, not saving to Firebase`);
-            return false;
-        }
-        
-        const userDocRef = doc(this.db, "construction21_users", this.userId);
-        try {
-            await runTransaction(this.db, async (transaction) => {
-                const docSnap = await transaction.get(userDocRef);
-                if (!docSnap.exists()) {
-                    console.warn("User doc missing during transaction, creating new one");
-                }
-                
-                // Ensure chips is an integer
-                const chipsToSave = Math.floor(Math.max(this.MIN_CHIPS, Math.min(this.MAX_CHIPS, this.chips)));
-                transaction.set(userDocRef, { chips: chipsToSave }, { merge: true });
-            });
-            return true;
-        } catch (error) {
-            console.error('Transaction failed, attempting direct save:', error);
-            try {
-                // Fallback: direct save
-                const chipsToSave = Math.floor(Math.max(this.MIN_CHIPS, Math.min(this.MAX_CHIPS, this.chips)));
-                await setDoc(userDocRef, { chips: chipsToSave }, { merge: true });
-                return true;
-            } catch (fallbackError) {
-                console.error('Fallback save also failed:', fallbackError);
-                return false;
-            }
-        }
-    }
+        this.resetGame(100);    }
+
+    // ---- GAME LOGIC ----
 
     // ---- GAME LOGIC ----
       resetGame(startingChips = 10000) {
@@ -451,8 +413,7 @@ export class Construction21Game {
         // If we have at least one ace and counting all aces as 11 puts us over 17, but the hand is 17, it's soft 17
         return aceCount > 0 && tempScore > 17 && score === 17;
     }
-    
-    settleHands() {
+      settleHands() {
         const dealerScore = this.calculateScore(this.dealerHand.cards);
         this.dealerHand.score = dealerScore;
         let results = [];
@@ -464,26 +425,32 @@ export class Construction21Game {
             let result = { outcome: '', payout: 0 };
 
             if (this.isBust(hand.cards)) {
+                // Player busts - lose bet
                 result.outcome = 'bust';
-                result.payout = 0;
+                result.payout = 0; // No payout (bet is lost)
             } else if (this.isBlackjack(hand.cards) && !this.isBlackjack(this.dealerHand.cards)) {
+                // Player has blackjack but dealer doesn't - win 3:2
                 result.outcome = 'blackjack';
-                result.payout = hand.bet * 2.5;
+                result.payout = hand.bet * 2.5; // Original bet + 1.5x win (3:2 payout)
                 this.chips += result.payout;
             } else if (this.isBlackjack(this.dealerHand.cards) && !this.isBlackjack(hand.cards)) {
+                // Dealer has blackjack but player doesn't - lose bet
                 result.outcome = 'dealer_blackjack';
-                result.payout = 0;
+                result.payout = 0; // No payout (bet is lost)
             } else if (dealerScore > 21 || playerScore > dealerScore) {
+                // Player wins - return bet + equal amount
                 result.outcome = 'win';
-                result.payout = hand.bet * 2;
+                result.payout = hand.bet * 2; // Original bet + win (2:1 payout)
                 this.chips += result.payout;
             } else if (playerScore === dealerScore) {
+                // Push - return original bet
                 result.outcome = 'push';
-                result.payout = hand.bet;
+                result.payout = hand.bet; // Return original bet
                 this.chips += result.payout;
             } else {
+                // Player loses
                 result.outcome = 'lose';
-                result.payout = 0;
+                result.payout = 0; // No payout (bet is lost)
             }
             results.push(result);
         });
@@ -571,12 +538,18 @@ export class Construction21Game {
             console.warn(`Cannot split: already at maximum hands (${this.MAX_HANDS})`);
             return false;
         }
-        
-        // Perform split
+          // Perform split
         const cardToMove = hand.cards.pop();
-        const newHand = { cards: [cardToMove], bet: hand.bet, isSplit: true };
+        const isAceSplit = hand.cards[0].value === 'A';
+        const newHand = { 
+            cards: [cardToMove], 
+            bet: hand.bet, 
+            isSplit: true,
+            isSplitAce: isAceSplit
+        };
         this.chips -= hand.bet;
         hand.isSplit = true;
+        hand.isSplitAce = isAceSplit;
         
         // Deal one card to original hand
         if (!this.dealCard(hand, true)) {
@@ -706,17 +679,23 @@ export class Construction21Game {
         // Validate final state
         this.validateGameState();
         return true;
-    }
-
-    settleInsurance() {
+    }    settleInsurance() {
         const insuranceBet = this.bets.insurance || 0;
         if (!insuranceBet) return;
+        
         const dealerCards = this.dealerHand.cards;
         const isDealerBlackjack = this.isBlackjack(dealerCards);
+        
         if (isDealerBlackjack) {
-            const payout = insuranceBet * 3; // 2:1 plus original
+            // When dealer has blackjack and player took insurance, pay 2:1 on the insurance bet
+            // Insurance pays 2:1, so player gets their original insurance bet back plus 2x that amount
+            const payout = insuranceBet * 3; // Original bet + 2x win (2:1 payout)
             this.chips += payout;
+            
+            // Note: Main bet loss is already handled in settleHands() where hands are marked as 'dealer_blackjack'
+            // and receive no payout when the dealer has blackjack
         }
+        
         this.bets.insurance = 0;
     }
 

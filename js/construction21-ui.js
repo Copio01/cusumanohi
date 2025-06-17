@@ -20,7 +20,14 @@ const db = getFirestore(app);
 
 // -- Globals --
 let game = null;
-let inPlay = false, outcomeLock = false, resultsCache = null, lastBets = null, userDocRef = null, userId = null;
+let inPlay = false;
+let outcomeLock = false;
+let resultsCache = null;
+let lastBets = { main: 0, pp: 0, plus3: 0 };
+let isAnimationInProgress = false; // Added animation lock state
+
+let userDocRef = null;
+let userId = null;
 let userDisplayName = "";
 
 const dealerCardsEl = document.getElementById('dealer-cards');
@@ -110,7 +117,7 @@ async function loadUserDataAndStartGame(user) {
 }
 
 // Firebase chips saving function with debounce to prevent excessive writes
-const debouncedSaveToFirebase = debounce(async function() {
+const saveChips = debounce(async function() {
   if (!userDocRef || !game) return;
   try {
     await updateDoc(userDocRef, {
@@ -201,7 +208,8 @@ function canDoubleCurrentHand() {
     inPlay &&
     hand &&
     hand.cards.length === 2 &&
-    game.chips >= hand.bet
+    game.chips >= hand.bet &&
+    !hand.isSplitAce // Cannot double on split Aces
   );
 }
 function canBuyInsurance() {
@@ -219,7 +227,9 @@ function canHitCurrentHand() {
   return (
     inPlay &&
     hand &&
-    game.calculateScore(hand.cards) < 21
+    game.calculateScore(hand.cards) < 21 &&
+    !hand.isSplitAce && // Cannot hit on split Aces
+    !hand.isDoubled     // Cannot hit after doubling down
   );
 }
 function isAllHandsDone() {
@@ -377,9 +387,15 @@ function setMobileGameplayMode(active) {
 
 // --- Simplified Visual Card Dealing Animation ---
 async function animateDealCard(hand, faceUp, isDealer, cardIndex) {
+  // Set animation lock to prevent button spamming during animations
+  isAnimationInProgress = true;
+  
   // Deal the card to the game state first
   const dealtCard = game.dealCard(hand, faceUp);
-  if (!dealtCard) return;
+  if (!dealtCard) {
+    isAnimationInProgress = false; // Release lock if we failed to get a card
+    return;
+  }
   
   // Get target container
   const targetContainer = isDealer ? dealerCardsEl : 
@@ -426,12 +442,18 @@ async function animateDealCard(hand, faceUp, isDealer, cardIndex) {
     cardEl.remove();
     updateHandsUI();
   }, 650);
-    // Wait for animation to complete
+  // Wait for animation to complete
   await simpleDelay(700);
+  
+  // Release animation lock after completing animation
+  isAnimationInProgress = false;
 }
 async function dealOpeningCards() {
   // Standard blackjack dealing order: Player, Dealer, Player, Dealer (face down)
   console.log('[DEAL] Starting opening card sequence...');
+  
+  // Set animation lock for the entire dealing sequence
+  isAnimationInProgress = true;
   
   await animateDealCard(game.playerHands[0], true, false, 0);   // Player card 1 (face up)
   console.log('[DEAL] Player first card dealt');
@@ -445,9 +467,11 @@ async function dealOpeningCards() {
   await animateDealCard(game.dealerHand, false, true, 1);       // Dealer card 2 (face down)
   console.log('[DEAL] Dealer second card dealt (face down)');
   console.log('[DEAL] Opening deal complete, dealer cards:', game.dealerHand.cards.map((c, i) => `${i}: ${c.value}${c.suit} (${c.isFaceUp ? 'up' : 'down'})`));
-  
-  // Check for auto-stand conditions (blackjacks)
+    // Check for auto-stand conditions (blackjacks)
   await checkAndHandleBlackjacks();
+  
+  // Release animation lock now that dealing is complete
+  isAnimationInProgress = false;
   
   updateActionBarState(); // <-- ENSURE action bar is updated after opening deal!
 }
@@ -876,7 +900,7 @@ function placeQuickBet(amount) {
   if (mainBetSpot && game.canPlaceBet(amount)) {
     game.placeBet('main', amount);    updateBetsUI();
     updateChipsDisplay();
-    debouncedSaveToFirebase();
+    saveChips();
     showEnhancedToast(`Quick bet: ${amount} chips`, 'success');
   }
 }
@@ -1208,6 +1232,12 @@ function handlePlayerAction(action) {
     return;
   }
   
+  // Prevent actions during animations to avoid rapid clicking issues
+  if (isAnimationInProgress) {
+    debugLog('PLAYER_ACTION', 'Action ignored - animation in progress');
+    return;
+  }
+  
   const activeHand = game.getActiveHand();
   if (!activeHand) {
     console.warn('[WARN] No active hand found');
@@ -1215,8 +1245,13 @@ function handlePlayerAction(action) {
   }
   
   try {
-    switch(action) {
-      case 'hit':
+    switch(action) {      case 'hit':
+        // Check if hand is a split Ace (cannot hit on split Aces)
+        if (activeHand.isSplitAce) {
+          debugLog('PLAYER_ACTION', 'Cannot hit on split Aces');
+          return;
+        }
+        
         if (activeHand.cards.length >= 2) {
           game.dealCard(activeHand, true);
           updateHandsUI();
@@ -1234,31 +1269,41 @@ function handlePlayerAction(action) {
         debugLog('PLAYER_ACTION', 'Player stands');
         moveToNextHandOrFinish();
         break;
-        
-      case 'double':
+          case 'double':
         if (canDoubleCurrentHand()) {
           // Use the game's doubleDown method instead of manually modifying the bet
           if (game.doubleDown()) {
-            updateBetsUI();
+            // Mark the hand as doubled to prevent further actions
+            activeHand.isDoubled = true;
+              updateBetsUI();
             updateHandsUI();
             updateChipsDisplay();
-            debouncedSaveToFirebase(); // Use debounced version
+            saveChips();
             
             // After doubling, automatically stand
             moveToNextHandOrFinish();
           }
         }
         break;
-        
-      case 'split':
+          case 'split':
         if (canSplitCurrentHand()) {
+          // Check if splitting Aces
+          const isAceSplit = activeHand.cards[0].value === 'A';
+          
           // Use the game's splitHand method
-          if (game.splitHand()) {
-            updateBetsUI();
+          if (game.splitHand()) {            updateBetsUI();
             updateHandsUI();
             updateChipsDisplay();
-            debouncedSaveToFirebase(); // Use debounced version
-            updateActionBarState();
+            saveChips(); // Use the renamed saveChips function
+            
+            // Special handling for split Aces - automatically move to next hand
+            // as player can only receive one card per Ace
+            if (isAceSplit) {
+              debugLog('PLAYER_ACTION', 'Split Aces detected, automatically moving to next hand');
+              moveToNextHandOrFinish();
+            } else {
+              updateActionBarState();
+            }
           }
         }
         break;
@@ -1266,11 +1311,10 @@ function handlePlayerAction(action) {
       case 'insurance':
         if (game.dealerHand.cards[0] && game.dealerHand.cards[0].value === 'A') {
           // Use the game's placeInsurance method instead of manual modification
-          const insuranceAmount = Math.ceil(activeHand.bet / 2);
-          if (game.placeInsurance(insuranceAmount)) {
+          const insuranceAmount = Math.ceil(activeHand.bet / 2);          if (game.placeInsurance(insuranceAmount)) {
             updateBetsUI();
             updateChipsDisplay();
-            debouncedSaveToFirebase(); // Use debounced version
+            saveChips(); // Use the renamed saveChips function
           }
         }
         break;
@@ -1294,39 +1338,101 @@ function moveToNextHandOrFinish() {
   }
 }
 
-function finishRound() {
+async function finishRound() {
   debugLog('ROUND', 'Finishing round...');
   inPlay = false;
+  isAnimationInProgress = true; // Lock UI during end of round animations
   
-  // Reveal dealer's hole card
-  if (game.dealerHand.cards[1]) {
+  // Reveal dealer's hole card with animation
+  if (game.dealerHand.cards[1] && !game.dealerHand.cards[1].isFaceUp) {
     game.dealerHand.cards[1].isFaceUp = true;
+    updateHandsUI();
+    
+    // Add dramatic pause after revealing hole card
+    await simpleDelay(600);
   }
   
-  // Dealer plays
-  while (game.dealerHand.score < 17) {
-    game.dealCard(game.dealerHand, true);
+  // Dealer draws cards with animation
+  if (game.dealerHand.score < 17) {
+    showEnhancedToast("Dealer draws...", "info", 1500);
+    
+    while (game.dealerHand.score < 17) {
+      game.dealCard(game.dealerHand, true);
+      updateHandsUI();
+      await simpleDelay(600); // Pause between dealer card draws
+    }
   }
-  
-  updateHandsUI();
   
   // Determine outcomes and update chips
   let totalWinnings = 0;
-  game.playerHands.forEach(hand => {
+  let handResults = [];
+  
+  game.playerHands.forEach((hand, index) => {
     const result = determineHandResult(hand, game.dealerHand);
-    if (result === 'win' || result === 'blackjack') {
-      const winAmount = result === 'blackjack' ? hand.bet * 2.5 : hand.bet * 2;
+    let resultText, winAmount = 0;
+    
+    if (result === 'win') {
+      winAmount = hand.bet * 2;
+      resultText = 'Win';
+      totalWinnings += winAmount;
+    } else if (result === 'blackjack') {
+      winAmount = hand.bet * 2.5;
+      resultText = 'Blackjack!';
       totalWinnings += winAmount;
     } else if (result === 'push') {
-      totalWinnings += hand.bet; // Return bet
+      winAmount = hand.bet;
+      resultText = 'Push';
+      totalWinnings += winAmount;
+    } else {
+      resultText = 'Lose';
+      winAmount = 0;
     }
+    
+    handResults.push({
+      index,
+      result,
+      resultText,
+      winAmount
+    });
   });
   
+  // Display results with animations
+  for (const handResult of handResults) {
+    const handElement = playerHandsEl.querySelector(`.player-hand[data-hand-index="${handResult.index}"]`);
+    
+    if (handElement) {
+      const resultElement = document.createElement('div');
+      resultElement.className = `hand-result ${handResult.result}`;
+      resultElement.textContent = handResult.resultText;
+      
+      if (handResult.result === 'win' || handResult.result === 'blackjack') {
+        resultElement.classList.add('win-result');
+        
+        // Add win amount display
+        const winElement = document.createElement('div');
+        winElement.className = 'win-amount';
+        winElement.textContent = `+$${handResult.winAmount}`;
+        resultElement.appendChild(winElement);
+        
+        // Add celebration effects for wins
+        AdvancedAnimationSystem.celebrateWin(handElement, handResult.winAmount);
+      } else if (handResult.result === 'push') {
+        resultElement.classList.add('push-result');
+      } else {
+        resultElement.classList.add('lose-result');
+      }
+      
+      handElement.appendChild(resultElement);
+      
+      // Delay between showing each hand's result
+      await simpleDelay(400);
+    }
+  }
+  
+  // Update chips with animation
   game.chips += totalWinnings;
   updateChipsDisplay();
-  
-  showInPlayButtons(false);
-  hideEndButtons();
+  saveChips(); // Use consistent function name
   
   // Update statistics
   gameStats.handsPlayed++;
@@ -1336,8 +1442,21 @@ function finishRound() {
     if (totalWinnings > gameStats.biggestWin) {
       gameStats.biggestWin = totalWinnings;
     }
+    
+    // Show a message for big wins
+    if (totalWinnings > game.bets.main * 3) {
+      showEnhancedToast(`Big Win! +$${totalWinnings}`, "success", 3500);
+    }
   }
   updateGameStatistics();
+  
+  // Show end buttons after a short delay
+  await simpleDelay(1000);
+  showInPlayButtons(false);
+  showEndButtons(); // Changed from hideEndButtons to properly show the end buttons
+  
+  // Release UI lock
+  isAnimationInProgress = false;
 }
 
 function updateGameStatistics() {
@@ -1451,7 +1570,7 @@ function setupEventHandlers() {
       // Use the enhanced bet validation
       if (game.canPlaceBet(selectedChip) && game.placeBet(type === 'plus3' ? 'plus3' : type, selectedChip)) {          animateChipToBetSpot(type, selectedChip, spot, getBetStackCount(type));        updateBetsUI();
         updateChipsDisplay();
-        debouncedSaveToFirebase();
+        saveChips();
         showEnhancedToast(`Bet ${selectedChip} placed on ${type === 'main' ? 'Main' : type === 'pp' ? 'P / P' : '21+3'}`, 'success');
         
         // Enhanced haptic feedback for successful bet
@@ -1561,10 +1680,9 @@ function setupEventHandlers() {
 
   // Enhanced betting control handlers
   if (clearBetsBtn) {    addDebugEventListener(clearBetsBtn, 'click', () => { 
-      if (!inPlay) { 
-        game.clearBets();        updateBetsUI(); 
+      if (!inPlay) {        game.clearBets();        updateBetsUI(); 
         updateChipsDisplay(); 
-        debouncedSaveToFirebase(); 
+        saveChips(); 
         showEnhancedToast('Bets cleared!', 'info'); 
       } 
     }, 'Clear Bets Button');
@@ -1577,7 +1695,7 @@ function setupEventHandlers() {
       game.clearBets();
       updateBetsUI();
       updateChipsDisplay();
-      debouncedSaveToFirebase();
+      saveChips();
       updateHandsUI();
       updateActionBarState();
       showInPlayButtons(false);
@@ -1600,12 +1718,11 @@ function setupEventHandlers() {
         game.clearBets();
         Object.keys(lastBets).forEach(k => {
           if (lastBets[k] > 0) {
-            game.bets[k] = lastBets[k];
-          }
+            game.bets[k] = lastBets[k];        }
         });        game.chips -= totalBet;
         updateBetsUI();
         updateChipsDisplay();
-        debouncedSaveToFirebase();
+        saveChips();
         startRound();
       }
     }, 'Rebet Button');
@@ -1628,12 +1745,11 @@ function setupEventHandlers() {
         game.clearBets();
         Object.keys(lastBets).forEach(k => {
           if (lastBets[k] > 0) {
-            game.bets[k] = lastBets[k] * 2;
-          }
+            game.bets[k] = lastBets[k] * 2;          }
         });        game.chips -= totalDoubleBet * 2;
         updateBetsUI();
         updateChipsDisplay();
-        debouncedSaveToFirebase();
+        saveChips();
         startRound();
       }
     }, 'Double Bet Button');
