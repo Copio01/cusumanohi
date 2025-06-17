@@ -19,13 +19,13 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 
 // -- Globals --
+let currentUser = null;
 let game = null;
 let inPlay = false;
-let outcomeLock = false;
+let isAnimationInProgress = false; // Added animation lock state
+let isUiLocked = false; // Added UI lock state
 let resultsCache = null;
 let lastBets = { main: 0, pp: 0, plus3: 0 };
-let isAnimationInProgress = false; // Added animation lock state
-
 let userDocRef = null;
 let userId = null;
 let userDisplayName = "";
@@ -389,7 +389,8 @@ function setMobileGameplayMode(active) {
 async function animateDealCard(hand, faceUp, isDealer, cardIndex) {
   // Set animation lock to prevent button spamming during animations
   isAnimationInProgress = true;
-  
+  isUiLocked = true;
+  updateActionBarState();
   // Deal the card to the game state first
   const dealtCard = game.dealCard(hand, faceUp);
   if (!dealtCard) {
@@ -441,8 +442,10 @@ async function animateDealCard(hand, faceUp, isDealer, cardIndex) {
   setTimeout(() => {
     cardEl.remove();
     updateHandsUI();
+    isUiLocked = false;
+    updateActionBarState();
   }, 650);
-  // Wait for animation to complete
+  // Wait for the animation to visually complete
   await simpleDelay(700);
   
   // Release animation lock after completing animation
@@ -561,46 +564,32 @@ function updateHandsUI() {
 }
 
 function updateActionBarState() {
-  console.log('[UI] Updating action bar state');
-  try {
-    if (!inPlay) {
-      showInPlayButtons(false);
-      hideEndButtons();
-      return;
-    }
-    
-    const activeHand = game.getActiveHand();
-    if (!activeHand) {
-      showInPlayButtons(false);
-      return;
-    }
-    
-    // Show appropriate buttons based on game state
-    showInPlayButtons(true);
-    
-    // Update button states
-    const hitBtn = document.getElementById('hit-btn');
-    const standBtn = document.getElementById('stand-btn');
-    const doubleBtn = document.getElementById('double-btn');
-    const splitBtn = document.getElementById('split-btn');
-    
-    if (hitBtn) hitBtn.disabled = false;
-    if (standBtn) standBtn.disabled = false;
-    
-    // Double down availability
-    if (doubleBtn) {
-      doubleBtn.disabled = !canDoubleCurrentHand();
-      doubleBtn.style.opacity = canDoubleCurrentHand() ? '1' : '0.5';
-    }
-    
-    // Split availability
-    if (splitBtn) {
-      splitBtn.disabled = !canSplitCurrentHand();
-      splitBtn.style.opacity = canSplitCurrentHand() ? '1' : '0.5';
-    }
-    
-  } catch (error) {
-    console.error('[ERROR] updateActionBarState failed:', error);
+  if (isUiLocked) {
+    document.getElementById('hit-button').disabled = true;
+    document.getElementById('stand-button').disabled = true;
+    document.getElementById('double-button').disabled = true;
+    document.getElementById('split-button').disabled = true;
+    document.getElementById('insurance-button').disabled = true;
+    return;
+  }
+  const hitButton = document.getElementById('hit-button');
+  const standButton = document.getElementById('stand-button');
+  const doubleButton = document.getElementById('double-button');
+  const splitButton = document.getElementById('split-button');
+  
+  if (hitButton) hitButton.disabled = false;
+  if (standButton) standButton.disabled = false;
+  
+  // Double down availability
+  if (doubleButton) {
+    doubleButton.disabled = !canDoubleCurrentHand();
+    doubleButton.style.opacity = canDoubleCurrentHand() ? '1' : '0.5';
+  }
+  
+  // Split availability
+  if (splitButton) {
+    splitButton.disabled = !canSplitCurrentHand();
+    splitButton.style.opacity = canSplitCurrentHand() ? '1' : '0.5';
   }
 }
 
@@ -1812,67 +1801,50 @@ async function startRound() {
 }
 
 async function checkAndHandleBlackjacks() {
-  debugLog('GAME_FLOW', 'Checking for blackjacks...');
-  
-  if (!game || !game.playerHands || !game.dealerHand) return;
-  
-  const playerHasBlackjack = game.playerHands[0] && game.calculateScore(game.playerHands[0].cards) === 21;
-  const dealerHasBlackjack = game.calculateScore(game.dealerHand.cards) === 21;
-  
-  if (playerHasBlackjack || dealerHasBlackjack) {
-    debugLog('GAME_FLOW', `Blackjack detected - Player: ${playerHasBlackjack}, Dealer: ${dealerHasBlackjack}`);
-    
-    // Reveal dealer's hole card if there's a blackjack
-    if (game.dealerHand.cards.length > 1 && !game.dealerHand.cards[1].isFaceUp) {
-      game.dealerHand.cards[1].isFaceUp = true;
-      updateHandsUI();
-      await delay(1000);
+  const playerHands = game.getPlayerHands();
+  const dealerHand = game.getDealerHand();
+
+  // Check player blackjack on the first hand only initially
+  // Split hands will be handled by the regular game flow if they get blackjack
+  if (playerHands.length === 1 && !playerHands[0].isSplit) {
+    const playerHasBlackjack = game.isBlackjack(playerHands[0].cards);
+    if (playerHasBlackjack) {
+        debugLog('BLACKJACK', 'Player has Blackjack on initial hand!');
+        // If player has BJ, the game ends or proceeds to dealer's turn if dealer might also have BJ
+        // The game logic in `settleHands` will determine the outcome vs dealer.
+        // We might not need to do anything special here if `finishRound` handles it.
     }
-    
-    // Handle round completion
-    setTimeout(() => {
-      processRoundCompletion();
-    }, 1500);
+  }
+
+  // If the dealer's upcard is an Ace or 10-value, offer insurance
+  if (dealerHand.cards[0] && (dealerHand.cards[0].value === 'A' || dealerHand.cards[0].value >= 10)) {
+    // Show insurance button or take other actions
+    // For now, we'll just log it
+    debugLog('BLACKJACK', 'Dealer upcard is Ace or 10-value, consider insurance');
   }
 }
 
-function processRoundCompletion() {
-  debugLog('ROUND', 'Processing round completion...');
-  
-  try {
-    // End the game properly
-    inPlay = false;
-    setMobileGameplayMode(false);
-    
-    // Reveal dealer's hole card if not already revealed
-    if (game.dealerHand.cards.length > 1 && !game.dealerHand.cards[1].isFaceUp) {
-      game.dealerHand.cards[1].isFaceUp = true;
+// --- UI and Logic for Round Results ---
+async function processRoundCompletion() {
+    debugLog('UI_DEBUG', 'processRoundCompletion called');
+    if (!game) {
+        debugLog('UI_ERROR', 'Game object not found in processRoundCompletion');
+        return;
     }
-    
-    // Update final UI
-    updateHandsUI();
-    
-    // Calculate and apply winnings
-    let totalWinnings = 0;
-    if (game.playerHands && game.playerHands.length > 0) {
-      game.playerHands.forEach(hand => {
-        const result = determineHandResult(hand, game.dealerHand);
-        if (result === 'win' || result === 'blackjack') {
-          const winAmount = result === 'blackjack' ? hand.bet * 2.5 : hand.bet * 2;
-          totalWinnings += winAmount;
-        } else if (result === 'push') {
-          totalWinnings += hand.bet; // Return original bet
-        }
-      });
-    }    // Update chips    game.chips += totalWinnings;
-    updateChipsDisplay();
-    debouncedSaveToFirebase();
-    
-    // Update statistics
-    gameStats.handsPlayed++;
-  } catch (error) {
-    console.error('[ERROR] processRoundCompletion failed:', error);
-  }
+
+    const results = game.settleHands(); // This now returns results and updates chips in logic
+    resultsCache = results; // Cache results for display
+    debugLog('ROUND_RESULTS', `Round results: ${JSON.stringify(results)}`);
+
+    // Save chips to Firebase
+    saveChips(); 
+
+    // Update chip display immediately after settling hands
+    updateChipDisplay(game.getChips());
+
+    // UI updates for end of round (e.g., showing results, enabling new game buttons)
+    // This will be handled by finishRound which calls this function.
+    // No direct UI manipulation here other than chip display if needed.
 }
 
 // Initialize Firebase auth state listener

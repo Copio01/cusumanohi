@@ -414,75 +414,66 @@ export class Construction21Game {
         return aceCount > 0 && tempScore > 17 && score === 17;
     }
       settleHands() {
-        const dealerScore = this.calculateScore(this.dealerHand.cards);
-        this.dealerHand.score = dealerScore;
-        let results = [];
-        
-        // Settle main hand outcomes
-        this.playerHands.forEach((hand, i) => {
-            const playerScore = this.calculateScore(hand.cards);
-            hand.score = playerScore;
-            let result = { outcome: '', payout: 0 };
+    const dealerScore = this.calculateScore(this.dealerHand.cards);
+    const dealerHasBJ = this.isBlackjack(this.dealerHand.cards);
+    this.dealerHand.score = dealerScore;
+    let results = [];
 
-            if (this.isBust(hand.cards)) {
-                // Player busts - lose bet
-                result.outcome = 'bust';
-                result.payout = 0; // No payout (bet is lost)
-            } else if (this.isBlackjack(hand.cards) && !this.isBlackjack(this.dealerHand.cards)) {
-                // Player has blackjack but dealer doesn't - win 3:2
-                result.outcome = 'blackjack';
-                result.payout = hand.bet * 2.5; // Original bet + 1.5x win (3:2 payout)
-                this.chips += result.payout;
-            } else if (this.isBlackjack(this.dealerHand.cards) && !this.isBlackjack(hand.cards)) {
-                // Dealer has blackjack but player doesn't - lose bet
-                result.outcome = 'dealer_blackjack';
-                result.payout = 0; // No payout (bet is lost)
-            } else if (dealerScore > 21 || playerScore > dealerScore) {
-                // Player wins - return bet + equal amount
-                result.outcome = 'win';
-                result.payout = hand.bet * 2; // Original bet + win (2:1 payout)
-                this.chips += result.payout;
-            } else if (playerScore === dealerScore) {
-                // Push - return original bet
-                result.outcome = 'push';
-                result.payout = hand.bet; // Return original bet
-                this.chips += result.payout;
-            } else {
-                // Player loses
-                result.outcome = 'lose';
-                result.payout = 0; // No payout (bet is lost)
-            }
-            results.push(result);
-        });
+    this.playerHands.forEach((hand, i) => {
+        const playerScore = this.calculateScore(hand.cards);
+        const playerHasBJ = this.isBlackjack(hand.cards);
+        hand.score = playerScore;
+        let result = { outcome: '', payout: 0 };
 
-        // Settle side bets (only for first hand - side bets are based on first two cards)
-        if (this.playerHands.length > 0 && this.playerHands[0].cards.length >= 2) {
-            const firstHand = this.playerHands[0];
-            
-            // Perfect Pairs side bet
-            if (this.bets.pp > 0) {
-                const ppResult = this.checkPerfectPairs(firstHand.cards[0], firstHand.cards[1]);
-                if (ppResult.payout > 0) {
-                    const ppPayout = this.bets.pp * (ppResult.payout + 1); // payout + original bet
-                    this.chips += ppPayout;
-                }
-            }
-            
-            // 21+3 side bet (uses player's first two cards + dealer's up card)
-            if (this.bets.plus3 > 0 && this.dealerHand.cards.length > 0) {
-                const plus3Cards = [firstHand.cards[0], firstHand.cards[1], this.dealerHand.cards[0]];
-                const plus3Result = this.check21Plus3(plus3Cards);
-                if (plus3Result.payout > 0) {
-                    const plus3Payout = this.bets.plus3 * (plus3Result.payout + 1); // payout + original bet
-                    this.chips += plus3Payout;
-                }
-            }
+        if (playerHasBJ && dealerHasBJ) {
+            result.outcome = 'push';
+            result.payout = hand.bet;
+        } else if (playerHasBJ) {
+            result.outcome = 'blackjack';
+            result.payout = hand.bet * 2.5;
+        } else if (dealerHasBJ) {
+            result.outcome = 'dealer_blackjack';
+            result.payout = 0;
+        } else if (playerScore > 21) {
+            result.outcome = 'bust';
+            result.payout = 0;
+        } else if (dealerScore > 21 || playerScore > dealerScore) {
+            result.outcome = 'win';
+            result.payout = hand.bet * 2;
+        } else if (playerScore === dealerScore) {
+            result.outcome = 'push';
+            result.payout = hand.bet;
+        } else {
+            result.outcome = 'lose';
+            result.payout = 0;
         }
 
-        this.settleInsurance();
-        this.bets = { main: 0, pp: 0, plus3: 0, insurance: 0 };
-        return results;
+        this.chips += result.payout;
+        results.push(result);
+    });
+
+    // Settle side bets (only for first hand)
+    if (this.playerHands.length > 0 && this.playerHands[0].cards.length >= 2) {
+        const firstHand = this.playerHands[0];
+        if (this.bets.pp > 0) {
+            const ppResult = this.checkPerfectPairs(firstHand.cards[0], firstHand.cards[1]);
+            if (ppResult.payout > 0) {
+                this.chips += this.bets.pp * (ppResult.payout + 1);
+            }
+        }
+        if (this.bets.plus3 > 0 && this.dealerHand.cards.length > 0) {
+            const plus3Cards = [firstHand.cards[0], firstHand.cards[1], this.dealerHand.cards[0]];
+            const plus3Result = this.check21Plus3(plus3Cards);
+            if (plus3Result.payout > 0) {
+                this.chips += this.bets.plus3 * (plus3Result.payout + 1);
+            }
+        }
     }
+
+    this.settleInsurance();
+    this.bets = { main: 0, pp: 0, plus3: 0, insurance: 0 };
+    return results;
+}
 
     getActiveHand() {
         if (
@@ -545,11 +536,11 @@ export class Construction21Game {
             cards: [cardToMove], 
             bet: hand.bet, 
             isSplit: true,
-            isSplitAce: isAceSplit
+            isSplitAce: isAceSplit // Flag for split aces
         };
         this.chips -= hand.bet;
         hand.isSplit = true;
-        hand.isSplitAce = isAceSplit;
+        hand.isSplitAce = isAceSplit; // Flag original hand as well
         
         // Deal one card to original hand
         if (!this.dealCard(hand, true)) {
@@ -720,6 +711,15 @@ export class Construction21Game {
             console.warn('Cannot start game: no main bet placed');
             return false;
         }
+        // Add this after the main bet validation
+        this.playerHands.push({
+            cards: [],
+            bet: this.bets.main,
+            score: 0,
+            isSplit: false,
+            isDoubled: false,
+            isSplitAce: false
+        });
         
         // Check minimum chip requirements
         if (this.chips < 0) {

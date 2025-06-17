@@ -282,168 +282,195 @@
     if (auth) {
       onAuthStateChanged(auth, async (user) => {
         if (user) {
-          try {
-            const userDocRef = doc(db, "construction21_users", user.uid);
-            const userDoc = await getDoc(userDocRef);
-            let chips = 100;
-            let displayName = user.displayName || user.email?.split('@')[0] || 'Player';
-            if (!userDoc.exists()) {
-              await setDoc(userDocRef, {
-                displayName,
-                chips,
-                email: user.email,
-                createdAt: new Date(),
-                lastLogin: new Date()
-              });
-            } else {
-              chips = userDoc.data().chips || 100;
-              displayName = userDoc.data().displayName || displayName;
-            }
-            // Store user info for multiplayer handoff
-            sessionStorage.setItem('c21user', JSON.stringify({
-              uid: user.uid,
-              displayName,
-              email: user.email,
-              chips
-            }));
-            sessionStorage.setItem('loginSuccess', 'true');
+          // User is signed in
+          const uid = user.uid;
+          const userDocRef = doc(db, "users", uid);
+          const userDoc = await getDoc(userDocRef);
+
+          if (userDoc.exists()) {
+            // User document exists, redirect to game
             window.location.href = 'construction21.html';
-          } catch (error) {
-            showMessage(loginMessage, 'Error loading user data. Try again.', 'error');
+          } else {
+            // New user, create document
+            try {
+              await setDoc(userDocRef, {
+                email: user.email,
+                chips: 1000, // Default chips for new user
+                createdAt: serverTimestamp()
+              });
+              window.location.href = 'construction21.html';
+            } catch (error) {
+              console.error("Error creating user document:", error);
+              alert("Error setting up your account. Please try again.");
+            }
           }
+        } else {
+          // User is signed out
+          // Show login/signup forms
+          document.getElementById('loading-indicator').style.display = 'none';
+          document.getElementById('auth-container').style.display = 'block';
+        }
+      });
+
+      // Handle Sign Up
+      const signupForm = document.getElementById('signup-form');
+      signupForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const email = signupForm.email.value;
+        const password = signupForm.password.value;
+        const loadingIndicator = document.getElementById('form-loading-indicator');
+        const errorMessageElement = document.getElementById('signup-error-message');
+
+        loadingIndicator.style.display = 'block';
+        errorMessageElement.textContent = ''; // Clear previous errors
+
+        try {
+          const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+          const user = userCredential.user;
+          // Create a new document for the user in Firestore with initial chip amount
+          await setDoc(doc(db, "users", user.uid), {
+            email: user.email,
+            chips: 1000, // Default chips for new user
+            createdAt: serverTimestamp()
+          });
+          // Redirect to game page (onAuthStateChanged will also handle this)
+          // window.location.href = 'construction21.html';
+        } catch (error) {
+          console.error("Error signing up:", error);
+          errorMessageElement.textContent = getFirebaseAuthErrorMessage(error.code);
+        } finally {
+          loadingIndicator.style.display = 'none';
+        }
+      });
+
+      // Handle Login
+      loginForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const email = document.getElementById('login-email').value.trim();
+        const password = document.getElementById('login-password').value;
+        if (!email || !password) return showMessage(loginMessage, 'Please fill in all fields.', 'error');
+        if (!email.includes('@')) return showMessage(loginMessage, 'Please enter a valid email.', 'error');
+        if (!auth) return showMessage(loginMessage, 'Authentication unavailable. Refresh.', 'error');
+        setButtonLoading(loginBtn, 'Logging in...');
+        try {
+          await signInWithEmailAndPassword(auth, email, password);
+          showMessage(loginMessage, 'Login successful! Redirecting...', 'success');
+        } catch (error) {
+          setButtonLoading(loginBtn, 'Login & Play', false);
+          showMessage(loginMessage, getErrorMessage(error.code), 'error');
+        }
+      });
+
+      // Multiplayer Login (WIP)
+      loginMultiplayerBtn.addEventListener('click', async () => {
+        const email = document.getElementById('login-email').value.trim();
+        const password = document.getElementById('login-password').value;
+        if (!email || !password) return showMessage(loginMessage, 'Please fill in all fields.', 'error');
+        if (!email.includes('@')) return showMessage(loginMessage, 'Please enter a valid email.', 'error');
+        if (!auth) return showMessage(loginMessage, 'Authentication unavailable. Refresh.', 'error');
+        setButtonLoading(loginMultiplayerBtn, 'Logging in...');
+        try {
+          await signInWithEmailAndPassword(auth, email, password);
+          showMessage(loginMessage, 'Login successful! Redirecting to multiplayer...', 'success');
+          // onAuthStateChanged will handle sessionStorage, so just redirect
+          sessionStorage.setItem('loginToMultiplayer', 'true');
+          window.location.href = 'Multiplayer21.html';
+        } catch (error) {
+          setButtonLoading(loginMultiplayerBtn, 'Login & Play Multiplayer (WIP)', false);
+          showMessage(loginMessage, getErrorMessage(error.code), 'error');
+        }
+      });
+
+      // Signup
+      signupForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const name = document.getElementById('signup-name').value.trim();
+        const email = document.getElementById('signup-email').value.trim();
+        const password = document.getElementById('signup-password').value;
+        if (!name || !email || !password) return showMessage(signupMessage, 'Please fill in all fields.', 'error');
+        if (name.length < 2) return showMessage(signupMessage, 'Name must be at least 2 characters.', 'error');
+        if (!email.includes('@')) return showMessage(signupMessage, 'Please enter a valid email.', 'error');
+        if (password.length < 6) return showMessage(signupMessage, 'Password 6+ chars.', 'error');
+        if (!auth || !db) return showMessage(signupMessage, 'Auth unavailable. Refresh.', 'error');
+        setButtonLoading(signupBtn, 'Creating account...');
+        try {
+          const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+          const user = userCredential.user;
+          await setDoc(doc(db, "users", user.uid), {
+            email: email,
+            chips: 1000, // Default chips for new user
+            createdAt: serverTimestamp()
+          });
+          // Store user info for multiplayer handoff
+          sessionStorage.setItem('c21user', JSON.stringify({
+            uid: user.uid,
+            displayName: name,
+            email,
+            chips: 1000
+          }));
+          showMessage(signupMessage, 'Account created! Redirecting...', 'success');
+        } catch (error) {
+          setButtonLoading(signupBtn, 'Create Account & Play', false);
+          showMessage(signupMessage, getErrorMessage(error.code), 'error');
+        }
+      });
+
+      // Forgot password flow
+      forgotLink.addEventListener('click', () => {
+        loginForm.style.display = 'none';
+        forgotForm.style.display = '';
+        forgotMessage.textContent = '';
+        document.getElementById('forgot-email').value = document.getElementById('login-email').value;
+      });
+      forgotCancelBtn.addEventListener('click', () => {
+        forgotForm.style.display = 'none';
+        loginForm.style.display = '';
+        forgotMessage.textContent = '';
+      });
+      forgotForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const email = document.getElementById('forgot-email').value.trim();
+        if (!email) return showMessage(forgotMessage, 'Please enter your email.', 'error');
+        setButtonLoading(forgotBtn, 'Sending...');
+        try {
+          await sendPasswordResetEmail(auth, email);
+          showMessage(forgotMessage, 'Reset email sent! Check your inbox.', 'success');
+        } catch (error) {
+          setButtonLoading(forgotBtn, 'Send Reset Email', false);
+          showMessage(forgotMessage, getErrorMessage(error.code), 'error');
+        }
+      });
+
+      function showMessage(element, message, type) {
+        element.textContent = message;
+        element.className = `message ${type}`;
+      }
+      function setButtonLoading(button, text, loading = true) {
+        button.textContent = text;
+        button.disabled = loading;
+      }
+      function getErrorMessage(code) {
+        switch (code) {
+          case 'auth/user-not-found': return 'No account with this email.';
+          case 'auth/wrong-password': return 'Incorrect password.';
+          case 'auth/email-already-in-use': return 'Email already exists.';
+          case 'auth/weak-password': return 'Password too short.';
+          case 'auth/invalid-email': return 'Invalid email address.';
+          case 'auth/too-many-requests': return 'Too many failed attempts. Try again later.';
+          default: return 'An error occurred. Try again.';
+        }
+      }
+
+      document.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+          const activeTab = document.querySelector('.auth-tab-content.active');
+          if (forgotForm.style.display === '' && forgotForm.offsetParent !== null) {
+            forgotBtn.click();
+          } else if (activeTab.id === 'login-tab') loginBtn.click();
+          else signupBtn.click();
         }
       });
     }
-
-    // Login
-    loginForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const email = document.getElementById('login-email').value.trim();
-      const password = document.getElementById('login-password').value;
-      if (!email || !password) return showMessage(loginMessage, 'Please fill in all fields.', 'error');
-      if (!email.includes('@')) return showMessage(loginMessage, 'Please enter a valid email.', 'error');
-      if (!auth) return showMessage(loginMessage, 'Authentication unavailable. Refresh.', 'error');
-      setButtonLoading(loginBtn, 'Logging in...');
-      try {
-        await signInWithEmailAndPassword(auth, email, password);
-        showMessage(loginMessage, 'Login successful! Redirecting...', 'success');
-      } catch (error) {
-        setButtonLoading(loginBtn, 'Login & Play', false);
-        showMessage(loginMessage, getErrorMessage(error.code), 'error');
-      }
-    });
-
-    // Multiplayer Login (WIP)
-    loginMultiplayerBtn.addEventListener('click', async () => {
-      const email = document.getElementById('login-email').value.trim();
-      const password = document.getElementById('login-password').value;
-      if (!email || !password) return showMessage(loginMessage, 'Please fill in all fields.', 'error');
-      if (!email.includes('@')) return showMessage(loginMessage, 'Please enter a valid email.', 'error');
-      if (!auth) return showMessage(loginMessage, 'Authentication unavailable. Refresh.', 'error');
-      setButtonLoading(loginMultiplayerBtn, 'Logging in...');
-      try {
-        await signInWithEmailAndPassword(auth, email, password);
-        showMessage(loginMessage, 'Login successful! Redirecting to multiplayer...', 'success');
-        // onAuthStateChanged will handle sessionStorage, so just redirect
-        sessionStorage.setItem('loginToMultiplayer', 'true');
-        window.location.href = 'Multiplayer21.html';
-      } catch (error) {
-        setButtonLoading(loginMultiplayerBtn, 'Login & Play Multiplayer (WIP)', false);
-        showMessage(loginMessage, getErrorMessage(error.code), 'error');
-      }
-    });
-
-    // Signup
-    signupForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const name = document.getElementById('signup-name').value.trim();
-      const email = document.getElementById('signup-email').value.trim();
-      const password = document.getElementById('signup-password').value;
-      if (!name || !email || !password) return showMessage(signupMessage, 'Please fill in all fields.', 'error');
-      if (name.length < 2) return showMessage(signupMessage, 'Name must be at least 2 characters.', 'error');
-      if (!email.includes('@')) return showMessage(signupMessage, 'Please enter a valid email.', 'error');
-      if (password.length < 6) return showMessage(signupMessage, 'Password 6+ chars.', 'error');
-      if (!auth || !db) return showMessage(signupMessage, 'Auth unavailable. Refresh.', 'error');
-      setButtonLoading(signupBtn, 'Creating account...');
-      try {
-        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-        const user = userCredential.user;
-        await setDoc(doc(db, "construction21_users", user.uid), {
-          displayName: name,
-          chips: 100,
-          email: email,
-          createdAt: new Date(),
-          lastLogin: new Date()
-        });
-        // Store user info for multiplayer handoff
-        sessionStorage.setItem('c21user', JSON.stringify({
-          uid: user.uid,
-          displayName: name,
-          email,
-          chips: 100
-        }));
-        showMessage(signupMessage, 'Account created! Redirecting...', 'success');
-      } catch (error) {
-        setButtonLoading(signupBtn, 'Create Account & Play', false);
-        showMessage(signupMessage, getErrorMessage(error.code), 'error');
-      }
-    });
-
-    // Forgot password flow
-    forgotLink.addEventListener('click', () => {
-      loginForm.style.display = 'none';
-      forgotForm.style.display = '';
-      forgotMessage.textContent = '';
-      document.getElementById('forgot-email').value = document.getElementById('login-email').value;
-    });
-    forgotCancelBtn.addEventListener('click', () => {
-      forgotForm.style.display = 'none';
-      loginForm.style.display = '';
-      forgotMessage.textContent = '';
-    });
-    forgotForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const email = document.getElementById('forgot-email').value.trim();
-      if (!email) return showMessage(forgotMessage, 'Please enter your email.', 'error');
-      setButtonLoading(forgotBtn, 'Sending...');
-      try {
-        await sendPasswordResetEmail(auth, email);
-        showMessage(forgotMessage, 'Reset email sent! Check your inbox.', 'success');
-      } catch (error) {
-        setButtonLoading(forgotBtn, 'Send Reset Email', false);
-        showMessage(forgotMessage, getErrorMessage(error.code), 'error');
-      }
-    });
-
-    function showMessage(element, message, type) {
-      element.textContent = message;
-      element.className = `message ${type}`;
-    }
-    function setButtonLoading(button, text, loading = true) {
-      button.textContent = text;
-      button.disabled = loading;
-    }
-    function getErrorMessage(code) {
-      switch (code) {
-        case 'auth/user-not-found': return 'No account with this email.';
-        case 'auth/wrong-password': return 'Incorrect password.';
-        case 'auth/email-already-in-use': return 'Email already exists.';
-        case 'auth/weak-password': return 'Password too short.';
-        case 'auth/invalid-email': return 'Invalid email address.';
-        case 'auth/too-many-requests': return 'Too many failed attempts. Try again later.';
-        default: return 'An error occurred. Try again.';
-      }
-    }
-
-    document.addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') {
-        const activeTab = document.querySelector('.auth-tab-content.active');
-        if (forgotForm.style.display === '' && forgotForm.offsetParent !== null) {
-          forgotBtn.click();
-        } else if (activeTab.id === 'login-tab') loginBtn.click();
-        else signupBtn.click();
-      }
-    });
   </script>
 </body>
 </html>
