@@ -86,11 +86,10 @@ async function loadUserDataAndStartGame(user) {
         chips: 10000,
         email: user.email,
         createdAt: new Date(),
-        lastLogin: new Date()
-      });
+        lastLogin: new Date()      });
     }
   } catch (e) {
-    showStatusToast("Couldn't load chips from server", true);
+    showEnhancedToast("Couldn't load chips from server", 'error');
   }  userDisplayName = displayName;
   if (profileNameEl) profileNameEl.textContent = userDisplayName;
   
@@ -118,11 +117,10 @@ const debouncedSaveToFirebase = debounce(async function() {
       chips: game.chips,
       lastLogin: new Date()
     });
-    // Optionally log success
-    // console.log('[FIREBASE] Chips saved successfully:', game.chips);
+    // Optionally log success    // console.log('[FIREBASE] Chips saved successfully:', game.chips);
   } catch (e) {
     console.error('[FIREBASE] Save error:', e);
-    showStatusToast("Couldn't save chips! Please reload the game.", true);
+    showEnhancedToast("Couldn't save chips! Please reload the game.", 'error');
   }
 }, 500);
 
@@ -780,15 +778,14 @@ function setupGestureControls() {
     const duration = Date.now() - startTime;
     const distance = Math.abs(startY - endY);
     
-    if (duration < 300 && distance > 50) {
-      if (startY - endY > 50) {
+    if (duration < 300 && distance > 50) {      if (startY - endY > 50) {
         // Swipe up - Stand
         handlePlayerAction('stand');
-        showStatusToast('👆 Swipe Stand');
+        showEnhancedToast('👆 Swipe Stand', 'info');
       } else if (endY - startY > 50) {
         // Swipe down - Hit
         handlePlayerAction('hit');
-        showStatusToast('👇 Swipe Hit');
+        showEnhancedToast('👇 Swipe Hit', 'info');
       }
     }
   }, { passive: true });
@@ -877,11 +874,10 @@ function placeQuickBet(amount) {
     // Place on main bet spot
   const mainBetSpot = document.getElementById('main-bet-spot');
   if (mainBetSpot && game.canPlaceBet(amount)) {
-    game.placeBet('main', amount);
-    updateBetsUI();
+    game.placeBet('main', amount);    updateBetsUI();
     updateChipsDisplay();
     debouncedSaveToFirebase();
-    showStatusToast(`Quick bet: ${amount} chips`);
+    showEnhancedToast(`Quick bet: ${amount} chips`, 'success');
   }
 }
 
@@ -1453,11 +1449,10 @@ function setupEventHandlers() {
       setTimeout(() => { isProcessing = false; }, 400); // Debounce for bets
       
       // Use the enhanced bet validation
-      if (game.canPlaceBet(selectedChip) && game.placeBet(type === 'plus3' ? 'plus3' : type, selectedChip)) {          animateChipToBetSpot(type, selectedChip, spot, getBetStackCount(type));
-        updateBetsUI();
+      if (game.canPlaceBet(selectedChip) && game.placeBet(type === 'plus3' ? 'plus3' : type, selectedChip)) {          animateChipToBetSpot(type, selectedChip, spot, getBetStackCount(type));        updateBetsUI();
         updateChipsDisplay();
         debouncedSaveToFirebase();
-        showStatusToast(`Bet ${selectedChip} placed on ${type === 'main' ? 'Main' : type === 'pp' ? 'P / P' : '21+3'}`);
+        showEnhancedToast(`Bet ${selectedChip} placed on ${type === 'main' ? 'Main' : type === 'pp' ? 'P / P' : '21+3'}`, 'success');
         
         // Enhanced haptic feedback for successful bet
         if (navigator.vibrate) {
@@ -1467,10 +1462,9 @@ function setupEventHandlers() {
         // Visual success feedback
         spot.style.boxShadow = '0 0 25px #00ff0066, 0 0 50px #00ff0033';
         setTimeout(() => {
-          spot.style.boxShadow = '';
-        }, 300);
+          spot.style.boxShadow = '';        }, 300);
       } else {
-        showStatusToast('Cannot place bet!', true);
+        showEnhancedToast('Cannot place bet!', 'error');
         
         // Error haptic feedback and visual cue
         if (navigator.vibrate) {
@@ -1568,11 +1562,10 @@ function setupEventHandlers() {
   // Enhanced betting control handlers
   if (clearBetsBtn) {    addDebugEventListener(clearBetsBtn, 'click', () => { 
       if (!inPlay) { 
-        game.clearBets(); 
-        updateBetsUI(); 
+        game.clearBets();        updateBetsUI(); 
         updateChipsDisplay(); 
         debouncedSaveToFirebase(); 
-        showStatusToast('Bets cleared!'); 
+        showEnhancedToast('Bets cleared!', 'info'); 
       } 
     }, 'Clear Bets Button');
   }
@@ -1596,11 +1589,10 @@ function setupEventHandlers() {
       hideEndButtons();
       if (lastBets) {
         let totalBet = 0;
-        Object.keys(lastBets).forEach(k => { 
-          if (lastBets[k] > 0) totalBet += lastBets[k]; 
+        Object.keys(lastBets).forEach(k => {          if (lastBets[k] > 0) totalBet += lastBets[k]; 
         });
         if (totalBet > game.chips) {
-          showStatusToast('Not enough chips for rebet!', true);
+          showEnhancedToast('Not enough chips for rebet!', 'error');
           showEndButtons();
           return;
         }
@@ -1625,11 +1617,10 @@ function setupEventHandlers() {
       if (lastBets) {
         let totalDoubleBet = 0;
         Object.keys(lastBets).forEach(k => {
-          if (lastBets[k] * 2 > game.chips) totalDoubleBet = Infinity;
-          else totalDoubleBet += lastBets[k];
+          if (lastBets[k] * 2 > game.chips) totalDoubleBet = Infinity;          else totalDoubleBet += lastBets[k];
         });
         if (totalDoubleBet === Infinity || totalDoubleBet * 2 > game.chips) {
-          showStatusToast('Not enough chips for 2x bet!', true);
+          showEnhancedToast('Not enough chips for 2x bet!', 'error');
           showEndButtons();
           return;
         }
@@ -1666,11 +1657,10 @@ async function startRound() {
     debugLog('GAME_FLOW', 'Cannot start round - no game instance');
     return;
   }
-  
-  // Check if player has placed bets
+    // Check if player has placed bets
   const totalBets = (game.bets.main || 0) + (game.bets.pp || 0) + (game.bets.plus3 || 0);
   if (totalBets === 0) {
-    showStatusToast('Please place a bet first!', true);
+    showEnhancedToast('Please place a bet first!', 'warning');
     debugLog('GAME_FLOW', 'Cannot start round - no bets placed');
     return;
   }
@@ -1684,10 +1674,9 @@ async function startRound() {
   
   // Set mobile gameplay mode for touch devices
   setMobileGameplayMode(true);
-  
-  // Start the game logic
+    // Start the game logic
   try {
-    game.startRound();
+    game.startGame();
     
     // Deal opening cards
     await dealOpeningCards();
@@ -1698,10 +1687,9 @@ async function startRound() {
     showInPlayButtons(true);
     hideEndButtons();
     
-    debugLog('GAME_FLOW', 'Round started successfully');
-  } catch (error) {
+    debugLog('GAME_FLOW', 'Round started successfully');  } catch (error) {
     debugLog('GAME_FLOW_ERROR', 'Error starting round:', error);
-    showStatusToast('Error starting round', true);
+    showEnhancedToast('Error starting round', 'error');
     inPlay = false;
     setMobileGameplayMode(false);
   }
