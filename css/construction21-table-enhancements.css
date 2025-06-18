@@ -1,0 +1,139 @@
+/* Card spots and discard tray enhancements */
+.dealer-card-spot {
+  position: absolute;
+  top: 15%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 300px;
+  height: 100px;
+  border-radius: 10px;
+  border: 2px dashed rgba(255, 215, 0, 0.2);
+  background: rgba(0, 60, 0, 0.2);
+  box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.2);
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.player-card-spot {
+  position: absolute;
+  bottom: 25%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 300px;
+  height: 100px;
+  border-radius: 10px;
+  border: 2px dashed rgba(255, 215, 0, 0.2);
+  background: rgba(0, 60, 0, 0.2);
+  box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.2);
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.card-spot-label {
+  color: rgba(255, 215, 0, 0.2);
+  font-size: 0.8rem;
+  font-weight: bold;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  pointer-events: none;
+  user-select: none;
+}
+
+.discard-tray {
+  position: absolute;
+  top: 20px;
+  left: 30px;
+  width: 70px;
+  height: 98px;
+  background: linear-gradient(135deg, #1a365d80, #2d4a7380);
+  border: 2px solid rgba(255, 215, 0, 0.3);
+  border-radius: 8px;
+  z-index: 5;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform: rotate(-5deg);
+  overflow: hidden;
+}
+
+.discard-tray-inner {
+  color: rgba(255, 215, 0, 0.3);
+  font-size: 0.7rem;
+  font-weight: bold;
+  text-align: center;
+  transform: rotate(90deg);
+  letter-spacing: 1px;
+}
+
+/* Enhanced table styling */
+#blackjack-table {
+  box-shadow: 
+    0 10px 30px rgba(0, 0, 0, 0.6),
+    inset 0 0 30px rgba(255, 215, 0, 0.1),
+    0 0 0 2px rgba(255, 215, 0, 0.3),
+    inset 0 0 100px rgba(0, 0, 0, 0.3);
+  background: radial-gradient(ellipse at center, 
+    rgba(0, 80, 0, 0.9) 0%, 
+    rgba(0, 60, 0, 0.95) 50%, 
+    rgba(0, 40, 0, 0.9) 100%);
+  border-radius: 30px;
+  border: 8px solid #ffd700;
+}
+
+/* Enhanced bet spots */
+.table-bet-spot {
+  background: rgba(0, 50, 0, 0.8);
+  border: 3px dashed #ffd700;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.4), inset 0 0 15px rgba(0, 0, 0, 0.3);
+  transition: all 0.2s ease;
+}
+
+.table-bet-spot:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(255, 215, 0, 0.3);
+  border-color: #ffed4e;
+}
+
+/* Hand value display enhancement */
+.hand-value {
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 0.9rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+  border: 2px solid #ffd700;
+  z-index: 20;
+}
+
+.hand-value.soft {
+  background: rgba(0, 100, 0, 0.8);
+  border-color: #90EE90;
+}
+
+.hand-value.bust {
+  background: rgba(150, 0, 0, 0.8);
+  border-color: #ff6b6b;
+}
+
+/* Table depth effect */
+#table-vignette {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(ellipse at center, transparent 30%, rgba(0, 0, 0, 0.15) 70%);
+  pointer-events: none;
+  z-index: 2;
+}
