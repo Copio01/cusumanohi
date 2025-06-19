@@ -1,16 +1,16 @@
 // construction21-logic.js
 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-app.js";
-import { getFirestore } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-firestore.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+import { getFirestore } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
 
 // --- Constants for Game Clarity & Maintainability ---
 export const GAME_OUTCOMES = Object.freeze({
-    WIN: 'win',
-    LOSE: 'lose',
-    PUSH: 'push',
-    BUST: 'bust',
-    BLACKJACK: 'blackjack',
-    DEALER_BLACKJACK: 'dealer_blackjack'
+    WIN: 'WIN',
+    LOSE: 'LOSE',
+    PUSH: 'PUSH',
+    BUST: 'BUST',
+    BLACKJACK: 'BLACKJACK',
+    DEALER_BLACKJACK: 'DEALER_BLACKJACK'
 });
 
 // --- Default Game Rules (Configurable) ---
@@ -18,7 +18,7 @@ const DEFAULT_RULES = {
     dealerHitsSoft17: true,
     blackjackPayout: 1.5, // 3:2 payout
     allowDoubleAfterSplit: true,
-    allowHitOnSplitAces: false // Most common casino rule
+    allowHitOnSplitAces: false
 };
 
 // --- Firebase Initialization ---
@@ -30,25 +30,18 @@ const firebaseConfig = {
     messagingSenderId: "20051552210",
     appId: "1:20051552210:web:7eb3b22baa3fec184e4a0b"
 };
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+export const app = initializeApp(firebaseConfig);
+export const db = getFirestore(app);
 
-/**
- * The core "engine" for the Construction 21 Blackjack game.
- * This class contains no UI code and is responsible for all game rules,
- * state management, and calculations.
- */
 export class Construction21Game {
-    constructor(userId, rules = {}) {
-        if (userId && typeof userId !== 'string') {
-            throw new Error('Construction21Game: userId must be a string or null.');
-        }
-
+    constructor(userId, rules = {}, verbose = false) {
         this.userId = userId || null;
-        this.db = db;
         this.rules = { ...DEFAULT_RULES, ...rules };
+        this.verbose = verbose;
+        this.reset();
+    }
 
-        // --- Game Rules & Limits ---
+    reset(startingChips = 10000) {
         this.suits = ['♥', '♦', '♠', '♣'];
         this.values = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
         this.PAYOUTS = {
@@ -62,12 +55,6 @@ export class Construction21Game {
         this.MAX_HANDS = 4;
         this.MAX_CARDS_PER_HAND = 11;
 
-        this.resetGame(10000);
-    }
-
-    // ---- Public Game Flow Methods ----
-
-    resetGame(startingChips = 10000) {
         this.chips = Math.max(this.MIN_CHIPS, Math.min(this.MAX_CHIPS, startingChips));
         this.deck = [];
         this.dealerHand = { cards: [], score: 0 };
@@ -75,13 +62,56 @@ export class Construction21Game {
         this.activeHandIndex = 0;
         this.bets = { main: 0, pp: 0, plus3: 0, insurance: 0 };
         this.isGameInProgress = false;
+        this.isDealerTurn = false;
+        this.actionLog = [];
+        this._log({ type: "state", action: "reset", chips: this.chips });
     }
 
+    // --- Logging ---
+    _log(entry) {
+        this.actionLog.push({ ...entry, ts: Date.now() });
+        if (this.verbose) console.log("[GameLog]", entry);
+    }
+    getActionLog() { return this.actionLog; }
+
+    // --- Betting Methods ---
+    placeBet(type, amount) {
+        if (this.isGameInProgress) return false;
+        if (!(typeof amount === 'number' && amount > 0 && this.chips >= amount)) return false;
+        if (!['main', 'pp', 'plus3'].includes(type)) return false;
+        if (amount > this.MAX_BET || amount < this.MIN_BET) return false;
+        this.chips -= amount;
+        this.bets[type] += amount;
+        this._log({ type: "bet", action: "placeBet", betType: type, amount, newChips: this.chips });
+        return true;
+    }
+
+    rebet() {
+        if (this.isGameInProgress) return false;
+        const sum = this.bets.main + this.bets.pp + this.bets.plus3;
+        if (sum === 0) return false;
+        if (this.chips < sum) return false;
+        this.chips -= sum;
+        this.bets.main *= 2;
+        this.bets.pp *= 2;
+        this.bets.plus3 *= 2;
+        this._log({ type: "bet", action: "rebet", newBets: { ...this.bets }, newChips: this.chips });
+        return true;
+    }
+
+    clearBets() {
+        if (this.isGameInProgress) return false;
+        const toReturn = this.bets.main + this.bets.pp + this.bets.plus3;
+        this.chips += toReturn;
+        this._log({ type: "bet", action: "clearBets", returned: toReturn, newChips: this.chips });
+        this.bets = { main: 0, pp: 0, plus3: 0, insurance: 0 };
+        return true;
+    }
+
+    // --- Core Game Flow ---
     startGame() {
-        if (this.isGameInProgress || this.bets.main <= 0) return false;
-
+        if (this.isGameInProgress || this.bets.main < this.MIN_BET) return false;
         this._prepareDeck();
-
         this.playerHands = [{
             cards: [],
             bet: this.bets.main,
@@ -90,128 +120,109 @@ export class Construction21Game {
             isSplitAce: false,
             isDoubled: false
         }];
-
         this.dealerHand = { cards: [], score: 0 };
         this.activeHandIndex = 0;
         this.isGameInProgress = true;
-
-        console.log(`[GAME START] Main bet: ${this.bets.main}, Rules:`, this.rules);
+        this.isDealerTurn = false;
+        this._log({ type: "state", action: "startGame", bets: { ...this.bets }, chips: this.chips });
         return true;
-    }
-
-    settleHands() {
-        if (!this.isGameInProgress) return null;
-
-        const mainHandResults = this._settleMainHands();
-        const sideBetResults = this._settleSideBets();
-        const insuranceResult = this._settleInsurance();
-
-        let totalNet = 0;
-        mainHandResults.forEach(r => totalNet += r.net);
-        Object.values(sideBetResults).forEach(r => totalNet += r.net);
-        totalNet += insuranceResult.net;
-
-        this.bets = { main: 0, pp: 0, plus3: 0, insurance: 0 };
-
-        this.endGame();
-        return { mainHandResults, sideBetResults, insuranceResult, totalNet };
     }
 
     endGame() {
         this.isGameInProgress = false;
-        console.log(`[GAME END] Final chip count: ${this.chips}`);
+        this.isDealerTurn = false;
+        this._log({ type: "state", action: "endGame", chips: this.chips });
     }
 
-    // ---- Betting Methods ----
-
-    placeBet(type, amount) {
-        if (this.isGameInProgress || !(typeof amount === 'number' && amount > 0 && this.chips >= amount) || !['main', 'pp', 'plus3'].includes(type)) return false;
-        this.chips -= amount;
-        this.bets[type] += amount;
-        return true;
-    }
-
-    clearBets() {
-        if (this.isGameInProgress) return false;
-        const totalBetsToReturn = this.bets.main + this.bets.pp + this.bets.plus3;
-        this.chips += totalBetsToReturn;
-        this.bets = { main: 0, pp: 0, plus3: 0, insurance: 0 };
-        return true;
-    }
-
-    // ---- Player Action Methods ----
-
+    // --- Player Actions ---
     hit() {
+        if (!this.isGameInProgress) return false;
         const hand = this.getActiveHand();
-        if (!hand || this.calculateScore(hand.cards) >= 21) return false;
-
+        if (!hand || hand.score >= 21) return false;
         if (hand.isSplitAce && !this.rules.allowHitOnSplitAces) {
-            console.log('[ACTION] Cannot hit on a split Ace. Auto-standing.');
+            this._log({ type: "action", action: "hit", result: "illegal_on_split_ace", handIndex: this.activeHandIndex });
             this.stand();
             return false;
         }
-
-        return this.dealCard(hand) ? true : false;
+        const card = this.dealCard(hand);
+        this._log({ type: "action", action: "hit", handIndex: this.activeHandIndex, card, newScore: hand.score });
+        return true;
     }
 
     stand() {
-        if (!this.getActiveHand()) return false;
+        if (!this.isGameInProgress) return false;
+        this._log({ type: "action", action: "stand", handIndex: this.activeHandIndex });
         this.activeHandIndex++;
+        if (this.activeHandIndex >= this.playerHands.length) this.isDealerTurn = true;
         return true;
     }
 
-    splitHand() {
+    double() {
+        if (!this.isGameInProgress) return false;
         const hand = this.getActiveHand();
-        const canSplit = hand &&
-                         hand.cards.length === 2 &&
-                         hand.cards[0].value === hand.cards[1].value &&
-                         this.chips >= hand.bet &&
-                         this.playerHands.length < this.MAX_HANDS;
-
-        if (!canSplit) return false;
-
-        const isAceSplit = hand.cards[0].value === 'A';
-        this.chips -= hand.bet;
-        const newHand = { cards: [hand.cards.pop()], bet: hand.bet, isSplit: true, isSplitAce, score: 0 };
-        hand.isSplit = true;
-        hand.isSplitAce = isAceSplit;
-
-        this.playerHands.splice(this.activeHandIndex + 1, 0, newHand);
-
-        this.dealCard(hand);
-        this.dealCard(newHand);
-
-        if (isAceSplit && !this.rules.allowHitOnSplitAces) {
-            this.stand();
+        if (!hand ||
+            hand.cards.length !== 2 ||
+            this.chips < hand.bet ||
+            (!this.rules.allowDoubleAfterSplit && hand.isSplit)
+        ) {
+            this._log({ type: "action", action: "double", result: "not_allowed", handIndex: this.activeHandIndex });
+            return false;
         }
-
-        return true;
-    }
-
-    doubleDown() {
-        const hand = this.getActiveHand();
-        const canDouble = hand &&
-                          hand.cards.length === 2 &&
-                          this.chips >= hand.bet &&
-                          (this.rules.allowDoubleAfterSplit || !hand.isSplit);
-
-        if (!canDouble) return false;
-
         this.chips -= hand.bet;
         hand.bet *= 2;
         hand.isDoubled = true;
-        this.dealCard(hand);
+        const card = this.dealCard(hand);
+        this._log({ type: "action", action: "double", handIndex: this.activeHandIndex, card, bet: hand.bet, chips: this.chips });
+        // Player must stand after doubling
+        this.stand();
         return true;
     }
 
-    // ---- Card, Deck, & Utility Methods ----
+    split() {
+        if (!this.isGameInProgress) return false;
+        const hand = this.getActiveHand();
+        if (!hand ||
+            hand.cards.length !== 2 ||
+            hand.cards[0].value !== hand.cards[1].value ||
+            this.chips < hand.bet ||
+            this.playerHands.length >= this.MAX_HANDS
+        ) {
+            this._log({ type: "action", action: "split", result: "not_allowed", handIndex: this.activeHandIndex });
+            return false;
+        }
+        const isAceSplit = hand.cards[0].value === 'A';
+        this.chips -= hand.bet;
+        const newHand = {
+            cards: [hand.cards.pop()],
+            bet: hand.bet,
+            isSplit: true,
+            isSplitAce: isAceSplit,
+            isDoubled: false,
+            score: 0
+        };
+        hand.isSplit = true;
+        hand.isSplitAce = isAceSplit;
+        this.playerHands.splice(this.activeHandIndex + 1, 0, newHand);
+        this.dealCard(hand);
+        this.dealCard(newHand);
 
+        this._log({ type: "action", action: "split", handIndex: this.activeHandIndex, splitValue: hand.cards[0]?.value, chips: this.chips });
+
+        // If splitting Aces, auto-stand if not allowed to hit after split
+        if (isAceSplit && !this.rules.allowHitOnSplitAces) {
+            this.stand();
+        }
+        return true;
+    }
+
+    // --- Card, Deck, & Utility Methods ---
     dealCard(hand, isFaceUp = true) {
         if (!hand || !this.deck.length) return null;
         const card = this.deck.pop();
-        card.isFaceUp = isFaceUp;
+        card.isFaceDown = !isFaceUp;
         hand.cards.push(card);
         hand.score = this.calculateScore(hand.cards);
+        this._log({ type: "deal", card: { ...card }, handIndex: this.activeHandIndex, isFaceUp, handScore: hand.score });
         return card;
     }
 
@@ -241,17 +252,38 @@ export class Construction21Game {
         return this.playerHands[this.activeHandIndex];
     }
 
-    // ---- Private Helper Methods (prefixed with _) ----
-
+    // --- Private Helpers ---
     _prepareDeck() {
         this.deck = [];
         for (const suit of this.suits) {
-            for (const value of this.values) { this.deck.push({ suit, value }); }
+            for (const value of this.values) {
+                this.deck.push({ suit, value });
+            }
         }
+        // Shuffle using Fisher-Yates
         for (let i = this.deck.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
             [this.deck[i], this.deck[j]] = [this.deck[j], this.deck[i]];
         }
+        this._log({ type: "deck", action: "shuffled" });
+    }
+
+    // --- Settling Methods ---
+    settleHands() {
+        if (!this.isGameInProgress) return null;
+        const mainHandResults = this._settleMainHands();
+        const sideBetResults = this._settleSideBets();
+        const insuranceResult = this._settleInsurance();
+
+        let totalNet = 0;
+        mainHandResults.forEach(r => totalNet += r.net);
+        Object.values(sideBetResults).forEach(r => totalNet += r.net);
+        totalNet += insuranceResult.net;
+
+        this.bets = { main: 0, pp: 0, plus3: 0, insurance: 0 };
+        this.endGame();
+        this._log({ type: "state", action: "settleHands", mainHandResults, sideBetResults, insuranceResult, totalNet });
+        return { mainHandResults, sideBetResults, insuranceResult, totalNet };
     }
 
     _settleMainHands() {
@@ -281,8 +313,9 @@ export class Construction21Game {
             } else {
                 outcome = GAME_OUTCOMES.LOSE;
             }
-            
+
             this.chips += payout;
+            this._log({ type: "result", hand, outcome, payout, net: payout - hand.bet });
             return { ...hand, outcome, payout, bet: hand.bet, net: payout - hand.bet };
         });
     }
@@ -292,22 +325,26 @@ export class Construction21Game {
         const playerInitialCards = this.playerHands.length > 0 ? this.playerHands[0].cards.slice(0, 2) : [];
         const dealerUpCard = this.dealerHand.cards.length > 0 ? this.dealerHand.cards[0] : null;
 
+        // Perfect Pair
         if (this.bets.pp > 0 && playerInitialCards.length === 2) {
             const ppResult = this._checkPerfectPairs(playerInitialCards[0], playerInitialCards[1]);
             const winnings = this.bets.pp * ppResult.payout;
             if (winnings > 0) this.chips += winnings + this.bets.pp;
             results.pp = { type: ppResult.type, payout: winnings, bet: this.bets.pp, net: winnings };
+            this._log({ type: "sidebet", side: "Perfect Pair", result: results.pp });
         }
-        
+
+        // 21+3
         if (this.bets.plus3 > 0 && playerInitialCards.length === 2 && dealerUpCard) {
             const plus3Result = this._check21Plus3([...playerInitialCards, dealerUpCard]);
             const winnings = this.bets.plus3 * plus3Result.payout;
             if (winnings > 0) this.chips += winnings + this.bets.plus3;
             results.plus3 = { type: plus3Result.type, payout: winnings, bet: this.bets.plus3, net: winnings };
+            this._log({ type: "sidebet", side: "21+3", result: results.plus3 });
         }
         return results;
     }
-    
+
     _settleInsurance() {
         const bet = this.bets.insurance;
         const result = { bet, payout: 0, net: bet > 0 ? -bet : 0, outcome: 'lose' };
@@ -317,6 +354,7 @@ export class Construction21Game {
             result.net = result.payout;
             result.outcome = 'win';
         }
+        this._log({ type: "sidebet", side: "Insurance", result });
         return result;
     }
 
@@ -343,7 +381,7 @@ export class Construction21Game {
         if (isFlush) return { type:'Flush', payout: this.PAYOUTS.PLUS_THREE.flush };
         return { type:'None', payout:0 };
     }
-    
+
     _isSoft17(cards) {
         if (this.calculateScore(cards) !== 17) return false;
         let nonAceScore = 0, hasAce = false;

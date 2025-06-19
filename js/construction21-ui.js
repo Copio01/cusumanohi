@@ -1,18 +1,17 @@
 // construction21-ui.js
 
-// --- Core Game Logic & Constants---
-import { Construction21Game, GAME_OUTCOMES } from './construction21-logic.js';
+// --- Core Game Logic & Constants ---
+import { Construction21Game, GAME_OUTCOMES, db as gameDb } from './construction21-logic.js';
 
 // --- Firebase Integration ---
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-app.js";
-import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-auth.js";
-import { getFirestore, doc, getDoc, setDoc, onSnapshot, updateDoc } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-firestore.js";
+import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+import { doc, getDoc, setDoc, onSnapshot, updateDoc } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
 
 // ==========================================================================
 // A. INITIALIZATION & STATE MANAGEMENT
 // ==========================================================================
 
-let game; // The single source of truth for all game logic
+let game; // Single source of truth for all game logic
 let uiLocked = false; // Prevents player actions during critical animations
 let lastBets = { main: 0, pp: 0, plus3: 0 }; // For the re-bet feature
 let selectedChipValue = 5; // Default selected chip
@@ -23,22 +22,15 @@ let previousBalance = 10000;
 // Utility for delays in async functions
 const delay = ms => new Promise(res => setTimeout(res, ms));
 
-// --- Firebase Initialization ---
-const firebaseConfig = {
-    apiKey: "AIzaSyBVtq6dAEuybJNmTTv8dXBxTVUgw1t0ZMk",
-    authDomain: "cusumano-website.firebaseapp.com",
-    projectId: "cusumano-website",
-    storageBucket: "cusumano-website.appspot.com",
-    messagingSenderId: "20051552210",
-    appId: "1:20051552210:web:7eb3b22baa3fec184e4a0b"
-};
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
+// --- Use Firebase instance from construction21-logic.js ---
+import { getAuth } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+const auth = getAuth();
+const db = gameDb;
 
 // ==========================================================================
 // B. DOM ELEMENT SELECTORS
 // ==========================================================================
+
 const DOMElements = {
     // Player Info
     profileName: document.getElementById('profile-name'),
@@ -73,7 +65,7 @@ const DOMElements = {
     statsBlackjacks: document.getElementById('stats-blackjacks'),
     statsBiggestWin: document.getElementById('stats-biggest-win'),
     statsNetWinnings: document.getElementById('stats-net-winnings'),
-    // Voucher system
+    // Voucher system (optional)
     voucherInput: document.getElementById('voucher-input'),
     voucherRedeemBtn: document.getElementById('voucher-redeem-btn'),
     voucherMessage: document.getElementById('voucher-message'),
@@ -92,10 +84,9 @@ function updateUI() {
 }
 
 function renderPlayerState() {
-    // Animate chip balance changes
     const bal = game.chips;
-    animateBalanceChange(bal - previousBalance);
-    DOMElements.playerBalance.textContent = bal;
+    if (bal !== previousBalance) animateBalanceChange(bal - previousBalance);
+    DOMElements.playerBalance.textContent = bal.toLocaleString();
     previousBalance = bal;
     document.body.dataset.gameState = game.isGameInProgress ? 'in-play' : 'betting';
 }
@@ -103,22 +94,24 @@ function renderPlayerState() {
 function renderHandsAndScores() {
     DOMElements.dealerHand.innerHTML = '';
     game.dealerHand.cards.forEach((cardData, i) => {
-        const cardEl = createCardElement(cardData, i === 1 && !game.isGameInProgress ? false : true);
+        const cardEl = createCardElement(cardData, !(i === 1 && !game.isGameInProgress));
         DOMElements.dealerHand.appendChild(cardEl);
     });
-    if (game.dealerHand.cards.length > 0) addScoreBubble(DOMElements.dealerHand, game.dealerHand.score);
+    if (game.dealerHand.cards.length > 0)
+        addScoreBubble(DOMElements.dealerHand, game.dealerHand.score);
 
     DOMElements.playerHandsContainer.innerHTML = '';
     game.playerHands.forEach((hand, index) => {
         const handContainer = document.createElement('div');
         handContainer.className = 'hand player-hand';
-        if (index === game.activeHandIndex && game.isGameInProgress) {
+        if (index === game.activeHandIndex && game.isGameInProgress)
             handContainer.classList.add('is-active');
-        }
-        if (game.isBlackjack(hand.cards)) {
+        if (game.isBlackjack(hand.cards))
             handContainer.classList.add('has-blackjack');
-        }
-        hand.cards.forEach(cardData => handContainer.appendChild(createCardElement(cardData)));
+        const cardsWrapper = document.createElement('div');
+        cardsWrapper.className = 'cards-wrapper';
+        hand.cards.forEach(cardData => cardsWrapper.appendChild(createCardElement(cardData)));
+        handContainer.appendChild(cardsWrapper);
         if (hand.cards.length > 0) addScoreBubble(handContainer, hand.score);
         DOMElements.playerHandsContainer.appendChild(handContainer);
     });
@@ -128,29 +121,43 @@ function renderBets() {
     DOMElements.betSpots.forEach(spot => {
         const betType = spot.dataset.betType;
         const amount = game.bets[betType] || 0;
-        spot.querySelector('.bet-spot__amount').textContent = `$${amount}`;
+        spot.querySelector('.bet-spot__amount').textContent = amount ? `$${amount}` : '';
         spot.classList.toggle('has-bet', amount > 0);
+
         // Remove old chips and render stack
-        spot.querySelector('.bet-spot__chips').innerHTML = '';
-        for (let chipSum = amount; chipSum > 0;) {
-            let value = [100, 25, 10, 5].find(v => chipSum >= v) || 5;
-            const chip = document.createElement('div');
-            chip.className = 'chip';
-            chip.textContent = value;
-            chip.setAttribute('data-value', value);
-            chipSum -= value;
-            spot.querySelector('.bet-spot__chips').appendChild(chip);
-        }
+        const chipsEl = spot.querySelector('.bet-spot__chips');
+        chipsEl.innerHTML = '';
+        let chipSum = amount;
+        [100, 25, 10, 5].forEach(value => {
+            while (chipSum >= value) {
+                const chip = document.createElement('div');
+                chip.className = 'chip';
+                chip.textContent = value;
+                chip.setAttribute('data-value', value);
+                chipsEl.appendChild(chip);
+                chipSum -= value;
+            }
+        });
     });
 }
 
 function createCardElement(cardData, faceUp = true) {
     const card = document.createElement('div');
     card.className = 'card';
-    if (!faceUp || cardData.isFaceDown) {
+    
+    // Only allow dealer's second card to be face down during initial deal
+    // Player cards should ALWAYS be face up
+    const isPlayerCard = !cardData.isDealer; 
+    const isDealerHoleCard = cardData.isDealer && cardData.isHoleCard;
+    
+    if ((!faceUp || cardData.isFaceDown) && !isPlayerCard && isDealerHoleCard) {
         card.classList.add('is-face-down');
+        // Store card data for later reveal
+        card.dataset.suit = cardData.suit;
+        card.dataset.value = cardData.value;
         return card;
     }
+    
     const suitIcons = { '♥': '♥', '♦': '♦', '♠': '♠', '♣': '♣' };
     const suit = suitIcons[cardData.suit] || cardData.suit;
     if (['♥', '♦'].includes(suit)) card.classList.add('card--red');
@@ -167,20 +174,55 @@ function addScoreBubble(handEl, score) {
     scoreBubble.className = 'hand-score';
     if (score > 21) scoreBubble.classList.add('is-bust');
     scoreBubble.textContent = score;
-    handEl.appendChild(scoreBubble);
+    // Find the right parent - either the cards-wrapper or the hand element itself
+    const target = handEl.querySelector('.cards-wrapper') || handEl;
+    target.appendChild(scoreBubble);
 }
 
 function updateActionBarState() {
-    if (uiLocked) { DOMElements.actionBar.dataset.state = 'ui-locked'; return; }
-    if (!game.isGameInProgress) { DOMElements.actionBar.dataset.state = 'betting'; }
-    else {
+    if (uiLocked) {
+        DOMElements.actionBar.dataset.state = 'ui-locked';
+        DOMElements.actionBar.querySelectorAll('button').forEach(btn => btn.disabled = true);
+        return;
+    }
+    
+    if (!game.isGameInProgress) {
+        DOMElements.actionBar.dataset.state = 'betting';
+        // First, disable all buttons
+        DOMElements.actionBar.querySelectorAll('button').forEach(btn => btn.disabled = true);
+        
+        // Then selectively enable appropriate buttons
+        DOMElements.actionBar.querySelectorAll('.action-button').forEach(btn => {
+            const action = btn.dataset.action;
+            
+            // Deal button should only be enabled if there's a main bet
+            if (action === 'deal') {
+                btn.disabled = !(game.bets && game.bets.main > 0);
+            }
+            // Clear button only if there are bets to clear
+            else if (action === 'clear') {
+                const hasBets = game.bets && (game.bets.main > 0 || game.bets.pp > 0 || game.bets.plus3 > 0);
+                btn.disabled = !hasBets;
+            }
+            // Rebet button only if there were previous bets and enough chips
+            else if (action === 'rebet') {
+                const previousTotal = lastBets.main + lastBets.pp + lastBets.plus3;
+                btn.disabled = previousTotal === 0 || game.chips < previousTotal;
+            }
+            // New game button always enabled
+            else if (action === 'new-game') {
+                btn.disabled = false;
+            }
+        });
+    } else {
         const hand = game.getActiveHand();
         if (hand) {
             DOMElements.actionBar.dataset.state = 'player-turn';
-            // Disable buttons based on game logic
+            // Set enabled/disabled state for player actions
             document.getElementById('double-btn').disabled = !(hand.cards.length === 2 && game.chips >= hand.bet && (game.rules.allowDoubleAfterSplit || !hand.isSplit));
             document.getElementById('split-btn').disabled = !(hand.cards.length === 2 && hand.cards[0].value === hand.cards[1].value && game.chips >= hand.bet);
             document.getElementById('hit-btn').disabled = hand.isSplitAce && !game.rules.allowHitOnSplitAces;
+            document.getElementById('stand-btn').disabled = false;
 
             // --- FEATURE: Basic Strategy Advisor ---
             if (userPreferences.strategyAdvisor && typeof game.getBasicStrategyMove === 'function') {
@@ -191,6 +233,10 @@ function updateActionBarState() {
             }
         } else {
             DOMElements.actionBar.dataset.state = 'dealer-turn';
+            // Only allow 'new game' or similar actions
+            DOMElements.actionBar.querySelectorAll('.action-button').forEach(btn => {
+                btn.disabled = btn.dataset.action !== 'new-game';
+            });
         }
     }
 }
@@ -199,30 +245,48 @@ function updateActionBarState() {
 // D. ANIMATION & VISUAL EFFECTS
 // ==========================================================================
 
-// Animate Card Dealing (from deck to target hand)
 async function animateDealCard(targetHandContainer, cardData) {
-    const deck = DOMElements.deck;
-    const deckRect = deck.getBoundingClientRect();
+    // Defensive: don't animate if elements missing
+    if (!DOMElements.deck || !targetHandContainer) {
+        targetHandContainer?.appendChild(createCardElement(cardData, !cardData.isFaceDown));
+        return;
+    }
+    
+    const deckRect = DOMElements.deck.getBoundingClientRect();    
     const destRect = targetHandContainer.getBoundingClientRect();
     const handCardCount = targetHandContainer.children.length;
-    const tempCard = createCardElement(cardData);
+    
+    // For animation, always show the back of the card during animation
+    // even for dealer's hole card (to avoid revealing it early)
+    const faceUp = !cardData.isFaceDown && !(cardData.isDealer && cardData.isHoleCard);
+    const tempCard = createCardElement({...cardData}, faceUp);
     tempCard.classList.add('dealing');
     document.body.appendChild(tempCard);
-    // Position for flight
+
+    // Animate from deck to destination
     tempCard.style.left = `${deckRect.left}px`;
     tempCard.style.top = `${deckRect.top}px`;
     tempCard.style.setProperty('--from-x', '0px');
     tempCard.style.setProperty('--from-y', '0px');
-    tempCard.style.setProperty('--to-x', `${destRect.left - deckRect.left + (handCardCount * 30)}px`);
-    tempCard.style.setProperty('--to-y', `${destRect.top - deckRect.top}px`);
+    tempCard.style.setProperty('--to-x', `${destRect.left - deckRect.left + (handCardCount * 25)}px`);
+    tempCard.style.setProperty('--to-y', `${destRect.top - deckRect.top}px`);    
     await delay(580);
     tempCard.remove();
+
     // Now append final card to hand
-    targetHandContainer.appendChild(createCardElement(cardData));
+    // Check if we're dealing to a player hand (which has a cards-wrapper)
+    const cardsWrapper = targetHandContainer.querySelector('.cards-wrapper') || targetHandContainer;
+    
+    // For dealer's hole card, make sure it's face down
+    if (cardData.isDealer && cardData.isHoleCard) {
+        cardData.isFaceDown = true;
+    }
+    
+    cardsWrapper.appendChild(createCardElement(cardData, !cardData.isFaceDown));
 }
 
-// Animate Chip Flight
 function animateChipToBetSpot(chipButton, betSpot) {
+    if (!chipButton || !betSpot) return;
     const chipRect = chipButton.getBoundingClientRect();
     const betRect = betSpot.getBoundingClientRect();
     const flyingChip = chipButton.cloneNode(true);
@@ -237,10 +301,10 @@ function animateChipToBetSpot(chipButton, betSpot) {
     flyingChip.addEventListener('animationend', () => flyingChip.remove());
 }
 
-// Animate balance change floating delta
 function animateBalanceChange(delta) {
     if (!delta || delta === 0) return;
     const balWrap = DOMElements.playerBalance.parentElement;
+    if (!balWrap) return;
     const el = document.createElement('div');
     el.className = 'balance-delta' + (delta < 0 ? ' negative' : '');
     el.textContent = (delta > 0 ? '+' : '') + delta;
@@ -250,7 +314,6 @@ function animateBalanceChange(delta) {
     setTimeout(() => el.remove(), 1100);
 }
 
-// Show win confetti on a hand container
 function showWinConfetti(handEl) {
     const confetti = document.createElement('div');
     confetti.className = 'win-confetti';
@@ -259,24 +322,25 @@ function showWinConfetti(handEl) {
     setTimeout(() => confetti.remove(), 1100);
 }
 
-// Shake an element (for invalid actions)
 function shakeElement(el) {
     el.classList.add('shake');
     el.addEventListener('animationend', () => el.classList.remove('shake'), { once: true });
 }
-
-// Ambient particles are handled in HTML init
 
 // ==========================================================================
 // E. GAME OUTCOME & MODALS
 // ==========================================================================
 
 function showOutcomeModal(results) {
-    DOMElements.outcomeTitle.textContent = results.totalNet > 0
-        ? "You Win!"
-        : results.totalNet < 0
-            ? "You Lose!"
-            : "Push!";
+    // Ensure any remaining face-down cards are now face-up
+    DOMElements.dealerHand.querySelectorAll('.card.is-face-down').forEach(card => {
+        card.classList.remove('is-face-down');
+    });
+    
+    // Accessibility: focus on modal for keyboard users
+    DOMElements.outcomeTitle.textContent =
+        results.totalNet > 0 ? "You Win!" :
+        results.totalNet < 0 ? "You Lose!" : "Push!";
     DOMElements.outcomeList.innerHTML = '';
     results.mainHandResults.forEach((hand, i) => {
         const li = document.createElement('li');
@@ -288,7 +352,60 @@ function showOutcomeModal(results) {
         DOMElements.outcomeList.appendChild(li);
     });
     DOMElements.outcomeTotal.textContent = `Net: $${results.totalNet}`;
-    DOMElements.outcomeModal.classList.add('is-visible');
+    
+    // Disable all action buttons until outcome is acknowledged
+    DOMElements.actionBar.querySelectorAll('.action-button').forEach(btn => {
+        btn.disabled = true;
+    });
+    
+    // Show the outcome modal and disable actions until modal is dismissed
+    showModal(DOMElements.outcomeModal);
+    
+    // Add a button to dismiss the modal and reset the game
+    const modalNewGameBtn = document.getElementById('modal-new-game-btn');
+    if (modalNewGameBtn) {
+        modalNewGameBtn.addEventListener('click', () => {
+            hideModal(DOMElements.outcomeModal);
+            resetGameState();
+        }, { once: true }); // Use once: true to prevent multiple handlers
+    }
+    
+    // Force game state reset when modal is closed
+    const modalCloseBtn = DOMElements.outcomeModal.querySelector('.modal-close-btn');
+    if (modalCloseBtn) {
+        modalCloseBtn.addEventListener('click', resetGameState, { once: true });
+    }
+}
+
+// Modal management functions
+function showModal(modalEl) {
+    if (!modalEl) return;
+    // Hide any other visible modals first
+    document.querySelectorAll('.modal-overlay.is-visible').forEach(modal => {
+        if (modal !== modalEl) modal.classList.remove('is-visible');
+    });
+    
+    modalEl.classList.add('is-visible');
+    
+    // Focus first focusable element for accessibility
+    setTimeout(() => {
+        const focusable = modalEl.querySelector('button, [tabindex], input, select, textarea');
+        if (focusable) focusable.focus();
+    }, 100);
+    
+    // Add escape key listener
+    const handleEscape = (e) => {
+        if (e.key === 'Escape') {
+            modalEl.classList.remove('is-visible');
+            document.removeEventListener('keydown', handleEscape);
+        }
+    };
+    document.addEventListener('keydown', handleEscape);
+}
+
+function hideModal(modalEl) {
+    if (!modalEl) return;
+    modalEl.classList.remove('is-visible');
 }
 
 // ==========================================================================
@@ -322,13 +439,11 @@ function updateStatsDisplay() {
 }
 
 function applyCustomization(prefs) {
-    // Table color
-    DOMElements.gameTable.style.setProperty('--color-felt', prefs.tableColor);
-    // Swatch highlight
+    if (DOMElements.gameTable)
+        DOMElements.gameTable.style.setProperty('--color-felt', prefs.tableColor);
     DOMElements.colorSwatches.forEach(s =>
         s.classList.toggle('selected', s.dataset.color === prefs.tableColor)
     );
-    // Strategy toggle state
     if (DOMElements.strategyToggle)
         DOMElements.strategyToggle.checked = !!prefs.strategyAdvisor;
 }
@@ -372,26 +487,61 @@ async function initializeGame(user) {
 }
 
 async function runDealerTurn() {
-    uiLocked = true;
-    updateActionBarState();
+    try {
+        uiLocked = true;
+        updateActionBarState();
+        
+        // Disable all player action buttons during dealer turn
+        const actionButtons = DOMElements.actionBar.querySelectorAll('.action-button');
+        actionButtons.forEach(btn => btn.disabled = true);
 
-    // Flip dealer's hole card if present
-    const dealerCards = DOMElements.dealerHand.querySelectorAll('.card');
-    const holeCard = dealerCards[1];
-    if (holeCard && holeCard.classList.contains('is-face-down')) {
-        // Animate flip
-        holeCard.classList.remove('is-face-down');
-        holeCard.innerHTML = createCardElement(game.dealerHand.cards[1]).innerHTML;
+        // Safety check to ensure dealer hand exists
+        if (!DOMElements.dealerHand) {
+            console.error("Dealer hand element not found");
+            return;
+        }
+
+        // Flip dealer's hole card if present
+        const dealerCards = DOMElements.dealerHand.querySelectorAll('.card');
+        const holeCard = dealerCards && dealerCards.length > 1 ? dealerCards[1] : null;
+        if (holeCard && holeCard.classList.contains('is-face-down')) {
+            // Animate flip
+            holeCard.classList.remove('is-face-down');
+        
+        // Update game state to mark the card as face up
+        if (game.dealerHand.cards[1]) {
+            game.dealerHand.cards[1].isFaceDown = false;
+        }
+        
+        if (holeCard.dataset.suit && holeCard.dataset.value) {
+            // Reconstruct card from stored data attributes
+            const cardData = {
+                suit: holeCard.dataset.suit,
+                value: holeCard.dataset.value,
+                isDealer: true,
+                isFaceDown: false
+            };
+            holeCard.innerHTML = createCardElement(cardData, true).innerHTML;
+        } else {
+            // Fallback to game state
+            holeCard.innerHTML = createCardElement(game.dealerHand.cards[1], true).innerHTML;
+        }
         await delay(800);
+    }    // Make sure game object exists before continuing
+    if (game) {
+        while (game.shouldDealerHit()) {
+            await delay(800);
+            const newCard = game.dealCard(game.dealerHand);
+            await animateDealCard(DOMElements.dealerHand, newCard);
+            updateUI();
+        }
+        // Make sure ALL dealer cards are face-up before settling
+        await ensureAllDealerCardsVisible();
+    } else {
+        console.error("Game object is undefined in runDealerTurn");
+        return;
     }
-
-    while (game.shouldDealerHit()) {
-        await delay(800);
-        const newCard = game.dealCard(game.dealerHand);
-        await animateDealCard(DOMElements.dealerHand, newCard);
-        updateUI();
-    }
-
+    
     await delay(900);
     const results = game.settleHands();
     updateAndSaveStats(results);
@@ -406,6 +556,10 @@ async function runDealerTurn() {
 // ==========================================================================
 
 function setupEventHandlers() {
+    // Prevent double-binding
+    if (DOMElements.chipTray.dataset.eventsBound) return;
+    DOMElements.chipTray.dataset.eventsBound = "1";
+
     // Chips
     DOMElements.chipTray.querySelectorAll('.chip').forEach(chip => {
         chip.addEventListener('click', () => {
@@ -442,24 +596,60 @@ function setupEventHandlers() {
                 shakeElement(btn);
                 return;
             }
-            switch (btn.dataset.action) {
-                case 'deal':
+            switch (btn.dataset.action) {                case 'deal':
+                    // Check if we can deal
+                    if (!game.bets || game.bets.main <= 0) {
+                        shakeElement(btn);
+                        return;
+                    }
+                    
+                    // Lock UI during deal
                     uiLocked = true;
                     updateActionBarState();
-                    game.startRound();
-                    updateUI();
-                    // Animate initial deal
-                    for (let i = 0; i < 2; i++) {
-                        for (const hand of [DOMElements.playerHandsContainer, DOMElements.dealerHand]) {
-                            await delay(220);
-                            const card = game.dealCard(hand === DOMElements.playerHandsContainer
-                                ? game.playerHands[0]
-                                : game.dealerHand);
-                            await animateDealCard(hand, card);
-                        }
+                    
+                    // Start the game
+                    if (!game.startGame()) {
+                        console.error("Failed to start game");
+                        uiLocked = false;
+                        updateActionBarState();
+                        return;
                     }
-                    uiLocked = false;
+                    
                     updateUI();
+                    
+                    try {
+                        // Animate initial deal
+                        for (let i = 0; i < 2; i++) {
+                            for (const hand of [DOMElements.playerHandsContainer, DOMElements.dealerHand]) {
+                                await delay(220);
+                                const isDealer = hand === DOMElements.dealerHand;
+                                const isDealerHoleCard = isDealer && i === 1; // Second dealer card is hole card
+                                const card = game.dealCard(isDealer ? game.dealerHand : game.playerHands[0], !isDealerHoleCard);
+                                
+                                // Mark the card with additional metadata
+                                card.isDealer = isDealer;
+                                card.isHoleCard = isDealerHoleCard;
+                                
+                                await animateDealCard(hand, card);
+                            }
+                        }
+                        
+                        // Check for blackjacks immediately
+                        const playerHand = game.playerHands[0];
+                        const dealerHand = game.dealerHand;
+                        
+                        if (game.isBlackjack(playerHand.cards) || game.isBlackjack(dealerHand.cards)) {
+                            // If either has blackjack, go straight to dealer turn
+                            updateUI();
+                            await delay(1000); // Pause to show the blackjack
+                            await runDealerTurn();
+                        }
+                    } catch (error) {
+                        console.error("Error during deal:", error);
+                    } finally {
+                        uiLocked = false;
+                        updateUI();
+                    }
                     break;
                 case 'hit':
                     uiLocked = true;
@@ -492,9 +682,12 @@ function setupEventHandlers() {
                 case 'rebet':
                     game.rebet();
                     updateUI();
-                    break;
-                case 'new-game':
+                    break;                case 'new-game':
+                    // Complete reset of both game logic and UI
                     game.reset();
+                    DOMElements.dealerHand.innerHTML = '';
+                    DOMElements.playerHandsContainer.innerHTML = '';
+                    lastBets = { main: 0, pp: 0, plus3: 0 };
                     updateUI();
                     break;
                 case 'clear':
@@ -503,23 +696,21 @@ function setupEventHandlers() {
                     break;
             }
         });
-    });
-
-    // Modal Openers/Closers
+    });    // Modal Openers/Closers
     if (DOMElements.statsBtn) {
         DOMElements.statsBtn.addEventListener('click', () => {
             updateStatsDisplay();
-            DOMElements.statsModal.classList.add('is-visible');
+            showModal(DOMElements.statsModal);
         });
     }
     if (DOMElements.payoutsBtn) {
         DOMElements.payoutsBtn.addEventListener('click', () => {
-            DOMElements.payoutsModal.classList.add('is-visible');
+            showModal(DOMElements.payoutsModal);
         });
     }
     if (DOMElements.settingsBtn) {
         DOMElements.settingsBtn.addEventListener('click', () => {
-            DOMElements.settingsModal.classList.add('is-visible');
+            showModal(DOMElements.settingsModal);
         });
     }
     if (DOMElements.logoutBtn) {
@@ -528,7 +719,20 @@ function setupEventHandlers() {
 
     document.querySelectorAll('.modal-close-btn').forEach(btn => {
         btn.addEventListener('click', () => {
-            btn.closest('.modal-overlay').classList.remove('is-visible');
+            const modalOverlay = btn.closest('.modal-overlay');
+            hideModal(modalOverlay);
+            
+            // If this is the outcome modal, reset the game state
+            if (modalOverlay.id === 'outcome-modal') {
+                resetGameState();
+            }
+        });
+    });
+    
+    // Also close modal when clicking outside content
+    document.querySelectorAll('.modal-overlay').forEach(modal => {
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) hideModal(modal);
         });
     });
 
@@ -551,6 +755,7 @@ function setupEventHandlers() {
 // ==========================================================================
 // I. INITIALIZATION
 // ==========================================================================
+
 onAuthStateChanged(auth, (user) => {
     if (user) {
         initializeGame(user);
@@ -558,3 +763,79 @@ onAuthStateChanged(auth, (user) => {
         document.body.innerHTML = `<h1>Please log in to play</h1>`;
     }
 });
+
+// Function to properly reset the game state
+function resetGameState() {
+    if (!game) return;
+    
+    // Reset all UI elements
+    DOMElements.dealerHand.innerHTML = '';
+    DOMElements.playerHandsContainer.innerHTML = '';
+    
+    // Reset all bet spots
+    DOMElements.betSpots.forEach(spot => {
+        spot.classList.remove('has-bet');
+        spot.querySelector('.bet-spot__amount').textContent = '';
+        spot.querySelector('.bet-spot__chips').innerHTML = '';
+    });
+    
+    // Store the last bets for rebetting
+    lastBets = { ...game.bets };
+    
+    // Reset the game logic state
+    game.endGame();
+    
+    // Clear any face-down card states in the game object
+    if (game.dealerHand && game.dealerHand.cards) {
+        game.dealerHand.cards.forEach(card => {
+            if (card) card.isFaceDown = false;
+        });
+    }
+    
+    // Re-enable all buttons
+    DOMElements.actionBar.querySelectorAll('.action-button').forEach(btn => {
+        btn.disabled = false;
+    });
+    
+    // Update the UI
+    updateUI();
+    
+    // Log the reset for debugging
+    console.log("Game state reset complete");
+}
+
+// Function to ensure all dealer cards are face up before showing the outcome
+async function ensureAllDealerCardsVisible() {
+    if (!game || !game.dealerHand || !game.dealerHand.cards) return;
+    
+    const dealerCards = DOMElements.dealerHand.querySelectorAll('.card');
+    // Check if we have any face-down cards
+    let hasHiddenCards = false;
+    
+    dealerCards.forEach((cardElement, index) => {
+        if (cardElement.classList.contains('is-face-down')) {
+            hasHiddenCards = true;
+            cardElement.classList.remove('is-face-down');
+            
+            // Get card data from game state
+            const cardData = game.dealerHand.cards[index];
+            if (cardData) {
+                // Ensure the card is marked as face up in the game state
+                cardData.isFaceDown = false;
+                
+                // Update the card visual
+                cardElement.innerHTML = createCardElement(cardData, true).innerHTML;
+            }
+        }
+    });
+    
+    // If any cards were flipped, add a small delay for the animation effect
+    if (hasHiddenCards) {
+        await delay(800);
+    }
+    
+    // Double check for any remaining face-down cards in the DOM and force their display
+    DOMElements.dealerHand.querySelectorAll('.card.is-face-down').forEach((card) => {
+        card.classList.remove('is-face-down');
+    });
+}

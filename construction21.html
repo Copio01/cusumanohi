@@ -91,12 +91,38 @@
         @keyframes particle-float {
             from { transform: translateY(0);}
             to   { transform: translateY(-22px);}
-        }
-        #dealer-hand, #player-hands {
+        }        #dealer-hand, #player-hands {
             display: flex; gap: 1.5rem; min-height: 120px; align-items: center;
         }
         #dealer-hand { position: absolute; top: 8%; left: 50%; transform: translateX(-50%);}
         #player-hands { position: absolute; bottom: 24%; left: 50%; transform: translateX(-50%);}
+        .player-hand { display: flex; gap: 1.5rem; align-items: center; }
+        
+        /* Overlap cards slightly in a hand to make it look more natural */
+        .hand .card {
+            margin-left: -15px;
+            transition: transform 0.2s ease;
+        }
+        .hand .card:first-child {
+            margin-left: 0;
+        }
+        /* Allow cards to fan out slightly on hover */
+        .hand .card:hover {
+            transform: translateY(-5px);
+            z-index: 5;
+        }
+        .hand.is-active {
+            position: relative;
+        }
+        .hand.is-active::before {
+            content: '';
+            position: absolute;
+            inset: -10px;
+            border-radius: 20px;
+            border: 2px dashed var(--color-gold);
+            opacity: 0.7;
+            pointer-events: none;
+        }
         .betting-area {
             position: absolute; bottom: 8%; left: 50%; transform: translateX(-50%);
             display: flex; gap: 3rem;
@@ -118,6 +144,16 @@
         }
         .bet-spot__chips { min-height: 26px; }
         .bet-spot__amount { font-weight: 600; font-size: 1.1rem; color: var(--color-gold);}
+        .bet-spot-label {
+            margin-top: 2px;
+            font-size: 0.98rem;
+            color: #d8b248;
+            letter-spacing: 0.02em;
+            font-family: var(--font-display);
+            font-weight: 700;
+            text-shadow: 0 2px 6px #0007;
+            pointer-events: none;
+        }
         .card {
             width: 74px; height: 110px; border-radius: 8px;
             box-shadow: 0 3px 12px #0009, 0 0 0 1.5px #fff4 inset;
@@ -200,15 +236,18 @@
             to   { box-shadow: 0 0 28px 8px var(--color-success), 0 0 0 4px var(--color-success) inset;}
         }
         .action-button:active { transform: scale(0.98); }
-        .action-button:disabled { background: #8884; color: #eee; cursor: not-allowed; }
-        /* Modal Overlay Animations */
-        .modal-overlay {
+        .action-button:disabled { background: #8884; color: #eee; cursor: not-allowed; }        .modal-overlay {
             display: none; position: fixed; inset: 0; background: rgba(18,18,18,0.95);
             z-index: 1000; align-items: center; justify-content: center;
             transition: background 0.4s;
+            opacity: 0;
+            pointer-events: none;
         }
         .modal-overlay.is-visible {
-            display: flex; animation: overlay-in 0.33s;
+            display: flex; 
+            animation: overlay-in 0.33s;
+            opacity: 1;
+            pointer-events: auto;
         }
         .modal-content {
             backdrop-filter: blur(14px) brightness(1.13);
@@ -231,7 +270,6 @@
             transition: color 0.16s;
         }
         .modal-close-btn:hover { color: var(--color-gold); }
-        /* PREMIUM WIN/LOSS MODAL CUSTOMIZATION */
         #outcome-modal .modal-content {
             border: 0;
             background: linear-gradient(145deg, #191925 70%, #373760 100%);
@@ -240,8 +278,9 @@
             position: relative;
             overflow: visible;
         }
-        .modal-victory { color: var(--color-success);}
-        .modal-defeat { color: var(--color-danger);}
+        .modal-victory { color: var(--color-success); font-size: 1.4rem; margin-bottom: 0.6rem;}
+        .modal-defeat { color: var(--color-danger); font-size: 1.4rem; margin-bottom: 0.6rem;}
+        .modal-net-result.zero { color: var(--color-neutral);}
         .outcome-hand-results {
             display: flex; flex-wrap: wrap; gap: 2rem; justify-content: center; margin: 1.5rem 0;
         }
@@ -281,14 +320,13 @@
         }
         .modal-net-result.positive { color: var(--color-success);}
         .modal-net-result.negative { color: var(--color-danger);}
-        .modal-net-result.zero { color: var(--color-neutral);}
         .confetti-emoji {
             font-size: 2.5rem; margin: 0 0.45rem; vertical-align: middle; animation: confetti-pop 0.9s cubic-bezier(.17,.67,.67,1.07) 1;
         }
         @keyframes confetti-pop {
             0% { transform: scale(0.8) translateY(30px) rotate(-32deg);}
             30% { transform: scale(1.5) translateY(-12px) rotate(6deg);}
-            80% { transform: scale(0.94) translateY(0) rotate(-6deg);}
+             80% { transform: scale(0.94) translateY(0) rotate(-6deg);}
             100% { transform: scale(1) translateY(0) rotate(0);}
         }
         .shake {
@@ -301,10 +339,55 @@
             80% { transform: translateX(7px);}
             100% { transform: translateX(0);}
         }
-        /* Accessibility/Focus Styles */
-        .bet-spot:focus { outline: 3px solid var(--color-gold); }
-        .action-button:focus { outline: 2px solid var(--color-gold); }
         .color-swatch.selected { border: 3px solid var(--color-gold);}
+        /* Cards wrapper to organize player hand display */
+        .cards-wrapper {
+            display: flex;
+            position: relative;
+            min-height: 110px;
+        }
+        .hand-score {
+            position: absolute;
+            bottom: -10px;
+            right: -10px;
+            background: var(--color-gold);
+            color: var(--color-black);
+            font-weight: 700;
+            border-radius: 50%;
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+            z-index: 10;
+        }
+        .hand-score.is-bust {
+            background: var(--color-danger);
+            color: white;
+        }
+        /* Face-down card styling */
+        .card.is-face-down {
+            background: linear-gradient(135deg, #233041 0%, #121a27 100%);
+            box-shadow: 0 3px 12px #0009, 0 0 0 1.5px #fff2 inset;
+            border: 2px solid #2b384a;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .card.is-face-down::before {
+            content: "";
+            position: absolute;
+            inset: 5px;
+            background: repeating-linear-gradient(
+                45deg,
+                rgba(255, 255, 255, 0.1) 0px,
+                rgba(255, 255, 255, 0.1) 2px,
+                transparent 2px,
+                transparent 6px
+            );
+            border-radius: 4px;
+        }
         /* ... other modal and stat styles unchanged ... */
     </style>
 </head>
@@ -333,19 +416,21 @@
                 </text>
             </svg>
             <div id="dealer-hand"></div>
-            <div id="player-hands"></div>
-            <div class="betting-area">
-                <div class="bet-spot" id="main-bet-spot" data-bet-type="main">
-                    <span id="main-bet-amount"></span>
-                    <div class="bet-spot__chips"></div>
-                </div>
+            <div id="player-hands"></div>            <div class="betting-area">
                 <div class="bet-spot" id="pp-bet-spot" data-bet-type="pp">
-                    <span id="pp-bet-amount"></span>
+                    <span class="bet-spot__amount"></span>
                     <div class="bet-spot__chips"></div>
+                    <div class="bet-spot-label">Perfect Pair</div>
+                </div>
+                <div class="bet-spot" id="main-bet-spot" data-bet-type="main">
+                    <span class="bet-spot__amount"></span>
+                    <div class="bet-spot__chips"></div>
+                    <div class="bet-spot-label">Main</div>
                 </div>
                 <div class="bet-spot" id="plus3-bet-spot" data-bet-type="plus3">
-                    <span id="plus3-bet-amount"></span>
+                    <span class="bet-spot__amount"></span>
                     <div class="bet-spot__chips"></div>
+                    <div class="bet-spot-label">21+3</div>
                 </div>
             </div>
             <div class="deck" id="deck" style="position: absolute; right: 3%; top: 8%; width: 68px; height: 98px; background: #233"></div>
@@ -369,20 +454,57 @@
             <button class="action-button" id="new-game-btn" data-action="new-game">New Game</button>
         </div>
     </footer>
-    <!-- MODALS -->
-    <div class="modal-overlay" id="outcome-modal" role="dialog" aria-modal="true">
+    <!-- OUTCOME MODAL -->    <div class="modal-overlay" id="outcome-modal" role="dialog" aria-modal="true">
         <div class="modal-content" id="outcome-modal-content">
             <button class="modal-close-btn" aria-label="Close" tabindex="0">×</button>
-            <div id="modal-victory-label" class="modal-victory" style="display:none;"><span class="confetti-emoji">🎉</span> You Win! <span class="confetti-emoji">🎉</span></div>
-            <div id="modal-defeat-label" class="modal-defeat" style="display:none;">You Lose.</div>
-            <div id="modal-push-label" class="modal-net-result zero" style="display:none;">Push.</div>
-            <div class="outcome-hand-results" id="outcome-hand-results"></div>
-            <div id="outcome-sidebets"></div>
-            <div id="outcome-net" class="modal-net-result"></div>
+            <div id="outcome-title"></div>
+            <ul id="outcome-results-list"></ul>
+            <div id="outcome-total-payout"></div>
             <button class="action-button" id="modal-new-game-btn" tabindex="0" style="margin-top:2.1rem;">Play Again</button>
         </div>
     </div>
-    <!-- ... your stats, payouts, settings modals as before ... -->
+    <!-- STATS MODAL -->    <div class="modal-overlay" id="stats-modal" role="dialog" aria-modal="true">
+        <div class="modal-content">
+            <button class="modal-close-btn" aria-label="Close">×</button>
+            <h2>Player Stats</h2>
+            <ul>
+                <li>Hands Played: <span id="stats-hands-played">0</span></li>
+                <li>Net Winnings: <span id="stats-net-winnings">$0</span></li>
+                <li>Blackjacks: <span id="stats-blackjacks">0</span></li>
+                <li>Biggest Win: <span id="stats-biggest-win">$0</span></li>
+            </ul>
+        </div>
+    </div>
+    <!-- SETTINGS MODAL -->    <div class="modal-overlay" id="settings-modal" role="dialog" aria-modal="true">
+        <div class="modal-content">
+            <button class="modal-close-btn" aria-label="Close">×</button>
+            <h2>Settings</h2>
+            <label><input type="checkbox" id="strategy-toggle"> Show Basic Strategy</label>
+            <div style="margin-top:1.2em;">
+                <span>Table Color: </span>
+                <button class="color-swatch" data-color="#2a623d" style="background:#2a623d; width:28px; height:28px; border-radius:50%; border:1.5px solid #e0b757;"></button>
+                <button class="color-swatch" data-color="#125b56" style="background:#125b56; width:28px; height:28px; border-radius:50%; border:1.5px solid #e0b757;"></button>
+                <button class="color-swatch" data-color="#512e17" style="background:#512e17; width:28px; height:28px; border-radius:50%; border:1.5px solid #e0b757;"></button>
+            </div>
+        </div>
+    </div>
+    <!-- PAYOUTS MODAL -->    <div class="modal-overlay" id="payouts-modal" role="dialog" aria-modal="true">
+        <div class="modal-content">
+            <button class="modal-close-btn" aria-label="Close">×</button>
+            <h2>Payout Table</h2>
+            <ul>
+                <li>Main: 3:2 for Blackjack</li>
+                <li>Perfect Pairs: see table rules</li>
+                <li>21+3: see table rules</li>
+            </ul>
+        </div>
+    </div>
+    <!-- OPTIONAL VOUCHER SYSTEM (hidden, can remove if not used) -->
+    <div style="display:none;">
+        <input type="text" id="voucher-input" placeholder="Voucher code">
+        <button id="voucher-redeem-btn">Redeem</button>
+        <span id="voucher-message"></span>
+    </div>
     <script type="module" src="js/construction21-ui.js"></script>
     <script>
     // AMBIENT PARTICLES
