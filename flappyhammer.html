@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Flappy Hammer</title>
+  <meta name="viewport" content="width=700, initial-scale=1.0, user-scalable=no">
+  <style>
+    body {
+      margin: 0; padding: 0;
+      background: radial-gradient(ellipse at 60% 40%, #ffd70033 0%, #23232b 100%), linear-gradient(135deg, #23232b 0%, #2d2d3a 100%);
+      font-family: 'Segoe UI', Arial, sans-serif;
+      min-height: 100vh; min-width: 100vw; overflow: hidden;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .animated-bg { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden;}
+    .bg-shape { position: absolute; border-radius: 50%; opacity: 0.14; filter: blur(30px); animation: floatBg 8s ease-in-out infinite alternate;}
+    .bg-shape1 { width: 350px; height: 350px; background: #ffd700; left: 8vw; top: 10vh; animation-delay: 0s;}
+    .bg-shape2 { width: 220px; height: 220px; background: #ff4e00; right: 8vw; top: 33vh; animation-delay: 2s;}
+    .bg-shape3 { width: 180px; height: 180px; background: #00cfff; left: 33vw; bottom: 8vh; animation-delay: 4s;}
+    @keyframes floatBg { to { transform: translateY(-40px) scale(1.10); } }
+    #game-container {
+      background: rgba(45,45,58,0.98); border: 5px solid #e0a106; border-radius: 28px;
+      box-shadow: 0 16px 50px #0004; padding: 35px 32px 32px 32px; box-sizing: border-box;
+      position: relative; display: flex; flex-direction: column; align-items: center; min-width: 370px; max-width: 900px;
+      margin: 40px auto; z-index: 2;
+    }
+    h1 {
+      color: #e0a106; text-align: center; font-size: clamp(1.9rem, 6vw, 2.9rem);
+      text-shadow: 2px 2px 7px #0009; margin: 0 0 23px 0; font-weight: 900; letter-spacing: 0.01em;
+      animation: bounce 1.4s infinite alternate cubic-bezier(.51,1.7,.49,.92);
+    }
+    @keyframes bounce { to { transform: translateY(-10px) scale(1.05); } }
+    /* Main Menu Styling */
+    #main-menu {
+      width: 100%; display: flex; flex-direction: column; align-items: center; gap: 1.38rem;
+      padding: 2.5rem 0 1.5rem 0; transition: opacity 0.4s;
+      min-height: 420px;
+    }
+    #main-menu input[type="text"] {
+      font-size: 1.2rem; padding: 0.52rem 1.1rem; border-radius: 9px;
+      border: 2px solid #e0a106; width: min(240px, 80vw); background-color: #f9f6ed;
+      box-shadow: 1px 2px 9px #0002; font-weight: 500; text-align: center; margin-bottom: 0.7rem;
+    }
+    .difficulty-chooser {
+      display: flex; gap: 1.1em; margin-bottom: 1.1em; flex-wrap:wrap; justify-content:center;
+    }
+    .diff-btn {
+      padding: 0.65em 2.2em; border: none; border-radius: 12px; font-size: 1.15rem; font-weight: 700; cursor: pointer;
+      background: #ffe066; color: #23232b; box-shadow: 0 2px 7px #e0a10622;
+      transition: all 0.15s; outline: none;
+      border: 2.4px solid #e0a106; position:relative;
+    }
+    .diff-btn.selected, .diff-btn:focus {
+      background: linear-gradient(90deg, #e0a106, #ff4e00 86%);
+      color: #fff; border-color: #ff4e00; transform: scale(1.08);
+      box-shadow: 0 5px 25px #ff4e0060;
+    }
+    .diff-btn span {
+      display: block; font-size: 0.8em; font-weight: 400; color: #e0a106; opacity: 0.92;
+    }
+    #main-menu button#start-btn {
+      margin-top: 0.2rem; width: 95%; max-width: 300px;
+      font-size: 1.2rem; background: linear-gradient(90deg,#e0a106,#ff4e00);
+      color: #fff; border: none; border-radius: 11px; font-weight: 700; cursor: pointer;
+      box-shadow: 0 4px 16px #0003; letter-spacing: 0.01em;
+    }
+    #main-menu button#start-btn:hover { transform: scale(1.06);}
+    #main-menu .icon-big { font-size: 3.4rem; display: block; margin: 0 auto 0.5em auto; text-align:center;}
+    #main-menu .tip { color: #ffe066; font-size: 1.09em; opacity: 0.93; margin-top: -3px; text-align: center;}
+    /* Game Canvas */
+    #game-canvas {
+      display: block; margin: 0 auto; background: #ffe066; box-shadow: 0 7px 32px #0004;
+      border-radius: 23px; border: 4.1px solid #e0a106; z-index: 1;
+      position: relative; width: 100%; max-width: 700px; height: 680px; min-width:320px;
+      transition: box-shadow 0.18s;
+    }
+    @media (max-width: 900px) { #game-canvas { max-width:99vw; height:68vw; } #game-container{max-width:99vw;} }
+    /* Score Overlay */
+    #score-overlay {
+      color: #fff; position: absolute; left: 50%; top: 22px; transform: translateX(-50%);
+      font-size: 2.3rem; font-weight: 900; letter-spacing: 0.01em;
+      text-shadow: 1px 2px 14px #1a1a22;
+      z-index: 4; background: rgba(32,26,11,0.12); padding: 5px 21px; border-radius: 15px;
+      user-select: none; pointer-events: none; display: none;
+    }
+    /* Game Over/Win Menu */
+    #death-screen {
+      display: none; flex-direction: column; align-items: center; justify-content: center;
+      gap: 1.7rem; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(44,44,44,0.97); border-radius: 19px; z-index: 10; text-align: center;
+      animation: fadeInWin 0.42s cubic-bezier(.5,1.8,.5,1) 1;
+    }
+    @keyframes fadeInWin { from{opacity:0;transform:translateY(40px) scale(.96);} to{opacity:1;transform:none;} }
+    #death-screen .medal {
+      font-size: 3.6rem; color: #ffe066; animation: popmedal 1.15s infinite alternate cubic-bezier(.5,1.8,.5,1);
+      filter: drop-shadow(0 2px 11px #ffd70055);
+    }
+    @keyframes popmedal { to { transform: scale(1.14) rotate(-9deg);} }
+    #death-screen .score {
+      font-size: 2.4rem; color: #e0a106; font-weight: 700; letter-spacing: 0.01em;
+      margin: 0.55em 0 0.34em 0; text-shadow: 1px 2px 12px #0002;
+      animation: popscore 1.4s infinite alternate cubic-bezier(.5,1.8,.5,1);
+    }
+    @keyframes popscore { to { transform: scale(1.07);} }
+    #death-screen button {
+      font-size: 1.12rem; padding: 0.74rem 2.1rem;
+      background: linear-gradient(90deg,#e0a106,#ff4e00);
+      color: #fff; border: none; border-radius: 11px; font-weight: 700; cursor: pointer;
+      box-shadow: 0 2px 10px #0002; transition: all 0.15s; margin: 0 0.9em;
+    }
+    #death-screen button:hover { transform: scale(1.06);}
+    #confetti { pointer-events:none; position: absolute; left:0; top:0; width:100%; height:100%; z-index: 99;}
+    .confetti-piece {
+      position:absolute; width:19px; height:8px; border-radius:4px;
+      opacity: 0.8; z-index:110; animation: confetti-fall 1.7s cubic-bezier(.53,1.7,.38,.85);
+      will-change: transform;
+    }
+    @keyframes confetti-fall { to { transform: translateY(580px) rotate(215deg) scaleX(.87); opacity:0.4;} }
+    /* Leaderboard styles */
+    #leaderboard {
+      width: 100%; max-width: 440px; margin: 28px auto 0 auto; background: rgba(0,0,0,0.22);
+      border-radius: 16px; box-shadow: 0 5px 22px #0002;
+      padding: 18px 18px 17px 18px; border: 2.7px solid #e0a106;
+      color: #fff; text-align: center; z-index: 2; font-size: 1.09rem; font-family: 'Segoe UI', Arial, sans-serif;
+      display: block;
+    }
+    #leaderboard h2 { color: #e0a106; font-size: 1.21em; margin: 0 0 13px 0; font-weight: 800;}
+    #leaderboard-entries { min-height: 76px;}
+    .score-entry { display: flex; align-items: center; justify-content: space-between; background: rgba(255,255,255,0.12); border-radius: 10px; margin-bottom: 10px; padding: 9px 14px 9px 39px; position:relative; font-size:1.09em; border-left: 4px solid #e0a106;}
+    .score-entry:last-child { margin-bottom: 0;}
+    .score-entry::before { content: attr(data-rank); position: absolute; left: 12px; top: 0; bottom: 0; width: 21px; display: flex; align-items: center; justify-content: center; color: #e0a106; font-weight: bold; font-size: 1.14em; opacity: 0.85;}
+    .score-entry .player-name { color: #fff; margin-right: 13px; background: rgba(255,255,255,0.11); padding: 4px 12px; border-radius: 10px; box-shadow: 1px 1px 3px #0001; flex:1; white-space:nowrap; overflow: hidden; text-overflow: ellipsis;}
+    .score-entry .player-score { color: #ffe066; font-size: 1.18em; background: rgba(0,0,0,0.11); padding: 3px 13px; border-radius: 9px; font-weight: 700;}
+    .score-entry .mode-label { font-size:0.82em; font-weight:400; margin-left: 7px; color:#ff4e00;}
+    .loading-spinner { width: 32px; height: 32px; border: 3px solid rgba(224,161,6,0.33); border-top: 3px solid #e0a106; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto;}
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+  <div class="animated-bg">
+    <div class="bg-shape bg-shape1"></div>
+    <div class="bg-shape bg-shape2"></div>
+    <div class="bg-shape bg-shape3"></div>
+  </div>
+  <div id="game-container">
+    <h1>🔨 Flappy Hammer 🔨</h1>
+    <div id="main-menu">
+      <span class="icon-big">🔨</span>
+      <input id="player-name" maxlength="18" type="text" placeholder="Enter name..." autocomplete="off"/>
+      <div class="difficulty-chooser">
+        <button class="diff-btn selected" data-mode="easy">Easy<br><span>Slow, big gaps, wide</span></button>
+        <button class="diff-btn" data-mode="normal">Normal<br><span>Standard width/gaps</span></button>
+        <button class="diff-btn" data-mode="nightmare">Nightmare<br><span>Small gap, close pipes</span></button>
+      </div>
+      <button id="start-btn">Start Game</button>
+      <span class="tip">Tap screen or press <b>Space</b> to flap!<br/>Avoid the pipes.</span>
+    </div>
+    <canvas id="game-canvas" width="700" height="680" style="display:none"></canvas>
+    <div id="score-overlay"></div>
+    <div id="death-screen">
+      <span class="medal">🏅</span>
+      <div class="score" id="death-score">Score: 0</div>
+      <div style="display:flex;gap:1.1em;justify-content:center;">
+        <button id="replay-btn">Replay</button>
+        <button id="return-menu-btn">Menu</button>
+      </div>
+      <div id="confetti"></div>
+    </div>
+    <div id="leaderboard" style="display:block;">
+      <h2>Leaderboard</h2>
+      <div id="leaderboard-entries">Loading...</div>
+    </div>
+  </div>
+  <script>
+    // --------------- FLAPPY GAME LOGIC WITH WIDER SCREEN & PIPE DISTANCES -----------------
+    const canvas = document.getElementById('game-canvas');
+    const ctx = canvas.getContext('2d');
+    const menu = document.getElementById('main-menu');
+    const startBtn = document.getElementById('start-btn');
+    const playerNameInput = document.getElementById('player-name');
+    const deathScreen = document.getElementById('death-screen');
+    const deathScore = document.getElementById('death-score');
+    const replayBtn = document.getElementById('replay-btn');
+    const returnMenuBtn = document.getElementById('return-menu-btn');
+    const confettiDiv = document.getElementById('confetti');
+    const scoreOverlay = document.getElementById('score-overlay');    const diffBtns = [...document.querySelectorAll(".diff-btn")];
+    let running = false, gameStarted = false, hammer, pipes, score, best, animFrame;
+    let selectedMode = "easy";
+    let modeVars = {};
+    // Visual effects variables
+    let particles = [];
+    let trails = [];
+    let gridOpacity = 0.5;
+    // Mode settings: realistic, based on cognitive tests, with horizontal pipe gaps
+   const DIFFICULTY_VARS = {
+  easy:      {gravity:0.28,  flapBoost:-5.5,  pipeSpeed:1.0,  gapSize:290, pipeDist:400, wind:0,    label:"Easy"},
+  normal:    {gravity:0.32,  flapBoost:-6.3,  pipeSpeed:1.8,  gapSize:165, pipeDist:280, wind:0,    label:"Normal"},
+  nightmare: {gravity:0.43,  flapBoost:-8.45, pipeSpeed:2.8,  gapSize:95,  pipeDist:180, wind:0.41, label:"Nightmare"}
+};
+
+
+
+    // -------- UI & MENU -----------
+    diffBtns.forEach(btn=>{
+      btn.onclick = ()=>{
+        diffBtns.forEach(b=>b.classList.remove("selected"));
+        btn.classList.add("selected");
+        selectedMode = btn.dataset.mode;
+      }
+    });
+    function showMenu() {
+      menu.style.opacity = "1"; menu.style.display = "flex";
+      canvas.style.display = "none";
+      scoreOverlay.style.display = "none";
+      deathScreen.style.display = "none";
+      confettiDiv.innerHTML = "";
+      document.getElementById('leaderboard').style.display = 'block';
+    }
+    function hideMenu() { menu.style.display="none"; }    function startGame() {
+      modeVars = {...DIFFICULTY_VARS[selectedMode]};
+      hammer = { x: 84, y: canvas.height/2-25, vy: 0, angle: 0, size: 49, tilt: 0 };
+      pipes = [];
+      score = 0;
+      best = Number(localStorage.getItem("flappyhammer_best_" + selectedMode)) || 0;
+      running = true; gameStarted = true;
+      // Reset visual effects
+      particles = [];
+      trails = [];
+      gridOpacity = 0.5;
+      menu.style.display = "none"; deathScreen.style.display = "none"; confettiDiv.innerHTML = "";
+      canvas.style.display = "block"; scoreOverlay.style.display = "block";
+      scoreOverlay.textContent = score;
+      document.getElementById('leaderboard').style.display = 'none';
+      // Set up pipe timing using distance, not frame interval
+      let lastPipeX = canvas.width + 30; // Place first pipe off screen
+      function gameLoop() {
+        // PHYSICS
+        hammer.vy += modeVars.gravity;
+        hammer.y += hammer.vy;
+        // Wind (nightmare): random drift
+        if (modeVars.wind) {
+          hammer.x += (Math.random()-0.5)*modeVars.wind;
+          hammer.tilt += (Math.random()-0.5)*0.09;
+          hammer.tilt = Math.max(-0.15, Math.min(0.16, hammer.tilt));
+        }
+        // Clamp hammer within game window
+        if (hammer.y < 0) { hammer.y = 0; hammer.vy = 0.5; }
+        if (hammer.y + hammer.size > canvas.height-7) { hammer.y = canvas.height-hammer.size-7; gameOver(); return;}
+        // Spawn pipes at horizontal distance
+        if (pipes.length === 0 || (canvas.width - pipes[pipes.length-1].x) >= modeVars.pipeDist) {
+          let top = Math.random()*(canvas.height-modeVars.gapSize-170)+80;
+          pipes.push({ x: canvas.width, top, passed:false });
+        }
+        // Move pipes
+        for (const p of pipes) p.x -= modeVars.pipeSpeed;
+        // Remove off-screen
+        while (pipes.length && pipes[0].x < -55) pipes.shift();        // Draw BG
+        ctx.clearRect(0,0,canvas.width,canvas.height);
+        ctx.fillStyle="#f7f0ce";
+        ctx.fillRect(0,0,canvas.width,canvas.height);
+        
+        // Draw blueprint grid background
+        drawBlueprintGrid();
+        
+        // Construction ground
+        ctx.fillStyle="#d1c089";
+        ctx.fillRect(0,canvas.height-16,canvas.width,16);
+        // Draw pipes
+        for (const p of pipes) {
+          // Top pipe
+          ctx.save();
+          ctx.shadowColor = "#bfa14a"; ctx.shadowBlur=10;
+          ctx.fillStyle="#e0a106"; ctx.fillRect(p.x,0,48,p.top);
+          ctx.strokeStyle="#bfa14a"; ctx.lineWidth=4; ctx.strokeRect(p.x,0,48,p.top);
+          for(let i=0;i<p.top/36;i++){
+            ctx.fillStyle="#ff4e00"; ctx.fillRect(p.x,p.top-36*i-16,48,12);
+          }
+          ctx.restore();
+          // Bottom pipe
+          ctx.save();
+          ctx.shadowColor = "#bfa14a"; ctx.shadowBlur=10;
+          ctx.fillStyle="#ff4e00"; ctx.fillRect(p.x,p.top+modeVars.gapSize,48,canvas.height-p.top-modeVars.gapSize-16);
+          ctx.strokeStyle="#bfa14a"; ctx.lineWidth=4; ctx.strokeRect(p.x,p.top+modeVars.gapSize,48,canvas.height-p.top-modeVars.gapSize-16);
+          for(let i=0;i<(canvas.height-p.top-modeVars.gapSize-16)/36;i++){
+            ctx.fillStyle="#e0a106"; ctx.fillRect(p.x,p.top+modeVars.gapSize+36*i+7,48,12);
+          }
+          ctx.restore();
+        }
+        // Check pass for score
+        for (const p of pipes) {
+          if (!p.passed && p.x+48<hammer.x+hammer.size/2) {
+            p.passed = true; score++;
+            scoreOverlay.textContent = score;
+          }
+        }        // Add trail effect
+        addTrail(hammer.x + hammer.size/2, hammer.y + hammer.size/2);
+        updateTrails();
+        
+        // Draw hammer with industrial look
+        hammer.angle += hammer.vy*0.013 + (hammer.tilt || 0);
+        drawIndustrialHammer();
+        
+        // Update and draw particles
+        updateAndDrawParticles();        // Check collisions
+        for (const p of pipes) {
+          // Top
+          if (hammer.x+hammer.size-9>p.x && hammer.x+9<p.x+48 && hammer.y<p.top) { 
+            createCollisionParticles(hammer.x, hammer.y);
+            gameOver(); 
+            return; 
+          }
+          // Bottom
+          if (hammer.x+hammer.size-9>p.x && hammer.x+9<p.x+48 && hammer.y+hammer.size>p.top+modeVars.gapSize) { 
+            createCollisionParticles(hammer.x, hammer.y);
+            gameOver(); 
+            return; 
+          }
+        }
+        if (running) animFrame = requestAnimationFrame(gameLoop);      }
+      animFrame = requestAnimationFrame(gameLoop);
+    }
+    
+    function gameOver() {
+      running = false;
+      
+      // Create explosion particles
+      const particleCount = 30;
+      const colors = ["#e0a106", "#ff4e00", "#ffe066", "#bfa14a"];
+      
+      for (let i = 0; i < particleCount; i++) {
+        particles.push({
+          x: hammer.x + hammer.size/2,
+          y: hammer.y + hammer.size/2,
+          vx: (Math.random() * 12 - 6),
+          vy: (Math.random() * 12 - 6),
+          size: Math.random() * 8 + 3,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          life: 40,
+          maxLife: 40
+        });
+      }
+      
+      // Show final particles and then end game
+      let finalFrames = 0;
+      const finalAnimation = () => {
+        ctx.clearRect(0,0,canvas.width,canvas.height);
+        ctx.fillStyle = "#f7f0ce";
+        ctx.fillRect(0,0,canvas.width,canvas.height);
+        drawBlueprintGrid();
+        updateAndDrawParticles();
+        finalFrames++;
+        if (finalFrames < 30) {
+          requestAnimationFrame(finalAnimation);
+        } else {
+          setTimeout(()=>showDeathScreen(), 150);
+        }
+      };
+      
+      cancelAnimationFrame(animFrame);
+      requestAnimationFrame(finalAnimation);
+    }
+    function showDeathScreen() {
+      canvas.style.display = "none";
+      scoreOverlay.style.display = "none";
+      deathScreen.style.display = "flex";
+      deathScore.textContent = `Score: ${score}`;
+      // Medal emoji
+      deathScreen.querySelector(".medal").textContent = score>=30?"🏆":score>=15?"🥈":score>=7?"🥉":"🏅";
+      // Animate confetti if good score
+      confettiDiv.innerHTML = "";
+      if (score>=12) for(let i=0;i<17;i++) createConfetti();
+      if (score>best) localStorage.setItem("flappyhammer_best_" + selectedMode, score);
+      submitScore(playerNameInput.value.trim()||"Anonymous", score, selectedMode);
+      updateLeaderboard();
+    }
+    function createConfetti() {
+      const colors = ["#ffe066","#ff4e00","#e0a106","#bfa14a"];
+      let conf = document.createElement("div");
+      conf.className = "confetti-piece";
+      conf.style.left = Math.random()*90+"%";
+      conf.style.background = colors[Math.floor(Math.random()*colors.length)];
+      conf.style.transform = `rotate(${Math.random()*360}deg) scaleX(${0.7+Math.random()*0.6})`;
+      confettiDiv.appendChild(conf);
+      setTimeout(()=>conf.remove(),1650);
+    }
+    startBtn.onclick = () => {
+      playerName = playerNameInput.value.trim() || "Anonymous";
+      startGame();
+    };    replayBtn.onclick = () => { startGame(); };
+    returnMenuBtn.onclick = () => { showMenu(); };
+    
+    document.addEventListener('keydown', e => {
+      if (!gameStarted) return;
+      if ((e.key===" "||e.key==="ArrowUp") && running) {
+        hammer.vy = modeVars.flapBoost;
+        createFlapParticles();
+      }
+      if (!running && (e.key===" "||e.key==="Enter")) { startGame(); }
+    });
+    canvas.addEventListener("mousedown", ()=>{ 
+      if(running) {
+        hammer.vy=modeVars.flapBoost;
+        createFlapParticles();
+      } 
+    });
+    canvas.addEventListener("touchstart", e=>{ 
+      if(running) {
+        hammer.vy=modeVars.flapBoost;
+        createFlapParticles();
+      } 
+    }, {passive:true});    document.body.addEventListener("touchstart", e => {
+      if (!running && menu.style.display==="none") startGame();
+    },{passive:true});
+    
+    // Visual enhancement functions
+    function drawBlueprintGrid() {
+      // Major grid
+      ctx.save();
+      ctx.strokeStyle = `rgba(25, 118, 210, ${gridOpacity * 0.5})`;
+      ctx.lineWidth = 1;
+      
+      // Draw vertical grid lines
+      for(let i = 0; i <= canvas.width; i += 50) {
+        ctx.beginPath();
+        ctx.moveTo(i, 0);
+        ctx.lineTo(i, canvas.height);
+        ctx.stroke();
+      }
+      
+      // Draw horizontal grid lines
+      for(let i = 0; i <= canvas.height; i += 50) {
+        ctx.beginPath();
+        ctx.moveTo(0, i);
+        ctx.lineTo(canvas.width, i);
+        ctx.stroke();
+      }
+      
+      // Minor grid
+      ctx.strokeStyle = `rgba(25, 118, 210, ${gridOpacity * 0.2})`;
+      ctx.lineWidth = 0.5;
+      
+      // Draw minor vertical grid lines
+      for(let i = 0; i <= canvas.width; i += 10) {
+        if (i % 50 !== 0) { // Skip major lines
+          ctx.beginPath();
+          ctx.moveTo(i, 0);
+          ctx.lineTo(i, canvas.height);
+          ctx.stroke();
+        }
+      }
+      
+      // Draw minor horizontal grid lines
+      for(let i = 0; i <= canvas.height; i += 10) {
+        if (i % 50 !== 0) { // Skip major lines
+          ctx.beginPath();
+          ctx.moveTo(0, i);
+          ctx.lineTo(canvas.width, i);
+          ctx.stroke();
+        }
+      }
+      
+      // Measurement markers
+      ctx.fillStyle = `rgba(25, 118, 210, ${gridOpacity * 0.9})`;
+      ctx.font = "10px monospace";
+      ctx.textAlign = "center";
+      
+      // Vertical markers
+      for(let i = 0; i <= canvas.width; i += 50) {
+        ctx.fillText(i.toString(), i, 10);
+      }
+      
+      // Horizontal markers
+      for(let i = 50; i <= canvas.height; i += 50) {
+        ctx.fillText(i.toString(), 10, i);
+      }
+      
+      ctx.restore();
+    }
+    
+    function drawIndustrialHammer() {
+      ctx.save();
+      const centerX = hammer.x + hammer.size/2;
+      const centerY = hammer.y + hammer.size/2;
+      
+      // Draw glow
+      ctx.shadowColor = "#ff4e00";
+      ctx.shadowBlur = 15;
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, hammer.size/2, 0, Math.PI*2);
+      ctx.fillStyle = "rgba(255, 78, 0, 0.2)";
+      ctx.fill();
+      
+      // Position and rotate
+      ctx.translate(centerX, centerY);
+      ctx.rotate(hammer.angle);
+      
+      // Create hammer head (handle already in emoji)
+      const handle = {
+        width: hammer.size * 0.9,
+        height: hammer.size * 0.3
+      };
+      const head = {
+        width: hammer.size * 0.6,
+        height: hammer.size * 0.6
+      };
+      
+      // Handle
+      const gradient = ctx.createLinearGradient(-handle.width/2, 0, handle.width/2, 0);
+      gradient.addColorStop(0, "#8B4513");
+      gradient.addColorStop(0.3, "#A0522D");
+      gradient.addColorStop(0.7, "#8B4513");
+      gradient.addColorStop(1, "#6B3E26");
+      
+      ctx.fillStyle = gradient;
+      ctx.beginPath();
+      ctx.rect(-handle.width/2, -handle.height/2, handle.width, handle.height);
+      ctx.fill();
+      
+      // Warning stripes on handle
+      ctx.fillStyle = "#e0a106";
+      const stripeWidth = handle.width / 8;
+      for (let i = -handle.width/2; i < handle.width/2; i += stripeWidth*2) {
+        ctx.fillRect(i, -handle.height/2, stripeWidth, handle.height);
+      }
+      
+      // Metal head
+      const headGradient = ctx.createLinearGradient(-head.width/2, 0, head.width/2, 0);
+      headGradient.addColorStop(0, "#777");
+      headGradient.addColorStop(0.3, "#AAA");
+      headGradient.addColorStop(0.7, "#999");
+      headGradient.addColorStop(1, "#777");
+      
+      ctx.fillStyle = headGradient;
+      ctx.beginPath();
+      ctx.rect(-head.width/2, -head.height, head.width, head.height);
+      ctx.fill();
+      
+      // Metal shine
+      ctx.fillStyle = "rgba(255,255,255,0.5)";
+      ctx.beginPath();
+      ctx.ellipse(-head.width/4, -head.height*0.7, head.width/6, head.height/6, 0, 0, Math.PI*2);
+      ctx.fill();
+      
+      // Rivets
+      ctx.fillStyle = "#555";
+      const rivetPositions = [
+        {x: -head.width/3, y: -head.height*0.3},
+        {x: head.width/3, y: -head.height*0.3},
+        {x: -head.width/3, y: -head.height*0.7},
+        {x: head.width/3, y: -head.height*0.7}
+      ];
+      
+      rivetPositions.forEach(pos => {
+        ctx.beginPath();
+        ctx.arc(pos.x, pos.y, head.width/10, 0, Math.PI*2);
+        ctx.fill();
+        
+        // Rivet shine
+        ctx.fillStyle = "rgba(255,255,255,0.5)";
+        ctx.beginPath();
+        ctx.arc(pos.x - head.width/40, pos.y - head.width/40, head.width/30, 0, Math.PI*2);
+        ctx.fill();
+        ctx.fillStyle = "#555";
+      });
+      
+      ctx.restore();
+    }
+    
+    function addTrail(x, y) {
+      // Add a new trail point
+      trails.push({
+        x: x,
+        y: y,
+        age: 0,
+        maxAge: 10
+      });
+      
+      // Keep trail at reasonable length
+      if (trails.length > 12) {
+        trails.shift();
+      }
+    }
+    
+    function updateTrails() {
+      // Draw hammer trails
+      ctx.save();
+      
+      for (let i = 0; i < trails.length; i++) {
+        const trail = trails[i];
+        trail.age++;
+        
+        // Remove old trail points
+        if (trail.age > trail.maxAge) {
+          trails.splice(i, 1);
+          i--;
+          continue;
+        }
+        
+        // Calculate opacity based on age
+        const opacity = (1 - trail.age / trail.maxAge) * 0.5;
+        const size = hammer.size * (1 - trail.age / trail.maxAge) * 0.8;
+        
+        // Draw trail
+        ctx.beginPath();
+        ctx.fillStyle = `rgba(255, 78, 0, ${opacity})`;
+        ctx.arc(trail.x, trail.y, size, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      
+      ctx.restore();
+    }
+    
+    function createCollisionParticles(x, y) {
+      // Create particles when hammer collides
+      const particleCount = 20;
+      const colors = ["#e0a106", "#ff4e00", "#aaa", "#bfa14a"];
+      
+      for (let i = 0; i < particleCount; i++) {
+        particles.push({
+          x: x + hammer.size/2,
+          y: y + hammer.size/2,
+          vx: Math.random() * 6 - 3,
+          vy: Math.random() * 6 - 3,
+          size: Math.random() * 6 + 2,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          life: 60,
+          maxLife: 60
+        });
+      }
+    }
+    
+    function createFlapParticles() {
+      // Create particles when hammer flaps
+      const particleCount = 10;
+      const colors = ["#ffe066", "#e0a106", "#ffcc00"];
+      
+      for (let i = 0; i < particleCount; i++) {
+        particles.push({
+          x: hammer.x + hammer.size/2,
+          y: hammer.y + hammer.size/2,
+          vx: Math.random() * 3 - 1.5,
+          vy: Math.random() * 3 + 2, // Mostly downward
+          size: Math.random() * 3 + 1,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          life: 20,
+          maxLife: 20
+        });
+      }
+    }
+    
+    function updateAndDrawParticles() {
+      ctx.save();
+      
+      for (let i = 0; i < particles.length; i++) {
+        const p = particles[i];
+        
+        // Update particle position
+        p.x += p.vx;
+        p.y += p.vy;
+        p.life--;
+        
+        // Remove dead particles
+        if (p.life <= 0) {
+          particles.splice(i, 1);
+          i--;
+          continue;
+        }
+        
+        // Draw particle
+        const opacity = p.life / p.maxLife;
+        ctx.fillStyle = p.color + Math.floor(opacity * 255).toString(16).padStart(2, '0');
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size * opacity, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      
+      ctx.restore();
+    }
+    
+    showMenu();
+
+    // ---------- Firebase Leaderboard Logic -----------
+    var db, collection, addDoc, query, orderBy, limit, getDocs, serverTimestamp;
+    (function() {
+      function assignFirebaseGlobals() {
+        db = window.firebaseFirestore;
+        collection = window.firebaseCollection;
+        addDoc = window.firebaseAddDoc;
+        query = window.firebaseQuery;
+        orderBy = window.firebaseOrderBy;
+        limit = window.firebaseLimit;
+        getDocs = window.firebaseGetDocs;
+        serverTimestamp = window.firebaseServerTimestamp;
+      }
+      if (window.firebaseFirestore) { assignFirebaseGlobals(); }
+      else { document.addEventListener('firebase-ready', assignFirebaseGlobals); }
+    })();
+    const leaderboardCollectionName = "flappyHammerLeaderboard";
+    const leaderboard = document.getElementById('leaderboard');
+    const leaderboardEntries = document.getElementById('leaderboard-entries');
+    const LEADERBOARD_SIZE = 7;
+    function submitScore(name, finalScore, mode) {
+      if (!db || !collection || finalScore<=0) return;
+      const scoresCollection = collection(db, leaderboardCollectionName);
+      addDoc(scoresCollection, {
+        name: name, score: finalScore, mode: mode, timestamp: serverTimestamp()
+      }).then(() => { updateLeaderboard(); })
+      .catch(error => { console.error("Error submitting score to Firebase: ", error); });
+    }
+    async function updateLeaderboard() {
+      if (!db || !collection) return;
+      leaderboardEntries.className = 'loading';
+      leaderboardEntries.innerHTML = '<div class="loading-spinner"></div>';
+      const scoresCollection = collection(db, leaderboardCollectionName);
+      const q = query(scoresCollection, orderBy("score", "desc"), limit(LEADERBOARD_SIZE*2));
+      try {
+        const querySnapshot = await getDocs(q);
+        leaderboardEntries.className = '';
+        leaderboardEntries.innerHTML = '';
+        if (querySnapshot.empty) {
+          leaderboardEntries.innerHTML = `<div style="color:#ffe066;">No scores yet!</div>`;
+          return;
+        }
+        let rank = 1;
+        querySnapshot.forEach(doc => {
+          const s = doc.data();
+          const entry = document.createElement('div');
+          entry.className = 'score-entry';
+          entry.setAttribute('data-rank', rank);
+          entry.innerHTML = `<span class="player-name">${s.name}<span class="mode-label">[${(s.mode||"normal").charAt(0).toUpperCase()+ (s.mode||"normal").slice(1)}]</span></span><span class="player-score">${s.score}</span>`;
+          leaderboardEntries.appendChild(entry);
+          rank++;
+        });
+      } catch (error) {
+        console.error("Error fetching leaderboard from Firebase: ", error);
+        leaderboardEntries.innerHTML = `<div style="color:#ff6b6b;">Error loading scores</div>`;
+      }
+    }
+    updateLeaderboard();
+  </script>
+  <script type="module">
+    // --- Firebase Setup (reusing your config for leaderboard) ---
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-app.js";
+    import { getFirestore, collection, addDoc, query, orderBy, limit, getDocs, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-firestore.js";
+    const firebaseConfig = {
+      apiKey: "AIzaSyBVtq6dAEuybJNmTTv8dXBxTVUgw1t0ZMk",
+      authDomain: "cusumano-website.firebaseapp.com",
+      projectId: "cusumano-website",
+      storageBucket: "cusumano-website.firebasestorage.app",
+      messagingSenderId: "20051552210",
+      appId: "1:20051552210:web:7eb3b22baa3fec184e4a0b"
+    };
+    const app = initializeApp(firebaseConfig);
+    window.firebaseApp = app;
+    window.firebaseFirestore = getFirestore(app);
+    window.firebaseCollection = collection;
+    window.firebaseAddDoc = addDoc;
+    window.firebaseQuery = query;
+    window.firebaseOrderBy = orderBy;
+    window.firebaseLimit = limit;
+    window.firebaseGetDocs = getDocs;
+    window.firebaseServerTimestamp = serverTimestamp;
+    document.dispatchEvent(new Event('firebase-ready'));
+  </script>
+</body>
+</html>
