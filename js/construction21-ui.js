@@ -4,7 +4,7 @@
 import { Construction21Game, GAME_OUTCOMES, db as gameDb } from './construction21-logic.js';
 
 // --- Firebase Integration ---
-import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
 import { doc, getDoc, setDoc, onSnapshot, updateDoc } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
 
 // ==========================================================================
@@ -23,7 +23,6 @@ let previousBalance = 10000;
 const delay = ms => new Promise(res => setTimeout(res, ms));
 
 // --- Use Firebase instance from construction21-logic.js ---
-import { getAuth } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
 const auth = getAuth();
 const db = gameDb;
 
@@ -46,11 +45,16 @@ const DOMElements = {
     betSpots: document.querySelectorAll('.bet-spot'),
     chipTray: document.getElementById('chip-tray'),
     // Action Bar
-    actionBar: document.getElementById('action-bar'),
-    // Modals & Panels
+    actionBar: document.getElementById('action-bar'),    // Modals & Panels
     outcomeModal: document.getElementById('outcome-modal'),
+    outcomeModalContent: document.getElementById('outcome-modal-content'),
     outcomeTitle: document.getElementById('outcome-title'),
-    outcomeList: document.getElementById('outcome-results-list'),
+    outcomeSubtitle: document.getElementById('outcome-subtitle'),
+    outcomeHands: document.getElementById('outcome-hands'),
+    outcomeSidebets: document.getElementById('outcome-sidebets'),
+    outcomeSidebetsContainer: document.getElementById('outcome-sidebets-container'),
+    outcomeInsurance: document.getElementById('outcome-insurance'),
+    outcomeInsuranceContainer: document.getElementById('outcome-insurance-container'),
     outcomeTotal: document.getElementById('outcome-total-payout'),
     settingsBtn: document.getElementById('settings-btn'),
     statsBtn: document.getElementById('stats-btn'),
@@ -94,7 +98,9 @@ function renderPlayerState() {
 function renderHandsAndScores() {
     DOMElements.dealerHand.innerHTML = '';
     game.dealerHand.cards.forEach((cardData, i) => {
-        const cardEl = createCardElement(cardData, !(i === 1 && !game.isGameInProgress));
+        // Force all dealer cards face up if it's dealer's turn
+        const forceUp = game.isDealerTurn || i !== 1 || !game.isGameInProgress;
+        const cardEl = createCardElement(cardData, forceUp);
         DOMElements.dealerHand.appendChild(cardEl);
     });
     if (game.dealerHand.cards.length > 0)
@@ -122,35 +128,71 @@ function renderBets() {
         const betType = spot.dataset.betType;
         const amount = game.bets[betType] || 0;
         spot.querySelector('.bet-spot__amount').textContent = amount ? `$${amount}` : '';
-        spot.classList.toggle('has-bet', amount > 0);
-
-        // Remove old chips and render stack
+        spot.classList.toggle('has-bet', amount > 0);        // Remove old chips and render stack with enhanced visual effect
         const chipsEl = spot.querySelector('.bet-spot__chips');
         chipsEl.innerHTML = '';
+        
+        // Calculate chips of each denomination needed
         let chipSum = amount;
+        let chipCounts = {};
         [100, 25, 10, 5].forEach(value => {
+            chipCounts[value] = 0;
             while (chipSum >= value) {
-                const chip = document.createElement('div');
+                chipCounts[value]++;
+                chipSum -= value;
+            }
+        });
+        
+        // Create and append chips with staggered animations
+        let delay = 0;
+        let totalChips = 0;
+        
+        // Add highest denomination chips first (they go on bottom)
+        [100, 25, 10, 5].forEach(value => {
+            for (let i = 0; i < chipCounts[value]; i++) {                const chip = document.createElement('div');
                 chip.className = 'chip';
                 chip.textContent = value;
                 chip.setAttribute('data-value', value);
+                
+                // Add edge pattern span element
+                const edgePattern = document.createElement('span');
+                chip.appendChild(edgePattern);
+                
+                // Add a small random rotation for natural appearance
+                const randomRotate = Math.random() * 8 - 4; // -4 to +4 degrees
+                chip.style.setProperty('--random-rotate', `${randomRotate}deg`);
+                
+                // Add more realistic Y offset to create natural stack variations
+                const randomOffsetY = Math.random() * 1.5 - 0.75; // -0.75px to +0.75px
+                chip.style.marginTop = `${randomOffsetY}px`;
+                
+                // Add staggered animation delay
+                chip.style.animationDelay = `${delay}ms`;
+                delay += 60; // 60ms between each chip for more natural feel
+                
+                // Add slight offset based on position in stack
+                chip.style.zIndex = totalChips;
+                totalChips++;
+                
                 chipsEl.appendChild(chip);
-                chipSum -= value;
             }
         });
     });
 }
 
 function createCardElement(cardData, faceUp = true) {
+    // Create card element with necessary class
     const card = document.createElement('div');
     card.className = 'card';
     
-    // Only allow dealer's second card to be face down during initial deal
-    // Player cards should ALWAYS be face up
+    // Handle face down cards (for dealer's hole card)
     const isPlayerCard = !cardData.isDealer; 
     const isDealerHoleCard = cardData.isDealer && cardData.isHoleCard;
     
-    if ((!faceUp || cardData.isFaceDown) && !isPlayerCard && isDealerHoleCard) {
+    // Show face down cards only during active gameplay
+    // If game is over (dealer's turn) OR faceUp is explicitly true, always show face up
+    if ((!faceUp || cardData.isFaceDown) && !isPlayerCard && isDealerHoleCard && 
+        !(game && game.isDealerTurn)) {
         card.classList.add('is-face-down');
         // Store card data for later reveal
         card.dataset.suit = cardData.suit;
@@ -158,14 +200,59 @@ function createCardElement(cardData, faceUp = true) {
         return card;
     }
     
+    // Setup suit and color
     const suitIcons = { '♥': '♥', '♦': '♦', '♠': '♠', '♣': '♣' };
     const suit = suitIcons[cardData.suit] || cardData.suit;
-    if (['♥', '♦'].includes(suit)) card.classList.add('card--red');
-    card.innerHTML = `
-        <div class="card__corner card__corner--top">${cardData.value}</div>
-        <div class="card__suit">${suit}</div>
-        <div class="card__corner card__corner--bottom">${cardData.value}</div>
-    `;
+    if (['♥', '♦'].includes(suit)) {
+        card.classList.add('card--red');
+    }
+    
+    // Add special class for face cards
+    if (['J', 'Q', 'K', 'A'].includes(cardData.value)) {
+        card.classList.add('card--face');
+    }
+    
+    // Create background/base structure
+    const cardBg = document.createElement('div');
+    cardBg.className = 'card__bg';
+    card.appendChild(cardBg);
+    
+    // Create the corners and center suit elements
+    const topCorner = document.createElement('div');
+    topCorner.className = 'card__corner card__corner--top';
+    topCorner.textContent = cardData.value;
+    
+    const bottomCorner = document.createElement('div');
+    bottomCorner.className = 'card__corner card__corner--bottom';
+    bottomCorner.textContent = cardData.value;
+    
+    const suitCenter = document.createElement('div');
+    suitCenter.className = 'card__suit';
+    suitCenter.textContent = suit;
+    
+    // Add mini-suit to corners
+    const miniSuitTop = document.createElement('span');
+    miniSuitTop.className = 'mini-suit';
+    miniSuitTop.textContent = suit;
+    topCorner.appendChild(miniSuitTop);
+    
+    const miniSuitBottom = document.createElement('span');
+    miniSuitBottom.className = 'mini-suit';
+    miniSuitBottom.textContent = suit;
+    bottomCorner.appendChild(miniSuitBottom);
+    
+    // Add face card decoration for J, Q, K
+    if (['J', 'Q', 'K'].includes(cardData.value)) {
+        const faceDesign = document.createElement('div');
+        faceDesign.className = 'face-design ' + cardData.value.toLowerCase() + '-design';
+        card.appendChild(faceDesign);
+    }
+    
+    // Add elements to card
+    card.appendChild(topCorner);
+    card.appendChild(suitCenter);
+    card.appendChild(bottomCorner);
+    
     return card;
 }
 
@@ -289,15 +376,57 @@ function animateChipToBetSpot(chipButton, betSpot) {
     if (!chipButton || !betSpot) return;
     const chipRect = chipButton.getBoundingClientRect();
     const betRect = betSpot.getBoundingClientRect();
+    
+    // Create a flying chip clone with all styling
     const flyingChip = chipButton.cloneNode(true);
     flyingChip.classList.add('flying');
+    
+    // Add edge pattern element if it doesn't exist
+    if (!flyingChip.querySelector('span')) {
+        const edgePattern = document.createElement('span');
+        flyingChip.appendChild(edgePattern);
+    }
+    
     document.body.appendChild(flyingChip);
+    
+    // Position the chip at its starting point
     flyingChip.style.left = `${chipRect.left}px`;
     flyingChip.style.top = `${chipRect.top}px`;
+    
+    // Calculate a more dramatic arched path for realistic casino chip toss
+    // Higher value chips have a more dramatic arc
+    const chipValue = parseInt(chipButton.dataset.value || 5);
+    const arcHeight = chipValue >= 100 ? -120 : 
+                       chipValue >= 25 ? -100 : 
+                       chipValue >= 10 ? -80 : -60;
+    
+    // Add slight variation to the arc for more natural movement
+    const arcVariation = Math.random() * 15 - 7.5; // -7.5 to +7.5 pixels
+    
+    // Set animation variables
     flyingChip.style.setProperty('--from-x', '0px');
     flyingChip.style.setProperty('--from-y', '0px');
-    flyingChip.style.setProperty('--to-x', `${betRect.left - chipRect.left + betRect.width / 2 - chipRect.width / 2}px`);
-    flyingChip.style.setProperty('--to-y', `${betRect.top - chipRect.top + betRect.height / 2 - chipRect.height / 2}px`);
+    flyingChip.style.setProperty('--arc-height', `${arcHeight + arcVariation}px`);
+    
+    // Add slight random offset to final position for more natural stacking
+    const randomOffsetX = Math.random() * 6 - 3; // -3 to +3 pixels
+    const randomOffsetY = Math.random() * 6 - 3; // -3 to +3 pixels
+    
+    flyingChip.style.setProperty(
+        '--to-x', 
+        `${betRect.left - chipRect.left + betRect.width / 2 - chipRect.width / 2 + randomOffsetX}px`
+    );
+    flyingChip.style.setProperty(
+        '--to-y', 
+        `${betRect.top - chipRect.top + betRect.height / 2 - chipRect.height / 2 + randomOffsetY}px`
+    );
+    
+    // Add a sound effect for chip movement (if enabled)
+    if (window.playSoundEffect) {
+        window.playSoundEffect('chip');
+    }
+    
+    // Remove the flying chip when animation completes
     flyingChip.addEventListener('animationend', () => flyingChip.remove());
 }
 
@@ -337,21 +466,291 @@ function showOutcomeModal(results) {
         card.classList.remove('is-face-down');
     });
     
-    // Accessibility: focus on modal for keyboard users
-    DOMElements.outcomeTitle.textContent =
-        results.totalNet > 0 ? "You Win!" :
-        results.totalNet < 0 ? "You Lose!" : "Push!";
-    DOMElements.outcomeList.innerHTML = '';
+    // Reset modal content
+    DOMElements.outcomeHands.innerHTML = '';
+    DOMElements.outcomeSidebets.innerHTML = '';
+    DOMElements.outcomeInsurance.innerHTML = '';
+      // Determine the primary outcome type to style the modal accordingly
+    let mainOutcomeType = 'push';
+    let outcomeClass = 'outcome-push';
+    let titleText = 'Push';
+    let subtitleText = 'Nobody wins, nobody loses';
+    let titleIcon = '⚖️';
+    
+    // Check if any hands have BLACKJACK
+    const hasBlackjack = results.mainHandResults.some(hand => hand.outcome === 'BLACKJACK');
+    
+    // Calculate the dealer's score to include in the subtitle
+    const dealerScore = game.dealerHand ? calculateScore(game.dealerHand.cards) : 0;
+    const dealerHasBlackjack = game.dealerHand ? isBlackjack(game.dealerHand.cards) : false;
+    
+    // Check overall outcome
+    if (results.totalNet > 0) {
+        if (hasBlackjack) {
+            outcomeClass = 'outcome-blackjack';
+            titleText = 'Blackjack!';
+            titleIcon = '🎯';
+            subtitleText = `Natural 21! ${dealerHasBlackjack ? 'Dealer also has Blackjack but you get paid insurance.' : `Dealer has ${dealerScore}`}`;
+        } else {
+            outcomeClass = 'outcome-win';
+            titleText = 'You Win!';
+            titleIcon = '🏆';
+            
+            // Determine a more specific message based on why they won
+            if (dealerScore > 21) {
+                subtitleText = `Dealer busted with ${dealerScore}!`;
+            } else {
+                subtitleText = `Your hand beat the dealer's ${dealerScore}!`;
+            }
+        }
+        mainOutcomeType = 'win';
+    } else if (results.totalNet < 0) {
+        // Check if all hands busted
+        const allBust = results.mainHandResults.every(hand => hand.outcome === 'BUST');
+        if (allBust) {
+            outcomeClass = 'outcome-bust';
+            titleText = 'Bust!';
+            titleIcon = '💥';
+            subtitleText = 'Your hand exceeded 21';
+        } else if (dealerHasBlackjack) {
+            outcomeClass = 'outcome-lose';
+            titleText = 'Dealer Blackjack';
+            titleIcon = '🃏';
+            subtitleText = 'Dealer has a natural 21';
+        } else {
+            outcomeClass = 'outcome-lose';
+            titleText = 'You Lose';
+            titleIcon = '👎';
+            subtitleText = `Dealer's ${dealerScore} beats your hand`;
+        }
+        mainOutcomeType = 'lose';
+    }
+      // Update header
+    DOMElements.outcomeModalContent.className = 'modal-content ' + outcomeClass;
+    DOMElements.outcomeTitle.innerHTML = `${titleIcon} ${titleText} ${titleIcon}`;
+    DOMElements.outcomeSubtitle.textContent = subtitleText;
+    
+    // Create hand results (main bets)
     results.mainHandResults.forEach((hand, i) => {
-        const li = document.createElement('li');
-        li.textContent = `Hand ${i + 1}: ${hand.outcome} | Bet $${hand.bet} | Payout $${hand.payout}`;
+        // Create hand result container
+        const handDiv = document.createElement('div');
+        handDiv.className = 'outcome-hand';
+        
+        // Create header with hand number and outcome
+        const handHeader = document.createElement('div');
+        handHeader.className = 'outcome-hand-header';
+        
+        const handTitle = document.createElement('div');
+        handTitle.className = 'outcome-hand-title';
+        handTitle.textContent = results.mainHandResults.length > 1 ? `Hand ${i + 1}` : 'Your Hand';
+        
+        const handResult = document.createElement('div');
+        let resultClass = '';
+        switch (hand.outcome) {
+            case 'BLACKJACK': resultClass = 'blackjack'; break;
+            case 'WIN': resultClass = 'win'; break;
+            case 'PUSH': resultClass = 'push'; break;
+            case 'BUST': resultClass = 'bust'; break;
+            default: resultClass = 'lose';
+        }
+        handResult.className = `outcome-hand-result ${resultClass}`;
+        handResult.textContent = hand.outcome.replace('_', ' ');
+        
+        handHeader.appendChild(handTitle);
+        handHeader.appendChild(handResult);
+        handDiv.appendChild(handHeader);
+          // Add score information
+        const handDetails = document.createElement('div');
+        handDetails.className = 'outcome-hand-details';
+        
+        // Get score from game state if not provided directly
+        const handScore = hand.score !== undefined ? hand.score : 
+                        (game.playerHands[i] ? calculateScore(game.playerHands[i].cards) : undefined);
+        
+        if (handScore !== undefined) {
+            const scoreSpan = document.createElement('span');
+            scoreSpan.className = 'outcome-hand-score';
+            scoreSpan.textContent = `Score: ${handScore}`;
+            handDetails.appendChild(scoreSpan);
+            
+            if (hand.outcome === 'BUST') {
+                const bustSpan = document.createElement('span');
+                bustSpan.textContent = ' (Over 21)';
+                bustSpan.style.color = 'var(--color-danger)';
+                handDetails.appendChild(bustSpan);
+            }
+        }
+        
+        handDiv.appendChild(handDetails);
+        
+        // Add payout information
+        const handPayout = document.createElement('div');
+        handPayout.className = 'outcome-hand-payout';
+        
+        const handBet = document.createElement('div');
+        handBet.className = 'outcome-hand-bet';
+        handBet.textContent = `Bet: $${hand.bet}`;
+        
+        const handNet = document.createElement('div');
+        const netClass = hand.net > 0 ? 'positive' : hand.net < 0 ? 'negative' : 'zero';
+        handNet.className = `outcome-hand-net ${netClass}`;
+        handNet.textContent = hand.net >= 0 ? `+$${hand.net}` : `-$${Math.abs(hand.net)}`;
+        
+        handPayout.appendChild(handBet);
+        handPayout.appendChild(handNet);
+        handDiv.appendChild(handPayout);
+        
+        // Add win effects for blackjack or win
         if (hand.outcome === 'BLACKJACK' || hand.outcome === 'WIN') {
             const handEls = DOMElements.playerHandsContainer.querySelectorAll('.hand');
             if (handEls[i]) showWinConfetti(handEls[i]);
         }
-        DOMElements.outcomeList.appendChild(li);
+        
+        DOMElements.outcomeHands.appendChild(handDiv);
     });
-    DOMElements.outcomeTotal.textContent = `Net: $${results.totalNet}`;
+    
+    // Create side bet results
+    let hasSideBets = false;
+    
+    if (results.sideBetResults) {
+        const sideBets = Object.entries(results.sideBetResults);
+        
+        if (sideBets.length > 0) {
+            hasSideBets = true;
+            
+            sideBets.forEach(([type, result]) => {                if (result.bet > 0) {
+                    // Create side bet result container
+                    const sideBetDiv = document.createElement('div');
+                    const isWin = result.payout > 0;
+                    sideBetDiv.className = `outcome-sidebet ${isWin ? 'win' : 'lose'}`;
+                    
+                    // Create header with side bet name
+                    const sideBetName = document.createElement('div');
+                    sideBetName.className = 'outcome-sidebet-name';
+                    
+                    let sideBetTitle = '';
+                    switch (type) {
+                        case 'pp': sideBetTitle = 'Perfect Pairs'; break;
+                        case 'plus3': sideBetTitle = '21+3'; break;
+                        default: sideBetTitle = type;
+                    }
+                    sideBetName.textContent = sideBetTitle;
+                    
+                    // Create win/loss indicator
+                    const sideBetResult = document.createElement('div');
+                    sideBetResult.className = 'outcome-sidebet-result';
+                    sideBetResult.textContent = isWin ? 'Win!' : 'No match';
+                    
+                    sideBetDiv.appendChild(sideBetName);
+                    sideBetDiv.appendChild(sideBetResult);
+                    
+                    // Add win type if available
+                    if (result.type && isWin) {
+                        const sideBetType = document.createElement('div');
+                        sideBetType.className = 'outcome-sidebet-type';
+                        sideBetType.textContent = result.type;
+                        sideBetDiv.appendChild(sideBetType);
+                    }
+                    
+                    // Add payout information
+                    const sideBetPayout = document.createElement('div');
+                    sideBetPayout.className = 'outcome-sidebet-payout';
+                    
+                    const sideBetBet = document.createElement('div');
+                    sideBetBet.className = 'outcome-sidebet-bet';
+                    sideBetBet.textContent = `Bet: $${result.bet}`;
+                    
+                    const sideBetNet = document.createElement('div');
+                    const netClass = isWin ? 'positive' : 'negative';
+                    sideBetNet.className = `outcome-sidebet-net ${netClass}`;
+                    
+                    // Calculate net (payout minus bet is shown in results.net)
+                    sideBetNet.textContent = isWin ? `$${result.payout}` : `$${result.bet}`;
+                    
+                    sideBetPayout.appendChild(sideBetBet);
+                    sideBetPayout.appendChild(sideBetNet);
+                    sideBetDiv.appendChild(sideBetPayout);
+                    
+                    DOMElements.outcomeSidebets.appendChild(sideBetDiv);
+                }
+            });
+        }
+    }
+    
+    // Toggle side bets container visibility
+    DOMElements.outcomeSidebetsContainer.style.display = hasSideBets ? 'block' : 'none';
+    
+    // Create insurance result
+    let hasInsurance = false;
+      if (results.insuranceResult && results.insuranceResult.bet > 0) {
+        hasInsurance = true;
+        
+        const insuranceDiv = document.createElement('div');
+        const insuranceWin = results.insuranceResult.payout > 0;
+        insuranceDiv.className = `outcome-insurance-result ${insuranceWin ? 'win' : 'lose'}`;
+        
+        // Create header
+        const insuranceTitle = document.createElement('div');
+        insuranceTitle.className = 'outcome-insurance-title';
+        insuranceTitle.textContent = 'Insurance';
+        
+        // Create outcome
+        const insuranceOutcome = document.createElement('div');
+        insuranceOutcome.className = 'outcome-insurance-outcome';
+        insuranceOutcome.textContent = insuranceWin ? 
+            'Dealer has Blackjack! Insurance pays 2:1' : 
+            'Dealer does not have Blackjack';
+        
+        insuranceDiv.appendChild(insuranceTitle);
+        insuranceDiv.appendChild(insuranceOutcome);
+        
+        // Add payout information
+        const insurancePayout = document.createElement('div');
+        insurancePayout.className = 'outcome-insurance-payout';
+        
+        const insuranceBet = document.createElement('div');
+        insuranceBet.className = 'outcome-insurance-bet';
+        insuranceBet.textContent = `Bet: $${results.insuranceResult.bet}`;
+        
+        const insuranceNet = document.createElement('div');
+        const netClass = results.insuranceResult.net > 0 ? 'positive' : 'negative';
+        insuranceNet.className = `outcome-insurance-net ${netClass}`;
+        insuranceNet.textContent = results.insuranceResult.net > 0 ? 
+            `$${results.insuranceResult.net}` : 
+            `$${Math.abs(results.insuranceResult.net)}`;
+        
+        insurancePayout.appendChild(insuranceBet);
+        insurancePayout.appendChild(insuranceNet);
+        insuranceDiv.appendChild(insurancePayout);
+        
+        DOMElements.outcomeInsurance.appendChild(insuranceDiv);
+    }
+    
+    // Toggle insurance container visibility
+    DOMElements.outcomeInsuranceContainer.style.display = hasInsurance ? 'block' : 'none';
+      // Update total net result with enhanced visual effects
+    const totalClass = results.totalNet > 0 ? 'positive' : results.totalNet < 0 ? 'negative' : 'zero';
+    let totalClassList = `outcome-total-payout ${totalClass}`;
+    
+    // Add big-win class for larger wins (adjust threshold as needed)
+    if (results.totalNet >= 500) {
+        totalClassList += ' big-win';
+    }
+    
+    DOMElements.outcomeTotal.className = totalClassList;
+    DOMElements.outcomeTotal.textContent = results.totalNet > 0 ? 
+        `+$${results.totalNet}` : 
+        results.totalNet < 0 ? 
+        `-$${Math.abs(results.totalNet)}` : 
+        `$${results.totalNet}`;
+    
+    // Add staggered animations to side bet elements
+    setTimeout(() => {
+        const sideBetElements = DOMElements.outcomeSidebets.querySelectorAll('.outcome-sidebet');
+        sideBetElements.forEach((element, index) => {
+            element.style.animationDelay = `${index * 0.2}s`;
+        });
+    }, 100);
     
     // Disable all action buttons until outcome is acknowledged
     DOMElements.actionBar.querySelectorAll('.action-button').forEach(btn => {
@@ -360,20 +759,23 @@ function showOutcomeModal(results) {
     
     // Show the outcome modal and disable actions until modal is dismissed
     showModal(DOMElements.outcomeModal);
-    
-    // Add a button to dismiss the modal and reset the game
+      // Add a button to dismiss the modal and start a new game
     const modalNewGameBtn = document.getElementById('modal-new-game-btn');
     if (modalNewGameBtn) {
         modalNewGameBtn.addEventListener('click', () => {
             hideModal(DOMElements.outcomeModal);
-            resetGameState();
+            // Use the proper new game action instead of just resetGameState
+            startNewGame();
         }, { once: true }); // Use once: true to prevent multiple handlers
     }
     
     // Force game state reset when modal is closed
     const modalCloseBtn = DOMElements.outcomeModal.querySelector('.modal-close-btn');
     if (modalCloseBtn) {
-        modalCloseBtn.addEventListener('click', resetGameState, { once: true });
+        modalCloseBtn.addEventListener('click', () => {
+            hideModal(DOMElements.outcomeModal);
+            resetGameState();
+        }, { once: true });
     }
 }
 
@@ -501,54 +903,54 @@ async function runDealerTurn() {
             return;
         }
 
-        // Flip dealer's hole card if present
-        const dealerCards = DOMElements.dealerHand.querySelectorAll('.card');
-        const holeCard = dealerCards && dealerCards.length > 1 ? dealerCards[1] : null;
-        if (holeCard && holeCard.classList.contains('is-face-down')) {
-            // Animate flip
-            holeCard.classList.remove('is-face-down');
-        
-        // Update game state to mark the card as face up
-        if (game.dealerHand.cards[1]) {
-            game.dealerHand.cards[1].isFaceDown = false;
+        // Force all dealer cards to be face up - first in game state
+        if (game && game.dealerHand && game.dealerHand.cards) {
+            game.dealerHand.cards.forEach(card => {
+                card.isFaceDown = false;
+            });
         }
         
-        if (holeCard.dataset.suit && holeCard.dataset.value) {
-            // Reconstruct card from stored data attributes
-            const cardData = {
-                suit: holeCard.dataset.suit,
-                value: holeCard.dataset.value,
-                isDealer: true,
-                isFaceDown: false
-            };
-            holeCard.innerHTML = createCardElement(cardData, true).innerHTML;
-        } else {
-            // Fallback to game state
-            holeCard.innerHTML = createCardElement(game.dealerHand.cards[1], true).innerHTML;
+        // Then update the DOM - re-render all dealer cards to ensure they're face-up
+        DOMElements.dealerHand.innerHTML = '';
+        if (game && game.dealerHand && game.dealerHand.cards) {
+            game.dealerHand.cards.forEach(cardData => {
+                // Force all cards to be face up when rendering
+                const cardEl = createCardElement(cardData, true);
+                DOMElements.dealerHand.appendChild(cardEl);
+            });
         }
+        
+        // Add dealer score bubble
+        if (game && game.dealerHand && game.dealerHand.score) {
+            addScoreBubble(DOMElements.dealerHand, game.dealerHand.score);
+        }
+        
         await delay(800);
-    }    // Make sure game object exists before continuing
-    if (game) {
-        while (game.shouldDealerHit()) {
-            await delay(800);
-            const newCard = game.dealCard(game.dealerHand);
-            await animateDealCard(DOMElements.dealerHand, newCard);
+        
+        // Make sure game object exists before continuing
+        if (game) {
+            while (game.shouldDealerHit()) {
+                await delay(800);
+                const newCard = game.dealCard(game.dealerHand);
+                await animateDealCard(DOMElements.dealerHand, newCard);
+                updateUI();
+            }
+            // Make sure ALL dealer cards are face-up before settling
+            await ensureAllDealerCardsVisible();
+            
+            await delay(900);
+            const results = game.settleHands();
+            updateAndSaveStats(results);
             updateUI();
-        }
-        // Make sure ALL dealer cards are face-up before settling
-        await ensureAllDealerCardsVisible();
-    } else {
-        console.error("Game object is undefined in runDealerTurn");
-        return;
+            showOutcomeModal(results);
+        } else {
+            console.error("Game object is undefined in runDealerTurn");
+        }    } catch (error) {
+        console.error("Error during dealer's turn:", error);
+    } finally {
+        uiLocked = false;
+        updateActionBarState();
     }
-    
-    await delay(900);
-    const results = game.settleHands();
-    updateAndSaveStats(results);
-    updateUI();
-    showOutcomeModal(results);
-    uiLocked = false;
-    updateActionBarState();
 }
 
 // ==========================================================================
@@ -670,10 +1072,39 @@ function setupEventHandlers() {
                     game.stand();
                     updateUI();
                     if (game.isDealerTurn) await runDealerTurn();
-                    break;
-                case 'double':
+                    break;                case 'double':
+                    uiLocked = true;
+                    updateActionBarState();
+                    
+                    // Store current hand index before double action
+                    const handIndex = game.activeHandIndex;
+                    
+                    // Double doubles the bet and deals exactly one card
+                    // It also automatically advances to next hand
                     game.double();
+                    
+                    // Get the element for the hand that was just doubled
+                    if (handIndex >= 0 && handIndex < DOMElements.playerHandsContainer.children.length) {
+                        const handEl = DOMElements.playerHandsContainer.children[handIndex];
+                        
+                        // Get the most recently added card from that hand
+                        const playerHand = game.playerHands[handIndex];
+                        if (playerHand && playerHand.cards.length > 0) {
+                            const card = playerHand.cards[playerHand.cards.length - 1];
+                            
+                            // Animate the card being dealt
+                            await animateDealCard(handEl, card);
+                        }
+                    }
+                    
                     updateUI();
+                    uiLocked = false;
+                    
+                    // Check if it's dealer's turn and proceed if so
+                    if (game.isDealerTurn) {
+                        await runDealerTurn();
+                    }
+                    
                     break;
                 case 'split':
                     game.split();
@@ -808,34 +1239,92 @@ function resetGameState() {
 async function ensureAllDealerCardsVisible() {
     if (!game || !game.dealerHand || !game.dealerHand.cards) return;
     
-    const dealerCards = DOMElements.dealerHand.querySelectorAll('.card');
-    // Check if we have any face-down cards
-    let hasHiddenCards = false;
+    // First update all cards in game state to be face up
+    game.dealerHand.cards.forEach(card => {
+        if (card) card.isFaceDown = false;
+    });
     
-    dealerCards.forEach((cardElement, index) => {
-        if (cardElement.classList.contains('is-face-down')) {
-            hasHiddenCards = true;
-            cardElement.classList.remove('is-face-down');
-            
-            // Get card data from game state
-            const cardData = game.dealerHand.cards[index];
-            if (cardData) {
-                // Ensure the card is marked as face up in the game state
-                cardData.isFaceDown = false;
-                
-                // Update the card visual
-                cardElement.innerHTML = createCardElement(cardData, true).innerHTML;
-            }
+    // Completely re-render dealer's hand to ensure everything is visible
+    DOMElements.dealerHand.innerHTML = '';
+    game.dealerHand.cards.forEach(cardData => {
+        if (cardData) {
+            const cardEl = createCardElement(cardData, true); // Force face up
+            DOMElements.dealerHand.appendChild(cardEl);
         }
     });
     
-    // If any cards were flipped, add a small delay for the animation effect
-    if (hasHiddenCards) {
-        await delay(800);
+    // Re-add score bubble
+    if (game.dealerHand.score !== undefined) {
+        addScoreBubble(DOMElements.dealerHand, game.dealerHand.score);
     }
+    
+    // Give a small delay for the animation effect
+    await delay(600);
     
     // Double check for any remaining face-down cards in the DOM and force their display
     DOMElements.dealerHand.querySelectorAll('.card.is-face-down').forEach((card) => {
         card.classList.remove('is-face-down');
     });
+}
+
+// Function to start a completely new game
+function startNewGame() {
+    if (!game) return;
+    
+    // Complete reset of both game logic and UI (same as new-game action)
+    game.reset();
+    DOMElements.dealerHand.innerHTML = '';
+    DOMElements.playerHandsContainer.innerHTML = '';
+    
+    // Reset all bet spots
+    DOMElements.betSpots.forEach(spot => {
+        spot.classList.remove('has-bet');
+        spot.querySelector('.bet-spot__amount').textContent = '';
+        spot.querySelector('.bet-spot__chips').innerHTML = '';
+    });
+    
+    // Clear last bets to start fresh
+    lastBets = { main: 0, pp: 0, plus3: 0 };
+    
+    // Re-enable all buttons
+    DOMElements.actionBar.querySelectorAll('.action-button').forEach(btn => {
+        btn.disabled = false;
+    });
+    
+    // Update the UI to reflect the fresh game state
+    updateUI();
+    
+    // Log for debugging
+    console.log("New game started");
+}
+
+// Utility functions that mirror the game object's methods
+function calculateScore(cards) {
+    if (!cards || !Array.isArray(cards)) return 0;
+    
+    let score = 0;
+    let aces = 0;
+    
+    for (const card of cards) {
+        if (card.value === 'A') {
+            aces++;
+            score += 11;
+        } else if (['J', 'Q', 'K'].includes(card.value)) {
+            score += 10;
+        } else {
+            score += parseInt(card.value);
+        }
+    }
+    
+    // Adjust for aces
+    while (score > 21 && aces > 0) {
+        score -= 10;
+        aces--;
+    }
+    
+    return score;
+}
+
+function isBlackjack(cards) {
+    return cards && cards.length === 2 && calculateScore(cards) === 21;
 }

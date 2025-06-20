@@ -155,9 +155,7 @@ export class Construction21Game {
         this.activeHandIndex++;
         if (this.activeHandIndex >= this.playerHands.length) this.isDealerTurn = true;
         return true;
-    }
-
-    double() {
+    }    double() {
         if (!this.isGameInProgress) return false;
         const hand = this.getActiveHand();
         if (!hand ||
@@ -172,7 +170,15 @@ export class Construction21Game {
         hand.bet *= 2;
         hand.isDoubled = true;
         const card = this.dealCard(hand);
-        this._log({ type: "action", action: "double", handIndex: this.activeHandIndex, card, bet: hand.bet, chips: this.chips });
+        
+        // After doubling, automatically move to next hand
+        // This is correct behavior since you can't hit after doubling
+        this.activeHandIndex++;
+        if (this.activeHandIndex >= this.playerHands.length) {
+            this.isDealerTurn = true;
+        }
+        
+        this._log({ type: "action", action: "double", handIndex: this.activeHandIndex - 1, card, bet: hand.bet, chips: this.chips, nextHand: this.activeHandIndex });
         // Player must stand after doubling
         this.stand();
         return true;
