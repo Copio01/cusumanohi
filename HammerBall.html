@@ -1,1586 +1,567 @@
-<!-- Construction HammerBall (Pong) Game -->
+<!-- Construction HammerBall (Pong) - Complete, Fully Working, Firebase Leaderboard -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=900, initial-scale=1.0">
-    <title>Construction HammerBall</title>
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            background: radial-gradient(ellipse at 60% 40%, #ffd70033 0%, #23232b 100%), linear-gradient(135deg, #23232b 0%, #2d2d3a 100%);
-            font-family: 'Segoe UI', Arial, sans-serif;
-            min-height: 100vh;
-            min-width: 100vw;
-             overflow: hidden;
-        }
-        .animated-bg {
-            position: fixed;
-            inset: 0;
-            z-index: 0;
-            pointer-events: none;
-            overflow: hidden;
-        }
-        .bg-shape {
-            position: absolute;
-            border-radius: 50%;
-            opacity: 0.18;
-            filter: blur(18px);
-            animation: floatBg 8s ease-in-out infinite alternate;
-        }
-        .bg-shape1 { width: 340px; height: 340px; background: #ffd700; left: 8vw; top: 10vh; animation-delay: 0s; }
-        .bg-shape2 { width: 220px; height: 220px; background: #ff4e00; right: 10vw; top: 30vh; animation-delay: 2s; }
-        .bg-shape3 { width: 180px; height: 180px; background: #00cfff; left: 30vw; bottom: 8vh; animation-delay: 4s; }
-        @keyframes floatBg {
-            0% { transform: translateY(0) scale(1); }
-            100% { transform: translateY(-30px) scale(1.08); }
-        }
-        #game-container {
-            position: relative;
-            width: 900px;
-            margin: 40px auto;
-            background: rgba(255, 255, 255, 0.95);
-            border: 8px solid #e0a106;
-            border-radius: 16px;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.2);
-            padding: 24px;
-            overflow: hidden;
-        }
-        #game-canvas {
-            background: #d1c089;
-            display: block;
-            margin: 0 auto 16px auto;
-            border: 4px solid #bfa14a;
-        }
-        #score-area {
-            text-align: center;
-            margin: 12px 0;
-        }
-        #score-label {
-            font-size: 1.3em;
-            color: #e0a106;
-            font-weight: bold;
-            background: rgba(255,255,255,0.7);
-            padding: 6px 24px;
-            border-radius: 12px;
-            box-shadow: 1px 1px 4px rgba(0,0,0,0.08);
-        }
-        #main-menu {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 1.2rem;
-            padding: 2.5rem 0 2rem 0;
-        }
-        #main-menu input[type="text"] {
-            font-size: 1.2rem;
-            padding: 0.5rem 1rem;
-            border-radius: 8px;
-            border: 2px solid #e0a106;
-            width: 260px;
-            margin-bottom: 0.5rem;
-        }
-        #main-menu button {
-            font-size: 1.2rem;
-            padding: 0.7rem 2.2rem;
-            background: linear-gradient(90deg,#e0a106,#ff4e00);
-            color: #fff;
-            border: none;
-            border-radius: 10px;
-            font-weight: 600;
-            cursor: pointer;
-            box-shadow: 0 2px 8px rgba(224,161,6,0.13);
-            transition: transform 0.13s;
-        }
-        #main-menu button:hover {
-            transform: scale(1.06);
-        }
-        #main-menu label {
-            font-size: 1.1rem;
-            color: #bfa14a;
-            font-weight: 500;
-        }
-        #difficulty-meter {
-            width: 100%;
-            height: 8px;
-            background: rgba(255,255,255,0.8);
-            border-radius: 4px;
-            overflow: hidden;
-            margin: 12px 0;
-        }
-        #difficulty-bar {
-            height: 100%;
-            background: linear-gradient(90deg, #e0a106, #ff4e00);
-            transition: width 0.3s;
-        }
-        /* Construction field details */
-        #game-canvas.construction-bg {
-            background-image: repeating-linear-gradient(135deg, #e0a10622 0 10px, transparent 10px 20px);
-        }
-        /* Paddle hit animation */
-        /* .paddle-hit {
-            animation: paddle-bounce 0.18s cubic-bezier(.5,1.8,.5,1) 1;
-        }
-        @keyframes paddle-bounce {
-            0% { transform: scaleY(1); }
-            40% { transform: scaleY(1.18); }
-            100% { transform: scaleY(1); }
-        }
-        .ball-squash {
-            animation: ball-squash 0.18s cubic-bezier(.5,1.8,.5,1) 1;
-        }
-        @keyframes ball-squash {
-            0% { transform: scale(1,1); }
-            40% { transform: scale(1.2,0.8); }
-            100% { transform: scale(1,1); }
-        } */
-        /* Score pop */
-        #score-label.score-pop {
-            animation: score-pop 0.3s cubic-bezier(.5,1.8,.5,1) 1;
-        }
-        @keyframes score-pop {
-            0% { transform: scale(1); }
-            40% { transform: scale(1.18); }
-            100% { transform: scale(1); }
-        }
-        /* HUD panel */
-        .hud-panel {
-            position: absolute;
-            top: 18px;
-            left: 18px;
-            background: rgba(255,255,255,0.85);
-            border: 2px solid #e0a106;
-            border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(224,161,6,0.13);
-            padding: 10px 18px 10px 12px;
-            z-index: 10;
-        }
-        /* Leaderboard styles (copied and adapted from Construction Snake) */
-        #leaderboard {
-            margin: 32px auto 0 auto;
-            max-width: 420px;
-            background: rgba(255,255,255,0.97);
-            border-radius: 16px;
-            box-shadow: 0 4px 24px #0002, 0 0 0 2px #ffd70033;
-            padding: 18px 24px 24px 24px;
-            border: 2.5px solid #e0a106;
-            display: none;
-            position: relative;
-            z-index: 2;
-        }
-        #leaderboard h2 {
-            color: #e0a106;
-            font-size: 1.5rem;
-            margin: 0 0 18px 0;
-            text-align: center;
-            letter-spacing: 1px;
-            font-weight: 700;
-        }
-        #leaderboard-entries {
-            min-height: 120px;
-        }
-        .score-entry {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            background: rgba(255,255,255,0.85);
-            border-radius: 12px;
-            box-shadow: 1px 1px 3px rgba(0,0,0,0.10);
-            margin-bottom: 10px;
-            padding: 8px 18px 8px 38px;
-            position: relative;
-            font-size: 1.08em;
-            font-family: 'Segoe UI', Arial, sans-serif;
-            border-left: 4px solid #e0a106;
-            transition: background 0.18s, box-shadow 0.18s;
-        }
-        .score-entry:last-child { margin-bottom: 0; }
-        .score-entry::before {
-            content: attr(data-rank);
-            position: absolute;
-            left: 10px;
-            top: 0;
-            bottom: 0;
-            width: 22px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #e0a106;
-            font-weight: bold;
-            font-size: 1.1em;
-            opacity: 0.85;
-        }
-        .score-entry .player-name {
-            color: #000;
-            margin-right: 10px;
-            background-color: rgba(255,255,255,0.85);
-            padding: 4px 12px;
-            border-radius: 12px;
-            box-shadow: 1px 1px 3px rgba(0,0,0,0.15);
-            text-shadow: none;
-            flex: 1;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        .score-entry small {
-            display: inline-block;
-            color: #555;
-            background-color: rgba(255,255,255,0.7);
-            font-weight: normal;
-            margin-left: 5px;
-            padding: 0 6px;
-            border-radius: 8px;
-            font-size: 0.8em;
-            vertical-align: middle;
-        }
-        .score-entry .player-score {
-            color: #000;
-            font-size: 1.2em;
-            background-color: rgba(255,255,255,0.9);
-            padding: 4px 12px;
-            border-radius: 12px;
-            min-width: 70px;
-            text-align: center;
-            box-shadow: 2px 2px 4px rgba(0,0,0,0.2);
-            font-weight: 700;
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-        .score-entry.current-player {
-            background-color: rgba(255,250,235,0.5);
-            border-left: 5px solid #ff9900;
-            animation: pulse-glow 2s infinite;
-        }
-        .score-entry.current-player .player-name {
-            background-color: rgba(255,236,179,0.95);
-            border: 1px solid rgba(255,153,0,0.6);
-            font-weight: 700;
-        }
-        @keyframes pulse-glow {
-            0% { box-shadow: 0 0 5px rgba(255,153,0,0.3); }
-            50% { box-shadow: 0 0 15px rgba(255,153,0,0.6); }
-            100% { box-shadow: 0 0 5px rgba(255,153,0,0.3); }
-        }
-        #leaderboard-entries.loading {
-            min-height: 150px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .loading-spinner {
-            width: 40px;
-            height: 40px;
-            border: 4px solid rgba(224,161,6,0.3);
-            border-top: 4px solid #e0a106;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        @media (max-width: 1000px) {
-            #game-container { width: 98vw; }
-            #game-canvas { width: 98vw !important; height: 98vw !important; max-width: 98vw; max-height: 98vw; }
-        }
-        /* Death screen styles */
-        #death-screen {
-            display: none;
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(255,255,255,0.97);
-            z-index: 20;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 2.2rem;
-        }
-        #death-screen .score {
-            font-size: 1.6rem;
-            color: #ff4e00;
-            font-weight: 600;
-        }
-        #death-screen button {
-            font-size: 1.2rem;
-            padding: 0.7rem 2.2rem;
-            border: none;
-            border-radius: 10px;
-            font-weight: 600;
-            cursor: pointer;
-            box-shadow: 0 2px 8px rgba(224,161,6,0.13);
-            transition: transform 0.13s;
-        }
-        #death-screen button:hover {
-            transform: scale(1.06);
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=900,initial-scale=1.0">
+  <title>Construction HammerBall</title>
+  <style>
+    html, body {
+      margin: 0; padding: 0;
+      min-height: 100vh; min-width: 100vw;
+      box-sizing: border-box;
+      background: radial-gradient(ellipse at 60% 40%, #ffd70033 0%, #23232b 100%), linear-gradient(135deg, #23232b 0%, #2d2d3a 100%);
+      font-family: 'Segoe UI', Arial, sans-serif;
+      overflow-x: hidden;
+      user-select: none;
+    }
+    .animated-bg {
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    }
+    .bg-shape { position: absolute; border-radius: 50%; opacity: 0.18; filter: blur(18px); animation: floatBg 8s ease-in-out infinite alternate;}
+    .bg-shape1 { width: 340px; height: 340px; background: #ffd700; left: 8vw; top: 10vh; animation-delay: 0s;}
+    .bg-shape2 { width: 220px; height: 220px; background: #ff4e00; right: 10vw; top: 30vh; animation-delay: 2s;}
+    .bg-shape3 { width: 180px; height: 180px; background: #00cfff; left: 30vw; bottom: 8vh; animation-delay: 4s;}
+    @keyframes floatBg { to { transform: translateY(-30px) scale(1.08);} }
+    #game-container {
+      width: 900px; max-width: 98vw; margin: 44px auto 0 auto; position: relative; z-index: 1;
+      background: rgba(255,255,255,0.97); border: 8px solid #e0a106; border-radius: 18px;
+      box-shadow: 0 8px 48px #0004; padding: 32px 28px 36px 28px;
+      overflow: visible;
+      display: flex; flex-direction: column; align-items: center;
+    }
+    @media (max-width: 980px) { #game-container { width: 99vw; padding: 2vw; } }
+    h1 {
+      color: #e0a106; font-size: 2.1em; letter-spacing: 0.03em; text-align: center;
+      margin: 0 0 26px 0; text-shadow: 2px 2px 6px #0002;
+      font-weight: 800; 
+    }
+    #main-menu { display: flex; flex-direction: column; align-items: center; gap: 1.2rem; padding-bottom: 2rem;}
+    #main-menu label { color: #bfa14a; font-weight: 500; font-size: 1.16em;}
+    #main-menu input[type="text"] {
+      font-size: 1.2rem; padding: 0.5rem 1rem; border-radius: 8px;
+      border: 2px solid #e0a106; width: 260px; margin-bottom: 0.5rem;
+      background: #fff9ed;
+    }
+    #main-menu .menu-buttons { display: flex; gap: 1.2rem; margin: 1.2rem 0; flex-wrap: wrap;}
+    #main-menu button, #death-screen button {
+      font-size: 1.12rem; padding: 0.7rem 2.1rem; background: linear-gradient(90deg,#e0a106,#ff4e00);
+      color: #fff; border: none; border-radius: 10px; font-weight: 700; cursor: pointer;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.11);
+      transition: all 0.16s;
+      margin-bottom: 0.1rem;
+    }
+    #main-menu button.selected {
+      box-shadow: 0 0 0 3px #e0a10699; background: linear-gradient(90deg,#ffe066,#ffb347);
+      color: #b36a00; font-weight: 700; transform: scale(1.08);
+    }
+    #main-menu button:hover, #death-screen button:hover { filter: brightness(1.14); transform: scale(1.05);}
+    #main-menu button:active, #death-screen button:active { filter: brightness(0.99); }
+    #start-btn { display: none; margin-top: 1.3rem; min-width: 180px; opacity: 0; transform: translateY(24px); }
+    #score-area { text-align: center; margin: 10px 0 16px 0; }
+    #score-label {
+      font-size: 1.32em; color: #e0a106; font-weight: bold;
+      background: rgba(255,255,255,0.82); padding: 7px 28px; border-radius: 14px;
+      box-shadow: 1px 1px 4px #0002;
+      display: inline-block;
+      transition: transform 0.16s;
+    }
+    #score-label.score-pop { animation: score-pop 0.35s cubic-bezier(.5,1.8,.5,1) 1;}
+    @keyframes score-pop { 0%{transform:scale(1);}40%{transform:scale(1.16);}100%{transform:scale(1);} }
+    #game-canvas {
+      display: none;
+      background: #d1c089;
+      border: 4px solid #bfa14a;
+      margin: 0 auto 10px auto; border-radius: 11px;
+      box-shadow: 0 2px 28px #e0a10619;
+      transition: box-shadow 0.18s;
+    }
+    #game-canvas.construction-bg {
+      background-image: repeating-linear-gradient(135deg, #e0a10622 0 10px, transparent 10px 20px);
+    }
+    #difficulty-meter { width: 100%; height: 8px; background: #fffde7; border-radius: 4px; overflow: hidden; margin: 12px 0; }
+    #difficulty-bar { height: 100%; background: linear-gradient(90deg, #e0a106, #ff4e00); transition: width 0.33s; }
+    /* Death screen overlay */
+    #death-screen {
+      display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(255,255,255,0.97); z-index: 30; flex-direction: column;
+      align-items: center; justify-content: center; gap: 2.2rem;
+      border-radius: 16px;
+    }
+    #death-screen .score { font-size: 1.45rem; color: #ff4e00; font-weight: 600; margin-bottom: 8px;}
+    #death-screen .game-over { font-size: 2.15rem; color: #e0a106; font-weight: 800; margin-bottom: 6px; }
+    #death-screen .ds-buttons { display: flex; gap: 1.5rem;}
+    /* Leaderboard */
+    #leaderboard { margin: 32px auto 0 auto; max-width: 460px; background: #fffde7;
+      border-radius: 15px; box-shadow: 0 4px 32px #0002, 0 0 0 2px #ffd70033;
+      padding: 16px 20px 20px 20px; border: 2.3px solid #e0a106;
+      display: none; position: relative; z-index: 2;}
+    #leaderboard h2 { color: #e0a106; font-size: 1.33rem; margin: 0 0 15px 0; text-align: center; font-weight: 700;}
+    #leaderboard-entries { min-height: 98px;}
+    .score-entry {
+      display: flex; align-items: center; justify-content: space-between;
+      background: #fffbe6; border-radius: 12px; box-shadow: 1px 1px 3px #0002;
+      margin-bottom: 8px; padding: 8px 20px 8px 35px; position: relative; font-size: 1.06em; border-left: 4px solid #e0a106;
+      transition: background 0.18s, box-shadow 0.18s;
+    }
+    .score-entry:last-child { margin-bottom: 0; }
+    .score-entry::before {
+      content: attr(data-rank); position: absolute; left: 10px; top: 0; bottom: 0; width: 21px;
+      display: flex; align-items: center; justify-content: center; color: #e0a106;
+      font-weight: bold; font-size: 1.08em; opacity: 0.88;
+    }
+    .score-entry .player-name {
+      color: #000; margin-right: 10px; background-color: #fff9ed;
+      padding: 3.5px 10px; border-radius: 10px; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      font-size: 1em;
+    }
+    .score-entry small { color: #555; background: #fffbe6; margin-left: 6px; border-radius: 8px; font-size: 0.83em; vertical-align: middle; }
+    .score-entry .player-score {
+      color: #000; font-size: 1.18em; background: #fff9ed; padding: 4px 12px;
+      border-radius: 11px; min-width: 62px; text-align: center; font-weight: 700; box-shadow: 1px 2px 4px #0001;
+    }
+    .score-entry.current-player {
+      background: #fff8d8; border-left: 5px solid #ff9900; animation: pulse-glow 2s infinite;
+    }
+    .score-entry.current-player .player-name {
+      background: #fff1bd; border: 1px solid #ff990099; font-weight: 700;
+    }
+    @keyframes pulse-glow { 0%{box-shadow:0 0 5px #ff99004d;} 50%{box-shadow:0 0 16px #ff990099;} 100%{box-shadow:0 0 5px #ff99004d;} }
+    .loading-spinner { width: 38px; height: 38px; margin: 22px auto; border: 4px solid #e0a10644; border-top: 4px solid #e0a106; border-radius: 50%; animation: spin 1.2s linear infinite;}
+    @keyframes spin { to{ transform: rotate(360deg);} }
+  </style>
 </head>
 <body>
-    <div class="animated-bg">
-        <div class="bg-shape bg-shape1"></div>
-        <div class="bg-shape bg-shape2"></div>
-        <div class="bg-shape bg-shape3"></div>
+  <div class="animated-bg">
+    <div class="bg-shape bg-shape1"></div>
+    <div class="bg-shape bg-shape2"></div>
+    <div class="bg-shape bg-shape3"></div>
+  </div>
+  <div id="game-container">
+    <h1>🔨 Construction HammerBall 🔨</h1>
+    <div id="main-menu">
+      <label for="player-name">Enter your name to play:</label>
+      <input type="text" id="player-name" maxlength="16" placeholder="Anonymous Hammerer" autocomplete="off">
+      <div class="menu-buttons">
+        <button id="single-btn">Single Player</button>
+        <button id="ultra-btn">Ultra (Powerups)</button>
+        <button id="two-btn">Classic 2 Player</button>
+      </div>
+      <button id="start-btn">Start Game</button>
     </div>
-    <div id="game-container">
-        <h1 style="color:#e0a106;text-align:center;">🔨 Construction HammerBall 🔨</h1>
-        <div id="main-menu">
-            <label for="player-name">Enter your name to play:</label>
-            <input type="text" id="player-name" maxlength="16" placeholder="Your name..." autocomplete="off" />
-            <div style="margin:1.2rem 0;display:flex;gap:1.2rem;">
-                <button id="single-btn">Single Player</button>
-                <button id="versus-btn">Ultra Single Player</button>
-                <button id="twoplayer-btn">Classic 2 Player</button>
-            </div>
-            <button id="start-btn" style="display:none;margin-top:1.5rem;min-width:180px;opacity:0;transform:translateY(20px);transition:opacity 0.4s,transform 0.4s;">Start Game</button>
-        </div>
-        <canvas id="game-canvas" width="800" height="600" style="display:none;"></canvas>
-        <div id="score-area" style="display:none;">
-            <span id="score-label">Score: 0</span>
-        </div>
-        <div id="difficulty-meter" style="display:none;">
-            <div id="difficulty-bar"></div>
-        </div>
-        <!-- Leaderboard and other UI elements can be added here if needed -->
-        <div id="leaderboard" style="display:none;">
-            <h2>Leaderboard</h2>
-            <div id="leaderboard-entries">Loading...</div>
-        </div>
-        <!-- Death screen overlay -->
-        <div id="death-screen" style="display:none;">
-            <div style="font-size:2.5rem;color:#e0a106;font-weight:700;">Game Over</div>
-            <div id="death-score" style="font-size:1.6rem;color:#ff4e00;font-weight:600;">Score: 0</div>
-            <div style="display:flex;gap:1.5rem;">
-                <button id="replay-btn" style="font-size:1.2rem;padding:0.7rem 2.2rem;background:linear-gradient(90deg,#e0a106,#ff4e00);color:#fff;border:none;border-radius:10px;font-weight:600;cursor:pointer;box-shadow:0 2px 8px rgba(224,161,6,0.13);">Replay</button>
-                <button id="return-menu-btn" style="font-size:1.2rem;padding:0.7rem 2.2rem;background:linear-gradient(90deg,#bfa14a,#ffd700);color:#fff;border:none;border-radius:10px;font-weight:600;cursor:pointer;box-shadow:0 2px 8px rgba(224,161,6,0.13);">Return to Menu</button>
-            </div>
-        </div>
+    <canvas id="game-canvas" width="800" height="600"></canvas>
+    <div id="score-area" style="display:none;">
+      <span id="score-label">Score: 0</span>
     </div>
-    <script>
-    // --- Construction HammerBall Game JS ---
+    <div id="difficulty-meter" style="display:none;">
+      <div id="difficulty-bar"></div>
+    </div>
+    <div id="leaderboard" style="display:none;">
+      <h2>Leaderboard</h2>
+      <div id="leaderboard-entries">Loading...</div>
+    </div>
+    <div id="death-screen">
+      <div class="game-over">Game Over</div>
+      <div class="score" id="death-score">Score: 0</div>
+      <div class="ds-buttons">
+        <button id="replay-btn">Replay</button>
+        <button id="return-menu-btn" style="background:linear-gradient(90deg,#bfa14a,#ffd700);color:#775800;">Main Menu</button>
+      </div>
+    </div>
+  </div>
+  <!-- Firebase App CDN (Modular SDK) -->
+  <script src="https://www.gstatic.com/firebasejs/11.9.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.9.0/firebase-firestore-compat.js"></script>
+  <script>
+    // ----- FIREBASE CONFIG -----
+    firebase.initializeApp({
+      apiKey: "AIzaSyBVtq6dAEuybJNmTTv8dXBxTVUgw1t0ZMk",
+      authDomain: "cusumano-website.firebaseapp.com",
+      projectId: "cusumano-website",
+      storageBucket: "cusumano-website.firebasestorage.app",
+      messagingSenderId: "20051552210",
+      appId: "1:20051552210:web:7eb3b22baa3fec184e4a0b"
+    });
+    const db = firebase.firestore();
+    // ----------------------------
+
+    // ---- ELEMENTS & GAME CONSTANTS ----
     const canvas = document.getElementById('game-canvas');
     const ctx = canvas.getContext('2d');
     const mainMenu = document.getElementById('main-menu');
     const playerNameInput = document.getElementById('player-name');
     const scoreArea = document.getElementById('score-area');
     const scoreLabel = document.getElementById('score-label');
-    const singleButton = document.getElementById('single-btn');
-    const versusButton = document.getElementById('versus-btn');
-    const twoPlayerButton = document.getElementById('twoplayer-btn');
-    const startButton = document.getElementById('start-btn');
-    const difficultyMeter = document.createElement('div');
-    difficultyMeter.id = 'difficulty-meter';
-    const difficultyBar = document.createElement('div');
-    difficultyBar.id = 'difficulty-bar';
-    difficultyMeter.appendChild(difficultyBar);
-    document.getElementById('game-container').insertBefore(difficultyMeter, canvas);
-    difficultyMeter.style.display = 'none';
+    const singleBtn = document.getElementById('single-btn');
+    const ultraBtn = document.getElementById('ultra-btn');
+    const twoBtn = document.getElementById('two-btn');
+    const startBtn = document.getElementById('start-btn');
+    const leaderboard = document.getElementById('leaderboard');
+    const leaderboardEntries = document.getElementById('leaderboard-entries');
+    const difficultyMeter = document.getElementById('difficulty-meter');
+    const difficultyBar = document.getElementById('difficulty-bar');
+    const deathScreen = document.getElementById('death-screen');
+    const deathScore = document.getElementById('death-score');
+    const replayBtn = document.getElementById('replay-btn');
+    const returnMenuBtn = document.getElementById('return-menu-btn');
 
-    let selectedMode = null;
-    let twoPlayerControls = false;
-
-    // Animate menu and button
-    function showStartButton() {
-        startButton.style.display = 'block';
-        setTimeout(() => {
-            startButton.style.opacity = '1';
-            startButton.style.transform = 'translateY(0)';
-        }, 10);
-    }
-    function hideStartButton() {
-        startButton.style.opacity = '0';
-        startButton.style.transform = 'translateY(20px)';
-        setTimeout(() => {
-            startButton.style.display = 'none';
-        }, 400);
-    }
-
-    singleButton.addEventListener('click', () => {
-        selectedMode = 'single';
-        twoPlayerControls = false;
-        singleButton.classList.add('selected');
-        versusButton.classList.remove('selected');
-        twoPlayerButton.classList.remove('selected');
-        showStartButton();
-    });
-    versusButton.addEventListener('click', () => {
-        selectedMode = 'ultra-single';
-        twoPlayerControls = false;
-        versusButton.classList.add('selected');
-        singleButton.classList.remove('selected');
-        twoPlayerButton.classList.remove('selected');
-        showStartButton();
-    });
-    twoPlayerButton.addEventListener('click', () => {
-        selectedMode = 'two-player';
-        twoPlayerControls = true;
-        twoPlayerButton.classList.add('selected');
-        singleButton.classList.remove('selected');
-        versusButton.classList.remove('selected');
-        showStartButton();
-    });
-    startButton.addEventListener('click', () => {
-        if (!selectedMode) return;
-        playerName = playerNameInput.value.trim() || "Anonymous";
-        // Animate menu out
-        mainMenu.style.transition = 'opacity 0.5s, transform 0.5s';
-        mainMenu.style.opacity = '0';
-        mainMenu.style.transform = 'translateY(-30px)';
-        setTimeout(() => {
-            mainMenu.style.display = 'none';
-            mainMenu.style.opacity = '';
-            mainMenu.style.transform = '';
-            if (selectedMode === 'single') resetGame('single');
-            else if (selectedMode === 'ultra-single') resetGame('ultra-single');
-            else if (selectedMode === 'two-player') resetGame('two-player');
-        }, 500);
-    });
-
-    // Add selected button style
-    const style = document.createElement('style');
-    style.textContent = `
-        #main-menu button.selected {
-            box-shadow: 0 0 0 3px #e0a10699;
-            background: linear-gradient(90deg,#ffe066,#ffb347);
-            color: #b36a00;
-            font-weight: 700;
-            transform: scale(1.08);
-        }
-        #main-menu button.selected:hover {
-            transform: scale(1.12);
-        }
-    `;
-    document.head.appendChild(style);
-
-    // Game constants
-    const PADDLE_WIDTH = 18;
-    const PADDLE_HEIGHT = 100;
-    const BALL_SIZE = 22;
-    const FIELD_WIDTH = 800;
-    const FIELD_HEIGHT = 600;
-    const PADDLE_SPEED = 7;
-    const BALL_SPEED = 7;
-    const ULTRA_POWERUP_DURATION = 300; // frames
-    const POWERUP_SIZE = 32;
+    // Game sizes
+    const FIELD_WIDTH = 800, FIELD_HEIGHT = 600;
+    const PADDLE_WIDTH = 18, PADDLE_HEIGHT = 100;
+    const BALL_SIZE = 22, POWERUP_SIZE = 34;
+    const PADDLE_SPEED = 7, BALL_SPEED = 7;
+    const MAX_BALL_SPEED = 15, ULTRA_POWERUP_DURATION = 340;
     const POWERUP_TYPES = [
-        { type: "magnet", color: "#4ecaff", icon: "🧲" },
-        { type: "ghost", color: "#b3b3ff", icon: "👻" },
-        { type: "shield", color: "#76e6cd", icon: "🛡️" },
-        { type: "drill", color: "#c0c0c0", icon: "🔩" }
+      { type: "magnet", color: "#4ecaff", icon: "🧲" },
+      { type: "ghost", color: "#b3b3ff", icon: "👻" },
+      { type: "shield", color: "#76e6cd", icon: "🛡️" },
+      { type: "drill", color: "#c0c0c0", icon: "🔩" }
     ];
+    const LEADERBOARD_SIZE = 8;
+    // ------------- STATE -------------
+    let selectedMode = null, playerName = "", running = false;
+    let gameMode = "single";
+    let leftPaddle, rightPaddle, ball, powerups, activePowerups;
+    let aiEnabled = false, twoPlayerControls = false;
+    let score = 0, intervalId = null;
 
-    // Game state
-    let gameMode = "classic"; // "classic" or "ultra"
-    let running = false;
-    let playerName = "";
-    let score = 0;
-    let intervalId = null;
-    let leftPaddle, rightPaddle, ball, powerups, activePowerups, powerupTimer, aiEnabled;
-    let baseBallSpeed = BALL_SPEED;
-    let maxBallSpeed = 16;
-    let difficultyProgress = 0;
+    // ---------- MENU HANDLERS ----------
+    [singleBtn, ultraBtn, twoBtn].forEach(btn => btn.classList.remove('selected'));
+    singleBtn.onclick = () => { selectedMode = 'single'; aiEnabled=true; twoPlayerControls=false; highlightBtn(singleBtn);}
+    ultraBtn.onclick = () => { selectedMode = 'ultra'; aiEnabled=true; twoPlayerControls=false; highlightBtn(ultraBtn);}
+    twoBtn.onclick = () => { selectedMode = 'twoplayer'; aiEnabled=false; twoPlayerControls=true; highlightBtn(twoBtn);}
+    function highlightBtn(btn) {
+      [singleBtn, ultraBtn, twoBtn].forEach(b=>b.classList.remove('selected'));
+      btn.classList.add('selected');
+      showStartBtn();
+    }
+    function showStartBtn() { startBtn.style.display='block'; setTimeout(()=>{startBtn.style.opacity='1';startBtn.style.transform='translateY(0)';},10);}
+    function hideStartBtn() { startBtn.style.opacity='0'; startBtn.style.transform='translateY(24px)'; setTimeout(()=>{startBtn.style.display='none';},390);}
+    startBtn.onclick = () => {
+      if(!selectedMode) return;
+      playerName = playerNameInput.value.trim() || "Anonymous";
+      mainMenu.style.opacity = "0"; mainMenu.style.transform="translateY(-35px)";
+      setTimeout(()=>{
+        mainMenu.style.display='none';
+        if(selectedMode=='single') resetGame("single");
+        if(selectedMode=='ultra') resetGame("ultra");
+        if(selectedMode=='twoplayer') resetGame("twoplayer");
+      },480);
+    };
 
+    // ------------- GAME CORE ----------------
     function resetGame(mode) {
-        gameMode = mode;
-        running = true;
-        score = 0;
-        leftPaddle = { x: 30, y: FIELD_HEIGHT/2 - PADDLE_HEIGHT/2, vy: 0 };
-        rightPaddle = { x: FIELD_WIDTH-48, y: FIELD_HEIGHT/2 - PADDLE_HEIGHT/2, vy: 0 };
-        baseBallSpeed = BALL_SPEED;
-        ball = {
-            x: FIELD_WIDTH/2 - BALL_SIZE/2,
-            y: FIELD_HEIGHT/2 - BALL_SIZE/2,
-            vx: baseBallSpeed * (Math.random() > 0.5 ? 1 : -1),
-            vy: baseBallSpeed * (Math.random()*2-1)
-        };
-        powerups = [];
-        activePowerups = [];
-        powerupTimer = 0;
-        aiEnabled = (mode === "single" || mode === "ultra-single");
-        twoPlayerControls = (mode === "two-player");
-        scoreLabel.textContent = "Score: 0";
-        canvas.style.display = 'block';
-        scoreArea.style.display = 'block';
-        mainMenu.style.display = 'none';
-        difficultyMeter.style.display = (mode === 'ultra-single') ? 'block' : 'none';
-        updateDifficultyBar();
-        if (intervalId) clearInterval(intervalId);
-        intervalId = setInterval(gameLoop, 1000/60);
+      gameMode = mode; running = true; score = 0;
+      leftPaddle = { x: 30, y: FIELD_HEIGHT/2-PADDLE_HEIGHT/2, vy: 0 };
+      rightPaddle = { x: FIELD_WIDTH-48, y: FIELD_HEIGHT/2-PADDLE_HEIGHT/2, vy: 0 };
+      ball = {
+        x: FIELD_WIDTH/2-BALL_SIZE/2,
+        y: FIELD_HEIGHT/2-BALL_SIZE/2,
+        vx: (BALL_SPEED+(Math.random()-0.5)*2)*(Math.random()>0.5?1:-1),
+        vy: (BALL_SPEED/1.2)*(Math.random()*2-1)
+      };
+      ball._subx=ball.x; ball._suby=ball.y;
+      powerups = []; activePowerups=[];
+      scoreLabel.textContent = "Score: 0";
+      canvas.style.display='block'; scoreArea.style.display='block';
+      difficultyMeter.style.display = (mode=="ultra") ? "block":"none";
+      updateDifficultyBar();
+      canvas.classList.add('construction-bg');
+      deathScreen.style.display = 'none';
+      leaderboard.style.display = 'none';
+      // Responsive canvas
+      canvas.width=FIELD_WIDTH; canvas.height=FIELD_HEIGHT;
+      // Keyboard state
+      leftPaddleUp=false; leftPaddleDown=false; rightPaddleUp=false; rightPaddleDown=false;
+      // Run
+      if(intervalId) clearInterval(intervalId);
+      intervalId = setInterval(gameLoop, 1000/60);
     }
 
     function updateDifficultyBar() {
-        // Progress is based on ball speed
-        const percent = Math.min(100, 100 * (Math.abs(ball.vx) - BALL_SPEED) / (maxBallSpeed - BALL_SPEED));
-        difficultyBar.style.width = percent + '%';
-        difficultyBar.style.height = '100%';
-        difficultyBar.style.background = 'linear-gradient(90deg, #e0a106, #ff4e00)';
-        difficultyBar.style.transition = 'width 0.3s';
+      if(gameMode!="ultra") return;
+      const base = BALL_SPEED, max=MAX_BALL_SPEED;
+      let percent = Math.min(100, 100*(Math.abs(ball.vx)-base)/(max-base));
+      difficultyBar.style.width = percent+'%';
     }
 
-    // --- Add construction field background ---
-    canvas.classList.add('construction-bg');
-
-    // --- Animate paddle and ball on hit ---
-    // function animatePaddleHit(isLeft) {
-    //     const el = canvas;
-    //     el.classList.remove('paddle-hit');
-    //     void el.offsetWidth; // force reflow
-    //     el.classList.add('paddle-hit');
-    // }
-    // function animateBallSquash() {
-    //     const el = canvas;
-    //     el.classList.remove('ball-squash');
-    //     void el.offsetWidth;
-    //     el.classList.add('ball-squash');
-    // }
     function animateScorePop() {
-        scoreLabel.classList.remove('score-pop');
-        void scoreLabel.offsetWidth;
-        scoreLabel.classList.add('score-pop');
+      scoreLabel.classList.remove('score-pop'); void scoreLabel.offsetWidth;
+      scoreLabel.classList.add('score-pop');
     }
 
-    // --- Enhanced drawField ---
+    // ---------- DRAW -------------
     function drawField() {
-        ctx.fillStyle = '#e8ddb7';
-        ctx.fillRect(0, 0, FIELD_WIDTH, FIELD_HEIGHT);
-        // Center line with animated dashes
+      ctx.fillStyle='#e8ddb7'; ctx.fillRect(0,0,FIELD_WIDTH,FIELD_HEIGHT);
+      // Center line dash
+      ctx.save(); ctx.strokeStyle='#bfa14a'; ctx.setLineDash([16,16]);
+      ctx.lineWidth=4; ctx.globalAlpha=0.7; ctx.beginPath();
+      let dashOffset = (Date.now()/30)%32; ctx.lineDashOffset=-dashOffset;
+      ctx.moveTo(FIELD_WIDTH/2,0); ctx.lineTo(FIELD_WIDTH/2,FIELD_HEIGHT); ctx.stroke();
+      ctx.setLineDash([]); ctx.globalAlpha=1;
+      // Construction cones
+      for(let i=0;i<3;i++){
+        let cx=FIELD_WIDTH/2-18+(i-1)*60, cy=60+i*120+20*Math.sin(Date.now()/600+i);
+        ctx.save(); ctx.translate(cx,cy); ctx.beginPath();
+        ctx.moveTo(0,18);ctx.lineTo(-12,-18);ctx.lineTo(12,-18);ctx.closePath();
+        ctx.fillStyle='#ff4e00';ctx.fill();
+        ctx.fillStyle='#fff';ctx.fillRect(-8,-8,16,4);
+        ctx.restore();
+      }
+      ctx.restore();
+    }
+    function drawPaddle(p,isLeft){
+      ctx.save();
+      ctx.fillStyle=isLeft?'#e0a106':'#ff4e00'; ctx.shadowColor='#bfa14a'; ctx.shadowBlur=8;
+      ctx.fillRect(p.x,p.y,PADDLE_WIDTH,PADDLE_HEIGHT);
+      for(let i=0;i<3;i++){
+        ctx.beginPath(); ctx.arc(p.x+PADDLE_WIDTH/2,p.y+18+i*32,3,0,2*Math.PI);
+        ctx.fillStyle='#bfa14a';ctx.fill();
+      }
+      ctx.restore();
+    }
+    function drawBall(){
+      ctx.save();
+      if(activePowerups.length>0){
+        for(let i=0;i<6;i++){
+          ctx.globalAlpha=0.08+0.04*i; ctx.beginPath();
+          ctx.arc(ball.x+BALL_SIZE/2-ball.vx*i*2,ball.y+BALL_SIZE/2-ball.vy*i*2,BALL_SIZE/2,0,2*Math.PI);
+          ctx.fillStyle='#e0a106'; ctx.fill();
+        }
+      }
+      ctx.globalAlpha=1;
+      let cx=ball.x+BALL_SIZE/2, cy=ball.y+BALL_SIZE/2;
+      const spinSpeed=0.13; drawBall._angle=(drawBall._angle||0)+spinSpeed;
+      ctx.save(); ctx.translate(cx,cy); ctx.rotate(drawBall._angle);
+      ctx.beginPath(); ctx.rect(-BALL_SIZE*0.09, BALL_SIZE*0.19, BALL_SIZE*0.18, BALL_SIZE*0.84);
+      ctx.fillStyle='#bfa14a'; ctx.shadowColor='#e0a106'; ctx.shadowBlur=5; ctx.fill(); ctx.shadowBlur=0;
+      ctx.beginPath(); ctx.rect(-BALL_SIZE*0.35, -BALL_SIZE*0.19, BALL_SIZE*0.7, BALL_SIZE*0.38);
+      ctx.fillStyle='#888'; ctx.strokeStyle='#444'; ctx.lineWidth=2.1; ctx.fill(); ctx.stroke();
+      ctx.beginPath(); ctx.arc(BALL_SIZE*0.35, 0, BALL_SIZE*0.19, 0, 2*Math.PI);
+      ctx.fillStyle='#e0a106'; ctx.strokeStyle='#bfa14a'; ctx.lineWidth=1.1; ctx.fill(); ctx.stroke();
+      ctx.restore();
+      ctx.restore();
+    }
+    function drawPowerups(){
+      for(const p of powerups){
         ctx.save();
-        ctx.strokeStyle = '#bfa14a';
-        ctx.setLineDash([16, 16]);
-        ctx.lineWidth = 4;
-        ctx.globalAlpha = 0.7;
-        ctx.beginPath();
-        const dashOffset = (Date.now()/30)%32;
-        ctx.setLineDash([16, 16]);
-        ctx.lineDashOffset = -dashOffset;
-        ctx.moveTo(FIELD_WIDTH/2, 0);
-        ctx.lineTo(FIELD_WIDTH/2, FIELD_HEIGHT);
-        ctx.stroke();
-        ctx.setLineDash([]);
-        ctx.globalAlpha = 1;
-        // Construction cones
-        for (let i=0; i<3; i++) {
-            const cx = FIELD_WIDTH/2-18 + (i-1)*60;
-            const cy = 60 + i*120 + 20*Math.sin(Date.now()/600+i);
-            ctx.save();
-            ctx.translate(cx, cy);
-            ctx.beginPath();
-            ctx.moveTo(0, 18); ctx.lineTo(-12, -18); ctx.lineTo(12, -18); ctx.closePath();
-            ctx.fillStyle = '#ff4e00'; ctx.fill();
-            ctx.fillStyle = '#fff'; ctx.fillRect(-8, -8, 16, 4);
-            ctx.restore();
+        ctx.beginPath(); ctx.arc(p.x+POWERUP_SIZE/2,p.y+POWERUP_SIZE/2,POWERUP_SIZE/2,0,2*Math.PI);
+        ctx.fillStyle=p.color; ctx.globalAlpha=0.78+0.22*Math.sin(Date.now()/210); ctx.shadowColor=p.color; ctx.shadowBlur=13; ctx.fill(); ctx.shadowBlur=0;
+        ctx.globalAlpha=1; ctx.font='23px Segoe UI'; ctx.textAlign='center'; ctx.textBaseline='middle';
+        let floatY=4*Math.sin(Date.now()/160+p.x); ctx.fillText(p.icon,p.x+POWERUP_SIZE/2,p.y+POWERUP_SIZE/2+floatY+1);
+        ctx.restore();
+      }
+    }
+    function drawHUD(){
+      if(gameMode=="ultra"&&activePowerups.length>0){
+        ctx.save();
+        ctx.globalAlpha=1; ctx.font='bold 17px Segoe UI'; ctx.textAlign='left'; ctx.textBaseline='top';
+        ctx.save(); ctx.beginPath(); ctx.moveTo(12,12); ctx.lineTo(160,12); ctx.lineTo(160,22+activePowerups.length*35); ctx.lineTo(12,22+activePowerups.length*35); ctx.closePath();
+        ctx.fillStyle='rgba(255,255,255,0.88)'; ctx.strokeStyle='#e0a106'; ctx.lineWidth=2; ctx.fill(); ctx.stroke(); ctx.restore();
+        let hudY=18;
+        for(const ap of activePowerups){
+          let details=POWERUP_TYPES.find(p=>p.type==ap.type); if(!details)continue;
+          let pulse=1+0.07*Math.sin(Date.now()/170+hudY);
+          ctx.save(); ctx.translate(32,hudY+12); ctx.scale(pulse,pulse); ctx.fillText(details.icon,0,0); ctx.restore();
+          ctx.fillStyle=details.color; ctx.fillText(` ${details.type.charAt(0).toUpperCase()+details.type.slice(1)}`,48,hudY);
+          ctx.save(); ctx.fillStyle='rgba(60,60,60,0.7)'; ctx.fillRect(20,hudY+22,100,7);
+          ctx.fillStyle=details.color; ctx.fillRect(20,hudY+22,100*(ap.timer/ULTRA_POWERUP_DURATION),7); ctx.restore();
+          hudY+=35;
         }
         ctx.restore();
+      }
+    }
+    function drawGame(){
+      drawField();
+      drawPaddle(leftPaddle,true); drawPaddle(rightPaddle,false);
+      drawBall();
+      if(gameMode=="ultra")drawPowerups();
+      drawHUD();
     }
 
-    // --- Enhanced drawPaddle ---
-    function drawPaddle(paddle, isLeft) {
-        ctx.save();
-        ctx.fillStyle = isLeft ? '#e0a106' : '#ff4e00';
-        ctx.shadowColor = '#bfa14a';
-        ctx.shadowBlur = 8;
-        ctx.fillRect(paddle.x, paddle.y, PADDLE_WIDTH, PADDLE_HEIGHT);
-        // Bolts
-        for (let i=0; i<3; i++) {
-            ctx.beginPath();
-            ctx.arc(paddle.x+PADDLE_WIDTH/2, paddle.y+18+i*32, 3, 0, 2*Math.PI);
-            ctx.fillStyle = '#bfa14a';
-            ctx.fill();
+    // --------- GAME LOOP ----------
+    let leftPaddleUp=false, leftPaddleDown=false, rightPaddleUp=false, rightPaddleDown=false;
+    function gameLoop(){
+      // --- PADDLE MOVEMENT ---
+      const paddleEasing = 0.3;
+      if(twoPlayerControls){
+        let tVyL=0, tVyR=0;
+        if(leftPaddleUp&&!leftPaddleDown) tVyL=-PADDLE_SPEED;
+        else if(leftPaddleDown&&!leftPaddleUp) tVyL=PADDLE_SPEED;
+        leftPaddle.vy+=(tVyL-leftPaddle.vy)*paddleEasing;
+        if(rightPaddleUp&&!rightPaddleDown) tVyR=-PADDLE_SPEED;
+        else if(rightPaddleDown&&!rightPaddleUp) tVyR=PADDLE_SPEED;
+        rightPaddle.vy+=(tVyR-rightPaddle.vy)*paddleEasing;
+      }
+      else if(aiEnabled){
+        let tVy=0;
+        if(ball.y+BALL_SIZE/2 < rightPaddle.y+PADDLE_HEIGHT/2-10) tVy=-PADDLE_SPEED;
+        else if(ball.y+BALL_SIZE/2 > rightPaddle.y+PADDLE_HEIGHT/2+10) tVy=PADDLE_SPEED;
+        rightPaddle.vy+=(tVy-rightPaddle.vy)*paddleEasing;
+      }
+      leftPaddle.y+=leftPaddle.vy; rightPaddle.y+=rightPaddle.vy;
+      leftPaddle.y=Math.max(0,Math.min(FIELD_HEIGHT-PADDLE_HEIGHT,leftPaddle.y));
+      rightPaddle.y=Math.max(0,Math.min(FIELD_HEIGHT-PADDLE_HEIGHT,rightPaddle.y));
+
+      // --- BALL ---
+      ball._subx+=ball.vx; ball._suby+=ball.vy; ball.x=ball._subx; ball.y=ball._suby;
+      // Top/bottom walls
+      if(ball.y<=0){ ball.y=0; ball._suby=ball.y; ball.vy*=-1;}
+      else if(ball.y+BALL_SIZE>=FIELD_HEIGHT){ ball.y=FIELD_HEIGHT-BALL_SIZE; ball._suby=ball.y; ball.vy*=-1;}
+
+      // --- POWERUPS (ULTRA ONLY) ---
+      if(gameMode=="ultra"){
+        if(Math.random()<0.008 && powerups.length<1){
+          let pt = POWERUP_TYPES[Math.floor(Math.random()*POWERUP_TYPES.length)];
+          powerups.push({
+            ...pt,
+            x: Math.random()*(FIELD_WIDTH-POWERUP_SIZE-40)+20,
+            y: Math.random()*(FIELD_HEIGHT-POWERUP_SIZE-40)+20
+          });
         }
-        ctx.restore();
+        // Collect powerups
+        for(let i=powerups.length-1;i>=0;i--){
+          let p=powerups[i];
+          let dx=(ball.x+BALL_SIZE/2)-(p.x+POWERUP_SIZE/2), dy=(ball.y+BALL_SIZE/2)-(p.y+POWERUP_SIZE/2);
+          if(Math.sqrt(dx*dx+dy*dy)<BALL_SIZE/2+POWERUP_SIZE/2){
+            activePowerups.push({type:p.type, timer:ULTRA_POWERUP_DURATION});
+            powerups.splice(i,1);
+          }
+        }
+        // Timer down
+        for(let i=activePowerups.length-1;i>=0;i--){
+          activePowerups[i].timer--;
+          if(activePowerups[i].timer<=0) activePowerups.splice(i,1);
+        }
+        // Increase ball speed
+        if(score>0&&score%90==0 && Math.abs(ball.vx)<MAX_BALL_SPEED){
+          ball.vx*=1.13; ball.vy*=1.11; updateDifficultyBar();
+        }
+        updateDifficultyBar();
+        applyPowerupEffects();
+      }
+
+      // Paddle collision
+      if(ball.x<=leftPaddle.x+PADDLE_WIDTH && ball.y+BALL_SIZE>leftPaddle.y && ball.y<leftPaddle.y+PADDLE_HEIGHT && ball.vx<0){
+        ball.x=leftPaddle.x+PADDLE_WIDTH; ball._subx=ball.x; ball.vx*=-1; animateScorePop();
+      }
+      if(ball.x+BALL_SIZE>=rightPaddle.x && ball.y+BALL_SIZE>rightPaddle.y && ball.y<rightPaddle.y+PADDLE_HEIGHT && ball.vx>0){
+        ball.x=rightPaddle.x-BALL_SIZE; ball._subx=ball.x; ball.vx*=-1; animateScorePop();
+      }
+      // Out of bounds (end game)
+      if(ball.x<0 || ball.x>FIELD_WIDTH){ endGame(); return;}
+      // Score update
+      score++; scoreLabel.textContent=`Score: ${score}`;
+      ctx.clearRect(0,0,FIELD_WIDTH,FIELD_HEIGHT);
+      drawGame();
     }
 
-    // --- Enhanced drawBall ---
-    function drawBall() {
-        ctx.save();
-        // Ball trail if powerup
-        if (activePowerups.length > 0) {
-            for (let i=0; i<6; i++) {
-                ctx.globalAlpha = 0.08 + 0.04*i;
-                ctx.beginPath();
-                ctx.arc(ball.x + BALL_SIZE/2 - ball.vx*i*2, ball.y + BALL_SIZE/2 - ball.vy*i*2, BALL_SIZE/2, 0, 2*Math.PI);
-                ctx.fillStyle = '#e0a106';
-                ctx.fill();
-            }
+    // --------- POWERUP EFFECTS (Ultra) ---------
+    function applyPowerupEffects(){
+      // Magnet: curve toward left paddle if moving left
+      if(activePowerups.some(p=>p.type=="magnet")&&ball.vx<0){
+        let paddleCenter=leftPaddle.y+PADDLE_HEIGHT/2, ballCenter=ball.y+BALL_SIZE/2, diff=paddleCenter-ballCenter;
+        ball.vy+=0.11*Math.sign(diff); ball.vy=Math.max(-MAX_BALL_SPEED,Math.min(MAX_BALL_SPEED,ball.vy));
+      }
+      // Ghost: ball passes through left paddle once
+      if(activePowerups.some(p=>p.type=="ghost")&&ball.x<=leftPaddle.x+PADDLE_WIDTH&&ball.y+BALL_SIZE>leftPaddle.y&&ball.y<leftPaddle.y+PADDLE_HEIGHT&&ball.vx<0){
+        let idx=activePowerups.findIndex(p=>p.type=="ghost"); if(idx!=-1){
+          activePowerups.splice(idx,1); ball.x=leftPaddle.x+PADDLE_WIDTH+3;
         }
-        ctx.globalAlpha = 1;
-        // --- Spinning hammer ---
-        const centerX = ball.x + BALL_SIZE/2;
-        const centerY = ball.y + BALL_SIZE/2;
-        const hammerLength = BALL_SIZE * 1.2;
-        const hammerHeadWidth = BALL_SIZE * 0.7;
-        const hammerHeadHeight = BALL_SIZE * 0.38;
-        const handleWidth = BALL_SIZE * 0.18;
-        const handleLength = BALL_SIZE * 0.9;
-        // Calculate rotation angle based on time for smooth spinning
-        const spinSpeed = 0.13; // radians per frame
-        if (!drawBall._angle) drawBall._angle = 0;
-        drawBall._angle += spinSpeed;
-        ctx.save();
-        ctx.translate(centerX, centerY);
-        ctx.rotate(drawBall._angle);
-        // Draw hammer handle
-        ctx.beginPath();
-        ctx.rect(-handleWidth/2, hammerHeadHeight/2, handleWidth, handleLength);
-        ctx.fillStyle = '#bfa14a';
-        ctx.shadowColor = '#e0a106';
-        ctx.shadowBlur = 6;
-        ctx.fill();
-        ctx.shadowBlur = 0;
-        // Draw hammer head
-        ctx.beginPath();
-        ctx.rect(-hammerHeadWidth/2, -hammerHeadHeight/2, hammerHeadWidth, hammerHeadHeight);
-        ctx.fillStyle = '#888';
-        ctx.strokeStyle = '#444';
-        ctx.lineWidth = 2.2;
-        ctx.fill();
-        ctx.stroke();
-        // Draw hammer face (circle at end)
-        ctx.beginPath();
-        ctx.arc(hammerHeadWidth/2, 0, hammerHeadHeight/2, 0, 2*Math.PI);
-        ctx.fillStyle = '#e0a106';
-        ctx.strokeStyle = '#bfa14a';
-        ctx.lineWidth = 1.2;
-        ctx.fill();
-        ctx.stroke();
-        ctx.restore();
-        ctx.restore();
+      }
+      // Shield: ball reflects off left wall once
+      if(activePowerups.some(p=>p.type=="shield")&&ball.x<0&&ball.vx<0){
+        let idx=activePowerups.findIndex(p=>p.type=="shield"); if(idx!=-1){
+          activePowerups.splice(idx,1); ball.x=2; ball.vx*=-1;
+        }
+      }
+      // Drill: ball pierces through left paddle, bounces off left wall
+      if(activePowerups.some(p=>p.type=="drill")&&ball.x<=leftPaddle.x+PADDLE_WIDTH&&ball.y+BALL_SIZE>leftPaddle.y&&ball.y<leftPaddle.y+PADDLE_HEIGHT&&ball.vx<0){
+        let idx=activePowerups.findIndex(p=>p.type=="drill"); if(idx!=-1){
+          activePowerups.splice(idx,1); ball.x=2; ball.vx*=-1;
+        }
+      }
     }
 
-    // --- Enhanced drawPowerups ---
-    function drawPowerups() {
-        for (const p of powerups) {
-            ctx.save();
-            ctx.beginPath();
-            ctx.arc(p.x + POWERUP_SIZE/2, p.y + POWERUP_SIZE/2, POWERUP_SIZE/2, 0, 2*Math.PI);
-            ctx.fillStyle = p.color;
-            ctx.globalAlpha = 0.7 + 0.3 * Math.sin(Date.now()/200);
-            ctx.shadowColor = p.color;
-            ctx.shadowBlur = 12;
-            ctx.fill();
-            ctx.shadowBlur = 0;
-            ctx.globalAlpha = 1;
-            ctx.font = '24px Segoe UI';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            // Animate float
-            const floatY = 4*Math.sin(Date.now()/180 + p.x);
-            ctx.fillText(p.icon, p.x + POWERUP_SIZE/2, p.y + POWERUP_SIZE/2 + 1 + floatY);
-            ctx.restore();
-        }
-    }
-
-    // --- Enhanced drawHUD ---
-    function drawHUD() {
-        if ((gameMode === "ultra" || gameMode === "ultra-single") && activePowerups.length > 0) {
-            ctx.save();
-            ctx.globalAlpha = 1;
-            ctx.font = 'bold 18px Segoe UI';
-            ctx.textAlign = 'left';
-            ctx.textBaseline = 'top';
-            // HUD panel
-            ctx.save();
-            ctx.beginPath();
-            ctx.moveTo(12, 12); ctx.lineTo(160, 12); ctx.lineTo(160, 18+activePowerups.length*36); ctx.lineTo(12, 18+activePowerups.length*36); ctx.closePath();
-            ctx.fillStyle = 'rgba(255,255,255,0.85)';
-            ctx.strokeStyle = '#e0a106';
-            ctx.lineWidth = 2;
-            ctx.fill(); ctx.stroke();
-            ctx.restore();
-            let hudY = 18;
-            for (const ap of activePowerups) {
-                const details = POWERUP_TYPES.find(p => p.type === ap.type);
-                if (!details) continue;
-                // Animate icon pulse
-                const pulse = 1 + 0.08 * Math.sin(Date.now()/180 + hudY);
-                ctx.save();
-                ctx.translate(32, hudY+12);
-                ctx.scale(pulse, pulse);
-                ctx.fillText(details.icon, 0, 0);
-                ctx.restore();
-                ctx.fillStyle = details.color;
-                ctx.fillText(` ${details.type.charAt(0).toUpperCase() + details.type.slice(1)}`, 48, hudY);
-                // Timer bar
-                ctx.save();
-                ctx.fillStyle = 'rgba(60,60,60,0.75)';
-                ctx.fillRect(20, hudY+22, 100, 7);
-                ctx.fillStyle = details.color;
-                ctx.fillRect(20, hudY+22, 100 * (ap.timer/ULTRA_POWERUP_DURATION), 7);
-                ctx.restore();
-                hudY += 36;
-            }
-            ctx.restore();
-        }
-    }
-
-    // --- Enhanced applyPowerupEffects ---
-    function applyPowerupEffects() {
-        // Magnet: ball curves toward left paddle
-        if (activePowerups.some(p => p.type === "magnet")) {
-            if (ball.vx < 0) {
-                const paddleCenter = leftPaddle.y + PADDLE_HEIGHT/2;
-                const ballCenter = ball.y + BALL_SIZE/2;
-                const diff = paddleCenter - ballCenter;
-                ball.vy += 0.13 * Math.sign(diff);
-                ball.vy = Math.max(-maxBallSpeed, Math.min(maxBallSpeed, ball.vy));
-                // Magnet lines
-                ctx.save();
-                ctx.strokeStyle = '#4ecaff';
-                ctx.globalAlpha = 0.5;
-                ctx.beginPath();
-                ctx.moveTo(ball.x + BALL_SIZE/2, ball.y + BALL_SIZE/2);
-                ctx.lineTo(leftPaddle.x + PADDLE_WIDTH, paddleCenter);
-                ctx.stroke();
-                ctx.restore();
-            }
-        }
-        // Ghost: ball passes through left paddle once
-        if (activePowerups.some(p => p.type === "ghost")) {
-            if (ball.x <= leftPaddle.x + PADDLE_WIDTH && ball.y + BALL_SIZE > leftPaddle.y && ball.y < leftPaddle.y + PADDLE_HEIGHT && ball.vx < 0) {
-                const idx = activePowerups.findIndex(p => p.type === "ghost");
-                if (idx !== -1) {
-                    // Animate ghost effect
-                    for (let i = 0; i < 8; i++) {
-                        setTimeout(() => {
-                            ctx.save();
-                            ctx.globalAlpha = 0.15 + 0.1 * Math.sin(Date.now()/60 + i);
-                            ctx.beginPath();
-                            ctx.arc(ball.x + BALL_SIZE/2, ball.y + BALL_SIZE/2, BALL_SIZE/2 + i*2, 0, 2*Math.PI);
-                            ctx.fillStyle = '#b3b3ff';
-                            ctx.fill();
-                            ctx.restore();
-                        }, i*12);
-                    }
-                    activePowerups.splice(idx, 1);
-                    ball.x = leftPaddle.x + PADDLE_WIDTH + 2;
-                }
-            }
-        }
-        // Shield: ball reflects off left wall once
-        if (activePowerups.some(p => p.type === "shield")) {
-            if (ball.x < 0 && ball.vx < 0) {
-                const idx = activePowerups.findIndex(p => p.type === "shield");
-                if (idx !== -1) {
-                    for (let i = 0; i < 8; i++) {
-                        setTimeout(() => {
-                            ctx.save();
-                            ctx.globalAlpha = 0.12 + 0.1 * Math.sin(Date.now()/60 + i);
-                            ctx.beginPath();
-                            ctx.arc(0, ball.y + BALL_SIZE/2, 24 + i*2, 0, 2*Math.PI);
-                            ctx.fillStyle = '#76e6cd';
-                            ctx.fill();
-                            ctx.restore();
-                        }, i*12);
-                    }
-                    activePowerups.splice(idx, 1);
-                    ball.x = 2;
-                    ball.vx *= -1;
-                }
-            }
-        }
-        // Drill: ball pierces through left paddle, bounces off left wall
-        if (activePowerups.some(p => p.type === "drill")) {
-            if (ball.x <= leftPaddle.x + PADDLE_WIDTH && ball.y + BALL_SIZE > leftPaddle.y && ball.y < leftPaddle.y + PADDLE_HEIGHT && ball.vx < 0) {
-                const idx = activePowerups.findIndex(p => p.type === "drill");
-                if (idx !== -1) {
-                    for (let i = 0; i < 8; i++) {
-                        setTimeout(() => {
-                            ctx.save();
-                            ctx.globalAlpha = 0.13 + 0.1 * Math.sin(Date.now()/60 + i);
-                            ctx.beginPath();
-                            ctx.arc(ball.x + BALL_SIZE/2, ball.y + BALL_SIZE/2, BALL_SIZE/2 + i*2, 0, 2*Math.PI);
-                            ctx.fillStyle = '#c0c0c0';
-                            ctx.fill();
-                            ctx.restore();
-                        }, i*12);
-                    }
-                    activePowerups.splice(idx, 1);
-                    ball.x = 2;
-                    ball.vx *= -1;
-                }
-            }
-        }
-    }
-
-    // --- Enhanced gameLoop ---
-    function gameLoop() {
-        // --- SMOOTHER PADDLE MOVEMENT ---
-        // Add velocity easing for paddles for smoother movement
-        const paddleEasing = 0.32; // Lower = more smoothing
-        if (twoPlayerControls) {
-            // Left paddle (W/S)
-            let targetVyL = 0;
-            if (leftPaddleUp && !leftPaddleDown) targetVyL = -PADDLE_SPEED;
-            else if (leftPaddleDown && !leftPaddleUp) targetVyL = PADDLE_SPEED;
-            leftPaddle.vy += (targetVyL - leftPaddle.vy) * paddleEasing;
-            // Right paddle (Up/Down)
-            let targetVyR = 0;
-            if (rightPaddleUp && !rightPaddleDown) targetVyR = -PADDLE_SPEED;
-            else if (rightPaddleDown && !rightPaddleUp) targetVyR = PADDLE_SPEED;
-            rightPaddle.vy += (targetVyR - rightPaddle.vy) * paddleEasing;
-        }
-        if (!twoPlayerControls && aiEnabled) {
-            // AI paddle smoothing
-            let targetVy = 0;
-            if (ball.y + BALL_SIZE/2 < rightPaddle.y + PADDLE_HEIGHT/2 - 10) targetVy = -PADDLE_SPEED;
-            else if (ball.y + BALL_SIZE/2 > rightPaddle.y + PADDLE_HEIGHT/2 + 10) targetVy = PADDLE_SPEED;
-            rightPaddle.vy += (targetVy - rightPaddle.vy) * paddleEasing;
-        }
-        // Single player left paddle (no smoothing for responsiveness)
-        if (!twoPlayerControls && !aiEnabled) {
-            // leftPaddle.vy is set directly by key events
-        }
-        leftPaddle.y += leftPaddle.vy;
-        rightPaddle.y += rightPaddle.vy;
-        leftPaddle.y = Math.max(0, Math.min(FIELD_HEIGHT-PADDLE_HEIGHT, leftPaddle.y));
-        rightPaddle.y = Math.max(0, Math.min(FIELD_HEIGHT-PADDLE_HEIGHT, rightPaddle.y));
-
-        // --- SMOOTHER BALL MOVEMENT ---
-        // Add subpixel movement for ball for smoother animation
-        if (!ball._subx) ball._subx = ball.x;
-        if (!ball._suby) ball._suby = ball.y;
-        ball._subx += ball.vx;
-        ball._suby += ball.vy;
-        ball.x = ball._subx;
-        ball.y = ball._suby;
-
-        // Ball collision with top/bottom
-        if (ball.y <= 0) {
-            ball.y = 0;
-            ball._suby = ball.y;
-            ball.vy *= -1;
-        } else if (ball.y + BALL_SIZE >= FIELD_HEIGHT) {
-            ball.y = FIELD_HEIGHT - BALL_SIZE;
-            ball._suby = ball.y;
-            ball.vy *= -1;
-        }
-
-        // Powerup effects
-        if ((gameMode === 'ultra' || gameMode === 'ultra-single') && activePowerups.length > 0) {
-            applyPowerupEffects();
-        }
-        // Ball collision with paddles
-        if (ball.x <= leftPaddle.x + PADDLE_WIDTH && ball.y + BALL_SIZE > leftPaddle.y && ball.y < leftPaddle.y + PADDLE_HEIGHT && ball.vx < 0) {
-            ball.x = leftPaddle.x + PADDLE_WIDTH;
-            ball._subx = ball.x;
-            ball.vx *= -1;
-            animatePaddleHit(true);
-            animateBallSquash();
-        }
-        if (ball.x + BALL_SIZE >= rightPaddle.x && ball.y + BALL_SIZE > rightPaddle.y && ball.y < rightPaddle.y + PADDLE_HEIGHT && ball.vx > 0) {
-            ball.x = rightPaddle.x - BALL_SIZE;
-            ball._subx = ball.x;
-            ball.vx *= -1;
-            animatePaddleHit(false);
-            animateBallSquash();
-        }
-        // Ball out of bounds (score)
-        if (ball.x < 0 || ball.x > FIELD_WIDTH) {
-            endGame();
-            return;
-        }
-        // Ultra single mode: spawn powerups, increase difficulty
-        if (gameMode === 'ultra-single') {
-            if (Math.random() < 0.008 && powerups.length < 1) {
-                const ptype = POWERUP_TYPES[Math.floor(Math.random()*POWERUP_TYPES.length)];
-                powerups.push({
-                    ...ptype,
-                    x: Math.random()*(FIELD_WIDTH-POWERUP_SIZE-40)+20,
-                    y: Math.random()*(FIELD_HEIGHT-POWERUP_SIZE-40)+20
-                });
-            }
-            for (let i=powerups.length-1; i>=0; i--) {
-                const p = powerups[i];
-                const dx = (ball.x+BALL_SIZE/2)-(p.x+POWERUP_SIZE/2);
-                const dy = (ball.y+BALL_SIZE/2)-(p.y+POWERUP_SIZE/2);
-                if (Math.sqrt(dx*dx+dy*dy) < BALL_SIZE/2 + POWERUP_SIZE/2) {
-                    activePowerups.push({ type: p.type, timer: ULTRA_POWERUP_DURATION });
-                    powerups.splice(i,1);
-                }
-            }
-            for (let i=activePowerups.length-1; i>=0; i--) {
-                activePowerups[i].timer--;
-                if (activePowerups[i].timer <= 0) activePowerups.splice(i,1);
-            }
-            if (score > 0 && score % 100 === 0 && Math.abs(ball.vx) < maxBallSpeed) {
-                ball.vx *= 1.12;
-                ball.vy *= 1.12;
-                updateDifficultyBar();
-            }
-            updateDifficultyBar();
-        }
-        // Update score
-        score++;
-        animateScorePop();
-        scoreLabel.textContent = `Score: ${score}`;
-        ctx.clearRect(0,0,FIELD_WIDTH,FIELD_HEIGHT);
-        drawGame();
-    }
-
-    // --- Add paddle and ball hit animations ---
-    function animatePaddleHit(isLeft) {
-        // Add a quick scale animation to the paddle
-        const el = canvas;
-        const className = isLeft ? 'paddle-hit-left' : 'paddle-hit-right';
-        el.classList.remove(className);
-        void el.offsetWidth;
-        el.classList.add(className);
-        setTimeout(() => el.classList.remove(className), 180);
-    }
-    function animateBallSquash() {
-        const el = canvas;
-        el.classList.remove('ball-squash');
-        void el.offsetWidth;
-        el.classList.add('ball-squash');
-        setTimeout(() => el.classList.remove('ball-squash'), 180);
-    }
-
-    // --- Enhanced drawField ---
-    function drawField() {
-        ctx.fillStyle = '#e8ddb7';
-        ctx.fillRect(0, 0, FIELD_WIDTH, FIELD_HEIGHT);
-        // Center line with animated dashes
-        ctx.save();
-        ctx.strokeStyle = '#bfa14a';
-        ctx.setLineDash([16, 16]);
-        ctx.lineWidth = 4;
-        ctx.globalAlpha = 0.7;
-        ctx.beginPath();
-        const dashOffset = (Date.now()/30)%32;
-        ctx.setLineDash([16, 16]);
-        ctx.lineDashOffset = -dashOffset;
-        ctx.moveTo(FIELD_WIDTH/2, 0);
-        ctx.lineTo(FIELD_WIDTH/2, FIELD_HEIGHT);
-        ctx.stroke();
-        ctx.setLineDash([]);
-        ctx.globalAlpha = 1;
-        // Construction cones
-        for (let i=0; i<3; i++) {
-            const cx = FIELD_WIDTH/2-18 + (i-1)*60;
-            const cy = 60 + i*120 + 20*Math.sin(Date.now()/600+i);
-            ctx.save();
-            ctx.translate(cx, cy);
-            ctx.beginPath();
-            ctx.moveTo(0, 18); ctx.lineTo(-12, -18); ctx.lineTo(12, -18); ctx.closePath();
-            ctx.fillStyle = '#ff4e00'; ctx.fill();
-            ctx.fillStyle = '#fff'; ctx.fillRect(-8, -8, 16, 4);
-            ctx.restore();
-        }
-        ctx.restore();
-    }
-
-    // --- Enhanced drawPaddle ---
-    function drawPaddle(paddle, isLeft) {
-        ctx.save();
-        ctx.fillStyle = isLeft ? '#e0a106' : '#ff4e00';
-        ctx.shadowColor = '#bfa14a';
-        ctx.shadowBlur = 8;
-        ctx.fillRect(paddle.x, paddle.y, PADDLE_WIDTH, PADDLE_HEIGHT);
-        // Bolts
-        for (let i=0; i<3; i++) {
-            ctx.beginPath();
-            ctx.arc(paddle.x+PADDLE_WIDTH/2, paddle.y+18+i*32, 3, 0, 2*Math.PI);
-            ctx.fillStyle = '#bfa14a';
-            ctx.fill();
-        }
-        ctx.restore();
-    }
-
-    // --- Enhanced drawBall ---
-    function drawBall() {
-        ctx.save();
-        // Ball trail if powerup
-        if (activePowerups.length > 0) {
-            for (let i=0; i<6; i++) {
-                ctx.globalAlpha = 0.08 + 0.04*i;
-                ctx.beginPath();
-                ctx.arc(ball.x + BALL_SIZE/2 - ball.vx*i*2, ball.y + BALL_SIZE/2 - ball.vy*i*2, BALL_SIZE/2, 0, 2*Math.PI);
-                ctx.fillStyle = '#e0a106';
-                ctx.fill();
-            }
-        }
-        ctx.globalAlpha = 1;
-        // --- Spinning hammer ---
-        const centerX = ball.x + BALL_SIZE/2;
-        const centerY = ball.y + BALL_SIZE/2;
-        const hammerLength = BALL_SIZE * 1.2;
-        const hammerHeadWidth = BALL_SIZE * 0.7;
-        const hammerHeadHeight = BALL_SIZE * 0.38;
-        const handleWidth = BALL_SIZE * 0.18;
-        const handleLength = BALL_SIZE * 0.9;
-        // Calculate rotation angle based on time for smooth spinning
-        const spinSpeed = 0.13; // radians per frame
-        if (!drawBall._angle) drawBall._angle = 0;
-        drawBall._angle += spinSpeed;
-        ctx.save();
-        ctx.translate(centerX, centerY);
-        ctx.rotate(drawBall._angle);
-        // Draw hammer handle
-        ctx.beginPath();
-        ctx.rect(-handleWidth/2, hammerHeadHeight/2, handleWidth, handleLength);
-        ctx.fillStyle = '#bfa14a';
-        ctx.shadowColor = '#e0a106';
-        ctx.shadowBlur = 6;
-        ctx.fill();
-        ctx.shadowBlur = 0;
-        // Draw hammer head
-        ctx.beginPath();
-        ctx.rect(-hammerHeadWidth/2, -hammerHeadHeight/2, hammerHeadWidth, hammerHeadHeight);
-        ctx.fillStyle = '#888';
-        ctx.strokeStyle = '#444';
-        ctx.lineWidth = 2.2;
-        ctx.fill();
-        ctx.stroke();
-        // Draw hammer face (circle at end)
-        ctx.beginPath();
-        ctx.arc(hammerHeadWidth/2, 0, hammerHeadHeight/2, 0, 2*Math.PI);
-        ctx.fillStyle = '#e0a106';
-        ctx.strokeStyle = '#bfa14a';
-        ctx.lineWidth = 1.2;
-        ctx.fill();
-        ctx.stroke();
-        ctx.restore();
-        ctx.restore();
-    }
-
-    // --- Enhanced drawPowerups ---
-    function drawPowerups() {
-        for (const p of powerups) {
-            ctx.save();
-            ctx.beginPath();
-            ctx.arc(p.x + POWERUP_SIZE/2, p.y + POWERUP_SIZE/2, POWERUP_SIZE/2, 0, 2*Math.PI);
-            ctx.fillStyle = p.color;
-            ctx.globalAlpha = 0.7 + 0.3 * Math.sin(Date.now()/200);
-            ctx.shadowColor = p.color;
-            ctx.shadowBlur = 12;
-            ctx.fill();
-            ctx.shadowBlur = 0;
-            ctx.globalAlpha = 1;
-            ctx.font = '24px Segoe UI';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            // Animate float
-            const floatY = 4*Math.sin(Date.now()/180 + p.x);
-            ctx.fillText(p.icon, p.x + POWERUP_SIZE/2, p.y + POWERUP_SIZE/2 + 1 + floatY);
-            ctx.restore();
-        }
-    }
-
-    // --- Enhanced drawHUD ---
-    function drawHUD() {
-        if ((gameMode === "ultra" || gameMode === "ultra-single") && activePowerups.length > 0) {
-            ctx.save();
-            ctx.globalAlpha = 1;
-            ctx.font = 'bold 18px Segoe UI';
-            ctx.textAlign = 'left';
-            ctx.textBaseline = 'top';
-            // HUD panel
-            ctx.save();
-            ctx.beginPath();
-            ctx.moveTo(12, 12); ctx.lineTo(160, 12); ctx.lineTo(160, 18+activePowerups.length*36); ctx.lineTo(12, 18+activePowerups.length*36); ctx.closePath();
-            ctx.fillStyle = 'rgba(255,255,255,0.85)';
-            ctx.strokeStyle = '#e0a106';
-            ctx.lineWidth = 2;
-            ctx.fill(); ctx.stroke();
-            ctx.restore();
-            let hudY = 18;
-            for (const ap of activePowerups) {
-                const details = POWERUP_TYPES.find(p => p.type === ap.type);
-                if (!details) continue;
-                // Animate icon pulse
-                const pulse = 1 + 0.08 * Math.sin(Date.now()/180 + hudY);
-                ctx.save();
-                ctx.translate(32, hudY+12);
-                ctx.scale(pulse, pulse);
-                ctx.fillText(details.icon, 0, 0);
-                ctx.restore();
-                ctx.fillStyle = details.color;
-                ctx.fillText(` ${details.type.charAt(0).toUpperCase() + details.type.slice(1)}`, 48, hudY);
-                // Timer bar
-                ctx.save();
-                ctx.fillStyle = 'rgba(60,60,60,0.75)';
-                ctx.fillRect(20, hudY+22, 100, 7);
-                ctx.fillStyle = details.color;
-                ctx.fillRect(20, hudY+22, 100 * (ap.timer/ULTRA_POWERUP_DURATION), 7);
-                ctx.restore();
-                hudY += 36;
-            }
-            ctx.restore();
-        }
-    }
-
-    // --- Enhanced applyPowerupEffects ---
-    function applyPowerupEffects() {
-        // Magnet: ball curves toward left paddle
-        if (activePowerups.some(p => p.type === "magnet")) {
-            if (ball.vx < 0) {
-                const paddleCenter = leftPaddle.y + PADDLE_HEIGHT/2;
-                const ballCenter = ball.y + BALL_SIZE/2;
-                const diff = paddleCenter - ballCenter;
-                ball.vy += 0.13 * Math.sign(diff);
-                ball.vy = Math.max(-maxBallSpeed, Math.min(maxBallSpeed, ball.vy));
-                // Magnet lines
-                ctx.save();
-                ctx.strokeStyle = '#4ecaff';
-                ctx.globalAlpha = 0.5;
-                ctx.beginPath();
-                ctx.moveTo(ball.x + BALL_SIZE/2, ball.y + BALL_SIZE/2);
-                ctx.lineTo(leftPaddle.x + PADDLE_WIDTH, paddleCenter);
-                ctx.stroke();
-                ctx.restore();
-            }
-        }
-        // Ghost: ball passes through left paddle once
-        if (activePowerups.some(p => p.type === "ghost")) {
-            if (ball.x <= leftPaddle.x + PADDLE_WIDTH && ball.y + BALL_SIZE > leftPaddle.y && ball.y < leftPaddle.y + PADDLE_HEIGHT && ball.vx < 0) {
-                const idx = activePowerups.findIndex(p => p.type === "ghost");
-                if (idx !== -1) {
-                    // Animate ghost effect
-                    for (let i = 0; i < 8; i++) {
-                        setTimeout(() => {
-                            ctx.save();
-                            ctx.globalAlpha = 0.15 + 0.1 * Math.sin(Date.now()/60 + i);
-                            ctx.beginPath();
-                            ctx.arc(ball.x + BALL_SIZE/2, ball.y + BALL_SIZE/2, BALL_SIZE/2 + i*2, 0, 2*Math.PI);
-                            ctx.fillStyle = '#b3b3ff';
-                            ctx.fill();
-                            ctx.restore();
-                        }, i*12);
-                    }
-                    activePowerups.splice(idx, 1);
-                    ball.x = leftPaddle.x + PADDLE_WIDTH + 2;
-                }
-            }
-        }
-        // Shield: ball reflects off left wall once
-        if (activePowerups.some(p => p.type === "shield")) {
-            if (ball.x < 0 && ball.vx < 0) {
-                const idx = activePowerups.findIndex(p => p.type === "shield");
-                if (idx !== -1) {
-                    for (let i = 0; i < 8; i++) {
-                        setTimeout(() => {
-                            ctx.save();
-                            ctx.globalAlpha = 0.12 + 0.1 * Math.sin(Date.now()/60 + i);
-                            ctx.beginPath();
-                            ctx.arc(0, ball.y + BALL_SIZE/2, 24 + i*2, 0, 2*Math.PI);
-                            ctx.fillStyle = '#76e6cd';
-                            ctx.fill();
-                            ctx.restore();
-                        }, i*12);
-                    }
-                    activePowerups.splice(idx, 1);
-                    ball.x = 2;
-                    ball.vx *= -1;
-                }
-            }
-        }
-        // Drill: ball pierces through left paddle, bounces off left wall
-        if (activePowerups.some(p => p.type === "drill")) {
-            if (ball.x <= leftPaddle.x + PADDLE_WIDTH && ball.y + BALL_SIZE > leftPaddle.y && ball.y < leftPaddle.y + PADDLE_HEIGHT && ball.vx < 0) {
-                const idx = activePowerups.findIndex(p => p.type === "drill");
-                if (idx !== -1) {
-                    for (let i = 0; i < 8; i++) {
-                        setTimeout(() => {
-                            ctx.save();
-                            ctx.globalAlpha = 0.13 + 0.1 * Math.sin(Date.now()/60 + i);
-                            ctx.beginPath();
-                            ctx.arc(ball.x + BALL_SIZE/2, ball.y + BALL_SIZE/2, BALL_SIZE/2 + i*2, 0, 2*Math.PI);
-                            ctx.fillStyle = '#c0c0c0';
-                            ctx.fill();
-                            ctx.restore();
-                        }, i*12);
-                    }
-                    activePowerups.splice(idx, 1);
-                    ball.x = 2;
-                    ball.vx *= -1;
-                }
-            }
-        }
-    }
-
-    // --- Enhanced gameLoop ---
-    function gameLoop() {
-        // --- SMOOTHER PADDLE MOVEMENT ---
-        // Add velocity easing for paddles for smoother movement
-        const paddleEasing = 0.32; // Lower = more smoothing
-        if (twoPlayerControls) {
-            // Left paddle (W/S)
-            let targetVyL = 0;
-            if (leftPaddleUp && !leftPaddleDown) targetVyL = -PADDLE_SPEED;
-            else if (leftPaddleDown && !leftPaddleUp) targetVyL = PADDLE_SPEED;
-            leftPaddle.vy += (targetVyL - leftPaddle.vy) * paddleEasing;
-            // Right paddle (Up/Down)
-            let targetVyR = 0;
-            if (rightPaddleUp && !rightPaddleDown) targetVyR = -PADDLE_SPEED;
-            else if (rightPaddleDown && !rightPaddleUp) targetVyR = PADDLE_SPEED;
-            rightPaddle.vy += (targetVyR - rightPaddle.vy) * paddleEasing;
-        }
-        if (!twoPlayerControls && aiEnabled) {
-            // AI paddle smoothing
-            let targetVy = 0;
-            if (ball.y + BALL_SIZE/2 < rightPaddle.y + PADDLE_HEIGHT/2 - 10) targetVy = -PADDLE_SPEED;
-            else if (ball.y + BALL_SIZE/2 > rightPaddle.y + PADDLE_HEIGHT/2 + 10) targetVy = PADDLE_SPEED;
-            rightPaddle.vy += (targetVy - rightPaddle.vy) * paddleEasing;
-        }
-        // Single player left paddle (no smoothing for responsiveness)
-        if (!twoPlayerControls && !aiEnabled) {
-            // leftPaddle.vy is set directly by key events
-        }
-        leftPaddle.y += leftPaddle.vy;
-        rightPaddle.y += rightPaddle.vy;
-        leftPaddle.y = Math.max(0, Math.min(FIELD_HEIGHT-PADDLE_HEIGHT, leftPaddle.y));
-        rightPaddle.y = Math.max(0, Math.min(FIELD_HEIGHT-PADDLE_HEIGHT, rightPaddle.y));
-
-        // --- SMOOTHER BALL MOVEMENT ---
-        // Add subpixel movement for ball for smoother animation
-        if (!ball._subx) ball._subx = ball.x;
-        if (!ball._suby) ball._suby = ball.y;
-        ball._subx += ball.vx;
-        ball._suby += ball.vy;
-        ball.x = ball._subx;
-        ball.y = ball._suby;
-
-        // Ball collision with top/bottom
-        if (ball.y <= 0) {
-            ball.y = 0;
-            ball._suby = ball.y;
-            ball.vy *= -1;
-        } else if (ball.y + BALL_SIZE >= FIELD_HEIGHT) {
-            ball.y = FIELD_HEIGHT - BALL_SIZE;
-            ball._suby = ball.y;
-            ball.vy *= -1;
-        }
-
-        // Powerup effects
-        if ((gameMode === 'ultra' || gameMode === 'ultra-single') && activePowerups.length > 0) {
-            applyPowerupEffects();
-        }
-        // Ball collision with paddles
-        if (ball.x <= leftPaddle.x + PADDLE_WIDTH && ball.y + BALL_SIZE > leftPaddle.y && ball.y < leftPaddle.y + PADDLE_HEIGHT && ball.vx < 0) {
-            ball.x = leftPaddle.x + PADDLE_WIDTH;
-            ball._subx = ball.x;
-            ball.vx *= -1;
-            animatePaddleHit(true);
-            animateBallSquash();
-        }
-        if (ball.x + BALL_SIZE >= rightPaddle.x && ball.y + BALL_SIZE > rightPaddle.y && ball.y < rightPaddle.y + PADDLE_HEIGHT && ball.vx > 0) {
-            ball.x = rightPaddle.x - BALL_SIZE;
-            ball._subx = ball.x;
-            ball.vx *= -1;
-            animatePaddleHit(false);
-            animateBallSquash();
-        }
-        // Ball out of bounds (score)
-        if (ball.x < 0 || ball.x > FIELD_WIDTH) {
-            endGame();
-            return;
-        }
-        // Ultra single mode: spawn powerups, increase difficulty
-        if (gameMode === 'ultra-single') {
-            if (Math.random() < 0.008 && powerups.length < 1) {
-                const ptype = POWERUP_TYPES[Math.floor(Math.random()*POWERUP_TYPES.length)];
-                powerups.push({
-                    ...ptype,
-                    x: Math.random()*(FIELD_WIDTH-POWERUP_SIZE-40)+20,
-                    y: Math.random()*(FIELD_HEIGHT-POWERUP_SIZE-40)+20
-                });
-            }
-            for (let i=powerups.length-1; i>=0; i--) {
-                const p = powerups[i];
-                const dx = (ball.x+BALL_SIZE/2)-(p.x+POWERUP_SIZE/2);
-                const dy = (ball.y+BALL_SIZE/2)-(p.y+POWERUP_SIZE/2);
-                if (Math.sqrt(dx*dx+dy*dy) < BALL_SIZE/2 + POWERUP_SIZE/2) {
-                    activePowerups.push({ type: p.type, timer: ULTRA_POWERUP_DURATION });
-                    powerups.splice(i,1);
-                }
-            }
-            for (let i=activePowerups.length-1; i>=0; i--) {
-                activePowerups[i].timer--;
-                if (activePowerups[i].timer <= 0) activePowerups.splice(i,1);
-            }
-            if (score > 0 && score % 100 === 0 && Math.abs(ball.vx) < maxBallSpeed) {
-                ball.vx *= 1.12;
-                ball.vy *= 1.12;
-                updateDifficultyBar();
-            }
-            updateDifficultyBar();
-        }
-        // Update score
-        score++;
-        animateScorePop();
-        scoreLabel.textContent = `Score: ${score}`;
-        ctx.clearRect(0,0,FIELD_WIDTH,FIELD_HEIGHT);
-        drawGame();
-    }
-
-    // --- Draw everything per frame ---
-    function drawGame() {
-        drawField();
-        drawPaddle(leftPaddle, true);
-        drawPaddle(rightPaddle, false);
-        drawBall();
-        if (gameMode === 'ultra-single') drawPowerups();
-        drawHUD();
-    }
-
-    // Controls
-    let leftPaddleUp = false, leftPaddleDown = false, rightPaddleUp = false, rightPaddleDown = false;
-    document.addEventListener('keydown', e => {
-        if (!running) return;
-        if (twoPlayerControls) {
-            if (e.key === 'w' || e.key === 'W') leftPaddleUp = true;
-            if (e.key === 's' || e.key === 'S') leftPaddleDown = true;
-            if (e.key === 'ArrowUp') rightPaddleUp = true;
-            if (e.key === 'ArrowDown') rightPaddleDown = true;
-        } else {
-            if (e.key === 'w' || e.key === 'ArrowUp') leftPaddle.vy = -PADDLE_SPEED;
-            if (e.key === 's' || e.key === 'ArrowDown') leftPaddle.vy = PADDLE_SPEED;
-        }
+    // -------- KEYBOARD -----------
+    document.addEventListener('keydown', e=>{
+      if(!running)return;
+      if(twoPlayerControls){
+        if(e.key=='w'||e.key=='W') leftPaddleUp=true;
+        if(e.key=='s'||e.key=='S') leftPaddleDown=true;
+        if(e.key=='ArrowUp') rightPaddleUp=true;
+        if(e.key=='ArrowDown') rightPaddleDown=true;
+      }else{
+        if(e.key=='w'||e.key=='ArrowUp') leftPaddle.vy=-PADDLE_SPEED;
+        if(e.key=='s'||e.key=='ArrowDown') leftPaddle.vy=PADDLE_SPEED;
+      }
     });
-    document.addEventListener('keyup', e => {
-        if (!running) return;
-        if (twoPlayerControls) {
-            if (e.key === 'w' || e.key === 'W') leftPaddleUp = false;
-            if (e.key === 's' || e.key === 'S') leftPaddleDown = false;
-            if (e.key === 'ArrowUp') rightPaddleUp = false;
-            if (e.key === 'ArrowDown') rightPaddleDown = false;
-        } else {
-            if (e.key === 'w' || e.key === 'ArrowUp') leftPaddle.vy = 0;
-            if (e.key === 's' || e.key === 'ArrowDown') leftPaddle.vy = 0;
-        }
+    document.addEventListener('keyup', e=>{
+      if(!running)return;
+      if(twoPlayerControls){
+        if(e.key=='w'||e.key=='W') leftPaddleUp=false;
+        if(e.key=='s'||e.key=='S') leftPaddleDown=false;
+        if(e.key=='ArrowUp') rightPaddleUp=false;
+        if(e.key=='ArrowDown') rightPaddleDown=false;
+      }else{
+        if(e.key=='w'||e.key=='ArrowUp') leftPaddle.vy=0;
+        if(e.key=='s'||e.key=='ArrowDown') leftPaddle.vy=0;
+      }
     });
 
-    // Main menu buttons
-    singleButton.addEventListener('click', () => {
-        selectedMode = 'single';
-        singleButton.classList.add('selected');
-        versusButton.classList.remove('selected');
-        twoPlayerButton.classList.remove('selected');
-        showStartButton();
-    });
-    versusButton.addEventListener('click', () => {
-        selectedMode = 'ultra-single';
-        versusButton.classList.add('selected');
-        singleButton.classList.remove('selected');
-        twoPlayerButton.classList.remove('selected');
-        showStartButton();
-    });
-    twoPlayerButton.addEventListener('click', () => {
-        selectedMode = 'two-player';
-        twoPlayerButton.classList.add('selected');
-        singleButton.classList.remove('selected');
-        versusButton.classList.remove('selected');
-        showStartButton();
-    });
-    startButton.addEventListener('click', () => {
-        if (!selectedMode) return;
-        playerName = playerNameInput.value.trim() || "Anonymous";
-        mainMenu.style.transition = 'opacity 0.5s, transform 0.5s';
-        mainMenu.style.opacity = '0';
-        mainMenu.style.transform = 'translateY(-30px)';
-        setTimeout(() => {
-            mainMenu.style.display = 'none';
-            mainMenu.style.opacity = '';
-            mainMenu.style.transform = '';
-            if (selectedMode === 'single') resetGame('single');
-            else if (selectedMode === 'ultra-single') resetGame('ultra-single');
-            else if (selectedMode === 'two-player') resetGame('two-player');
-        }, 500);
-    });
-
-    // Add death screen HTML
-    const deathScreen = document.createElement('div');
-    deathScreen.id = 'death-screen';
-    deathScreen.style.display = 'none';
-    deathScreen.style.position = 'absolute';
-    deathScreen.style.top = '0';
-    deathScreen.style.left = '0';
-    deathScreen.style.width = '100%';
-    deathScreen.style.height = '100%';
-    deathScreen.style.background = 'rgba(255,255,255,0.97)';
-    deathScreen.style.zIndex = '20';
-    deathScreen.style.display = 'flex';
-    deathScreen.style.flexDirection = 'column';
-    deathScreen.style.alignItems = 'center';
-    deathScreen.style.justifyContent = 'center';
-    deathScreen.style.gap = '2.2rem';
-    deathScreen.innerHTML = `
-        <div style="font-size:2.5rem;color:#e0a106;font-weight:700;">Game Over</div>
-        <div id="death-score" style="font-size:1.6rem;color:#ff4e00;font-weight:600;">Score: 0</div>
-        <div style="display:flex;gap:1.5rem;">
-            <button id="replay-btn" style="font-size:1.2rem;padding:0.7rem 2.2rem;background:linear-gradient(90deg,#e0a106,#ff4e00);color:#fff;border:none;border-radius:10px;font-weight:600;cursor:pointer;box-shadow:0 2px 8px rgba(224,161,6,0.13);">Replay</button>
-            <button id="return-menu-btn" style="font-size:1.2rem;padding:0.7rem 2.2rem;background:linear-gradient(90deg,#bfa14a,#ffd700);color:#fff;border:none;border-radius:10px;font-weight:600;cursor:pointer;box-shadow:0 2px 8px rgba(224,161,6,0.13);">Return to Menu</button>
-        </div>
-    `;
-    document.getElementById('game-container').appendChild(deathScreen);
-    // Ensure death screen is hidden on initial load
-    window.addEventListener('DOMContentLoaded', () => {
-        deathScreen.style.display = 'none';
-    });
-
-    // Death screen logic
-    const deathScore = deathScreen.querySelector('#death-score');
-    const replayBtn = deathScreen.querySelector('#replay-btn');
-    const returnMenuBtn = deathScreen.querySelector('#return-menu-btn');
-
-    replayBtn.addEventListener('click', () => {
-        deathScreen.style.display = 'none';
-        leaderboard.style.display = 'none';
-        scoreArea.style.display = 'block';
-        canvas.style.display = 'block';
-        if (selectedMode === 'single') resetGame('single');
-        else if (selectedMode === 'ultra-single') resetGame('ultra-single');
-        else if (selectedMode === 'two-player') resetGame('two-player');
-    });
-    returnMenuBtn.addEventListener('click', () => {
-        deathScreen.style.display = 'none';
-        leaderboard.style.display = 'block';
-        mainMenu.style.display = 'flex';
-        canvas.style.display = 'none';
-        scoreArea.style.display = 'none';
-        difficultyMeter.style.display = 'none';
-    });
-
-    function endGame() {
-        running = false;
-        clearInterval(intervalId);
-        // Show death screen
-        deathScore.textContent = `Score: ${score}`;
-        deathScreen.style.display = 'flex';
-        canvas.style.display = 'none';
-        scoreArea.style.display = 'none';
-        difficultyMeter.style.display = 'none';
-        leaderboard.style.display = 'block';
-        submitScore(playerName, score);
-        updateLeaderboard();
+    // -------- END GAME & LEADERBOARD ----------
+    function endGame(){
+      running=false; clearInterval(intervalId);
+      deathScore.textContent=`Score: ${score}`;
+      deathScreen.style.display='flex';
+      canvas.style.display='none'; scoreArea.style.display='none'; difficultyMeter.style.display='none';
+      if(gameMode!="twoplayer"){ leaderboard.style.display='block'; submitScore(playerName,score);}
+      updateLeaderboard();
     }
-
-    // --- Firebase logic for leaderboard (uses window.firebase* globals set by module script) ---
-    var db, collection, addDoc, query, orderBy, limit, getDocs, serverTimestamp;
-
-    (function() {
-        function assignFirebaseGlobals() {
-            db = window.firebaseFirestore;
-            collection = window.firebaseCollection;
-            addDoc = window.firebaseAddDoc;
-            query = window.firebaseQuery;
-            orderBy = window.firebaseOrderBy;
-            limit = window.firebaseLimit;
-            getDocs = window.firebaseGetDocs;
-            serverTimestamp = window.firebaseServerTimestamp;
-        }
-        if (window.firebaseFirestore) {
-            assignFirebaseGlobals();
-        } else {
-            document.addEventListener('firebase-ready', assignFirebaseGlobals);
-        }
-    })();
-
-    const leaderboardCollectionName = "hammerballLeaderboard";
-    const leaderboard = document.getElementById('leaderboard');
-    const leaderboardEntries = document.getElementById('leaderboard-entries');
-    const LEADERBOARD_SIZE = 6;
-
-    function submitScore(name, finalScore) {
-        if (!db || !collection) return;
-        // Prevent leaderboard submission for two-player mode
-        if (selectedMode === 'two-player' || gameMode === 'two-player' || finalScore <= 0) {
-            updateLeaderboard();
-            return;
-        }
-        const scoresCollection = collection(db, leaderboardCollectionName);
-        addDoc(scoresCollection, {
-            name: name,
-            score: finalScore,
-            mode: gameMode,
-            timestamp: serverTimestamp()
-        }).then(() => {
-            updateLeaderboard();
-        }).catch(error => {
-            console.error("Error submitting score to Firebase: ", error);
-        });
-    }
-
-    async function updateLeaderboard() {
-        if (!db || !collection) return;
-        leaderboardEntries.className = 'loading';
-        leaderboardEntries.innerHTML = '<div class="loading-spinner"></div>';
-        const scoresCollection = collection(db, leaderboardCollectionName);
-        const q = query(scoresCollection, orderBy("score", "desc"), limit(LEADERBOARD_SIZE));
-        try {
-            const querySnapshot = await getDocs(q);
-            leaderboardEntries.className = '';
-            leaderboardEntries.innerHTML = '';
-            if (querySnapshot.empty) {
-                leaderboardEntries.innerHTML = `<div style="text-align:center;padding:30px;color:#ffcc33;"><div style="font-size:38px;margin-bottom:12px;animation: bounce 2s infinite;">🏆</div><div>No scores yet!</div></div>`;
-                return;
-            }
-            let rank = 1;
-            querySnapshot.forEach(doc => {
-                const s = doc.data();
-                const entry = document.createElement('div');
-                entry.className = 'score-entry';
-                entry.setAttribute('data-rank', rank);
-                const modeClass = s.mode === 'ultra-single' ? 'ultra-mode' : 'classic-mode';
-                entry.innerHTML = `<span class="player-name">${s.name} <small class="${modeClass}">(${s.mode})</small></span><span class="player-score">${s.score}</span>`;
-                leaderboardEntries.appendChild(entry);
-                rank++;
-            });
-        } catch (error) {
-            console.error("Error fetching leaderboard from Firebase: ", error);
-            leaderboardEntries.innerHTML = `<div style="text-align:center;padding:20px;color:#ff6b6b;"><div style="font-size:24px;margin-bottom:10px;">⚠️</div><div>Error loading scores</div><div style="font-size:0.9em;opacity:0.7;margin-top:5px;">Please try again later</div></div>`;
-        }
-    }
-
-    function endGame() {
-        running = false;
-        clearInterval(intervalId);
-        // Show death screen
-        deathScore.textContent = `Score: ${score}`;
-        deathScreen.style.display = 'flex';
-        canvas.style.display = 'none';
-        scoreArea.style.display = 'none';
-        difficultyMeter.style.display = 'none';
-        leaderboard.style.display = 'block';
-        submitScore(playerName, score);
-        updateLeaderboard();
-    }
-
-    // Show leaderboard on main menu
-    mainMenu.style.display = 'flex';
-    leaderboard.style.display = 'block';
-    updateLeaderboard();
-    </script>
-    <script type="module">
-    // --- Firebase Imports and setup for global use ---
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-app.js";
-    import { getFirestore, collection, addDoc, query, orderBy, limit, getDocs, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-firestore.js";
-
-    const firebaseConfig = {
-        apiKey: "AIzaSyBVtq6dAEuybJNmTTv8dXBxTVUgw1t0ZMk",
-        authDomain: "cusumano-website.firebaseapp.com",
-        projectId: "cusumano-website",
-        storageBucket: "cusumano-website.firebasestorage.app",
-        messagingSenderId: "20051552210",
-        appId: "1:20051552210:web:7eb3b22baa3fec184e4a0b"
+    replayBtn.onclick = () => {
+      deathScreen.style.display='none'; leaderboard.style.display='none';
+      scoreArea.style.display='block'; canvas.style.display='block';
+      resetGame(selectedMode);
     };
-    const app = initializeApp(firebaseConfig);
-    window.firebaseApp = app;
-    window.firebaseFirestore = getFirestore(app);
-    window.firebaseCollection = collection;
-    window.firebaseAddDoc = addDoc;
-    window.firebaseQuery = query;
-    window.firebaseOrderBy = orderBy;
-    window.firebaseLimit = limit;
-    window.firebaseGetDocs = getDocs;
-    window.firebaseServerTimestamp = serverTimestamp;
+    returnMenuBtn.onclick = () => {
+      deathScreen.style.display='none'; leaderboard.style.display='block';
+      mainMenu.style.display='flex'; canvas.style.display='none';
+      scoreArea.style.display='none'; difficultyMeter.style.display='none';
+    };
 
-    document.dispatchEvent(new Event('firebase-ready'));
-    </script>
+    // ----- FIREBASE LEADERBOARD -----
+    function submitScore(name, finalScore){
+      if(gameMode=="twoplayer"||finalScore<=0) return;
+      db.collection("hammerballLeaderboard").add({
+        name: name, score: finalScore, mode: gameMode, ts: firebase.firestore.FieldValue.serverTimestamp()
+      }).then(()=>{ updateLeaderboard(); }).catch(err=>{console.error("Firebase submit error",err);});
+    }
+    function updateLeaderboard(){
+      leaderboardEntries.className=''; leaderboardEntries.innerHTML='<div class="loading-spinner"></div>';
+      db.collection("hammerballLeaderboard").orderBy("score","desc").limit(LEADERBOARD_SIZE).get()
+      .then(qs=>{
+        leaderboardEntries.innerHTML="";
+        if(qs.empty){ leaderboardEntries.innerHTML='<div style="text-align:center;padding:24px;color:#ffcc33;"><div style="font-size:38px;margin-bottom:12px;">🏆</div><div>No scores yet!</div></div>'; return;}
+        let rank=1;
+        qs.forEach(doc=>{
+          let s=doc.data();
+          let div=document.createElement('div');
+          div.className="score-entry"; div.setAttribute('data-rank',rank);
+          let modeClass=s.mode=="ultra"?"ultra-mode":"classic-mode";
+          div.innerHTML=`<span class="player-name">${s.name} <small class="${modeClass}">(${s.mode})</small></span><span class="player-score">${s.score}</span>`;
+          leaderboardEntries.appendChild(div); rank++;
+        });
+      })
+      .catch(e=>{
+        leaderboardEntries.innerHTML = `<div style="text-align:center;padding:20px;color:#ff6b6b;"><div style="font-size:24px;margin-bottom:10px;">⚠️</div><div>Error loading scores</div><div style="font-size:0.9em;opacity:0.7;margin-top:5px;">Please try again later</div></div>`;
+      });
+    }
+
+    // ---- INIT SHOW LEADERBOARD ON LOAD ----
+    mainMenu.style.display='flex'; leaderboard.style.display='block';
+    updateLeaderboard();
+    deathScreen.style.display='none';
+
+  </script>
 </body>
 </html>

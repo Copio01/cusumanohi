@@ -1698,22 +1698,41 @@
                 transparent 6px
             );
             border-radius: 4px;
-        }
-          /* Mobile Responsiveness */
+        }        /* Mobile Responsiveness - Comprehensive Implementation */
         @media (max-width: 768px) {
             /* Enhanced body adjustments for mobile */
             body {
                 overflow-x: hidden; /* Prevent horizontal scrolling */
                 min-height: -webkit-fill-available; /* Better height handling on iOS */
+                padding-bottom: 150px; /* Add padding for fixed controls */
+                height: 100vh; /* Full height */
+                /* Use this variable approach for dynamic height adjustment */
+                height: calc(var(--vh, 1vh) * 100);
+            }
+            
+            /* Improved game content layout */
+            .main-content {
+                padding-bottom: 100px; /* Ensure space for controls */
+                min-height: calc(100vh - 180px);
+                min-height: calc(var(--vh, 1vh) * 100 - 180px);
+                display: flex;
+                align-items: flex-start; /* Align to top for better visibility */
+                padding-top: 10px;
             }
             
             /* Adjust table sizing */
             .game-table {
                 width: 95vw;
-                aspect-ratio: 3 / 2;
+                aspect-ratio: 3 / 4; /* Better mobile ratio */
                 border-radius: 50px;
                 border-width: 8px;
                 box-shadow: 0 0 60px 10px #e0b75744, 0 12px 25px rgba(0,0,0,0.6);
+                height: auto;
+                margin-bottom: 20px;
+                max-height: 80vh;
+                max-height: calc(var(--vh, 1vh) * 80);
+                position: relative;
+                touch-action: pan-x pan-y;
             }
 
             /* Scale down cards and bets */
@@ -1737,10 +1756,15 @@
             .player-controls {
                 flex-direction: column;
                 gap: 1rem;
-                bottom: 5%;
-                width: 92%;
-                left: 4%;
-                right: 4%;
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                z-index: 90;
+                background: rgba(30,30,30,0.95);
+                backdrop-filter: blur(10px);
+                width: 100%;
+                padding: 10px;
             }
 
             .action-bar {
@@ -1753,11 +1777,16 @@
                 font-size: 1rem;
                 padding: 0.8rem 1rem;
                 min-width: 90px; /* Ensure touch targets are large enough */
+                touch-action: manipulation;
+                position: relative;
             }
 
             /* Tighter header for mobile */
             .game-header {
                 padding: 0.5rem 1rem;
+                position: sticky;
+                top: 0;
+                z-index: 100;
             }
 
             .profile-info {
@@ -1778,11 +1807,12 @@
             }
             
             #player-hands {
-                bottom: 28%;
+                bottom: 35%; /* Move up from bottom */
             }
             
             .betting-area {
                 gap: 2rem;
+                bottom: 20%; /* Move up to prevent cutting off */
             }
             
             /* Card overlap adjustments */
@@ -1790,7 +1820,7 @@
                 margin-left: -20px;
             }
             
-            /* Modals need to be fully visible */
+            /* Modals overhaul for mobile - general */
             .modal-content {
                 width: 90%;
                 max-width: 95vw;
@@ -1803,8 +1833,53 @@
                 right: 0.5rem;
                 padding: 0.5rem;
             }
+            
+            /* Outcome modal mobile fixes */
+            #outcome-modal .modal-content {
+                max-height: 85vh;
+                width: 92vw;
+                overflow-y: auto; /* Enable scrolling */
+                padding: 1.5rem 1rem;
+                margin: 0;
+                border-radius: 18px;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                position: fixed;
+            }
+            
+            /* Reduce header size */
+            .outcome-title {
+                font-size: 1.8rem;
+                margin-top: 0;
+            }
+            
+            /* Compact outcome sections */
+            .outcome-section {
+                padding: 0.8rem;
+                margin-bottom: 0.5rem;
+            }
+            
+            /* Stack hand results on mobile */
+            .outcome-hands {
+                display: flex;
+                flex-direction: column;
+                gap: 0.8rem;
+            }
+            
+            /* Smaller payouts display */
+            .outcome-total-payout {
+                font-size: 1.6rem;
+                padding: 0.6rem 1.5rem;
+            }
+            
+            #modal-new-game-btn {
+                margin-top: 1rem;
+                padding: 0.8rem 1.5rem;
+            }
         }
 
+        /* For smaller devices */
         @media (max-width: 480px) {
             /* Further reduce sizes on very small screens */
             .game-table {
@@ -1867,6 +1942,19 @@
             }
         }
         
+        /* For very small phones */
+        @media (max-width: 360px) {
+            .betting-area {
+                bottom: 22%;
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            #player-hands {
+                bottom: 40%;
+            }
+        }
+        
         /* Touch support for mobile devices */
         @media (hover: none) {
             /* Remove hover effects on mobile */
@@ -1924,11 +2012,48 @@
             aspect-ratio: 16 / 10;
         }
         
-        /* Mobile device classes for JS detection */
-        .mobile-device .game-header {
-            position: sticky;
-            top: 0;
-            z-index: 100;
+        /* iOS-specific fixes */
+        @supports (-webkit-touch-callout: none) {
+            /* iOS devices */
+            body {
+                height: -webkit-fill-available;
+            }
+            
+            .main-content {
+                min-height: -webkit-fill-available;
+            }
+        }
+        
+        /* Android-specific fixes */
+        @supports (-webkit-appearance:none) and (not (overflow:-webkit-marquee)) and (not (-ms-ime-align:auto)) {
+            /* Fix touch highlight color on Android */
+            * {
+                -webkit-tap-highlight-color: transparent;
+            }
+            
+            /* Enhance button touch area for Android */
+            .action-button, 
+            .header-btns button,
+            .chip,
+            .bet-spot {
+                touch-action: manipulation;
+                position: relative;
+            }
+            
+            /* Provide material-style touch feedback */
+            .action-button:active::after,
+            .header-btns button:active::after,
+            .chip:active::after,
+            .bet-spot:active::after {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(255, 255, 255, 0.1);
+                border-radius: inherit;
+            }
         }
 
         /* ... other modal and stat styles unchanged ... */
@@ -2082,12 +2207,112 @@
             dot.style.left = `${Math.random() * 100}%`;
             dot.style.top = `${Math.random() * 100}%`;
             dot.style.width = `${Math.random()*2+1.5}px`;
-            dot.style.height = dot.style.width;
-            dot.style.opacity = Math.random()*0.6 + 0.11;
+            dot.style.height = dot.style.width;            dot.style.opacity = Math.random()*0.6 + 0.11;
             dot.style.background = 'rgba(255,255,255,0.12)';
             dot.style.animationDuration = `${7 + Math.random()*4}s`;
             container.appendChild(dot);
         }
+    })();
+    </script>
+
+    <!-- Mobile Optimizations -->
+    <script>
+    (function() {
+        // Dynamic viewport height fix (especially for mobile Chrome)
+        function setMobileHeight() {
+            // First we get the viewport height and multiply it by 1% to get a value for a vh unit
+            let vh = window.innerHeight * 0.01;
+            // Then we set the value in the --vh custom property to the root of the document
+            document.documentElement.style.setProperty('--vh', `${vh}px`);
+        }
+
+        // Initial set
+        setMobileHeight();
+
+        // Update on resize and orientation change
+        window.addEventListener('resize', setMobileHeight);
+        window.addEventListener('orientationchange', () => {
+            setTimeout(setMobileHeight, 300);
+        });
+
+        // Function to detect if we're on a mobile device
+        function isMobileDevice() {
+            return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || 
+                (window.matchMedia && window.matchMedia('(max-width: 768px)').matches);
+        }
+
+        // Apply mobile class if on mobile
+        if (isMobileDevice()) {
+            document.body.classList.add('mobile-device');
+        }
+
+        // Handle orientation changes
+        window.addEventListener('orientationchange', () => {
+            // Small delay to let the browser adjust
+            setTimeout(() => {
+                // Adjust table aspect ratio based on orientation
+                const gameTable = document.getElementById('game-table');
+                if (gameTable) {
+                    if (window.orientation === 0 || window.orientation === 180) {
+                        // Portrait
+                        gameTable.classList.add('portrait-mode');
+                        gameTable.classList.remove('landscape-mode');
+                    } else {
+                        // Landscape
+                        gameTable.classList.add('landscape-mode');
+                        gameTable.classList.remove('portrait-mode');
+                    }
+                }
+                
+                // Force redraw of modals if visible
+                const visibleModal = document.querySelector('.modal-overlay.is-visible');
+                if (visibleModal) {
+                    visibleModal.style.display = 'none';
+                    setTimeout(() => {
+                        visibleModal.style.display = 'flex';
+                    }, 50);
+                }
+            }, 300);
+        });
+
+        // Initial orientation class
+        const gameTable = document.getElementById('game-table');
+        if (gameTable) {
+            if (window.matchMedia("(orientation: portrait)").matches) {
+                gameTable.classList.add('portrait-mode');
+            } else {
+                gameTable.classList.add('landscape-mode');
+            }
+        }
+
+        // Handle Android back button for modals
+        window.addEventListener('popstate', function(event) {
+            // Close any open modal when back button is pressed
+            const openModal = document.querySelector('.modal-overlay.is-visible');
+            if (openModal) {
+                openModal.classList.remove('is-visible');
+                // Prevent default back behavior and add a new history state
+                history.pushState(null, document.title, window.location.href);
+                event.preventDefault();
+            }
+        });
+
+        // Add history state when opening a modal
+        document.querySelectorAll('.modal-overlay').forEach(modal => {
+            const observer = new MutationObserver(mutations => {
+                mutations.forEach(mutation => {
+                    if (mutation.attributeName === 'class' && 
+                        modal.classList.contains('is-visible')) {
+                        history.pushState(null, document.title, window.location.href);
+                    }
+                });
+            });
+            
+            observer.observe(modal, { attributes: true });
+        });
+
+        // Push an initial state so we have something to go back to
+        history.pushState(null, document.title, window.location.href);
     })();
     </script>
 </body>
