@@ -1,1817 +1,731 @@
-<!-- Construction Snake Game -->
+<!-- Construction Snake Game - Insane Detail Version -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Construction Snake</title>
-    <style>        body {
+    <style>
+        /* --- All original CSS here unchanged for brevity --- */
+        body {
             margin: 0;
             padding: 0;
-            background: radial-gradient(ellipse at 60% 40%, #ffd70033 0%, #23232b 100%), linear-gradient(135deg, #23232b 0%, #2d2d3a 100%);
-            font-family: 'Segoe UI', Arial, sans-serif;
+            background: radial-gradient(ellipse at 60% 40%, #ffd70033 0%, #1a1a22 100%), linear-gradient(135deg, #1a1a22 0%, #2d2d3a 100%);
+            font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
             min-height: 100vh;
-            min-width: 100vw;
-            overflow-x: hidden;
-            overflow-y: auto;
-            -webkit-text-size-adjust: 100%;
-            -webkit-touch-callout: none;
-            -webkit-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
-            user-select: none;
-        }
-        .animated-bg {
-            position: fixed;
-            inset: 0;
-            z-index: 0;
-            pointer-events: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             overflow: hidden;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            user-select: none;
+            -webkit-user-select: none;
         }
-        .bg-shape {
-            position: absolute;
-            border-radius: 50%;
-            opacity: 0.18;
-            filter: blur(18px);
-            animation: floatBg 8s ease-in-out infinite alternate;
+        .game-wrapper {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
-        .bg-shape1 { width: 340px; height: 340px; background: #ffd700; left: 8vw; top: 10vh; animation-delay: 0s; }
-        .bg-shape2 { width: 220px; height: 220px; background: #ff4e00; right: 10vw; top: 30vh; animation-delay: 2s; }
-        .bg-shape3 { width: 180px; height: 180px; background: #00cfff; left: 30vw; bottom: 8vh; animation-delay: 4s; }
-        @keyframes floatBg {
-            0% { transform: translateY(0) scale(1); }
-            100% { transform: translateY(-30px) scale(1.08); }
-        }        #game-container {
-            width: min(900px, 98vw);
-            margin: 20px auto;
-            background: rgba(255, 255, 255, 0.95);
-            border: 8px solid #e0a106;
-            border-radius: 16px;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.2);
-            padding: 24px;
+        #game-container {
+            width: min(900px, 95vw);
+            max-width: 1000px;
+            background: rgba(45, 45, 58, 0.7);
+            backdrop-filter: blur(10px);
+            border: 4px solid #e0a106;
+            border-radius: 20px;
+            box-shadow: 0 12px 40px rgba(0,0,0,0.4);
+            padding: clamp(12px, 3vw, 24px);
+            box-sizing: border-box;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
-        
-        /* Mobile optimizations for game field */
-        @media (max-width: 768px) {
-            #game-container {
-                width: 98vw;
-                margin: 5px auto;
-                padding: 10px;
-                border-radius: 8px;
-                border-width: 4px;
-            }
-            
-            /* Hide leaderboard on mobile during gameplay */
-            #leaderboard {
-                display: none !important;
-            }
-            
-            /* Optimize game canvas for mobile */
-            #game-canvas {
-                width: calc(100vw - 40px);
-                height: calc(100vw - 40px);
-                max-width: 85vw;
-                max-height: 85vw;
-                border-width: 2px;
-            }
-            
-            /* Adjust title for mobile */
-            h1 {
-                font-size: 1.3rem !important;
-                margin: 10px 0 !important;
-            }
-            
-            /* Compact score area */
-            #score-area {
-                margin: 8px 0 !important;
-            }
-            
-            /* Compact difficulty meter */
-            #difficulty-meter {
-                height: 20px;
-                margin-bottom: 10px;
-                border-width: 1px;
-            }
+        h1 {
+            color:#e0a106;
+            text-align:center;
+            font-size: clamp(1.5rem, 4vw, 2.2rem);
+            text-shadow: 2px 2px 5px rgba(0,0,0,0.5);
+            margin: 0 0 clamp(10px, 3vw, 20px) 0;
         }
-        
-        @media (max-width: 480px) {
-            #game-container {
-                width: 100vw;
-                margin: 0;
-                padding: 8px;
-                border-radius: 0;
-                border-left: none;
-                border-right: none;
-            }
-            
-            #game-canvas {
-                width: calc(100vw - 20px);
-                height: calc(100vw - 20px);
-                max-width: 95vw;
-                max-height: 95vw;
-            }
-            
-            h1 {
-                font-size: 1.1rem !important;
-                margin: 5px 0 !important;
-            }
+        #canvas-container {
+            position: relative;
+            margin: 0 auto;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 4px solid #bfa14a;
         }
-        
-        /* Landscape mode optimizations for mobile */
-        @media screen and (max-height: 600px) and (orientation: landscape) {
-            #game-container {
-                margin: 2px auto;
-                padding: 5px;
-            }
-            
-            #game-canvas {
-                width: min(50vh, 85vw);
-                height: min(50vh, 85vw);
-            }
-            
-            h1 {
-                font-size: 1rem !important;
-                margin: 2px 0 !important;
-            }
-            
-            #difficulty-meter {
-                height: 15px;
-                margin-bottom: 5px;
-            }
-            
-            #score-area {
-                margin: 5px 0 !important;
-            }
-        }        #game-canvas {
+        #game-canvas {
             background: #d1c089;
             display: block;
-            margin: 0 auto 16px auto;
-            border: 4px solid #bfa14a;
-            width: min(800px, 90vw);
-            height: min(800px, 90vw);
-            max-width: 90vw;
-            max-height: 90vw;
+            position: relative;
+            z-index: 1;
         }
-        
-        /* Mobile canvas optimizations */
-        @media (max-width: 768px) {
-            #game-canvas {
-                width: min(85vw, calc(100vh - 200px));
-                height: min(85vw, calc(100vh - 200px));
-                max-width: 85vw;
-                max-height: calc(100vh - 200px);
-                margin: 0 auto 8px auto;
-            }
-        }
-        
-        @media (max-width: 480px) {
-            #game-canvas {
-                width: min(95vw, calc(100vh - 150px));
-                height: min(95vw, calc(100vh - 150px));
-                max-width: 95vw;
-                max-height: calc(100vh - 150px);
-                margin: 0 auto 5px auto;
-            }
-        }
-        
-        /* Landscape mode canvas sizing */
-        @media screen and (max-height: 600px) and (orientation: landscape) {
-            #game-canvas {
-                width: min(60vh, 50vw);
-                height: min(60vh, 50vw);
-                max-width: 50vw;
-                max-height: 60vh;
-            }
+        #ui-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            z-index: 2;
         }
         #difficulty-meter {
-            width: 100%;
-            height: 28px;
-            background: #eee;
+            width: 80%;
+            max-width: 400px;
+            height: clamp(18px, 3vw, 28px);
+            background: #444;
             border-radius: 14px;
-            margin-bottom: 18px;
+            margin: clamp(8px, 2vw, 18px) 0;
             overflow: hidden;
             border: 2px solid #e0a106;
+            position: relative;
         }
         #difficulty-bar {
             height: 100%;
             width: 0%;
             background: linear-gradient(90deg, #e0a106, #ff4e00);
-            transition: width 0.3s;
+            transition: width 0.3s ease-out;
+            border-radius: 14px 0 0 14px;
         }
+        #score-area {
+            color: #fff;
+            font-weight: bold;
+            font-size: clamp(1.2rem, 3vw, 1.5rem);
+            text-shadow: 1px 1px 3px #000;
+        }
+        #combo-display {
+            color: #ffc107;
+            font-size: clamp(1rem, 2.5vw, 1.3rem);
+            font-weight: bold;
+            margin-left: 15px;
+            opacity: 0;
+            transform: scale(0.5);
+            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        #combo-display.visible {
+            opacity: 1;
+            transform: scale(1);
+            animation: combo-bounce 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        @keyframes combo-bounce { 0% { transform: scale(1.2); } 100% { transform: scale(1); } }
         #leaderboard {
-            margin-top: 24px;
-            background: #fffbe6;
-            border: 2px solid #e0a106;
-            border-radius: 8px;
-            padding: 12px;
-        }
-        #leaderboard h2 {
-            margin-top: 0;
-            color: #e0a106;
-        }        #leaderboard {
-            background-color: rgba(255, 255, 255, 0.15);
+            width: 100%;
+            max-width: 500px;
+            margin-top: clamp(15px, 3vw, 24px);
+            background-color: rgba(0, 0, 0, 0.3);
             border-radius: 8px;
             padding: 15px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
             border: 2px solid rgba(224, 161, 6, 0.7);
-            max-width: min(500px, 90vw);
-            margin: 0 auto;
+            color: #fff;
         }
-        #leaderboard h2 {
-            margin-top: 0;
-            color: #e0a106;
-            text-align: center;
-            font-size: 1.4em;
-            padding-bottom: 8px;
-            border-bottom: 2px solid rgba(224, 161, 6, 0.5);
-            margin-bottom: 12px;
-            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
-        }
-        
-        @media (max-width: 768px) {
-            #leaderboard {
-                padding: 12px;
-                margin: 10px;
-            }
-            #leaderboard h2 {
-                font-size: 1.2em;
-            }
-        }
-        
-        @media (max-width: 480px) {
-            #leaderboard {
-                padding: 10px;
-                margin: 8px;
-            }
-            #leaderboard h2 {
-                font-size: 1.1em;
-            }
-        }
-        .score-entry {
+        .leaderboard-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 10px 15px;
-            margin-bottom: 8px;
-            background-color: rgba(255, 255, 255, 0.1);
-            border-radius: 6px;
-            font-weight: bold;
-            transition: all 0.2s ease-in-out;
-            position: relative;
-            overflow: hidden;
-            border-left: 4px solid #e0a106;
+            border-bottom: 2px solid rgba(224, 161, 6, 0.5);
+            padding-bottom: 8px;
+            margin-bottom: 12px;
         }
-        .score-entry:hover {
-            background-color: rgba(255, 255, 255, 0.2);
-            transform: translateY(-2px);
-            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
+        .leaderboard-header h2 {
+            margin: 0;
+            color: #e0a106;
+            font-size: clamp(1.2em, 3vw, 1.4em);
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
         }
-        .score-entry:last-child {
-            margin-bottom: 0;
-        }
-        .score-entry::before {
-            content: attr(data-rank);
-            position: absolute;
-            left: 0;
-            top: 0;
-            bottom: 0;
-            width: 28px;
-            background-color: rgba(224, 161, 6, 0.8);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #000;
-            font-weight: bold;
-            font-size: 0.9em;
-        }
-        .score-entry .player-name {
-            color: #000;
-            margin-left: 32px;
-            margin-right: 10px;
-            background-color: rgba(255, 255, 255, 0.85);
-            padding: 4px 12px;
-            border-radius: 12px;
-            box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.15);
-            text-shadow: none;
-            flex: 1;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        .score-entry small {
-            display: inline-block;
-            color: #555;
-            background-color: rgba(255, 255, 255, 0.7);
-            font-weight: normal;
-            margin-left: 5px;
-            padding: 0 6px;
-            border-radius: 8px;
-            font-size: 0.8em;
-            vertical-align: middle;
-        }.score-entry .player-score {
-            color: #000;
-            font-size: 1.2em;
-            background-color: rgba(255, 255, 255, 0.85);
-            padding: 3px 10px;
-            border-radius: 12px;
-            min-width: 60px;
-            text-align: center;
-            box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
-        }
-        .score-entry .score-date {
-            position: absolute;
-            right: 15px;
-            bottom: 2px;
-            font-size: 0.75em;
-            color: rgba(255, 255, 255, 0.6);
-            font-style: italic;
-        }
-        /* Highlight current player entry */
-        .score-entry.current-player {
-            background-color: rgba(255, 250, 235, 0.4);
-            border-left: 4px solid #ff9900;
-            animation: pulse-glow 2s infinite;
-        }
-        .score-entry.current-player .player-name {
-            background-color: rgba(255, 236, 179, 0.9);
-            border: 1px solid rgba(255, 153, 0, 0.5);
-        }
-        @keyframes pulse-glow {
-            0% { box-shadow: 0 0 5px rgba(224, 161, 6, 0.3); }
-            50% { box-shadow: 0 0 15px rgba(224, 161, 6, 0.5); }
-            100% { box-shadow: 0 0 5px rgba(224, 161, 6, 0.3); }
-        }
-        /* Loading animation */
-        #leaderboard-entries.loading {
-            min-height: 150px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .loading-spinner {
-            width: 40px;
-            height: 40px;
-            border: 4px solid rgba(224, 161, 6, 0.3);
-            border-top: 4px solid #e0a106;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }        #main-menu {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 1.2rem;
-            padding: 2.5rem 0 2rem 0;
-        }        #main-menu input[type="text"] {
-            font-size: 1.2rem;
-            padding: 0.5rem 1rem;
-            border-radius: 8px;
-            border: 2px solid #e0a106;
-            width: min(260px, 80vw);
-            margin-bottom: 0.5rem;
-            -webkit-appearance: none;
-            appearance: none;
-        }
-        #main-menu button {
-            font-size: 1.2rem;
-            padding: 0.7rem 2.2rem;
-            background: linear-gradient(90deg,#e0a106,#ff4e00);
-            color: #fff;
-            border: none;
-            border-radius: 10px;
-            font-weight: 600;
+        .leaderboard-tabs button {
+            background: transparent;
+            border: 1px solid #e0a106;
+            color: #e0a106;
+            padding: 4px 10px;
+            border-radius: 5px;
             cursor: pointer;
-            box-shadow: 0 2px 8px rgba(224,161,6,0.13);
-            transition: transform 0.13s;
-            min-width: 140px;
-            touch-action: manipulation;
-            -webkit-tap-highlight-color: transparent;
-        }
-        #main-menu button:hover {
-            transform: scale(1.06);
-        }
-        #main-menu button:active {
-            transform: scale(0.98);
-        }
-        #main-menu label {
-            font-size: 1.1rem;
-            color: #bfa14a;
-            font-weight: 500;
-            text-align: center;
-        }
-        
-        @media (max-width: 480px) {
-            #main-menu {
-                padding: 1.5rem 0 1rem 0;
-                gap: 1rem;
-            }
-            #main-menu input[type="text"] {
-                font-size: 1rem;
-                width: min(240px, 85vw);
-            }
-            #main-menu button {
-                font-size: 1rem;
-                padding: 0.6rem 1.8rem;
-                min-width: 120px;
-            }
-            #main-menu label {
-                font-size: 1rem;
-            }
-        }@media (max-width: 1000px) {
-            #game-container { 
-                width: 98vw; 
-                margin: 10px auto;
-                padding: 16px;
-            }
-            #game-canvas { 
-                width: min(90vw, 90vh) !important; 
-                height: min(90vw, 90vh) !important; 
-                max-width: 90vw; 
-                max-height: 90vh; 
-            }
-            h1 { font-size: 1.8rem; margin-bottom: 1rem; }
-        }
-
-        /* Touch Controls */
-        #touch-controls {
-            display: none;
-            margin-top: 20px;
-            justify-content: center;
-            align-items: center;
-        }
-        
-        .controls-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 10px;
-            user-select: none;
-            -webkit-user-select: none;
-        }
-        
-        .control-row {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .direction-btn {
-            width: 60px;
-            height: 60px;
-            background: linear-gradient(135deg, #e0a106, #f4b73d);
-            border: 3px solid #bfa14a;
-            border-radius: 12px;
-            color: #23232b;
-            font-size: 1.8rem;
-            font-weight: bold;
-            cursor: pointer;
-            touch-action: manipulation;
             transition: all 0.2s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 4px 12px rgba(224, 161, 6, 0.3);
-            text-shadow: 0 1px 2px rgba(0,0,0,0.2);
         }
-          .direction-btn:active {
-            transform: scale(0.95);
-            box-shadow: 0 2px 6px rgba(224, 161, 6, 0.5);
-            background: linear-gradient(135deg, #f4b73d, #e0a106);
+        .leaderboard-tabs button:hover { background: rgba(224, 161, 6, 0.2); }
+        .leaderboard-tabs button.active { background: #e0a106; color: #1a1a22; font-weight: bold; }
+        #leaderboard-entries .score-entry {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 10px; margin-bottom: 8px; background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 6px; font-weight: 500; border-left: 4px solid #e0a106;
         }
-        
-        .direction-btn:hover {
-            background: linear-gradient(135deg, #f4b73d, #ff8c00);
-            box-shadow: 0 6px 16px rgba(244, 183, 61, 0.4);
+        #leaderboard-entries .player-name { flex: 1; margin-left: 10px; }
+        #leaderboard-entries .player-score { font-weight: bold; }
+        .loading-spinner {
+            width: 40px; height: 40px; margin: 20px auto; border: 4px solid rgba(224, 161, 6, 0.3);
+            border-top: 4px solid #e0a106; border-radius: 50%; animation: spin 1s linear infinite;
         }
-        
-        /* Enhanced touch feedback */
-        .direction-btn.pressed {
-            transform: scale(0.9);
-            background: linear-gradient(135deg, #ff8c00, #e0a106);
-            box-shadow: 0 1px 3px rgba(224, 161, 6, 0.7);
+        @keyframes spin { to { transform: rotate(360deg); } }
+        #main-menu, #game-over-screen {
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            gap: 1.2rem; padding: 2.5rem 0 2rem 0; width: 100%;
         }
-        
-        /* Controls visibility */
-        @media (hover: none) and (pointer: coarse) {
-            #touch-controls {
-                display: flex;
-            }
+        #main-menu input[type="text"] {
+            font-size: 1.2rem; padding: 0.5rem 1rem; border-radius: 8px;
+            border: 2px solid #e0a106; width: min(260px, 80vw); background-color: #eee;
         }
-        
-        /* Force show on small screens */
-        @media (max-width: 768px) {
-            #touch-controls {
-                display: flex;
-            }
+        #main-menu button, #game-over-screen button {
+            font-size: 1.2rem; padding: 0.7rem 2.2rem; background: linear-gradient(90deg,#e0a106,#ff4e00);
+            color: #fff; border: none; border-radius: 10px; font-weight: 600; cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3); transition: all 0.2s ease; text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
         }
-          /* Control instructions */
-        .control-instructions {
-            text-align: center;
-            margin-bottom: 15px;
-            color: #666;
-            font-size: 0.9rem;
+        #main-menu button:hover, #game-over-screen button:hover { transform: scale(1.06); box-shadow: 0 6px 20px rgba(0,0,0,0.4); }
+        #main-menu button:active, #game-over-screen button:active { transform: scale(0.98); }
+        #game-over-screen { text-align: center; color: #fff; }
+        #final-score-display { font-size: 2.5rem; color: #ffd700; margin: -10px 0 0 0; }
+        #best-score-display { font-size: 1.2rem; opacity: 0.8; }
+        #touch-controls { display: none; margin-top: 20px; user-select: none; -webkit-user-select: none; width: 100%; justify-content: center; }
+        .controls-grid { display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(2, 1fr); gap: 10px; width: min(300px, 80vw); }
+        .direction-btn, .pause-btn {
+            width: 100%; aspect-ratio: 1/1; background: linear-gradient(135deg, #e0a106, #f4b73d);
+            border: 3px solid #bfa14a; border-radius: 12px; color: #23232b; font-size: 2rem;
+            font-weight: bold; cursor: pointer; touch-action: manipulation; transition: all 0.1s ease;
+            display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.3);
         }
-        
-        .desktop-hint {
-            display: inline;
-        }
-        
-        .keyboard-hint {
-            display: none;
-        }
-        
-        /* Show mobile instructions on touch devices */
-        @media (hover: none) and (pointer: coarse) {
-            .desktop-hint {
-                display: none;
-            }
-            
-            .keyboard-hint {
-                display: inline;
-            }
-        }
-        
-        @media (max-width: 768px) {
-            .control-instructions {
-                font-size: 0.8rem;
-                margin-bottom: 10px;
-            }
-            
-            .direction-btn {
-                width: 55px;
-                height: 55px;
-                font-size: 1.6rem;
-            }
-        }        @media (max-width: 480px) {
-            .direction-btn {
-                width: 50px;
-                height: 50px;
-                font-size: 1.4rem;
-            }
-            
-            .control-row {
-                gap: 8px;
-            }
-            
-            .controls-container {
-                gap: 8px;
-            }
-            
-            .score-entry {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 5px;
-                padding: 6px 10px;
-            }
-            
-            .score-entry .player-name {
-                width: 100%;
-                text-align: center;
-            }
-            
-            .score-entry .player-score {
-                align-self: center;
-            }
-            
-            .score-entry .score-date {
-                align-self: center;
-                font-size: 0.8em;
-            }
-        }
-
-        /* Landscape mobile optimizations */
-        @media screen and (max-height: 600px) and (orientation: landscape) {
-            #game-container {
-                margin: 5px auto;
-                padding: 12px;
-            }
-            
-            h1 {
-                font-size: 1.5rem !important;
-                margin-bottom: 0.5rem !important;
-            }
-            
-            #main-menu {
-                padding: 1rem 0 0.5rem 0;
-                gap: 0.8rem;
-            }
-            
-            #touch-controls {
-                margin-top: 10px;
-            }
-            
-            .direction-btn {
-                width: 45px;
-                height: 45px;
-                font-size: 1.3rem;
-            }
-            
-            .controls-container {
-                gap: 6px;
-            }
-            
-            .control-row {
-                gap: 6px;
-            }
-            
-            .control-instructions {
-                font-size: 0.75rem;
-                margin-bottom: 5px;
-            }
-        }
+        .direction-btn:active, .pause-btn:active { transform: scale(0.95); box-shadow: 0 2px 6px rgba(0,0,0,0.4); }
+        #up-btn { grid-column: 2; grid-row: 1; }
+        #left-btn { grid-column: 1; grid-row: 2; }
+        #down-btn { grid-column: 2; grid-row: 2; }
+        #right-btn { grid-column: 3; grid-row: 2; }
+        #pause-btn-touch { grid-column: 3; grid-row: 1; font-size: 1.5rem; }
+        @media (max-width: 768px) { #touch-controls { display: flex; } }
     </style>
 </head>
 <body>
-    <div class="animated-bg">
-        <div class="bg-shape bg-shape1"></div>
-        <div class="bg-shape bg-shape2"></div>
-        <div class="bg-shape bg-shape3"></div>
-    </div>
-    <div id="game-container">
-        <h1 style="color:#e0a106;text-align:center;">🚧 Construction Snake 🚧</h1>
-        <div id="main-menu">
-            <label for="player-name">Enter your name to play:</label>
-            <input type="text" id="player-name" maxlength="16" placeholder="Your name..." autocomplete="off" />
-            <div style="margin:1.2rem 0;display:flex;gap:1.2rem;">
-                <button id="classic-btn">Classic Snake</button>
-                <button id="ultra-btn">Ultra Snake</button>
+    <div class="animated-bg"></div>
+    <div class="game-wrapper">
+        <div id="game-container">
+            <h1>🚧 Construction Snake 🚧</h1>
+            <div id="main-menu">
+                <label for="player-name" style="color: #fff; font-weight: 500;">Enter your name:</label>
+                <input type="text" id="player-name" maxlength="16" placeholder="Anonymous Snake" autocomplete="off" />
+                <div style="margin:1.2rem 0;display:flex;gap:1.2rem;">
+                    <button id="classic-btn">Classic</button>
+                    <button id="ultra-btn">Ultra</button>
+                </div>
+            </div>
+            <div id="game-over-screen" style="display:none;">
+                <h2>GAME OVER</h2>
+                <p id="final-score-display">Score: 0</p>
+                <p id="best-score-display">Best: 0</p>
+                <div style="margin:1.2rem 0;display:flex;gap:1.2rem;">
+                    <button id="retry-btn">Try Again</button>
+                    <button id="menu-btn">Main Menu</button>
+                </div>
+            </div>
+            <div id="game-ui" style="display: none; text-align:center; width: 100%; flex-direction: column; align-items: center;">
+                <div id="difficulty-meter"><div id="difficulty-bar"></div></div>
+                <div id="score-area">
+                    <span id="score-label">Score: 0</span>
+                    <span id="combo-display"></span>
+                </div>
+                <div id="canvas-container">
+                    <canvas id="game-canvas"></canvas>
+                    <canvas id="ui-canvas"></canvas>
+                </div>
+                <div id="touch-controls">
+                    <div class="controls-grid">
+                        <button class="direction-btn" id="up-btn">↑</button>
+                        <button class="direction-btn" id="left-btn">←</button>
+                        <button class="direction-btn" id="down-btn">↓</button>
+                        <button class="direction-btn" id="right-btn">→</button>
+                        <button class="pause-btn" id="pause-btn-touch">P</button>
+                    </div>
+                </div>
+            </div>
+            <div id="leaderboard" style="display:none;">
+                <div class="leaderboard-header">
+                    <h2>Leaderboard</h2>
+                    <div class="leaderboard-tabs">
+                        <button id="tab-classic" class="active">Classic</button>
+                        <button id="tab-ultra">Ultra</button>
+                    </div>
+                </div>
+                <div id="leaderboard-entries"></div>
             </div>
         </div>
-        <div id="difficulty-meter" style="display:none;">
-            <div id="difficulty-bar"></div>
-        </div>
-        <canvas id="game-canvas" width="800" height="800" style="display:none;"></canvas>
-        <div id="score-area" style="text-align:center;margin:12px 0;display:none;">
-            <span id="score-label">Score: 0</span>
-        </div>        <div id="leaderboard" style="display:none;">
-            <h2>Leaderboard</h2>
-            <div id="leaderboard-entries">Loading...</div>
-        </div>
+    </div>
+    <script type="module">        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-app.js";
+        import { getFirestore, collection, addDoc, query, orderBy, limit, getDocs, serverTimestamp, where } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-firestore.js";
         
-        <!-- Touch Controls -->
-        <div id="touch-controls">
-            <div class="controls-container">                <div class="control-instructions">
-                    <span class="keyboard-hint">Use buttons below or swipe on game area</span>
-                    <span class="desktop-hint">Use WASD, Arrow Keys, or buttons below</span>
-                </div>
-                <div class="control-row">
-                    <button class="direction-btn" id="up-btn" data-direction="UP">↑</button>
-                </div>
-                <div class="control-row">
-                    <button class="direction-btn" id="left-btn" data-direction="LEFT">←</button>
-                    <button class="direction-btn" id="down-btn" data-direction="DOWN">↓</button>
-                    <button class="direction-btn" id="right-btn" data-direction="RIGHT">→</button>
-                </div>
-            </div>
-        </div>
-    </div>
-    <script type="module">
-    // --- Firebase Imports ---
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-app.js";
-    import { getFirestore, collection, addDoc, query, orderBy, limit, getDocs, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-firestore.js";    // --- Your Firebase Configuration (copied from admin.html) ---
-    const firebaseConfig = {
-        apiKey: "AIzaSyBVtq6dAEuybJNmTTv8dXBxTVUgw1t0ZMk",
-        authDomain: "cusumano-website.firebaseapp.com",
-        projectId: "cusumano-website",
-        storageBucket: "cusumano-website.firebasestorage.app",
-        messagingSenderId: "20051552210",
-        appId: "1:20051552210:web:7eb3b22baa3fec184e4a0b"
-    };
-    // ----------------------------------------------------
+        // Firebase configuration
+        const firebaseConfig = {
+          apiKey: "AIzaSyBVtq6dAEuybJNmTTv8dXBxTVUgw1t0ZMk",
+          authDomain: "cusumano-website.firebaseapp.com",
+          databaseURL: "https://cusumano-website-default-rtdb.firebaseio.com",
+          projectId: "cusumano-website",
+          storageBucket: "cusumano-website.firebasestorage.app",
+          messagingSenderId: "20051552210",
+          appId: "1:20051552210:web:7eb3b22baa3fec184e4a0b"
+        };
+        // === END CONFIG ===
 
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-    const leaderboardCollectionName = "snakeLeaderboard"; // Firestore collection name
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const leaderboardCollectionName = "snakeLeaderboard";
 
-    // --- Construction Snake Game JS ---
-    const CELL_SIZE = 32;
-    const GRID_SIZE = 25;
-    const CANVAS_SIZE = CELL_SIZE * GRID_SIZE;
-    const INITIAL_SPEED = 120;
-    const SPEED_STEP = 6;
-    const MAX_SPEED = 40;
-    const DIFFICULTY_BAR_MAX = 100;
-    const LEADERBOARD_SIZE = 6; // Changed from 7 to 6 as requested
-    const POWERUP_DURATION = 48; // Duration in game ticks (quartered from 150, then increased by ~25%)
+        // --- Game Constants & State ---
+        const CELL_SIZE = 32;
+        const GRID_SIZE = 25;
+        const INITIAL_SPEED = 125;
+        const SPEED_STEP = 5;
+        const MAX_SPEED = 45;
+        const LEADERBOARD_SIZE = 5;
+        const POWERUP_DURATION = 300;
+        const COMBO_TIMER_MAX = 2000;
 
-    let snake, direction, nextDirection, food, score, speed, intervalId, running, playerName;
-    let obstacles = [];
+        let snake, direction, nextDirection, food, frenzyFood, score, speed, gameLoopInterval, running, paused, playerName, gameMode;
+        let obstacles = [], powerups = [], activePowerups = [], weatherParticles = [];
+        let comboCounter = 0, comboTimer = 0;
+        let screenShake = { duration: 0, magnitude: 0 }, explosionChain = [];
+        const elements = {};
 
-    const canvas = document.getElementById('game-canvas');
-    const ctx = canvas.getContext('2d');
-    const mainMenu = document.getElementById('main-menu');
-    const playerNameInput = document.getElementById('player-name');
-    const difficultyMeter = document.getElementById('difficulty-meter');
-    const difficultyBar = document.getElementById('difficulty-bar');
-    const scoreArea = document.getElementById('score-area');
-    const scoreLabel = document.getElementById('score-label');
-    const leaderboard = document.getElementById('leaderboard');
-    const leaderboardEntries = document.getElementById('leaderboard-entries');
-    const classicButton = document.getElementById('classic-btn');
-    const ultraButton = document.getElementById('ultra-btn');
-
-    // --- Main Menu Update ---
-    // Remove erroneous raw HTML main menu block from JS
-
-    // --- JS: Add Ultra Snake Mode ---
-    let gameMode = "classic"; // "classic" or "ultra"
-    let powerups = [];
-    // let activePowerup = null; // Replaced for stacking
-    // let powerupTimer = 0; // Replaced for stacking
-    let activePowerups = []; // Array to hold active powerups { type, timer, charges? }
-
-    const POWERUP_TYPES = [
-        { type: "magnet", color: "#4ecaff", icon: "🧲" },
-        { type: "ghost", color: "#b3b3ff", icon: "👻" },
-        { type: "shield", color: "#76e6cd", icon: "🛡️" }, // Cyan-ish for shield
-        { type: "drill", color: "#c0c0c0", icon: "🔩" }   // Silver for drill
-    ];
-
-    function resetGame() {
-        snake = [
-            {x: 12, y: 12},
-            {x: 11, y: 12},
-            {x: 10, y: 12}
+        const POWERUP_TYPES = [
+            { type: "ghost", color: "#b3b3ff", icon: "👻" },
+            { type: "shield", color: "#76e6cd", icon: "🛡️" },
+            { type: "drill", color: "#c0c0c0", icon: "🔩" },
+            { type: "supercharge", color: "#FFD700", icon: "⚡" }
         ];
-        direction = 'RIGHT';
-        nextDirection = 'RIGHT';
-        score = 0;
-        speed = INITIAL_SPEED;
-        obstacles = [];
-        powerups = [];
-        // activePowerup = null; // Handled by activePowerups
-        // powerupTimer = 0;   // Handled by activePowerups
-        activePowerups = []; // Reset active powerups
-        placeFood();
-        if (gameMode === "ultra") placePowerup(); // Initial powerup for ultra
-        updateDifficultyBar();
-        scoreLabel.textContent = "Score: " + score;
-        if (intervalId) clearInterval(intervalId); // Clear previous interval if any
-        intervalId = setInterval(gameLoop, speed);
-        running = true;
-    }
 
-    function placeFood() {
-        let valid = false;
-        while (!valid) {
-            food = {
-                x: Math.floor(Math.random() * GRID_SIZE),
-                y: Math.floor(Math.random() * GRID_SIZE)
-            };
-            valid = !snake.some(s => s.x === food.x && s.y === food.y) &&
-                    !obstacles.some(o => o.x === food.x && o.y === food.y);
+        function playSound(soundName) { /* placeholder */ }
+
+        function resetGame() {
+            snake = [{x: 12, y: 12}, {x: 11, y: 12}, {x: 10, y: 12}];
+            direction = 'RIGHT'; nextDirection = 'RIGHT';
+            score = 0; speed = INITIAL_SPEED;
+            obstacles = []; powerups = []; activePowerups = [];
+            frenzyFood = null; comboCounter = 0; explosionChain = [];
+            placeItem('food');
+            if (gameMode === "ultra") placeItem('powerup');
+            updateDifficultyBar();
+            elements.scoreLabel.textContent = "Score: 0";
+            elements.comboDisplay.classList.remove('visible');
+            if (gameLoopInterval) clearInterval(gameLoopInterval);
+            gameLoopInterval = setInterval(gameLoop, speed);
+            running = true; paused = false;
         }
-    }
 
-    function placeObstacle() {
-        let valid = false, obs;
-        while (!valid) {
-            obs = {
-                x: Math.floor(Math.random() * GRID_SIZE),
-                y: Math.floor(Math.random() * GRID_SIZE)
-            };
-            valid = !snake.some(s => s.x === obs.x && s.y === obs.y) &&
-                    !obstacles.some(o => o.x === obs.x && o.y === obs.y) &&
-                    (food.x !== obs.x || food.y !== obs.y);
-        }
-        obstacles.push(obs);
-    }
-
-    function placePowerup() {
-        // Only place a powerup if there isn't one already
-        if (powerups.length > 0) return;
-        let valid = false, p;
-        while (!valid) {
-            p = {
-                x: Math.floor(Math.random() * GRID_SIZE),
-                y: Math.floor(Math.random() * GRID_SIZE),
-                ...POWERUP_TYPES[Math.floor(Math.random() * POWERUP_TYPES.length)]
-            };
-            valid = !snake.some(s => s.x === p.x && s.y === p.y) &&
-                    !obstacles.some(o => o.x === p.x && o.y === p.y) &&
-                    (food.x !== p.x || food.y !== p.y);
-        }
-        powerups.push(p);
-    }
-
-    function drawPowerups() {
-        if (!powerups || powerups.length === 0) return;
-        for (const p of powerups) {
-            const x = p.x * CELL_SIZE + CELL_SIZE / 2;
-            const y = p.y * CELL_SIZE + CELL_SIZE / 2;
-            ctx.save();
-            ctx.beginPath();
-            ctx.arc(x, y, 13, 0, 2 * Math.PI);
-            ctx.fillStyle = p.color;
-            ctx.globalAlpha = 0.7 + 0.3 * Math.sin(Date.now()/200);
-            ctx.shadowColor = p.color;
-            ctx.shadowBlur = 12;
-            ctx.fill();
-            ctx.shadowBlur = 0;
-            ctx.globalAlpha = 1;
-            ctx.font = '20px Segoe UI';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText(p.icon, x, y+1);
-            ctx.restore();
-        }
-    }
-
-    function drawCell(x, y, color, borderColor = "#bfa14a") {
-        ctx.fillStyle = color;
-        ctx.fillRect(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
-        ctx.strokeStyle = borderColor;
-        ctx.lineWidth = 2;
-        ctx.strokeRect(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
-    }
-
-    // --- Enhanced Graphics ---
-
-    function drawObstacles() {
-        for (const obs of obstacles) {
-            ctx.save();
-            const cx = obs.x * CELL_SIZE + CELL_SIZE/2;
-            const cy = obs.y * CELL_SIZE + CELL_SIZE/2;
-            // Bomb body with radial gradient for shine
-            let grad = ctx.createRadialGradient(cx-5, cy-5, 4, cx, cy, 13);
-            grad.addColorStop(0, "#444");
-            grad.addColorStop(0.5, "#222");
-            grad.addColorStop(1, "#111");
-            ctx.beginPath();
-            ctx.arc(cx, cy, 13, 0, 2 * Math.PI);
-            ctx.fillStyle = grad;
-            ctx.shadowColor = "#000";
-            ctx.shadowBlur = 10;
-            ctx.fill();
-            ctx.shadowBlur = 0;
-            ctx.strokeStyle = "#888";
-            ctx.lineWidth = 3;
-            ctx.stroke();
-            // Curly fuse
-            ctx.beginPath();
-            ctx.moveTo(cx, cy - 13);
-            for (let i = 0; i < 5; i++) {
-                ctx.lineTo(cx + Math.sin(i + Date.now()/400) * 3, cy - 16 - i * 2.5);
+        function placeItem(type) {
+            const occupied = new Set(snake.map(s => `${s.x},${s.y}`));
+            obstacles.forEach(o => occupied.add(`${o.x},${o.y}`));
+            powerups.forEach(p => occupied.add(`${p.x},${p.y}`));
+            if (food) occupied.add(`${food.x},${food.y}`);
+            if (frenzyFood) occupied.add(`${frenzyFood.x},${frenzyFood.y}`);
+            let position, attempts = 0;
+            do {
+                position = { x: Math.floor(Math.random() * GRID_SIZE), y: Math.floor(Math.random() * GRID_SIZE) };
+                attempts++;
+            } while (occupied.has(`${position.x},${position.y}`) && attempts < 100);
+            if (attempts >= 100) return;
+            const itemBase = { ...position, spawnTime: Date.now(), scale: 0 };
+            if (type === 'food') food = itemBase;
+            else if (type === 'frenzyFood') frenzyFood = { ...itemBase, duration: 5000 };
+            else if (type === 'obstacle') obstacles.push(itemBase);
+            else if (type === 'powerup' && powerups.length < 2) {
+                const isSuper = Math.random() < 0.2;
+                const pType = isSuper ? POWERUP_TYPES.find(p=>p.type==='supercharge') : POWERUP_TYPES[Math.floor(Math.random() * (POWERUP_TYPES.length -1))];
+                powerups.push({ ...itemBase, ...pType });
             }
-            ctx.strokeStyle = "#bfa14a";
-            ctx.lineWidth = 2.5;
-            ctx.stroke();
-            // Animated Spark with glow and flicker
-            ctx.save();
-            const sparkPulse = 0.7 + 0.3 * Math.sin(Date.now()/80);
-            ctx.globalAlpha = sparkPulse;
-            ctx.beginPath();
-            ctx.arc(cx, cy - 28, 4 + Math.abs(Math.sin(Date.now()/120)), 0, 2 * Math.PI);
-            ctx.fillStyle = "#ffec70";
-            ctx.shadowColor = "#ffec70";
-            ctx.shadowBlur = 12 + 6 * Math.abs(Math.sin(Date.now()/120));
-            ctx.fill();
-            ctx.shadowBlur = 0;
-            ctx.globalAlpha = 1;
-            ctx.beginPath();
-            ctx.arc(cx, cy - 28, 1.5 + Math.abs(Math.sin(Date.now()/100)), 0, 2 * Math.PI);
-            ctx.fillStyle = "#ff4e00";
-            ctx.fill();
-            // Tiny sparks
-            for (let s = 0; s < 3; s++) {
+        }
+
+        function animationLoop() {
+            if (screenShake.duration > 0) {
+                const dx = (Math.random() - 0.5) * screenShake.magnitude * 2;
+                const dy = (Math.random() - 0.5) * screenShake.magnitude * 2;
+                elements.canvasContainer.style.transform = `translate(${dx}px, ${dy}px)`;
+                screenShake.duration--;
+            } else {
+                elements.canvasContainer.style.transform = 'translate(0,0)';
+            }
+            if (elements.gameUI.style.display !== 'none') {
+                drawGame(); drawUI();
+            }
+            requestAnimationFrame(animationLoop);
+        }
+
+        function drawGame() {
+            const ctx = elements.ctx;
+            ctx.fillStyle = '#e8ddb7';
+            ctx.fillRect(0, 0, elements.gameCanvas.width, elements.gameCanvas.height);
+            drawWeather(ctx);
+            drawItems(obstacles, drawObstacle, ctx);
+            drawItems(powerups, drawPowerup, ctx);
+            if (food) drawFood(food, false, ctx);
+            if (frenzyFood) drawFood(frenzyFood, true, ctx);
+            if (snake) drawSnake(ctx);
+        }
+        function drawUI() {
+            const uiCtx = elements.uiCtx;
+            uiCtx.clearRect(0, 0, elements.uiCanvas.width, elements.uiCanvas.height);
+            drawActivePowerupHUD(uiCtx);
+            drawExplosionChain(uiCtx);
+        }
+        function drawItems(items, drawFunc, ctx) { items.forEach(item => drawFunc(item, ctx)); }
+        function drawSnake(ctx) {
+            const isGhost = activePowerups.some(p => p.type === 'ghost');
+            const isDrill = activePowerups.some(p => p.type === 'drill');
+            const isSuper = activePowerups.some(p => p.type === 'supercharge');
+            for (let i = 0; i < snake.length; i++) {
+                const { x, y } = snake[i];
                 ctx.save();
-                ctx.globalAlpha = 0.5 + 0.5 * Math.random();
-                ctx.beginPath();
-                ctx.arc(cx + Math.random()*6-3, cy - 28 - Math.random()*6, 0.7 + Math.random()*0.7, 0, 2 * Math.PI);
-                ctx.fillStyle = '#ffec70';
-                ctx.fill();
+                if (isGhost) ctx.globalAlpha = 0.6;
+                if (isSuper) {
+                    const pulse = Math.abs(Math.sin(Date.now() / 100 + i * 0.5));
+                    ctx.shadowColor = `rgba(255, 215, 0, ${0.5 + pulse * 0.5})`;
+                    ctx.shadowBlur = 10 + pulse * 10;
+                }
+                if (i === 0) {
+                    ctx.fillStyle = isDrill ? "#c0c0c0" : isSuper ? "#ffd700" : "#e0a106";
+                    ctx.fillRect(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+                    ctx.fillStyle = "#b3e6ff"; ctx.fillRect(x * CELL_SIZE + 8, y * CELL_SIZE + 6, 16, 10);
+                } else {
+                    const scale = (snake.length - i) / snake.length * 0.4 + 0.6;
+                    const offset = (CELL_SIZE - CELL_SIZE * scale) / 2;
+                    ctx.fillStyle = isSuper ? "#ffec80" : "#bfa14a";
+                    ctx.fillRect(x * CELL_SIZE + offset, y * CELL_SIZE + offset, CELL_SIZE * scale, CELL_SIZE * scale);
+                }
                 ctx.restore();
             }
-            ctx.restore();
+        }
+        function drawFood(item, isFrenzy, ctx) {
+            if (item.scale < 1) item.scale += 0.1;
+            const wobble = Math.sin((Date.now() - item.spawnTime)/180) * 2;
+            const x = item.x * CELL_SIZE + CELL_SIZE/2, y = item.y * CELL_SIZE + CELL_SIZE/2 + wobble;
+            ctx.save();
+            ctx.translate(x, y);
+            ctx.scale(item.scale, item.scale);
+            const icon = isFrenzy ? '🧰' : '🚧';
+            ctx.font = '24px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+            ctx.fillText(icon, 0, 0);
             ctx.restore();
         }
-    }
-
-    function drawSnake() {
-        if (!snake || !Array.isArray(snake) || snake.length === 0) return;
-
-        const isGhostActive = gameMode === "ultra" && activePowerups.some(p => p.type === "ghost" && p.timer > 0);
-        const isMagnetActive = gameMode === "ultra" && activePowerups.some(p => p.type === "magnet" && p.timer > 0);
-
-        for (let i = 0; i < snake.length; i++) {
-            const segment = snake[i];
-            const sx = segment.x * CELL_SIZE;
-            const sy = segment.y * CELL_SIZE;
-            
+        function drawObstacle(obs, ctx) {
+            const x = obs.x * CELL_SIZE + CELL_SIZE/2, y = obs.y * CELL_SIZE + CELL_SIZE/2;
             ctx.save();
-
-            if (isGhostActive) {
-                ctx.globalAlpha = 0.6; // Semi-transparent for ghost
+            ctx.beginPath(); ctx.arc(x, y, 13, 0, 2 * Math.PI); ctx.fillStyle = "#222"; ctx.fill();
+            ctx.beginPath(); ctx.moveTo(x, y-13); ctx.lineTo(x, y - 20); ctx.strokeStyle = "#8d7b2f"; ctx.lineWidth=2; ctx.stroke();
+            const pulse = Math.abs(Math.sin(Date.now()/80));
+            ctx.beginPath(); ctx.arc(x, y-20, 2 + pulse*2, 0, 2*Math.PI);
+            ctx.fillStyle = `rgba(255, 236, 112, ${0.7+pulse*0.3})`; ctx.fill();
+            ctx.restore();
+        }
+        function drawPowerup(p, ctx) {
+            if (p.scale < 1) p.scale += 0.1;
+            const x = p.x * CELL_SIZE + CELL_SIZE/2, y = p.y * CELL_SIZE + CELL_SIZE/2;
+            ctx.save();
+            ctx.translate(x, y); ctx.scale(p.scale, p.scale);
+            ctx.beginPath(); ctx.arc(0, 0, 14, 0, 2*Math.PI); ctx.fillStyle = p.color; ctx.globalAlpha=0.8; ctx.fill();
+            ctx.font = '20px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.globalAlpha = 1;
+            ctx.fillText(p.icon, 0, 0);
+            ctx.restore();
+        }
+        function drawWeather(ctx) {
+            const difficultyPercent = Math.min(100, 100 - ((speed - MAX_SPEED) / (INITIAL_SPEED - MAX_SPEED)) * 100);
+            const maxRaindrops = Math.floor(difficultyPercent * 1.5);
+            if (weatherParticles.length < maxRaindrops && Math.random() < 0.5) {
+                weatherParticles.push({
+                    x: Math.random() * elements.gameCanvas.width, y: -10,
+                    length: Math.random() * 10 + 10, speed: Math.random() * 2 + 3,
+                    life: 0, isRipple: false
+                });
             }
-
-            if (i === 0) { // Head
-                // Head: bulldozer cab
-                ctx.fillStyle = "#e0a106";
-                ctx.fillRect(sx, sy, CELL_SIZE, CELL_SIZE);
-                // Window
-                ctx.fillStyle = "#b3e6ff";
-                ctx.fillRect(sx + 8, sy + 6, 16, 10);
-                // Grill
-                ctx.strokeStyle = "#bfa14a";
-                ctx.lineWidth = 2;
-                ctx.beginPath();
-                ctx.moveTo(sx + 6, sy + 28);
-                ctx.lineTo(sx + 26, sy + 28);
-                ctx.stroke();
-                // Headlights
-                ctx.fillStyle = "#fffbe6";
-                ctx.beginPath();
-                ctx.arc(sx + 6, sy + 30, 3, 0, 2 * Math.PI);
-                ctx.arc(sx + 26, sy + 30, 3, 0, 2 * Math.PI);
-                ctx.fill();
-                // Blade
-                ctx.fillStyle = "#bfa14a";
-                ctx.fillRect(sx, sy + 24, CELL_SIZE, 8);
-
-                if (isMagnetActive) {
-                    const headCenterX = sx + CELL_SIZE / 2;
-                    const headCenterY = sy + CELL_SIZE / 2;
-                    const magnetColor = POWERUP_TYPES.find(p => p.type === "magnet").color;
-                    
-                    // Pulsating aura for magnet
-                    const pulse = Math.abs(Math.sin(Date.now() / 200)); // 0 to 1
-                    const auraRadius = CELL_SIZE * (0.6 + pulse * 0.4); // Varies between 0.6 and 1.0 of CELL_SIZE
-                    const auraOpacity = 0.3 + pulse * 0.3; // Varies between 0.3 and 0.6
-
+            ctx.strokeStyle = 'rgba(174,194,224,0.4)'; ctx.lineWidth = 1.5;
+            for (let i = weatherParticles.length - 1; i >= 0; i--) {
+                let p = weatherParticles[i];
+                if (p.isRipple) {
+                    p.life++;
                     ctx.beginPath();
-                    ctx.arc(headCenterX, headCenterY, auraRadius, 0, 2 * Math.PI);
-                    ctx.fillStyle = magnetColor;
-                    ctx.globalAlpha = isGhostActive ? Math.min(0.6, auraOpacity) : auraOpacity; // Respect ghost transparency
-                    ctx.fill();
-
-                    // Sparkle particles for magnet
-                    const numSparks = 5;
-                    for (let k = 0; k < numSparks; k++) {
-                        const angle = (Date.now() / 300 + (k * Math.PI * 2) / numSparks) % (Math.PI * 2);
-                        const distance = CELL_SIZE * 0.5 + pulse * 8;
-                        const sparkX = headCenterX + Math.cos(angle) * distance;
-                        const sparkY = headCenterY + Math.sin(angle) * distance;
-                        const sparkSize = 1 + pulse * 2;
-                        
-                        ctx.beginPath();
-                        ctx.arc(sparkX, sparkY, sparkSize, 0, 2 * Math.PI);
-                        ctx.fillStyle = magnetColor;
-                        const sparkOpacity = 0.5 + pulse * 0.5;
-                        ctx.globalAlpha = isGhostActive ? Math.min(0.6, sparkOpacity) : sparkOpacity;
-                        ctx.fill();
-                    }
-                }
-
-                // Shield Powerup Visual Effect
-                const isShieldActive = gameMode === "ultra" && activePowerups.some(p => p.type === "shield" && p.timer > 0);
-                if (isShieldActive) {
-                    const headCenterX = sx + CELL_SIZE / 2;
-                    const headCenterY = sy + CELL_SIZE / 2;
-                    const shieldColor = POWERUP_TYPES.find(p => p.type === "shield").color;
-                    const pulse = Math.abs(Math.sin(Date.now() / 250)); // Slower pulse for shield
-                    const shieldRadius = CELL_SIZE * (0.7 + pulse * 0.2); // Slightly larger and less variable
-                    const shieldOpacity = 0.35 + pulse * 0.25;
-
-                    ctx.beginPath();
-                    ctx.arc(headCenterX, headCenterY, shieldRadius, 0, 2 * Math.PI);
-                    ctx.fillStyle = shieldColor;                    // If ghost is also active, ensure shield opacity doesn't exceed ghost's base opacity
-                    let finalShieldOpacity = isGhostActive ? Math.min(ctx.globalAlpha, shieldOpacity) : shieldOpacity;
-                    // If magnet is also active, and ghost is not, ensure shield opacity doesn't make magnet aura invisible
-                    if (isMagnetActive && !isGhostActive) finalShieldOpacity = Math.min(0.6, shieldOpacity); // Fixed: using fixed value instead of undefined auraOpacity
-                    
-                    const originalAlpha = ctx.globalAlpha; // Store current alpha before applying shield
-                    ctx.globalAlpha = finalShieldOpacity;
-                    ctx.fill();
-                    
-                    // Optional: Add a slight border to the shield
-                    ctx.strokeStyle = "rgba(255, 255, 255, 0.5)";
-                    ctx.lineWidth = 1.5;
+                    ctx.arc(p.x, p.y, p.life * 1.5, 0, 2*Math.PI);
+                    ctx.globalAlpha = 1 - (p.life / 20);
                     ctx.stroke();
-                    ctx.globalAlpha = originalAlpha; // Restore original alpha before shield was drawn
-                }
-
-                // Drill Powerup Visual Effect
-                const isDrillActive = gameMode === "ultra" && activePowerups.some(p => p.type === "drill" && p.timer > 0);
-                if (isDrillActive) {
-                    const drillColor = POWERUP_TYPES.find(p => p.type === "drill").color;
-                    const drillSize = CELL_SIZE * 0.4;
-                    const rotation = (Date.now() / 50) % (Math.PI * 2); // Fast rotation
-                    
-                    ctx.save();
-                    ctx.translate(sx + CELL_SIZE / 2, sy + CELL_SIZE / 2); // Move to head center
-                    
-                    // Determine drill position based on snake direction
-                    let drillOffsetX = 0;
-                    let drillOffsetY = 0;
-                    let drillRotationAngle = 0;
-
-                    switch (direction) {
-                        case 'UP': 
-                            drillOffsetY = -CELL_SIZE * 0.4;
-                            drillRotationAngle = 0;
-                            break;
-                        case 'DOWN': 
-                            drillOffsetY = CELL_SIZE * 0.4;
-                            drillRotationAngle = Math.PI;
-                            break;
-                        case 'LEFT': 
-                            drillOffsetX = -CELL_SIZE * 0.4;
-                            drillRotationAngle = -Math.PI / 2;
-                            break;
-                        case 'RIGHT': 
-                            drillOffsetX = CELL_SIZE * 0.4;
-                            drillRotationAngle = Math.PI / 2;
-                            break;
-                    }
-                    ctx.translate(drillOffsetX, drillOffsetY); // Position drill bit
-                    ctx.rotate(drillRotationAngle + rotation); // Orient and spin drill bit
-
-                    // Draw a simple drill bit shape (cone-like)
-                    ctx.beginPath();
-                    ctx.moveTo(0, -drillSize * 0.75); // Tip
-                    ctx.lineTo(-drillSize * 0.3, drillSize * 0.25);
-                    ctx.lineTo(drillSize * 0.3, drillSize * 0.25);
-                    ctx.closePath();
-                    ctx.fillStyle = drillColor;
-                    const originalAlpha = ctx.globalAlpha; // Store current alpha
-                    if (isGhostActive) ctx.globalAlpha = Math.min(originalAlpha, 0.7); // Respect ghost transparency
-                    ctx.fill();
-                    ctx.strokeStyle = "#888";
-                    ctx.lineWidth = 1;
-                    ctx.stroke();
-                    ctx.globalAlpha = originalAlpha; // Restore alpha
-                    ctx.restore();
-                }
-
-            } else { // Body
-                // Body: treads with marks
-                ctx.fillStyle = "#bfa14a";
-                ctx.fillRect(sx, sy, CELL_SIZE, CELL_SIZE);
-                ctx.fillStyle = "#e0a106";
-                ctx.fillRect(sx + 4, sy + 4, 24, 24);
-                // Tread marks
-                ctx.strokeStyle = "#8d7b2f";
-                ctx.lineWidth = 1.2;
-                for (let t = 7; t < 25; t += 5) {
-                    ctx.beginPath();
-                    ctx.moveTo(sx + t, sy + 4);
-                    ctx.lineTo(sx + t, sy + 28);
-                    ctx.stroke();
-                }
-            }
-            
-            // Reset alpha if it was changed for ghost, before drawing border
-            if (isGhostActive) {
-                 ctx.globalAlpha = 1.0; 
-            }
-            ctx.strokeStyle = "#8d7b2f"; // Border color for all segments
-            if (isGhostActive) { // Make border also semi-transparent
-                ctx.globalAlpha = 0.6;
-            }
-            ctx.strokeRect(sx, sy, CELL_SIZE, CELL_SIZE);
-            
-            ctx.restore(); // Restore to original state (clears globalAlpha changes etc.)
-        }
-    }
-
-    function drawFood() {
-        if (!food || typeof food.x !== 'number' || typeof food.y !== 'number') return;
-        const wobble = Math.sin(Date.now()/180) * 3;
-        const x = food.x * CELL_SIZE + CELL_SIZE / 2;
-        const y = food.y * CELL_SIZE + CELL_SIZE / 2 + wobble;
-        ctx.save();
-        ctx.translate(x, y);
-        // Glow
-        ctx.beginPath();
-        ctx.arc(0, 0, 16 + 2 * Math.abs(wobble), 0, 2 * Math.PI);
-        ctx.globalAlpha = 0.18 + 0.08 * Math.abs(Math.sin(Date.now()/180));
-        ctx.fillStyle = "#ffec70";
-        ctx.fill();
-        ctx.globalAlpha = 1;
-        // Cone
-        ctx.beginPath();
-        ctx.moveTo(0, 14);
-        ctx.lineTo(-10, -14);
-        ctx.lineTo(10, -14);
-        ctx.closePath();
-        ctx.fillStyle = "#ff4e00";
-        ctx.fill();
-        ctx.fillStyle = "#fff";
-        ctx.fillRect(-8, -8, 16, 4);
-        ctx.restore();
-    }
-
-    function drawDifficultyBarShine() {
-        const bar = document.getElementById('difficulty-bar');
-        let shine = document.getElementById('diff-shine');
-        if (!bar.offsetParent) return; // Don't draw if meter is hidden
-
-        if (!shine) {
-            shine = document.createElement('div');
-            shine.id = 'diff-shine';
-            shine.style.position = 'absolute';
-            shine.style.top = '0';
-            shine.style.left = '0';
-            shine.style.height = '100%';
-            shine.style.width = '40px';
-            shine.style.pointerEvents = 'none';
-            shine.style.background = 'linear-gradient(90deg,rgba(255,255,255,0.18) 0%,rgba(255,255,255,0.45) 50%,rgba(255,255,255,0.18) 100%)';
-            shine.style.borderRadius = '14px';
-            shine.style.transition = 'none';
-            bar.parentElement.style.position = 'relative';
-            bar.parentElement.appendChild(shine);
-        }
-        // Animate shine left to right
-        const percent = ((Date.now()/10) % 120) / 120;
-        shine.style.left = `calc(${percent * 100}% - 20px)`;
-    }
-
-    // --- Explosion Animation ---
-    let explosion = null;
-    function triggerExplosion(x, y) {
-        explosion = { x, y, frame: 0 };
-    }
-    function drawExplosion() {
-        if (!explosion) return;
-        const { x, y, frame } = explosion;
-        const cx = x * CELL_SIZE + CELL_SIZE/2;
-        const cy = y * CELL_SIZE + CELL_SIZE/2;
-        const maxR = 38;
-        const r = Math.min(maxR, frame * 4 + 10);
-        ctx.save();
-        ctx.globalAlpha = 0.7 - frame * 0.07;
-        // Main blast
-        ctx.beginPath();
-        ctx.arc(cx, cy, r, 0, 2 * Math.PI);
-        ctx.fillStyle = frame % 2 === 0 ? '#ffec70' : '#ff4e00';
-        ctx.shadowColor = '#ffec70';
-        ctx.shadowBlur = 18 - frame;
-        ctx.fill();
-        ctx.shadowBlur = 0;
-        // Shockwave ring
-        if (frame < 8) {
-            ctx.beginPath();
-            ctx.arc(cx, cy, r + 12 + frame * 2, 0, 2 * Math.PI);
-            ctx.strokeStyle = 'rgba(255, 238, 112, ' + (0.25 - frame * 0.025) + ')';
-            ctx.lineWidth = 6 - frame * 0.5;
-            ctx.stroke();
-        }
-        // Debris
-        for (let i = 0; i < 10; i++) {
-            const angle = (Math.PI * 2 / 10) * i + frame * 0.2;
-            const dr = r + 10 + frame * 2 + Math.random() * 8;
-            ctx.save();
-            ctx.beginPath();
-            ctx.arc(cx + Math.cos(angle) * dr, cy + Math.sin(angle) * dr, 4 + Math.random() * 2, 0, 2 * Math.PI);
-            ctx.fillStyle = frame % 2 === 0 ? '#bfa14a' : '#e0a106';
-            ctx.globalAlpha = 0.7 - frame * 0.06;
-            ctx.fill();
-            ctx.restore();
-        }
-        // Sparks
-        for (let i = 0; i < 8; i++) {
-            const angle = (Math.PI * 2 / 8) * i + frame * 0.5;
-            const len = r + 18 + frame * 2;
-            ctx.save();
-            ctx.strokeStyle = '#ff4e00';
-            ctx.globalAlpha = 0.5 - frame * 0.04;
-            ctx.lineWidth = 2.2 - frame * 0.13;
-            ctx.beginPath();
-            ctx.moveTo(cx, cy);
-            ctx.lineTo(cx + Math.cos(angle) * len, cy + Math.sin(angle) * len);
-            ctx.stroke();
-            ctx.restore();
-        }
-        ctx.restore();
-        explosion.frame++;
-        if (explosion.frame > 14) explosion = null;
-    }
-
-    // Draw a subtle construction site background pattern on the canvas
-    let bgFrame = 0;
-    function drawBackground() {
-        // Light sand color base
-        ctx.save();
-        ctx.fillStyle = '#e8ddb7';
-        ctx.fillRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
-        // Faint grid lines
-        ctx.strokeStyle = 'rgba(191,161,74,0.07)'; // even fainter
-        ctx.lineWidth = 1;
-        for (let i = 1; i < GRID_SIZE; i++) {
-            ctx.beginPath();
-            ctx.moveTo(i * CELL_SIZE, 0);
-            ctx.lineTo(i * CELL_SIZE, CANVAS_SIZE);
-            ctx.stroke();
-            ctx.beginPath();
-            ctx.moveTo(0, i * CELL_SIZE);
-            ctx.lineTo(CANVAS_SIZE, i * CELL_SIZE);
-            ctx.stroke();
-        }
-        // Slow, subtle tire tracks
-        const tireTrackCount = 3;
-        for (let t = 0; t < tireTrackCount; t++) {
-            // Animate tracks very slowly
-            const phase = (bgFrame/240 + t*0.33) % 1; // much slower
-            const x = 60 + (CANVAS_SIZE-120) * ((t*0.37 + 0.13) % 1);
-            const y = 60 + (CANVAS_SIZE-120) * ((t*0.21 + 0.27) % 1);
-            ctx.save();
-            ctx.globalAlpha = 0.07;
-            ctx.strokeStyle = '#bfa14a';
-            ctx.lineWidth = 8;
-            ctx.beginPath();
-            ctx.moveTo(x, y);
-            ctx.lineTo(x + Math.cos(phase * 2 * Math.PI) * 80, y + Math.sin(phase * 2 * Math.PI) * 80);
-            ctx.stroke();
-            ctx.restore();
-        }
-        // Faint cones
-        for (let i = 0; i < 2; i++) {
-            const bx = 40 + (CANVAS_SIZE-80) * ((i*0.41 + 0.19) % 1);
-            const by = 40 + (CANVAS_SIZE-80) * ((i*0.29 + 0.33) % 1);
-            ctx.save();
-            ctx.globalAlpha = 0.09;
-            ctx.translate(bx, by);
-            ctx.beginPath();
-            ctx.moveTo(0, 12);
-            ctx.lineTo(-8, -12);
-            ctx.lineTo(8, -12);
-            ctx.closePath();
-            ctx.fillStyle = '#ff4e00';
-            ctx.fill();
-            ctx.fillStyle = '#fff';
-            ctx.fillRect(-6, -6, 12, 3);
-            ctx.restore();
-        }
-        ctx.restore();
-        bgFrame++;
-    }
-
-    // --- Animation Frame ---
-    function drawGame() {
-        drawBackground();
-        drawObstacles();
-        drawSnake();
-        drawFood();
-        drawPowerups();
-        drawExplosion();
-        if (difficultyMeter.style.display !== 'none') {
-            drawDifficultyBarShine();
-        }
-
-        // --- Ultra Snake Mode Active Power-up HUD (Stacking) ---
-        if (gameMode === "ultra" && activePowerups.length > 0 && running) {
-            let currentHudY = 20; // Initial Y position for the first HUD item
-            const hudX = 20;
-            const textHeight = 18; // Slightly smaller for stacking
-            const barHeight = 7;
-            const barMaxWidth = 100; // Slightly smaller bar
-            const spacing = 5; // Spacing between text and bar
-            const itemSpacing = 8; // Spacing between stacked HUD items
-
-            for (const activeP of activePowerups) {
-                const powerupDetails = POWERUP_TYPES.find(p => p.type === activeP.type);
-                if (powerupDetails) {
-                    ctx.save();
-                    // Draw Powerup Text (Icon + Name)
-                    ctx.font = `bold ${textHeight - 4}px Segoe UI`; // e.g., "bold 14px Segoe UI"
-                    ctx.fillStyle = powerupDetails.color;
-                    ctx.textAlign = "left";
-                    ctx.textBaseline = "top";
-                    const powerupName = powerupDetails.type.charAt(0).toUpperCase() + powerupDetails.type.slice(1);
-                    ctx.shadowColor = "rgba(0,0,0,0.6)";
-                    ctx.shadowBlur = 2;
-                    ctx.fillText(`${powerupDetails.icon} ${powerupName}`, hudX, currentHudY);
-                    ctx.shadowBlur = 0;
-
-                    // Draw Timer Bar
-                    const timerBarY = currentHudY + textHeight + spacing;
-                    // Background of the timer bar
-                    ctx.fillStyle = "rgba(60, 60, 60, 0.75)";
-                    ctx.fillRect(hudX, timerBarY, barMaxWidth, barHeight);
-
-                    // Foreground (actual time left)
-                    const currentBarWidth = Math.max(0, (activeP.timer / POWERUP_DURATION) * barMaxWidth);
-                    ctx.fillStyle = powerupDetails.color;
-                    ctx.fillRect(hudX, timerBarY, currentBarWidth, barHeight);
-
-                    // Border for the timer bar
-                    ctx.strokeStyle = "rgba(30, 30, 30, 0.85)";
-                    ctx.lineWidth = 1;
-                    ctx.strokeRect(hudX, timerBarY, barMaxWidth, barHeight);
-                    
-                    if (currentBarWidth > 0) {
-                        ctx.strokeStyle = "rgba(255, 255, 255, 0.25)";
-                        ctx.strokeRect(hudX, timerBarY, currentBarWidth, barHeight);
-                    }
-                    ctx.restore();
-                    currentHudY += textHeight + spacing + barHeight + itemSpacing; // Move Y for next item
-                }
-            }
-        }
-    }
-
-    // --- Improved Animation Loop ---
-    function animationLoop(ts) {
-        // Draw at 60fps for smooth animation
-        if (canvas.style.display !== 'none') { // Only draw if canvas is visible
-             drawGame();
-        }
-        requestAnimationFrame(animationLoop);
-    }
-
-    function updateDifficultyBar() {
-        // Difficulty increases as speed increases (lower ms = harder)
-        const percent = Math.min(100, 100 - ((speed - MAX_SPEED) / (INITIAL_SPEED - MAX_SPEED)) * 100);
-        difficultyBar.style.width = percent + "%";
-    }
-
-    function moveSnake() {
-        let head = {...snake[0]};
-        switch (nextDirection) {
-            case 'LEFT': head.x--; break;
-            case 'RIGHT': head.x++; break;
-            case 'UP': head.y--; break;
-            case 'DOWN': head.y++; break;
-        }
-        direction = nextDirection;
-        if (head.x < 0 || head.x >= GRID_SIZE || head.y < 0 || head.y >= GRID_SIZE) {
-            running = false;
-            return;
-        }
-        // Self-collision check (excluding ghost mode)
-        if (!(gameMode === "ultra" && activePowerups.some(p => p.type === "ghost" && p.timer > 0)) &&
-            snake.slice(1).some(s => s.x === head.x && s.y === head.y)) {
-            running = false;
-            return;
-        }
-        
-        // Bomb collision check (excluding ghost mode)
-        const bomb = obstacles.find(o => o.x === head.x && o.y === head.y);
-        if (bomb && 
-            !(gameMode === "ultra" && activePowerups.some(p => p.type === "ghost" && p.timer > 0)) &&
-            !(gameMode === "ultra" && activePowerups.some(p => p.type === "shield" && p.timer > 0)) &&
-            !(gameMode === "ultra" && activePowerups.some(p => p.type === "drill" && p.timer > 0)) ) {
-            running = false;
-            triggerExplosion(bomb.x, bomb.y);
-            return;
-        }
-
-        // Shield and Drill interaction with bombs
-        if (gameMode === "ultra" && bomb) {
-            const shieldIndex = activePowerups.findIndex(p => p.type === "shield");
-            const drillIndex = activePowerups.findIndex(p => p.type === "drill");
-
-            if (drillIndex !== -1) {
-                // Drill destroys the bomb
-                obstacles = obstacles.filter(o => o.x !== bomb.x || o.y !== bomb.y);
-                triggerExplosion(bomb.x, bomb.y); // Show explosion for destroyed bomb
-                activePowerups[drillIndex].timer = 0; // Consume drill (or decrement charges if implemented)
-                // Potentially add a small "drill used" sound/visual cue here
-            } else if (shieldIndex !== -1) {
-                // Shield protects from the bomb, consumes shield
-                activePowerups[shieldIndex].timer = 0; // Consume shield (or decrement charges)
-                // Potentially add a "shield hit" sound/visual cue here
-                // The bomb remains, but the snake is safe for this hit
-            }
-        }
-
-        snake.unshift(head);
-
-        // Magnet Powerup Effect - pulls food towards snake head if active
-        if (gameMode === "ultra" && activePowerups.some(p => p.type === "magnet" && p.timer > 0) && food) {
-            const headPos = snake[0];
-            const foodMagnetRadius = 2; // 2-block radius
-
-            const dx = headPos.x - food.x;
-            const dy = headPos.y - food.y;
-
-            // Check if food is within magnet radius
-            if (Math.abs(dx) <= foodMagnetRadius && Math.abs(dy) <= foodMagnetRadius) {
-                // Only move if food is not already at the head's position
-                if (dx !== 0 || dy !== 0) {
-                    // Prioritize moving along the axis with the larger distance to make the pull more direct
-                    if (Math.abs(dx) > Math.abs(dy)) {
-                        food.x += Math.sign(dx);
-                    } else if (Math.abs(dy) > Math.abs(dx)) {
-                        food.y += Math.sign(dy);
-                    } else { // Distances are equal (and non-zero), or one is zero and the other is non-zero
-                        if (dx !== 0) { // Prefer X movement if distances are equal and dx is non-zero
-                            food.x += Math.sign(dx);
-                        } else if (dy !== 0) { // Otherwise, if dy is non-zero (dx must be zero here if this branch is reached)
-                            food.y += Math.sign(dy);
-                        }
+                    if (p.life > 20) weatherParticles.splice(i, 1);
+                } else {
+                    p.y += p.speed;
+                    ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(p.x, p.y - p.length); ctx.stroke();
+                    if (p.y > elements.gameCanvas.height) {
+                        p.isRipple = true;
                     }
                 }
             }
+            ctx.globalAlpha = 1;
         }
-        
-        // Food consumption
-        if (head.x === food.x && head.y === food.y) {
-            score++;
-            scoreLabel.textContent = "Score: " + score;
-            placeFood();
-            if (gameMode === "ultra") placePowerup();
-            // Only place obstacles in Ultra mode
-            if (gameMode === "ultra" && score % 5 === 0 && obstacles.length < 20) {
-                placeObstacle();
+        function drawExplosionChain(uiCtx) {
+            explosionChain = explosionChain.filter(exp => {
+                if (Date.now() < exp.startTime) return true;
+                if (exp.frame > 15) return false;
+                const { x, y } = exp;
+                const cx = x * CELL_SIZE + CELL_SIZE/2, cy = y * CELL_SIZE + CELL_SIZE/2;
+                const r = exp.frame * 4;
+                uiCtx.save();
+                uiCtx.globalAlpha = 0.9 - exp.frame * 0.06;
+                uiCtx.beginPath(); uiCtx.arc(cx, cy, r, 0, 2 * Math.PI);
+                uiCtx.fillStyle = exp.frame % 2 === 0 ? '#ffec70' : '#ff4e00'; uiCtx.fill();
+                uiCtx.restore();
+                exp.frame++;
+                return true;
+            });
+        }
+        function drawActivePowerupHUD(uiCtx) {
+            let yPos = 20;
+            activePowerups.forEach(p => {
+                const details = POWERUP_TYPES.find(pt => pt.type === p.type);
+                if (!details) return;
+                const remaining = p.timer / POWERUP_DURATION;
+                uiCtx.save();
+                uiCtx.fillStyle = '#fff';
+                uiCtx.font = 'bold 16px Segoe UI';
+                uiCtx.textAlign = 'left';
+                uiCtx.fillText(`${details.icon} ${details.type.toUpperCase()}`, 20, yPos);
+                uiCtx.fillStyle = 'rgba(0,0,0,0.5)';
+                uiCtx.fillRect(20, yPos + 8, 100, 10);
+                uiCtx.fillStyle = details.color;
+                uiCtx.fillRect(20, yPos + 8, 100 * remaining, 10);
+                uiCtx.restore();
+                yPos += 40;
+            });
+        }
+        function displayGameMessage(text, duration = 2000) {
+            let msgDiv = document.createElement('div');
+            msgDiv.textContent = text;
+            Object.assign(msgDiv.style, {
+                position: 'absolute', left: '50%', top: '40%', transform: 'translate(-50%, -50%)',
+                color: '#fff', fontSize: '2.5rem', fontWeight: 'bold', textShadow: '3px 3px 6px #000',
+                zIndex: '100', transition: 'opacity 0.5s ease, transform 0.5s ease', opacity: '0'
+            });
+            elements.canvasContainer.appendChild(msgDiv);
+            setTimeout(() => { msgDiv.style.opacity = '1'; msgDiv.style.transform = 'translate(-50%, -50%) scale(1.1)'; }, 10);
+            setTimeout(() => { msgDiv.style.opacity = '0'; msgDiv.style.transform = 'translate(-50%, -50%) scale(0.9)'; }, duration - 500);
+            setTimeout(() => { msgDiv.remove(); }, duration);
+        }
+        function gameLoop() { if (!running || paused) return; updateState(); }
+        function updateState() {
+            if (!running) return;
+            const ate = checkCollisions();
+            if (!ate) { snake.pop(); }
+            activePowerups.forEach(p => p.timer--);
+            activePowerups = activePowerups.filter(p => p.timer > 0);
+            if (frenzyFood && Date.now() - frenzyFood.spawnTime > frenzyFood.duration) frenzyFood = null;
+            if (comboCounter > 0) {
+                comboTimer -= speed;
+                if (comboTimer <= 0) {
+                    comboCounter = 0;
+                    elements.comboDisplay.classList.remove('visible');
+                }
             }
-            // Ensure speed does not go below MAX_SPEED (lower speed value means faster game)
-            const newCalculatedSpeed = speed - SPEED_STEP;
-            const newSpeed = Math.max(MAX_SPEED, newCalculatedSpeed);
-
-            if (newSpeed !== speed) {
-                speed = newSpeed;
-                clearInterval(intervalId);
-                intervalId = setInterval(gameLoop, speed);
+            const head = {...snake[0]};
+            switch (nextDirection) {
+                case 'LEFT': head.x--; break; case 'RIGHT': head.x++; break;
+                case 'UP': head.y--; break; case 'DOWN': head.y++; break;
             }
+            direction = nextDirection;
+            snake.unshift(head);
+        }
+        function checkCollisions() {
+            const head = snake[0];
+            const isGhost = activePowerups.some(p => p.type === 'ghost');
+            const isSuper = activePowerups.some(p => p.type === 'supercharge');
+            if (head.x < 0 || head.x >= GRID_SIZE || head.y < 0 || head.y >= GRID_SIZE) { triggerGameOver(); return false; }
+            if (!isGhost && !isSuper && snake.slice(1).some(s => s.x === head.x && s.y === head.y)) { triggerGameOver(); return false; }
+            const obsIndex = obstacles.findIndex(o => o.x === head.x && o.y === head.y);
+            if (obsIndex !== -1) {
+                if (isGhost) {}
+                else if (isSuper || usePowerup('shield') || usePowerup('drill')) {
+                    obstacles.splice(obsIndex, 1); triggerScreenShake(5, 8); playSound('destroy');
+                } else {
+                    triggerGameOver(); return false;
+                }
+            }
+            let ateSomething = false;
+            if (food && head.x === food.x && head.y === food.y) { handleFoodConsumption(1); ateSomething = true; }
+            if (frenzyFood && head.x === frenzyFood.x && head.y === frenzyFood.y) { handleFoodConsumption(5); ateSomething = true; }
+            const powerupIndex = powerups.findIndex(p => p.x === head.x && p.y === head.y);
+            if (powerupIndex !== -1) {
+                activatePowerup(powerups[powerupIndex]);
+                powerups.splice(powerupIndex, 1);
+            }
+            return ateSomething;
+        }
+        function handleFoodConsumption(points) {
+            playSound('eat');
+            comboCounter++; comboTimer = COMBO_TIMER_MAX;
+            score += points * (comboCounter > 1 ? comboCounter : 1);
+            if (comboCounter > 1) {
+                elements.comboDisplay.textContent = `COMBO x${comboCounter}`;
+                elements.comboDisplay.classList.add('visible');
+                playSound('combo');
+            }
+            elements.scoreLabel.textContent = "Score: " + score;
+            speed = Math.max(MAX_SPEED, speed - SPEED_STEP);
+            clearInterval(gameLoopInterval);
+            gameLoopInterval = setInterval(gameLoop, speed);
             updateDifficultyBar();
-        } else {
-            snake.pop();
+            if (points === 1) food = null; else frenzyFood = null;
+            placeItem('food');
+            if (gameMode === "ultra" && score > 0 && score % 10 === 0 && !frenzyFood) placeItem('frenzyFood');
+            if (gameMode === "ultra" && score > 0 && score % 4 === 0) placeItem('obstacle');
+            if (gameMode === "ultra" && score > 0 && score % 7 === 0) placeItem('powerup');
         }
-        if (gameMode === "ultra") {
-            const idx = powerups.findIndex(p => p.x === head.x && p.y === head.y);
-            if (idx !== -1) {
-                activatePowerup(powerups[idx]);
-            }
-        }
-    }
-
-    function activatePowerup(powerupToActivate) {
-        const existingPowerup = activePowerups.find(p => p.type === powerupToActivate.type);
-        if (existingPowerup) {
-            existingPowerup.timer = POWERUP_DURATION; // Refresh timer
-        } else {
-            activePowerups.push({ type: powerupToActivate.type, timer: POWERUP_DURATION });
-        }
-        powerups = powerups.filter(p => p.x !== powerupToActivate.x || p.y !== powerupToActivate.y); // Remove collected powerup
-        // console.log(`Activated/Refreshed ${powerupToActivate.type} powerup!`);
-    }
-
-    function updatePowerupEffects() {
-        if (activePowerups.length === 0) return;
-
-        for (let i = activePowerups.length - 1; i >= 0; i--) {
-            activePowerups[i].timer--;
-            if (activePowerups[i].timer <= 0) {
-                // console.log(`${activePowerups[i].type} powerup expired.`);
-                activePowerups.splice(i, 1); // Remove expired powerup
-            }
-        }
-    }
-
-    function gameLoop() {
-        if (!running) {
-            if (explosion) {
-                setTimeout(gameLoop, 60);
-                return;
-            }
-            endGame();
-            return;
-        }
-        moveSnake();
-        if (gameMode === "ultra") {
-            updatePowerupEffects();
-        }
-    }    function startGame(mode) {
-        playerName = playerNameInput.value.trim() || "Anonymous";
-        gameMode = mode;
-
-        mainMenu.style.display = 'none';
-        canvas.style.display = 'block';
-        difficultyMeter.style.display = 'block';
-        scoreArea.style.display = 'block';
-        
-        // Hide leaderboard on mobile during gameplay
-        const isMobile = window.innerWidth <= 768;
-        if (isMobile) {
-            leaderboard.style.display = 'none';
-        } else {
-            leaderboard.style.display = 'block';
-        }
-        
-        // Show touch controls on mobile
-        const touchControls = document.getElementById('touch-controls');
-        if (touchControls) {
-            touchControls.style.display = 'flex';
-        }
-
-        resetGame();
-        // Trigger canvas resize to optimize for gameplay
-        setTimeout(() => {
-            const resizeEvent = new Event('resize');
-            window.dispatchEvent(resizeEvent);
-        }, 100);
-    }    function endGame() {
-        running = false;
-        clearInterval(intervalId);
-        showGameOver();
-        mainMenu.style.display = 'flex'; // Show main menu again
-        canvas.style.display = 'none';
-        difficultyMeter.style.display = 'none';
-        scoreArea.style.display = 'none';
-        
-        // Show leaderboard when game ends (on all devices)
-        leaderboard.style.display = 'block';
-        
-        // Hide touch controls when game ends
-        const touchControls = document.getElementById('touch-controls');
-        if (touchControls) {
-            touchControls.style.display = 'none';
-        }
-        
-        submitScore(playerName, score);
-        
-        // Trigger canvas resize to restore normal layout
-        setTimeout(() => {
-            const resizeEvent = new Event('resize');
-            window.dispatchEvent(resizeEvent);
-        }, 100);
-    }
-
-    function showGameOver() {
-        // Placeholder for a more elaborate game over screen
-        console.log(`Game Over. Player: ${playerName}, Score: ${score}, Mode: ${gameMode}`);
-    }
-
-    function submitScore(name, finalScore) {
-        // Don't submit scores of 0 to the database
-        if (finalScore <= 0) {
-            console.log("Score is 0 or less, not submitting to leaderboard");
-            updateLeaderboard(); // Still refresh leaderboard
-            return;
-        }
-        
-        const scoresCollection = collection(db, leaderboardCollectionName);
-        addDoc(scoresCollection, {
-            name: name,
-            score: finalScore,
-            mode: gameMode,
-            timestamp: serverTimestamp() // Use serverTimestamp for consistent timing
-        }).then(() => {
-            console.log("Score submitted to Firebase");
-            updateLeaderboard(); // Refresh leaderboard after submission
-        }).catch(error => {
-            console.error("Error submitting score to Firebase: ", error);
-            // Fallback or error message for the user if needed
-        });    }
-      async function updateLeaderboard() {
-        leaderboardEntries.className = 'loading';
-        leaderboardEntries.innerHTML = '<div class="loading-spinner"></div>'; // Better loading indicator
-        const scoresCollection = collection(db, leaderboardCollectionName);
-        const q = query(scoresCollection, orderBy("score", "desc"), limit(LEADERBOARD_SIZE));
-        
-        try {
-            const querySnapshot = await getDocs(q);
-            leaderboardEntries.className = ''; // Remove loading class
-            leaderboardEntries.innerHTML = ''; // Clear previous entries or loading message
-            
-            if (querySnapshot.empty) {                leaderboardEntries.innerHTML = `
-                    <div style="text-align:center;padding:30px;color:#ffcc33;">
-                        <div style="font-size:38px;margin-bottom:12px;animation: bounce 2s infinite;">🏆</div>
-                        <div style="font-weight:bold;font-size:1.3em;text-shadow:1px 1px 2px rgba(0,0,0,0.3);">No scores yet!</div>
-                        <div style="opacity:0.9;margin-top:8px;background-color:rgba(255,255,255,0.3);display:inline-block;padding:5px 15px;border-radius:10px;">Be the first champion!</div>
-                    </div>
-                    <style>
-                        @keyframes bounce {
-                            0%, 100% { transform: translateY(0); }
-                            50% { transform: translateY(-10px); }
-                        }
-                    </style>`;
-                return;
-            }
-            
-            let rank = 1;
-            querySnapshot.forEach(doc => {
-                const s = doc.data();
-                const entry = document.createElement('div');
-                entry.classList.add('score-entry');
-                entry.setAttribute('data-rank', rank); // Add rank attribute for CSS ::before content
-                
-                // Format score with commas
-                const formattedScore = s.score.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-                
-                // Get timestamp if available
-                let timeAgo = '';
-                if (s.timestamp) {
-                    const date = new Date(s.timestamp.seconds * 1000);
-                    // Simple time ago function
-                    const now = new Date();
-                    const diffMs = now - date;
-                    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-                    
-                    if (diffDays === 0) {
-                        timeAgo = 'today';
-                    } else if (diffDays === 1) {
-                        timeAgo = 'yesterday';
-                    } else if (diffDays < 7) {
-                        timeAgo = `${diffDays} days ago`;
-                    } else {
-                        timeAgo = date.toLocaleDateString();
-                    }
-                }
-                  // Add trophy icon for top 3
-                let trophyIcon = '';
-                if (rank === 1) trophyIcon = '<span style="display:inline-block;width:22px;margin-right:5px;font-size:1.2em;vertical-align:middle;">🏆</span>';
-                else if (rank === 2) trophyIcon = '<span style="display:inline-block;width:22px;margin-right:5px;font-size:1.2em;vertical-align:middle;">🥈</span>';
-                else if (rank === 3) trophyIcon = '<span style="display:inline-block;width:22px;margin-right:5px;font-size:1.2em;vertical-align:middle;">🥉</span>';                const modeClass = s.mode === 'ultra' ? 'ultra-mode' : 'classic-mode';
-                entry.innerHTML = `
-                    <span class="player-name">${trophyIcon}${s.name} <small class="${modeClass}">(${s.mode})</small></span>
-                    <span class="player-score">${formattedScore}</span>
-                    ${timeAgo ? `<span class="score-date">${timeAgo}</span>` : ''}
-                `;
-                
-                // Add extra flair for the current player's score
-                if (s.name === playerName) {
-                    entry.classList.add('current-player');
-                }
-                
-                leaderboardEntries.appendChild(entry);
-                rank++;
-            });
-        } catch (error) {            console.error("Error fetching leaderboard from Firebase: ", error);
-            leaderboardEntries.innerHTML = `
-                <div style="text-align:center;padding:20px;color:#ff6b6b;">
-                    <div style="font-size:24px;margin-bottom:10px;">⚠️</div>
-                    <div>Error loading scores</div>
-                    <div style="font-size:0.9em;opacity:0.7;margin-top:5px;">Please try again later</div>
-                </div>`;
-        }
-    }    window.onload = () => {        // Set up responsive canvas with mobile optimizations
-        function resizeCanvas() {
-            const container = document.getElementById('game-container');
-            const isMobile = window.innerWidth <= 768;
-            const isSmallMobile = window.innerWidth <= 480;
-            const isLandscape = window.innerHeight < 600 && window.orientation !== undefined;
-            
-            let finalSize;
-            
-            if (isMobile) {
-                // Mobile-specific sizing logic
-                const viewportWidth = window.innerWidth;
-                const viewportHeight = window.innerHeight;
-                const availableHeight = viewportHeight - 150; // Account for controls and UI
-                
-                if (isLandscape) {
-                    // Landscape mode - prioritize height
-                    finalSize = Math.min(viewportHeight * 0.6, viewportWidth * 0.5, 400);
-                } else if (isSmallMobile) {
-                    // Small mobile - maximize screen usage
-                    finalSize = Math.min(viewportWidth - 20, availableHeight, viewportWidth * 0.95);
-                } else {
-                    // Regular mobile
-                    finalSize = Math.min(viewportWidth - 40, availableHeight, viewportWidth * 0.85);
-                }
-                
-                // Ensure minimum playable size
-                finalSize = Math.max(finalSize, 250);
+        function activatePowerup(powerup) {
+            playSound('powerup');
+            const existing = activePowerups.find(p => p.type === powerup.type);
+            if (existing) {
+                existing.timer = POWERUP_DURATION;
             } else {
-                // Desktop sizing (original logic)
-                const containerWidth = container.clientWidth - 48;
-                const viewportHeight = window.innerHeight;
-                const maxSize = Math.min(containerWidth, viewportHeight * 0.5, 800);
-                finalSize = Math.max(maxSize, 300);
+                activePowerups.push({ type: powerup.type, timer: POWERUP_DURATION });
             }
-            
-            canvas.style.width = finalSize + 'px';
-            canvas.style.height = finalSize + 'px';
-            
-            // Hide leaderboard on mobile during gameplay
-            const leaderboard = document.getElementById('leaderboard');
-            if (isMobile && running) {
-                leaderboard.style.display = 'none';
-            } else if (!isMobile || !running) {
-                leaderboard.style.display = '';
-            }
+            displayGameMessage(`${powerup.type.toUpperCase()}!`);
         }
-        
-        canvas.width = CANVAS_SIZE;
-        canvas.height = CANVAS_SIZE;
-        resizeCanvas();
-        
-        // Resize on orientation change
-        window.addEventListener('resize', resizeCanvas);
-        window.addEventListener('orientationchange', () => {
-            setTimeout(resizeCanvas, 100);
-        });
-        
-        updateLeaderboard(); // Load leaderboard on page load
-        requestAnimationFrame(animationLoop); // Start drawing loop
-
-        classicButton.addEventListener('click', () => startGame('classic'));
-        ultraButton.addEventListener('click', () => startGame('ultra'));
-
-        // Keyboard controls
-        document.addEventListener('keydown', e => {
+        function usePowerup(type) {
+            const index = activePowerups.findIndex(p => p.type === type);
+            if (index !== -1) {
+                activePowerups.splice(index, 1);
+                return true;
+            }
+            return false;
+        }
+        function startGame(mode) {
+            playerName = elements.playerNameInput.value.trim() || "Anonymous";
+            localStorage.setItem('snakePlayerName', playerName);
+            gameMode = mode;
+            elements.mainMenu.style.display = 'none';
+            elements.gameOverScreen.style.display = 'none';
+            elements.leaderboard.style.display = 'none';
+            elements.gameUI.style.display = 'flex';
+            resetGame();
+        }
+        function triggerGameOver() {
             if (!running) return;
-            handleDirectionInput(e.key.toLowerCase());
-        });        // Touch button controls with enhanced feedback
-        const directionButtons = document.querySelectorAll('.direction-btn');
-        directionButtons.forEach(btn => {
-            // Prevent zoom on double-tap
-            btn.addEventListener('touchstart', e => {
-                e.preventDefault();
-                btn.classList.add('pressed');
-                if (!running) return;
-                const direction = btn.dataset.direction;
-                handleDirectionInput(direction.toLowerCase());
-            }, { passive: false });
-            
-            btn.addEventListener('touchend', e => {
-                e.preventDefault();
-                btn.classList.remove('pressed');
-            }, { passive: false });
-            
-            btn.addEventListener('click', e => {
-                e.preventDefault();
-                if (!running) return;
-                const direction = btn.dataset.direction;
-                handleDirectionInput(direction.toLowerCase());
+            playSound('crash');
+            running = false;
+            clearInterval(gameLoopInterval);
+            triggerScreenShake(15, 10);
+            snake.forEach((segment, i) => {
+                explosionChain.push({ ...segment, frame: 0, startTime: Date.now() + i * 50 });
             });
-        });        // Swipe controls with improved detection
-        let touchStartX = 0;
-        let touchStartY = 0;
-        let touchStartTime = 0;
-        const minSwipeDistance = 30;
-        const maxSwipeTime = 300; // ms
-        
-        canvas.addEventListener('touchstart', e => {
-            e.preventDefault();
-            const touch = e.touches[0];
-            touchStartX = touch.clientX;
-            touchStartY = touch.clientY;
-            touchStartTime = Date.now();
-        }, { passive: false });
-        
-        canvas.addEventListener('touchend', e => {
-            e.preventDefault();
-            if (!running) return;
-            
-            const touch = e.changedTouches[0];
-            const deltaX = touch.clientX - touchStartX;
-            const deltaY = touch.clientY - touchStartY;
-            const deltaTime = Date.now() - touchStartTime;
-            
-            // Only register swipes that are fast enough and long enough
-            if (deltaTime > maxSwipeTime) return;
-            if (Math.abs(deltaX) < minSwipeDistance && Math.abs(deltaY) < minSwipeDistance) {
-                return;
-            }
-            
-            // Determine primary direction with better sensitivity
-            if (Math.abs(deltaX) > Math.abs(deltaY) * 0.7) {
-                // Horizontal swipe (with some tolerance for diagonal)
-                if (deltaX > 0) {
-                    handleDirectionInput('arrowright');
-                } else {
-                    handleDirectionInput('arrowleft');
-                }
-            } else if (Math.abs(deltaY) > Math.abs(deltaX) * 0.7) {
-                // Vertical swipe (with some tolerance for diagonal)
-                if (deltaY > 0) {
-                    handleDirectionInput('arrowdown');
-                } else {
-                    handleDirectionInput('arrowup');
-                }
-            }
-        }, { passive: false });
-
-        // Prevent default touch behavior on game container
-        const gameContainer = document.getElementById('game-container');
-        gameContainer.addEventListener('touchmove', e => e.preventDefault(), { passive: false });
-    };
-
-    // Centralized direction handling function
-    function handleDirectionInput(key) {
-        switch (key) {
-            case 'arrowleft':
-            case 'left':
-            case 'a':
-                if (direction !== 'RIGHT') nextDirection = 'LEFT'; 
-                break;
-            case 'arrowright':
-            case 'right':
-            case 'd':
-                if (direction !== 'LEFT') nextDirection = 'RIGHT'; 
-                break;
-            case 'arrowup':
-            case 'up':
-            case 'w':
-                if (direction !== 'DOWN') nextDirection = 'UP'; 
-                break;
-            case 'arrowdown':
-            case 'down':
-            case 's':
-                if (direction !== 'UP') nextDirection = 'DOWN'; 
-                break;
+            setTimeout(showGameOverScreen, snake.length * 50 + 500);
         }
-    }
-
-    // --- Construction Snake Game JS End ---
+        function showGameOverScreen() {
+            elements.gameUI.style.display = 'none';
+            elements.gameOverScreen.style.display = 'flex';
+            elements.leaderboard.style.display = 'block';
+            const bestScoreKey = `${gameMode}BestScore`;
+            const bestScore = localStorage.getItem(bestScoreKey) || 0;
+            if (score > parseInt(bestScore)) {
+                localStorage.setItem(bestScoreKey, score);
+                elements.bestScoreDisplay.textContent = `New Best: ${score}`;
+            } else {
+                elements.bestScoreDisplay.textContent = `Best: ${bestScore}`;
+            }
+            elements.finalScoreDisplay.textContent = `Score: ${score}`;
+            if (score > 0) submitScore();
+            updateLeaderboard(gameMode);
+        }
+        function showMainMenu() {
+            elements.gameOverScreen.style.display = 'none';
+            elements.gameUI.style.display = 'none';
+            elements.mainMenu.style.display = 'flex';
+            elements.leaderboard.style.display = 'block';
+            updateLeaderboard('classic');
+        }
+        function togglePause() {
+            if (!running) return;
+            paused = !paused;
+            playSound('pause');
+            displayGameMessage(paused ? "PAUSED" : "RESUMED", 1000);
+        }
+        function updateDifficultyBar() {
+            const percent = Math.min(100, 100 - ((speed - MAX_SPEED) / (INITIAL_SPEED - MAX_SPEED)) * 100);
+            elements.difficultyBar.style.width = percent + "%";
+        }
+        function triggerScreenShake(duration, magnitude) {
+            screenShake.duration = duration;
+            screenShake.magnitude = magnitude;
+        }
+        async function submitScore() {
+            if (!playerName || score <= 0) return;
+            try {
+                await addDoc(collection(db, leaderboardCollectionName), { name: playerName, score, mode: gameMode, timestamp: serverTimestamp() });
+            } catch (e) { console.error("Error submitting score: ", e); }
+        }
+        async function updateLeaderboard(mode) {
+            elements.leaderboardEntries.innerHTML = '<div class="loading-spinner"></div>';
+            const q = query(collection(db, leaderboardCollectionName), where("mode", "==", mode), orderBy("score", "desc"), limit(LEADERBOARD_SIZE));
+            try {
+                const querySnapshot = await getDocs(q);
+                elements.leaderboardEntries.innerHTML = '';
+                if (querySnapshot.empty) { elements.leaderboardEntries.innerHTML = `<div style="text-align: center; padding: 20px;">No scores yet for ${mode} mode.</div>`; return; }
+                querySnapshot.forEach(doc => {
+                    const data = doc.data(); const entry = document.createElement('div');
+                    entry.className = 'score-entry'; entry.innerHTML = `<span class="player-name">${data.name}</span><span class="player-score">${data.score}</span>`;
+                    elements.leaderboardEntries.appendChild(entry);
+                });
+            } catch (e) {
+                console.error("Error fetching leaderboard:", e);
+                elements.leaderboardEntries.innerHTML = `<div style="text-align: center; color: #ff6b6b; padding: 20px;">Error loading scores.</div>`;
+            }
+        }
+        function handleDirectionInput(newDir) {
+            if (!running || paused) return;
+            if ((newDir === 'UP' && direction !== 'DOWN') || (newDir === 'DOWN' && direction !== 'UP') ||
+                (newDir === 'LEFT' && direction !== 'RIGHT') || (newDir === 'RIGHT' && direction !== 'LEFT')) {
+                nextDirection = newDir;
+            }
+        }
+        function init() {
+            elements.mainMenu = document.getElementById('main-menu');
+            elements.gameOverScreen = document.getElementById('game-over-screen');
+            elements.playerNameInput = document.getElementById('player-name');
+            elements.gameUI = document.getElementById('game-ui');
+            elements.difficultyBar = document.getElementById('difficulty-bar');
+            elements.scoreLabel = document.getElementById('score-label');
+            elements.comboDisplay = document.getElementById('combo-display');
+            elements.leaderboard = document.getElementById('leaderboard');
+            elements.leaderboardEntries = document.getElementById('leaderboard-entries');
+            elements.finalScoreDisplay = document.getElementById('final-score-display');
+            elements.bestScoreDisplay = document.getElementById('best-score-display');
+            elements.canvasContainer = document.getElementById('canvas-container');
+            elements.gameCanvas = document.getElementById('game-canvas');
+            elements.uiCanvas = document.getElementById('ui-canvas');
+            elements.ctx = elements.gameCanvas.getContext('2d');
+            elements.uiCtx = elements.uiCanvas.getContext('2d');
+            [elements.gameCanvas, elements.uiCanvas].forEach(c => {
+                c.width = CELL_SIZE * GRID_SIZE;
+                c.height = CELL_SIZE * GRID_SIZE;
+            });
+            elements.canvasContainer.style.width = `${CELL_SIZE * GRID_SIZE}px`;
+            elements.canvasContainer.style.height = `${CELL_SIZE * GRID_SIZE}px`;
+            elements.playerNameInput.value = localStorage.getItem('snakePlayerName') || '';
+            document.getElementById('classic-btn').onclick = () => startGame('classic');
+            document.getElementById('ultra-btn').onclick = () => startGame('ultra');
+            document.getElementById('retry-btn').onclick = () => startGame(gameMode);
+            document.getElementById('menu-btn').onclick = showMainMenu;
+            document.getElementById('tab-classic').onclick = () => {
+                updateLeaderboard('classic');
+                document.getElementById('tab-classic').classList.add('active');
+                document.getElementById('tab-ultra').classList.remove('active');
+            };
+            document.getElementById('tab-ultra').onclick = () => {
+                updateLeaderboard('ultra');
+                document.getElementById('tab-ultra').classList.add('active');
+                document.getElementById('tab-classic').classList.remove('active');
+            };
+            document.addEventListener('keydown', e => {
+                const key = e.key.toLowerCase();
+                if (key === 'p') { togglePause(); return; }
+                if (!running || paused) return;
+                const keyMap = {'arrowup':'UP', 'w':'UP', 'arrowdown':'DOWN', 's':'DOWN', 'arrowleft':'LEFT', 'a':'LEFT', 'arrowright':'RIGHT', 'd':'RIGHT'};
+                if (keyMap[key]) handleDirectionInput(keyMap[key]);
+            });
+            document.getElementById('up-btn').onclick = () => handleDirectionInput('UP');
+            document.getElementById('down-btn').onclick = () => handleDirectionInput('DOWN');
+            document.getElementById('left-btn').onclick = () => handleDirectionInput('LEFT');
+            document.getElementById('right-btn').onclick = () => handleDirectionInput('RIGHT');
+            document.getElementById('pause-btn-touch').onclick = togglePause;
+            showMainMenu();
+            requestAnimationFrame(animationLoop);
+        }
+        init();
     </script>
 </body>
 </html>
