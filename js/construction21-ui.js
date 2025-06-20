@@ -22,6 +22,28 @@ let previousBalance = 10000;
 // Utility for delays in async functions
 const delay = ms => new Promise(res => setTimeout(res, ms));
 
+// Mobile touch support utility
+const addTouchSupport = (element, handler) => {
+    if (!element) return; // Skip if element doesn't exist
+    
+    element.addEventListener('touchstart', function(e) {
+        e.preventDefault(); // Prevent default behavior like scrolling/zooming
+        if (e.touches && e.touches[0]) {
+            // Pass the first touch point to the handler
+            handler(e.touches[0]);
+        } else {
+            // Fallback to the event itself
+            handler(e);
+        }
+    });
+};
+
+// Function to detect if we're on a mobile device
+const isMobileDevice = () => {
+    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || 
+           (window.matchMedia && window.matchMedia('(max-width: 768px)').matches);
+};
+
 // --- Use Firebase instance from construction21-logic.js ---
 const auth = getAuth();
 const db = gameDb;
@@ -964,16 +986,21 @@ function setupEventHandlers() {
 
     // Chips
     DOMElements.chipTray.querySelectorAll('.chip').forEach(chip => {
-        chip.addEventListener('click', () => {
+        // Mouse click handler
+        const chipClickHandler = () => {
             DOMElements.chipTray.querySelectorAll('.chip').forEach(c => c.classList.remove('is-selected'));
             chip.classList.add('is-selected');
             selectedChipValue = parseInt(chip.dataset.value, 10);
-        });
-    });
-
-    // Betting
+        };
+        
+        chip.addEventListener('click', chipClickHandler);
+        
+        // Add touch support
+        addTouchSupport(chip, chipClickHandler);
+    });    // Betting
     DOMElements.betSpots.forEach(spot => {
-        spot.addEventListener('click', () => {
+        // Mouse click handler
+        const spotClickHandler = () => {
             if (uiLocked || !selectedChipValue) {
                 shakeElement(DOMElements.chipTray);
                 return;
@@ -988,17 +1015,20 @@ function setupEventHandlers() {
                 spot
             );
             updateUI();
-        });
-    });
-
-    // Action Bar
+        };
+        
+        spot.addEventListener('click', spotClickHandler);
+        
+        // Add touch support
+        addTouchSupport(spot, spotClickHandler);
+    });    // Action Bar
     DOMElements.actionBar.querySelectorAll('.action-button').forEach(btn => {
-        btn.addEventListener('click', async () => {
+        const buttonHandler = async () => {
             if (uiLocked || btn.disabled) {
                 shakeElement(btn);
                 return;
             }
-            switch (btn.dataset.action) {                case 'deal':
+            switch (btn.dataset.action) {case 'deal':
                     // Check if we can deal
                     if (!game.bets || game.bets.main <= 0) {
                         shakeElement(btn);
@@ -1119,15 +1149,21 @@ function setupEventHandlers() {
                     DOMElements.dealerHand.innerHTML = '';
                     DOMElements.playerHandsContainer.innerHTML = '';
                     lastBets = { main: 0, pp: 0, plus3: 0 };
-                    updateUI();
-                    break;
+                    updateUI();                    break;
                 case 'clear':
                     game.clearBets();
                     updateUI();
                     break;
             }
-        });
-    });    // Modal Openers/Closers
+        };
+        
+        btn.addEventListener('click', buttonHandler);
+        
+        // Add touch support for action buttons
+        addTouchSupport(btn, buttonHandler);
+    });
+    
+    // Modal Openers/Closers
     if (DOMElements.statsBtn) {
         DOMElements.statsBtn.addEventListener('click', () => {
             updateStatsDisplay();
@@ -1174,12 +1210,44 @@ function setupEventHandlers() {
             updateUI();
         });
     }
-    if (DOMElements.colorSwatches) {
-        DOMElements.colorSwatches.forEach(swatch => {
-            swatch.addEventListener('click', () => {
+    if (DOMElements.colorSwatches) {        DOMElements.colorSwatches.forEach(swatch => {
+            const swatchHandler = () => {
                 savePreference('tableColor', swatch.dataset.color);
-            });
+            };
+            
+            swatch.addEventListener('click', swatchHandler);
+            
+            // Add touch support
+            addTouchSupport(swatch, swatchHandler);
         });
+    }
+    
+    // Apply mobile-specific adjustments if on a mobile device
+    if (isMobileDevice()) {
+        document.body.classList.add('mobile-device');
+        
+        // Make additional UI tweaks for mobile experience
+        const gameTable = document.querySelector('.game-table');
+        if (gameTable) {
+            if (window.matchMedia("(orientation: portrait)").matches) {
+                gameTable.classList.add('portrait-mode');
+            } else {
+                gameTable.classList.add('landscape-mode');
+            }
+            
+            // Listen for orientation changes
+            window.addEventListener('orientationchange', () => {
+                setTimeout(() => {
+                    if (window.matchMedia("(orientation: portrait)").matches) {
+                        gameTable.classList.add('portrait-mode');
+                        gameTable.classList.remove('landscape-mode');
+                    } else {
+                        gameTable.classList.add('landscape-mode');
+                        gameTable.classList.remove('portrait-mode');
+                    }
+                }, 100);
+            });
+        }
     }
 }
 

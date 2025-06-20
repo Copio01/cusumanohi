@@ -1699,6 +1699,238 @@
             );
             border-radius: 4px;
         }
+          /* Mobile Responsiveness */
+        @media (max-width: 768px) {
+            /* Enhanced body adjustments for mobile */
+            body {
+                overflow-x: hidden; /* Prevent horizontal scrolling */
+                min-height: -webkit-fill-available; /* Better height handling on iOS */
+            }
+            
+            /* Adjust table sizing */
+            .game-table {
+                width: 95vw;
+                aspect-ratio: 3 / 2;
+                border-radius: 50px;
+                border-width: 8px;
+                box-shadow: 0 0 60px 10px #e0b75744, 0 12px 25px rgba(0,0,0,0.6);
+            }
+
+            /* Scale down cards and bets */
+            .card {
+                width: 64px;
+                height: 95px;
+                transition: transform 0.2s ease, box-shadow 0.2s ease;
+            }
+
+            .bet-spot {
+                width: 70px;
+                height: 70px;
+            }
+
+            .chip {
+                width: 45px;
+                height: 45px;
+            }
+
+            /* Reflow controls for better mobile layout */
+            .player-controls {
+                flex-direction: column;
+                gap: 1rem;
+                bottom: 5%;
+                width: 92%;
+                left: 4%;
+                right: 4%;
+            }
+
+            .action-bar {
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 0.6rem;
+            }
+
+            .action-button {
+                font-size: 1rem;
+                padding: 0.8rem 1rem;
+                min-width: 90px; /* Ensure touch targets are large enough */
+            }
+
+            /* Tighter header for mobile */
+            .game-header {
+                padding: 0.5rem 1rem;
+            }
+
+            .profile-info {
+                gap: 1rem;
+            }
+
+            #profile-name {
+                font-size: 1.7rem;
+            }
+
+            #player-balance {
+                font-size: 1.1rem;
+            }
+
+            /* Hand positioning adjustments */
+            #dealer-hand {
+                top: 6%;
+            }
+            
+            #player-hands {
+                bottom: 28%;
+            }
+            
+            .betting-area {
+                gap: 2rem;
+            }
+            
+            /* Card overlap adjustments */
+            .hand .card {
+                margin-left: -20px;
+            }
+            
+            /* Modals need to be fully visible */
+            .modal-content {
+                width: 90%;
+                max-width: 95vw;
+                max-height: 80vh;
+                padding: 1rem;
+            }
+            
+            .modal-close {
+                top: 0.5rem;
+                right: 0.5rem;
+                padding: 0.5rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            /* Further reduce sizes on very small screens */
+            .game-table {
+                aspect-ratio: 4 / 3;
+                border-radius: 40px;
+                border-width: 6px;
+            }
+
+            .card {
+                width: 58px;
+                height: 84px;
+            }
+
+            .bet-spot {
+                width: 64px;
+                height: 64px;
+            }
+
+            .chip {
+                width: 40px;
+                height: 40px;
+            }
+
+            .action-button {
+                font-size: 0.9rem;
+                padding: 0.6rem 0.9rem;
+                margin: 0.2rem;
+            }
+
+            #profile-name {
+                font-size: 1.4rem;
+            }
+            
+            /* Enhanced card and hand positioning for tiny screens */
+            #dealer-hand, #player-hands {
+                gap: 0.8rem;
+            }
+            
+            .hand .card {
+                margin-left: -25px;
+            }
+            
+            .betting-area {
+                gap: 1.5rem;
+                bottom: 12%;
+            }
+            
+            /* Ensure chips still stack properly */
+            .bet-spot__chips .chip {
+                margin-bottom: -30px;
+                width: 35px;
+                height: 35px;
+                font-size: 0.85rem;
+            }
+            
+            /* Header further adjustments */
+            .header-btns button {
+                padding: 0.4rem;
+                margin-left: -0.1rem;
+            }
+        }
+        
+        /* Touch support for mobile devices */
+        @media (hover: none) {
+            /* Remove hover effects on mobile */
+            .hand .card:hover {
+                transform: none;
+                box-shadow: none;
+            }
+            
+            /* Active state for touch feedback */
+            .action-button:active, .chip:active, .bet-spot:active {
+                transform: scale(0.96);
+                opacity: 0.9;
+            }
+            
+            /* Enlarging touch targets */
+            .action-button, .chip, .bet-spot {
+                cursor: pointer;
+                -webkit-tap-highlight-color: transparent;
+            }
+            
+            /* Smooth scrolling and prevent text selection */
+            * {
+                -webkit-user-select: none;
+                user-select: none;
+                -webkit-touch-callout: none;
+                touch-action: manipulation;
+            }
+        }
+        
+        /* Orientation handling */
+        @media (max-width: 768px) and (orientation: portrait) {
+            .game-table {
+                aspect-ratio: 3 / 4;
+            }
+            
+            .betting-area {
+                bottom: 15%;
+            }
+            
+            #dealer-hand {
+                top: 10%;
+            }
+            
+            #player-hands {
+                bottom: 32%;
+            }
+        }
+        
+        /* Class-based orientation styles for JS control */
+        .game-table.portrait-mode {
+            aspect-ratio: 3 / 4;
+        }
+        
+        .game-table.landscape-mode {
+            aspect-ratio: 16 / 10;
+        }
+        
+        /* Mobile device classes for JS detection */
+        .mobile-device .game-header {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
         /* ... other modal and stat styles unchanged ... */
     </style>
 </head>
