@@ -4,837 +4,1520 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cusumano Home Improvements | Monroe, MI</title>
-    <meta name="description" content="Expert home improvement services in Monroe, MI. Specializing in siding, decks, and dumpster rentals. Call for a free quote!"">
+    <meta name="description" content="Cusumano Home Improvements - Professional home renovation, remodeling, and dumpster rental services in Monroe, MI and surrounding areas. Family-owned with 20+ years of experience. Free estimates available.">
+    <meta name="keywords" content="home improvement, renovation, remodeling, siding, decks, dumpster rental, Monroe Michigan, construction, family owned">
+    <meta name="author" content="Cusumano Home Improvements">
+    <meta property="og:title" content="Cusumano Home Improvements | Monroe, MI">
+    <meta property="og:description" content="Professional home improvement services in Monroe, MI. 20+ years of experience in renovation and construction.">
+    <meta property="og:type" content="business.business">
     
-    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Poppins:wght@600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Poppins:wght@600;700&family=Righteous&display=swap" rel="stylesheet">
 
     <style>
         :root {
             --primary-color: #0a4d68;
             --secondary-color: #088395;
             --accent-color: #f5a623;
-            --light-gray: #f9f9f9;
-            --dark-gray: #333333;
+            --light-gray: #f8f9fa;
+            --dark-gray: #343a40;
             --white: #ffffff;
+            --success-color: #2a9d8f;
+            --danger-color: #e63946;
             --font-heading: 'Poppins', sans-serif;
             --font-body: 'Roboto', sans-serif;
+            --font-display: 'Righteous', sans-serif;
+            --shadow-sm: 0 2px 8px rgba(0,0,0,0.05);
+            --shadow-md: 0 6px 16px rgba(0,0,0,0.08);
+            --shadow-lg: 0 10px 30px rgba(0,0,0,0.1);
         }
         *, *::before, *::after { box-sizing: border-box; }
         html { scroll-behavior: smooth; scroll-padding-top: 80px; }
         body {
             margin: 0;
             font-family: var(--font-body);
-            background: linear-gradient(135deg, #e0f7fa 0%, #f9f9f9 60%, #f5a62322 100%);
+            background-color: var(--white);
             color: var(--dark-gray);
             line-height: 1.7;
+            overflow-x: hidden;
         }
-        /* Add a subtle pattern overlay for extra depth */
-        body::before {
-            content: '';
-            position: fixed;
-            top: 0; left: 0; width: 100vw; height: 100vh;
-            pointer-events: none;
-            z-index: 0;
-            opacity: 0.13;
-            background-image: url('data:image/svg+xml;utf8,<svg width="60" height="60" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="0" y="0" width="60" height="60" fill="none"/><circle cx="30" cy="30" r="1.5" fill="%230a4d68"/><circle cx="0" cy="0" r="1.5" fill="%230a4d68"/><circle cx="60" cy="60" r="1.5" fill="%230a4d68"/><circle cx="60" cy="0" r="1.5" fill="%230a4d68"/><circle cx="0" cy="60" r="1.5" fill="%230a4d68"/></svg>');
-            background-repeat: repeat;
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 5rem 0;
         }
-        main, .main-header, .main-footer, .admin-login-float {
-            position: relative;
-            z-index: 1;
-        }
-        h1, h2, h3 { font-family: var(--font-heading); color: var(--primary-color); margin-top: 0; }
-        h2.section-title { text-align: center; font-size: 2.5rem; margin-bottom: 3rem; }
+        h1, h2, h3 { font-family: var(--font-heading); font-weight: 700; color: var(--primary-color); margin-top: 0; }
+        h2.section-title { text-align: center; font-size: 2.8rem; margin-bottom: 4rem; position: relative; }
+        h2.section-title::after { content: ''; display: block; width: 60px; height: 4px; background-color: var(--accent-color); margin: 0.5rem auto 0; border-radius: 2px; }
 
-        /* Header & Navigation */
-        .main-header { background-color: var(--white); padding: 1rem 0; border-bottom: 1px solid #e0e0e0; position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        /* --- Header & Navigation --- */
+        .main-header {
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+        .main-header.scrolled { box-shadow: var(--shadow-sm); }
         .header-content { display: flex; justify-content: space-between; align-items: center; width: 90%; max-width: 1200px; margin: 0 auto; }
-        .logo { font-family: var(--font-heading); font-size: 1.5rem; font-weight: 600; color: var(--primary-color); text-decoration: none; padding-bottom: 0.2em; /* Added padding to prevent text cutoff */ }
-        .main-nav a, .main-nav .nav-contact-btn { color: var(--dark-gray); text-decoration: none; margin-left: 2rem; font-weight: 700; position: relative; padding: 0.5rem 0; background: none; border: none; font-size: inherit; font-family: inherit; cursor: pointer; }
-        .main-nav a::after, .main-nav .nav-contact-btn::after { content: ''; position: absolute; bottom: 0; left: 0; width: 0; height: 2px; background-color: var(--accent-color); transition: width 0.3s ease; }
-        .main-nav a:hover::after, .main-nav .nav-contact-btn:hover::after { width: 100%; }
+        .logo img { height: 50px; object-fit: contain; vertical-align: middle; }
+        .logo span { font-family: var(--font-heading); font-size: 1.5rem; color: var(--primary-color); text-decoration: none; }
+        .main-nav { display: flex; align-items: center; }
+        .main-nav a { color: var(--dark-gray); text-decoration: none; margin-left: 2.5rem; font-weight: 700; position: relative; padding: 0.5rem 0; }
+        .main-nav a::after { content: ''; position: absolute; bottom: 0; left: 0; width: 0; height: 3px; background-color: var(--accent-color); transition: width 0.3s ease; }
+        .main-nav a:hover::after { width: 100%; }
+        .hamburger-menu { display: none; cursor: pointer; z-index: 1600; position: relative;}
+        .mobile-nav { display: none; }
 
-        /* Static Hero Banner */
+        /* --- Hero Section --- */
+        /* --- Enhanced Loading States --- */
+        .loading-spinner {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border: 4px solid var(--light-gray);
+            border-radius: 50%;
+            border-top-color: var(--primary-color);
+            animation: spin 1s ease-in-out infinite;
+            margin: 2rem auto;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .content-loading {
+            text-align: center;
+            padding: 2rem;
+            color: var(--dark-gray);
+        }
+        
+        /* --- Enhanced Hero Section --- */
         .hero-banner {
             position: relative;
             width: 100%;
-            height: 70vh;
-            max-height: 750px;
-            background-size: contain !important;
-            background-position: center !important;
-            background-repeat: no-repeat !important;
-            background-color: #eef2f3;
+            height: 100vh;
+            max-height: 900px;
+            overflow: hidden;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
             display: flex;
-            align-items: center;
+            align-items: center; 
             justify-content: center;
+            /* Add a subtle pattern for when image doesn't fill */
+            background-image: 
+                linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%),
+                radial-gradient(circle at 25% 25%, rgba(255,255,255,0.05) 0%, transparent 50%),
+                radial-gradient(circle at 75% 75%, rgba(255,255,255,0.03) 0%, transparent 50%);
         }
-        .hero-overlay {
+        
+        .hero-background {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: none;
-            display: flex; flex-direction: column;
-            justify-content: flex-start; /* Move text higher up */
-            align-items: center; text-align: center; color: var(--white);
-            padding: 1.5rem 1rem 0 1rem; /* Reduced top padding to move text higher */
+            background-size: contain;
+            background-position: center;
+            background-repeat: no-repeat;
+            opacity: 0;
+            transition: opacity 1s ease-in-out;
+            z-index: 1;
+            /* Ensure image is always fully visible */
+            background-color: rgba(10, 77, 104, 0.1);
         }
-        @media (max-width: 768px) {
-            .hero-overlay { padding: 1rem 0.5rem; } /* Also reduce on mobile */
+        
+        /* Fallback when no image is loaded */
+        .hero-background:not(.loaded) {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            opacity: 1;
         }
-        .hero-title-bg {
-            display: inline-block;
-            background: rgba(10, 77, 104, 0.65);
-            box-shadow: 0 4px 16px rgba(10,77,104,0.13);
-            border-radius: 0.6em;
-            padding: 0.18em 0.7em;
-            margin-bottom: 1.2rem;
-            margin-top: 0.5rem;
-            position: relative;
-            z-index: 2;
-            backdrop-filter: blur(2px);
+        
+        .hero-background.loaded {
+            opacity: 1;
+            /* Removed kenBurns animation as it doesn't work well with contain */
+            animation: gentleFade 8s infinite alternate ease-in-out;
         }
-        .hero-title-bg h1 {
-            margin: 0;
-            font-size: 3.5rem;
-            color: #fff;
-            text-shadow: 0 2px 16px rgba(10,77,104,0.25), 0 1px 3px rgba(0,0,0,0.4);
+        
+        .hero-background::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, rgba(10, 77, 104, 0.6), rgba(8, 131, 149, 0.4));
+            z-index: 1;
         }
-        .hero-title-bg p {
-            font-size: 1.2rem;
-            color: #f7f8fc;
-            margin: 0.4em 0 0 0;
-            text-shadow: 0 1px 6px rgba(10,77,104,0.18), 0 1px 3px rgba(0,0,0,0.3);
+        
+        @keyframes gentleFade {
+            0% { opacity: 1; }
+            100% { opacity: 0.95; }
         }
-        @media (max-width: 768px) {
-            .hero-overlay {
-                padding-top: 2.5rem;
-                padding-bottom: 0;
-            }
+        
+        @keyframes gentleFade {
+            0% { opacity: 1; }
+            100% { opacity: 0.95; }
         }
-        @media (max-width: 600px) {
-            .hero-overlay {
-                padding-top: 1.2rem;
-                padding-bottom: 0;
-            }
-        }
-
-        /* Call For a Free Quote Button Below Hero Banner */
-        .hero-call-btn-wrapper {
-            display: flex;
-            justify-content: center;
-            margin-top: -1.5rem;
-            margin-bottom: 2.5rem;
-            position: relative;
-            z-index: 20; /* Ensure button stays above hero banner and overlays */
-        }
-        .hero-call-btn-wrapper .btn-primary {
-            box-shadow: 0 4px 18px rgba(10,77,104,0.18);
-            font-size: 1.15rem;
-            padding: 1.1rem 2.2rem;
-        }
-        @media (max-width: 600px) {
-            .hero-call-btn-wrapper {
-                margin-top: -1.2rem;
-                margin-bottom: 1.5rem;
-            }
-            .hero-call-btn-wrapper .btn-primary {
-                font-size: 1rem;
-                padding: 0.9rem 1.2rem;
-            }
-        }
-
-        /* Image Slider Section */
-        #gallery-slider-section {
-            display: none; /* Hidden by default, shown by JS */
-            padding-top: 4rem;
-        }
-        .slider-container { 
+        
+        .hero-overlay { 
             position: relative; 
-            width: 100%; 
-            height: 80vh; /* Increased from 70vh */
-            max-height: 950px; /* Increased from 800px */
-            overflow: hidden; 
-            background-color: #e0e0e0; 
-            border-radius: 8px; 
-        }
-        .slider-track { display: flex; height: 100%; transition: transform 0.5s ease-in-out; }
-        .slide { flex: 0 0 100%; width: 100%; height: 100%; position: relative; }
-        .slide img { width: 100%; height: 100%; object-fit: cover; border-radius: 8px; }
-        .slider-arrow { position: absolute; top: 50%; transform: translateY(-50%); background-color: rgba(255, 255, 255, 0.7); border: none; border-radius: 50%; width: 50px; height: 50px; cursor: pointer; z-index: 10; font-size: 1.5rem; transition: background-color 0.2s; }
-        .slider-arrow:hover { background-color: var(--white); }
-        .slider-arrow.prev { left: 15px; }
-        .slider-arrow.next { right: 15px; }
-        .slider-dots { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); display: flex; gap: 10px; z-index: 10; }
-        .dot { width: 12px; height: 12px; border-radius: 50%; background-color: rgba(255, 255, 255, 0.5); cursor: pointer; transition: background-color 0.3s; }
-        .dot.active { background-color: var(--white); }
-
-        /* Admin Login Button */
-        .admin-login-float { position: fixed; bottom: 20px; right: 20px; z-index: 1001; }
-        .admin-login-float a { display: flex; align-items: center; justify-content: center; width: 50px; height: 50px; background-color: var(--primary-color); color: var(--white); border-radius: 50%; text-decoration: none; box-shadow: 0 4px 12px rgba(0,0,0,0.2); transition: transform 0.2s; }
-        .admin-login-float a:hover { transform: scale(1.1); }
-        
-        /* Other Sections... */
-        .btn { display: inline-block; padding: 1rem 2rem; border-radius: 5px; text-decoration: none; font-weight: 700; transition: transform 0.2s ease, box-shadow 0.2s ease; cursor: pointer; border: none; }
-        .btn-primary { background-color: var(--accent-color); color: var(--white); }
-        .btn-secondary { background-color: var(--secondary-color); color: var(--white); }
-        .btn:hover { transform: translateY(-3px); box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
-        #about { background-color: var(--light-gray); }
-        .about-content { text-align: center; max-width: 800px; margin: 0 auto; font-size: 1.1rem; }
-        .services-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; }
-        .service-card {
-            background-color: var(--white);
-            border: 1px solid #e0e0e0;
-            border-radius: 8px;
+            z-index: 2; 
+            text-align: center; 
+            color: var(--white); 
             padding: 2rem;
-            text-align: center;
-            transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s;
-            box-shadow: 0 2px 8px rgba(10,77,104,0.04);
-            min-height: 320px; /* Ensures enough space for icon, title, and text */
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: flex-start;
+            max-width: 800px;
+            animation: heroFadeIn 1.5s ease-out;
         }
-        .service-card:hover, .service-card:focus-within {
-            transform: translateY(-10px) scale(1.03);
-            box-shadow: 0 10px 24px rgba(10,77,104,0.10);
-            border-color: var(--accent-color);
-        }
-        .service-card:focus-within {
-            outline: 2px solid var(--accent-color);
-        }
-        .service-card .service-icon:focus {
-            outline: none;
-        }
-        .btn:focus, .main-nav a:focus {
-            outline: 2px solid var(--accent-color);
-            outline-offset: 2px;
-        }
-        #contact { background-color: var(--primary-color); color: var(--white); text-align: center; }
-        #contact h2 { color: var(--white); }
-        #contact p { font-size: 1.1rem; margin-bottom: 2rem; }
-        .main-footer { background-color: var(--dark-gray); color: var(--light-gray); text-align: center; padding: 2rem 1rem; }
         
-        /* Contact Section Custom Styles */
-        #contact .container {
-            background: linear-gradient(120deg, var(--primary-color) 60%, var(--secondary-color) 100%);
-            color: var(--white);
-            border-radius: 16px;
-            box-shadow: 0 4px 24px rgba(10,77,104,0.10);
-            padding: 3rem 2rem;
-            margin-bottom: 3rem;
+        @keyframes heroFadeIn {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
         }
-        #contact h2.section-title {
-            color: var(--accent-color);
-            margin-bottom: 1.5rem;
-        }
-        #contact ul {
-            color: var(--white);
-        }
-        #contact a { /* This applies to links within the contact section text, not necessarily form buttons */
-            color: var(--accent-color);
-            text-decoration: underline;
-        }
-
-        /* Styles for the new embedded contact form */
-        #contact .contact-form {
-            background: var(--white);
-            color: var(--primary-color);
-            border-radius: 10px;
-            box-shadow: 0 2px 12px rgba(10,77,104,0.08);
-            padding: 2rem 1.5rem;
-            width: 100%; /* Ensure it takes the width of its container */
-            box-sizing: border-box;
-        }
-        #contact .contact-form h3 {
-            text-align: center;
-            color: var(--primary-color);
-            font-family: var(--font-heading);
-            margin-top: 0;
-            margin-bottom: 1.5rem;
-            font-size: 1.8rem;
-        }
-        #contact .contact-form .form-group {
-            margin-bottom: 1rem;
-        }
-        #contact .contact-form label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-weight: 700;
-            color: var(--primary-color);
-        }
-        #contact .contact-form .field-element {
-            width: 100%;
-            padding: 0.75rem;
-            border: 1px solid #e0e0e0;
-            border-radius: 5px;
-            font-size: 1rem;
-            background: #f7f8fc;
-            color: var(--dark-gray);
-            box-sizing: border-box;
-            font-family: var(--font-body);
-        }
-        #contact .contact-form .field-element:focus {
-            border-color: var(--accent-color);
-            outline: none;
-            box-shadow: 0 0 0 2px rgba(245, 166, 35, 0.2); /* accent-color with alpha */
-        }
-        #contact .contact-form .form-actions {
-            margin-top: 1.5rem;
-            text-align: center;
-        }
-        #contact .contact-form .form-actions .btn {
-            width: auto; /* Auto width based on content and padding */
-            min-width: 200px; /* Minimum width for better appearance */
-            padding: 0.75rem 1.5rem; /* Slightly adjusted padding for form button */
-        }
-
-        /* Enhancements for contact section buttons for better visibility */
-        #contact .contact-details-column .btn-secondary { /* "Call Us Now" button */
-            background-color: var(--accent-color); /* Changed to orange for high contrast */
-            color: var(--white);
-            width: 100%; /* Moved from inline style */
-            max-width: 300px; /* Moved from inline style */
-            font-size: 1.1rem; /* Moved from inline style */
-            text-align: center; /* Moved from inline style */
-            /* display: inline-block; is inherited from .btn class */
-            /* padding is inherited from .btn or can be customized here if needed */
-        }
-
-        #contact .contact-details-column .btn-secondary:hover,
-        #contact .contact-form .form-actions .btn-primary:hover {
-            background-color: #e09110; /* Darker orange for hover */
-            box-shadow: 0 6px 18px rgba(0,0,0,0.25); /* Enhanced shadow on hover */
-            /* transform: translateY will be inherited from general .btn:hover */
-        }
-        /* Note: .btn-primary in the form already uses var(--accent-color) by default. */
         
-        @media (max-width: 900px) {
-            #contact .container { flex-direction: column; }
-            .contact-map-column { margin-top: 2rem; max-width: 100% !important; }
+        .hero-overlay h1 { 
+            font-size: clamp(2.5rem, 5vw, 4.5rem);
+            color: var(--white); 
+            text-shadow: 0 3px 20px rgba(0,0,0,0.7); 
+            margin-bottom: 1.5rem;
+            line-height: 1.1;
         }
-        @media (max-width: 600px) {
-            .contact-map-column { margin-top: 1.5rem; }
-        }        @media (max-width: 768px) {
-            .header-content { flex-direction: column; }
-            .main-nav { margin-top: 1rem; }
-            .main-nav a { margin-left: 1rem; margin-right: 1rem; }
-            .hero-overlay h1 { font-size: 2.5rem; }
-            .hero-overlay p { font-size: 1rem; }
-            .services-grid { grid-template-columns: 1fr; gap: 1.5rem; }
-            #contact .container { padding: 2rem 1rem; }
-            #contact .contact-form { padding: 1.5rem 1rem; }
-            .hero-overlay { padding: 2rem 0.5rem; }
+        
+        .hero-overlay p {
+            font-size: 1.25rem;
+            margin-bottom: 2rem;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+            opacity: 0.95;
         }
-        @media (max-width: 480px) {
-            .service-card { padding: 1.2rem 0.5rem; }
-            .hero-overlay h1 { font-size: 2rem; }
+        
+        /* --- Enhanced Gallery with Lazy Loading --- */
+        .gallery-container { 
+            position: relative; 
         }
-
-        .bubble-highlight {
-            background: rgba(255,255,255,0.72); /* White, more transparent */
-            color: #0a3570; /* Deep blue for contrast */
-            border-radius: 0.4em;
-            padding: 0.08em 0.3em;
-            box-decoration-break: clone;
-            -webkit-box-decoration-break: clone;
-            box-shadow: 0 2px 8px rgba(10,77,104,0.13);
-            display: inline;
-        }
-
-        .service-icon-img, .service-icon {
-            display: block;
-            margin: 0 auto 1rem auto;
-            width: 64px;
-            height: 64px;
-            max-width: 100%;
-            object-fit: contain;
-            border-radius: 8px;
-            background: #f7f8fc;
-            box-shadow: 0 1px 4px rgba(10,77,104,0.07);
-        }
-
-        /* Socials Section */
-        #socials-section {
+        
+        .gallery-loading {
+            text-align: center;
+            padding: 4rem 2rem;
             background: var(--light-gray);
-            padding: 4rem 0 3rem 0;
+            border-radius: 12px;
         }
-        #socials-section .container {
+        
+        .main-slider { 
+            background-color: var(--light-gray); 
+            border-radius: 12px; 
+            overflow: hidden;
+            position: relative;
+            min-height: 400px;
             display: flex;
-            flex-wrap: wrap;
-            gap: 2.5rem;
-            align-items: stretch;
-            justify-content: center;
-            padding-left: 3vw;
-            padding-right: 3vw;
-            max-width: 1200px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-        #socials-section .sections-row {
-            display: flex;
-            flex-direction: row;
-            align-items: stretch;
-            justify-content: center;
-            gap: 3rem;
-        }
-        @media (max-width: 1100px) {
-            #socials-section .sections-row {
-                flex-direction: column;
-                gap: 2.5rem;
-            }
-        }
-        .socials-col, .google-col {
-            flex: 1 1 0;
-            min-width: 340px;
-            max-width: 600px;
-            display: flex;
-            flex-direction: column;
-            align-items: stretch;
-        }
-        @media (max-width: 600px) {
-            .socials-col, .google-col {
-                min-width: 0;
-                max-width: 100%;
-            }
-        }
-        .fb-page-embed {
-            display: flex;
-            flex-direction: column;
             align-items: center;
-            justify-content: flex-start;
-        }
-        @media (max-width: 1100px) {
-            #socials-section .container {
-                flex-direction: column;
-                align-items: center;
-                padding-left: 4vw;
-                padding-right: 4vw;
-            }
-            .socials-info, .fb-page-embed {
-                max-width: 100%;
-            }
-        }
-        @media (max-width: 600px) {
-            #socials-section { padding: 2rem 0 1.5rem 0; }
-            #socials-section .container { padding-left: 2vw; padding-right: 2vw; }
-            .fb-page-embed { padding: 1rem 0.2rem; }
-        }
-        /* Google Reviews/Map container layout */
-        #socials-section .google-reviews-row {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 2rem;
-            align-items: stretch;
             justify-content: center;
         }
-        #socials-section .google-map-col, #socials-section .google-info-col {
-            flex: 1 1 380px;
-            min-width: 280px;
-            max-width: 500px;
+        
+        .main-slider img { 
+            width: 100%; 
+            height: 60vh; 
+            max-height: 500px;
+            object-fit: cover; 
+            cursor: pointer; 
+            transition: transform 0.3s ease, filter 0.3s ease;
+            opacity: 0;
+        }
+        
+        .main-slider img.loaded {
+            opacity: 1;
+            animation: imageLoad 0.5s ease-out;
+        }
+        
+        @keyframes imageLoad {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        
+        .main-slider img:hover { 
+            transform: scale(1.02); 
+            filter: brightness(1.1);
+        }
+        
+        .thumbnails { 
+            display: flex; 
+            justify-content: center; 
+            gap: 1rem; 
+            margin-top: 1.5rem; 
+            flex-wrap: wrap; 
+            padding: 0 1rem;
+        }
+        
+        .thumb { 
+            width: 100px; 
+            height: 70px; 
+            object-fit: cover; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            border: 3px solid transparent; 
+            transition: all 0.3s ease; 
+            opacity: 0.7;
+        }
+        
+        .thumb:hover { 
+            transform: scale(1.05); 
+            opacity: 1;
+        }
+        
+        .thumb.active { 
+            border-color: var(--accent-color);
+            opacity: 1;
+            transform: scale(1.05);
+        }
+        
+        /* --- Enhanced Services Section --- */
+        .services-grid { 
+            display: flex; 
+            flex-direction: column; 
+            gap: 4rem; 
+        }
+        
+        .service-group-card { 
+            display: grid; 
+            grid-template-columns: 1fr 1.2fr; 
+            gap: 3rem; 
+            align-items: center;
+            background: var(--white);
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: var(--shadow-md);
+            transition: all 0.3s ease;
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+        
+        .service-group-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .service-group-card:nth-child(even) { 
+            grid-template-columns: 1.2fr 1fr; 
+        }
+        
+        .service-group-card:nth-child(even) .service-image-container { 
+            grid-column: 2; 
+            grid-row: 1; 
+        }
+        
+        .service-image-container { 
+            width: 100%; 
+            aspect-ratio: 4/3; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            background: linear-gradient(135deg, var(--light-gray) 0%, #e9ecef 100%);
+            border-radius: 12px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .service-image { 
+            width: 100%; 
+            height: 100%; 
+            object-fit: cover; 
+            border-radius: 12px;
+            transition: transform 0.3s ease;
+        }
+        
+        .service-image-container:hover .service-image {
+            transform: scale(1.05);
+        }
+        
+        .service-icon { 
+            stroke-width: 1.5; 
+            color: var(--primary-color); 
+            width: 80px; 
+            height: 80px;
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.1));
+        }
+        
+        .service-details h3 { 
+            font-size: 2.2rem; 
+            margin-bottom: 1rem;
+            color: var(--primary-color);
+        }
+        
+        .service-details p {
+            font-size: 1.1rem;
+            line-height: 1.7;
+            margin-bottom: 1.5rem;
+            color: var(--dark-gray);
+        }
+        
+        .service-details ul { 
+            list-style: none; 
+            padding-left: 0; 
             margin-bottom: 2rem;
         }
-        #socials-section .google-info-col {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-start;
-            justify-content: flex-start;
+        
+        .service-details li { 
+            padding: 0.5rem 0 0.5rem 2rem; 
+            position: relative; 
+            margin-bottom: 0.5rem;
+            font-size: 1.05rem;
+            transition: all 0.2s ease;
         }
-        @media (max-width: 1100px) {
-            #socials-section .google-reviews-row {
-                flex-direction: column;
-                align-items: center;
+        
+        .service-details li:hover {
+            color: var(--primary-color);
+            transform: translateX(5px);
+        }
+        
+        .service-details li::before { 
+            content: '✓'; 
+            color: var(--accent-color); 
+            position: absolute; 
+            left: 0; 
+            font-weight: 700;
+            font-size: 1.2rem;
+            top: 0.4rem;
+        }
+        
+        /* --- Enhanced Contact Section --- */
+        .contact-layout { 
+            display: grid; 
+            grid-template-columns: 1fr 1.2fr; 
+            gap: 4rem; 
+            align-items: start;
+        }
+        
+        .contact-details {
+            background: var(--white);
+            padding: 2.5rem;
+            border-radius: 16px;
+            box-shadow: var(--shadow-md);
+            height: fit-content;
+        }
+        
+        .contact-form-wrapper {
+            background: var(--white);
+            padding: 2.5rem;
+            border-radius: 16px;
+            box-shadow: var(--shadow-md);
+        }
+        
+        .form-group { 
+            margin-bottom: 1.5rem; 
+            position: relative; 
+        }
+        
+        .field-element { 
+            width: 100%; 
+            padding: 1.2rem; 
+            border: 2px solid #e9ecef; 
+            border-radius: 12px; 
+            font-size: 1rem; 
+            transition: all 0.3s ease;
+            background: #fafbfc;
+        }
+        
+        .field-element:focus { 
+            border-color: var(--accent-color); 
+            outline: none; 
+            box-shadow: 0 0 0 3px rgba(245, 166, 35, 0.15);
+            background: var(--white);
+            transform: translateY(-2px);
+        }
+        
+        .field-element:valid {
+            border-color: var(--success-color);
+        }
+          /* --- Enhanced Footer --- */
+        .main-footer {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--dark-gray) 100%);
+            color: var(--white);
+            text-align: center;
+            padding: 3rem 2rem 2rem;
+            margin-top: 5rem;
+        }
+        
+        .main-footer p {
+            margin: 0.5rem 0;
+            opacity: 0.9;
+        }
+        
+        .main-footer a {
+            color: var(--accent-color);
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        
+        .main-footer a:hover {
+            color: var(--white);
+            text-decoration: underline;
+        }
+        
+        /* --- Enhanced Admin Float Button --- */
+        .admin-login-float { 
+            position: fixed; 
+            bottom: 20px; 
+            right: 20px; 
+            z-index: 1001; 
+        }
+        
+        .admin-login-float a { 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            width: 60px; 
+            height: 60px; 
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: var(--white); 
+            border-radius: 50%; 
+            text-decoration: none; 
+            box-shadow: 0 4px 20px rgba(10, 77, 104, 0.3);
+            transition: all 0.3s ease;
+            border: 3px solid var(--white);
+        }
+        
+        .admin-login-float a:hover { 
+            transform: scale(1.1) translateY(-2px); 
+            box-shadow: 0 8px 30px rgba(10, 77, 104, 0.4);
+        }
+        
+        /* --- Error States --- */
+        .error-state {
+            text-align: center;
+            padding: 3rem 2rem;
+            color: var(--danger-color);
+            background: #fef2f2;
+            border-radius: 12px;
+            margin: 2rem 0;
+        }
+        
+        .error-state h3 {
+            color: var(--danger-color);
+            margin-bottom: 1rem;
+        }
+        
+        .btn { display: inline-block; padding: 1rem 2.5rem; border-radius: 50px; text-decoration: none; font-weight: 700; transition: all 0.3s ease; cursor: pointer; border: none; font-family: var(--font-heading); }
+        .btn-primary { background: var(--accent-color); color: var(--dark-gray); box-shadow: var(--shadow-md); }
+        .btn-primary:hover { background: #ffb93a; transform: translateY(-3px) scale(1.05); box-shadow: var(--shadow-lg); }
+        
+        /* --- General Sections Styling --- */
+        .section-light { background-color: var(--white); }
+        .section-dark { background-color: var(--light-gray); }
+
+        /* --- About & Why Choose Us Section --- */
+        .about-content { text-align: center; max-width: 800px; margin: 0 auto; }
+        .about-content p { font-size: 1.1rem; line-height: 1.8; }
+        .trust-badges { display: flex; justify-content: space-around; text-align: center; flex-wrap: wrap; gap: 2rem; margin-bottom: 4rem; }
+        .badge { flex: 1; min-width: 150px; }
+        .badge-icon { font-size: 2.5rem; color: var(--secondary-color); margin-bottom: 0.5rem; }
+        .badge h4 { margin: 0; color: var(--primary-color); }
+
+        /* --- Services Section --- */
+        .services-grid { display: flex; flex-direction: column; gap: 5rem; }
+        .service-group-card { display: grid; grid-template-columns: 1fr 1.1fr; gap: 3rem; align-items: center; }
+        .service-group-card:nth-child(even) { grid-template-columns: 1.1fr 1fr; }
+        .service-group-card:nth-child(even) .service-image-container { grid-column: 2; grid-row: 1; }
+        .service-image-container { width: 100%; aspect-ratio: 4/3; display:flex; align-items:center; justify-content:center; background-color: #f0f2f5; border-radius: 12px; }
+        .service-image { width: 100%; height: 100%; object-fit: cover; border-radius: 12px; }
+        .service-icon { stroke-width: 1.5; color: var(--secondary-color); width: 80px; height: 80px; }
+        .service-details h3 { font-size: 2rem; }
+        .service-details ul { list-style: none; padding-left: 0; }
+        .service-details li { padding-left: 1.5rem; position: relative; margin-bottom: 0.5rem; }
+        .service-details li::before { content: '✓'; color: var(--accent-color); position: absolute; left: 0; font-weight: 700; }
+        .btn-modal { margin-top: 1.5rem; padding: 0.8rem 1.8rem; background-color: var(--secondary-color); }
+        
+        /* --- Gallery Section --- */
+        .gallery-container { position: relative; }
+        .main-slider { background-color: var(--light-gray); border-radius: 12px; overflow: hidden; }
+        .main-slider img { width: 100%; height: 60vh; object-fit: cover; cursor: pointer; transition: transform 0.3s ease;}
+        .main-slider img:hover { transform: scale(1.02); }
+        .thumbnails { display: flex; justify-content: center; gap: 1rem; margin-top: 1.5rem; flex-wrap: wrap; }
+        .thumb { width: 100px; height: 70px; object-fit: cover; border-radius: 6px; cursor: pointer; border: 3px solid transparent; transition: border-color 0.3s, transform 0.3s; }
+        .thumb:hover { transform: scale(1.05); }
+        .thumb.active { border-color: var(--accent-color); }
+
+        /* --- Social & Contact --- */
+        .contact-layout { display: grid; grid-template-columns: 1fr 1.2fr; gap: 3rem; }
+        .form-group { margin-bottom: 1.5rem; position: relative; }
+        .field-element { width: 100%; padding: 1rem; border: 1px solid #ccc; border-radius: 8px; font-size: 1rem; transition: border-color 0.2s, box-shadow 0.2s; }
+        .field-element:focus { border-color: var(--accent-color); outline: none; box-shadow: 0 0 0 3px rgba(245, 166, 35, 0.25); }
+        .field-element.valid { border-color: var(--success-color); }
+        .field-element.invalid { border-color: var(--danger-color); }
+        .invalid-feedback { color: var(--danger-color); font-size: 0.875rem; margin-top: 0.25rem; display: block; }
+        .validation-icon { position: absolute; right: 1rem; top: 50%; transform: translateY(-50%); opacity: 0; transition: opacity 0.3s; font-size: 1.2rem; }
+        .field-element.valid + .validation-icon.valid-icon,
+        .field-element.invalid + .validation-icon.invalid-icon { opacity: 1; }
+        .alert { padding: 0.75rem 1rem; border-radius: 0.375rem; margin-top: 1rem; }
+        .alert-danger { background-color: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; }
+        .alert-success { background-color: #d1e7dd; border: 1px solid #badbcc; color: #0f5132; }
+        .btn-spinner { display: inline-flex; align-items: center; }
+
+        #socials { padding-top: 5rem; }
+        .socials-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: start;}
+        .social-card { background: var(--white); padding: 2.5rem; border-radius: 12px; box-shadow: var(--shadow-md); }
+        .social-card h3 { margin-top: 0; }
+        .fb-page { width: 100%; }
+        .google-map-container { position: relative; padding-bottom: 75%; height: 0; overflow: hidden; border-radius: 8px;}
+        .google-map-container iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0; }
+
+        /* --- Modals and Lightboxes --- */
+        .modal, .lightbox {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85); display: flex; align-items: center; justify-content: center;
+            z-index: 2000; opacity: 0; pointer-events: none; transition: opacity 0.3s ease;
+        }
+        .modal.active, .lightbox.active { opacity: 1; pointer-events: all; }
+        .modal-content, .lightbox-content { background: var(--white); padding: 3rem; border-radius: 12px; max-width: 600px; width: 90%; position: relative; transform: scale(0.9); transition: transform 0.3s ease; }
+        .modal.active .modal-content, .lightbox.active .lightbox-content { transform: scale(1); }
+        .close-btn { position: absolute; top: 1rem; right: 1.5rem; font-size: 2.5rem; cursor: pointer; border: none; background: none; color: #aaa; line-height: 1; z-index: 2001;}
+        .lightbox .close-btn { color: var(--white); }
+        .lightbox-content { background: none; padding: 0; max-width: 90vw; max-height: 90vh; }
+        .lightbox-content img { width: 100%; height: 100%; object-fit: contain; box-shadow: 0 0 40px rgba(0,0,0,0.5);}
+        .lightbox-nav { position: absolute; top: 50%; transform: translateY(-50%); font-size: 3rem; color: white; background: rgba(0,0,0,0.3); border: none; cursor: pointer; padding: 0 1rem; border-radius: 8px; transition: background 0.3s; }
+        .lightbox-nav:hover { background: rgba(0,0,0,0.5); }
+        .lightbox-prev { left: 1rem; }
+        .lightbox-next { right: 1rem; }
+
+        /* --- Animations & Utilities --- */
+        .reveal-on-scroll { opacity: 0; transform: translateY(30px); transition: opacity 0.6s ease-out, transform 0.6s ease-out; }
+        .reveal-on-scroll.is-visible { opacity: 1; transform: translateY(0); }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* --- Responsive Adjustments --- */
+        @media (max-width: 992px) {
+            .contact-layout, .socials-layout, .service-group-card, .service-group-card:nth-child(even) { grid-template-columns: 1fr; }
+            .service-group-card:nth-child(even) .service-image-container { grid-column: 1; }
+        }
+        @media (max-width: 768px) {
+            .main-nav { display: none; }
+            .hamburger-menu { display: block; }
+            .mobile-nav {
+                display: flex; flex-direction: column; align-items: center; justify-content: center;
+                position: fixed; top: 0; left: -100%; width: 100%; height: 100%;
+                background: rgba(10, 77, 104, 0.98);
+                backdrop-filter: blur(5px);
+                transition: left 0.4s ease;
+                z-index: 1500;
             }
-            #socials-section .google-map-col, #socials-section .google-info-col {
-                max-width: 100%;
+            .mobile-nav.active { left: 0; }
+            .mobile-nav a { color: var(--white); font-size: 2rem; margin: 1.5rem 0; }
+            .close-mobile-nav { position: absolute; top: 2rem; right: 2rem; font-size: 3rem; color: var(--white);}
+            .hero-overlay h1 { font-size: 2.5rem; }
+            h2.section-title { font-size: 2.2rem; }
+            
+            /* Mobile hero banner adjustments */
+            .hero-banner {
+                height: 80vh;
+                max-height: 600px;
+            }
+            
+            .hero-background {
+                /* On mobile, prioritize fitting to width */
+                background-size: contain;
+            }
+            
+            .socials-layout {
+                grid-template-columns: 1fr;
+                gap: 2rem;
             }
         }
+        .admin-login-float { position: fixed; bottom: 20px; right: 20px; z-index: 1001; }
+        .admin-login-float a { display: flex; align-items: center; justify-content: center; width: 50px; height: 50px; background-color: var(--primary-color); color: var(--white); border-radius: 50%; text-decoration: none; box-shadow: var(--shadow-md); transition: transform 0.2s; }
+        .admin-login-float a:hover { transform: scale(1.1); }
     </style>
 </head>
 <body>
-    <header class="main-header">
+    <header class="main-header" id="main-header">
         <div class="header-content">
-            <a href="" class="logo" id="site-logo-link"><img id="site-logo-img" src="" alt="Company Logo" style="height:2.2em;vertical-align:middle;display:none;max-width:180px;max-height:60px;"> <span id="site-logo-text">Cusumano Home Improvements</span></a>
+            <a href="/" class="logo">
+                <img id="site-logo-img" src="" alt="Company Logo" style="display: none;">
+                <span id="site-logo-text">Cusumano Home Improvements</span>
+            </a>
             <nav class="main-nav">
                 <a href="#about">About</a>
                 <a href="#services">Services</a>
+                <a href="#gallery">Our Work</a>
                 <a href="#contact">Contact</a>
-                <a href="#socials-section">Socials</a>
-                <a href="#google-reviews" id="nav-reviews-link">Reviews</a>
             </nav>
+            <div class="hamburger-menu" aria-label="Open menu" tabindex="0">
+                <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+            </div>
         </div>
     </header>
 
+    <nav class="mobile-nav" aria-label="Mobile menu">
+        <button class="close-btn close-mobile-nav" aria-label="Close menu">&times;</button>
+        <a href="#about">About</a>
+        <a href="#services">Services</a>
+        <a href="#gallery">Our Work</a>
+        <a href="#contact">Contact</a>
+    </nav>
+
     <main>
-        <section class="hero-banner" id="hero-banner">
+        <section class="hero-banner">
+            <div class="hero-background" id="hero-banner-bg" role="img" aria-label="Home improvements hero background"></div>
             <div class="hero-overlay">
-                <div class="hero-title-bg" style="background:none;box-shadow:none;padding:0;margin:0;">
-                    <h1><span class="bubble-highlight">Transform Your Space</span></h1>
-                    <p><span class="bubble-highlight">Quality construction and home improvement services in Monroe, MI</span></p>
+                <h1 id="hero-headline">Quality You Can Stand On</h1>
+                <p id="hero-subtitle">Professional home improvement services in Monroe, MI with over 20 years of experience</p>
+                <a href="#contact" id="hero-cta-button" class="btn btn-primary">Get a Free Quote</a>
+            </div>
+        </section>
+
+        <section id="about" class="container section-light">
+             <div class="about-content reveal-on-scroll">
+                <h2 class="section-title">20+ Years of Quality Craftsmanship in Monroe</h2>
+                <div id="about-content-text">
+                    <div class="content-loading">
+                        <div class="loading-spinner"></div>
+                        <p>Loading content...</p>
+                    </div>
                 </div>
             </div>
         </section>
-        <div class="hero-call-btn-wrapper">
-            <a href="tel:734-777-8158" class="btn btn-primary">Call For a Free Quote</a>
-        </div>
 
-        <section id="gallery-slider-section" class="container">
+        <section id="why-us-section" class="section-dark">
+            <div class="container">
+                <h2 class="section-title">Why Choose Us?</h2>
+                <div class="trust-badges">
+                    <div class="badge reveal-on-scroll"><div class="badge-icon" aria-hidden="true">⭐</div><h4>20+ Years Experience</h4></div>
+                    <div class="badge reveal-on-scroll"><div class="badge-icon" aria-hidden="true">👨‍👩‍👧‍👦</div><h4>Family Owned & Operated</h4></div>
+                    <div class="badge reveal-on-scroll"><div class="badge-icon" aria-hidden="true">✅</div><h4>Licensed & Insured</h4></div>
+                    <div class="badge reveal-on-scroll"><div class="badge-icon" aria-hidden="true">📋</div><h4>Free Estimates</h4></div>
+                </div>
+            </div>
+        </section>
+
+        <section id="services" class="container section-light">
+            <h2 class="section-title">Our Services</h2>
+            <div class="services-grid" id="services-grid"></div>
+        </section>
+
+        <section id="gallery" class="container section-dark">
             <h2 class="section-title">Our Work</h2>
-            <div class="slider-container">
-                <div class="slider-track">
-                    <!-- Slides will be dynamically inserted here by JavaScript -->
+            <div class="gallery-container" id="gallery-container">
+                <div class="gallery-loading">
+                    <div class="loading-spinner"></div>
+                    <p>Loading our latest projects...</p>
                 </div>
-                <button class="slider-arrow prev" id="prevBtn">&#10094;</button>
-                <button class="slider-arrow next" id="nextBtn">&#10095;</button>
-                <div class="slider-dots" id="dots-container"></div>
+                <div class="main-slider" id="main-slider" style="display: none;"></div>
+                <div class="thumbnails" id="thumbnails"></div>
             </div>
         </section>
-
-        <section id="about"><div class="container"><h2 class="section-title">About Our Company</h2><div class="about-content" id="about-content"><!-- About text will be loaded here --></div></div></section>
-        <section id="services"><div class="container"><h2 class="section-title">Our Services</h2><div class="services-grid" id="services-grid"><!-- Services will be loaded here --></div></div></section>
-        <section id="contact"><div class="container">
-            <h2 class="section-title">Ready to Start Your Project?</h2>
-            <p id="contact-intro"><!-- Contact intro will be loaded here --></p>
-            <div style="display: flex; flex-wrap: wrap; gap: 2.5rem; align-items: flex-start; justify-content: space-between;">
-                <div style="flex:1 1 300px; min-width:280px; max-width:400px;" class="contact-details-column" id="contact-details-column"><!-- Contact details will be loaded here --></div>
-                <div style="flex:2 1 400px; min-width:300px; max-width:550px;">
-                    <form action="https://formsubmit.co/copernan@yahoo.com" method="POST" class="contact-form">
+        
+        <section id="contact" class="container section-light">
+            <h2 class="section-title">Contact & Find Us</h2>
+            <div class="contact-layout">
+                <div class="contact-details">
+                    <h3>Get In Touch</h3>
+                    <div id="contact-intro"><p>Ready to start your next project? Contact us today for a free, no-obligation quote. We're here to help bring your vision to life.</p></div>
+                    <div id="contact-details-column"></div>
+                </div>
+                <div class="contact-form-wrapper">
+                     <form id="contact-form" action="https://formsubmit.co/copernan@yahoo.com" method="POST" novalidate>
                         <h3>Send us a Message</h3>
                         <div class="form-group">
-                            <label for="contact-name">Full Name</label>
-                            <input type="text" id="contact-name" name="name" required class="field-element">
+                            <input type="text" id="form-name" name="name" required class="field-element" placeholder="Full Name" minlength="2">
+                            <div class="invalid-feedback"></div>
                         </div>
                         <div class="form-group">
-                            <label for="contact-email">Email Address</label>
-                            <input type="email" id="contact-email" name="email" required class="field-element">
+                            <input type="email" id="form-email" name="email" required class="field-element" placeholder="Email Address" aria-label="Email">
+                            <span class="validation-icon valid-icon" style="color:var(--success-color);">✓</span>
+                            <span class="validation-icon invalid-icon" style="color:var(--danger-color);">✗</span>
+                            <div class="invalid-feedback"></div>
                         </div>
                         <div class="form-group">
-                            <label for="contact-phone">Phone Number (Optional)</label>
-                            <input type="tel" id="contact-phone" name="phone" class="field-element">
+                            <input type="tel" id="form-phone" name="phone" class="field-element" placeholder="Phone Number (Optional)">
+                            <div class="invalid-feedback"></div>
                         </div>
                         <div class="form-group">
-                            <label for="contact-message">How can we help you?</label>
-                            <textarea id="contact-message" name="message" required class="field-element" rows="5"></textarea>
+                            <textarea id="form-message" name="message" required class="field-element" rows="5" placeholder="How can we help?" minlength="10"></textarea>
+                            <div class="invalid-feedback"></div>
                         </div>
                         <div class="form-actions">
-                            <button type="submit" class="btn btn-primary">Send Message</button>
+                            <button type="submit" class="btn btn-primary">
+                                <span class="btn-text">Send Message</span>
+                                <span class="btn-spinner" style="display: none;">
+                                    <span class="loading-spinner"></span> Sending...
+                                </span>
+                            </button>
                         </div>
+                        <div class="form-status" style="display: none;"></div>
                     </form>
                 </div>
-                <div style="flex:1 1 300px; min-width:280px; max-width:400px; display: block;" class="contact-map-column">
-                    <div style="border-radius:12px; overflow:hidden; box-shadow:0 2px 16px rgba(10,77,104,0.10); margin-bottom:1rem;">
-                        <iframe title="Monroe Michigan Map" width="100%" height="260" frameborder="0" style="border:0; min-width:220px; min-height:180px;" allowfullscreen loading="lazy"
-                            src="https://www.openstreetmap.org/export/embed.html?bbox=-83.442%2C41.887%2C-83.322%2C41.963&amp;layer=mapnik&amp;marker=41.916%2C-83.397"></iframe>
-                    </div>
-                    <div style="font-size:0.95rem; color:#e0e0e0; text-align:center;">Monroe, Michigan and surrounding areas highlighted.</div>
-                </div>
             </div>
-        </div></section>
+        </section>
 
-        <section id="socials-section">
-            <div class="sections-row">
-                <div class="socials-col">
-                    <div class="container" style="background:none;box-shadow:none;padding-top:0;padding-bottom:0;">
-                        <div class="socials-info">
-                            <h2>Connect With Us on Facebook</h2>
-                            <p>See our latest projects, updates, and customer reviews. Like and follow us to stay up to date with Cusumano Home Improvements!</p>
-                            <div class="fb-like-follow">
-                                <!-- Facebook Like/Follow Button -->
-                                <div class="fb-like" data-href="https://www.facebook.com/cusumanocement/" data-width="" data-layout="button_count" data-action="like" data-size="large" data-share="true"></div>
-                                <div class="fb-follow" data-href="https://www.facebook.com/cusumanocement/" data-width="" data-layout="button" data-size="large" data-show-faces="true"></div>
-                            </div>
-                        </div>
-                        <div class="fb-page-embed">
-                            <!-- Facebook Page Plugin Embed -->
-                            <div class="fb-page" data-href="https://www.facebook.com/cusumanocement/" data-tabs="timeline" data-width="500" data-height="500" data-small-header="false" data-adapt-container-width="true" data-hide-cover="false" data-show-facepile="true">
-                                <blockquote cite="https://www.facebook.com/cusumanocement/" class="fb-xfbml-parse-ignore">
-                                    <a href="https://www.facebook.com/cusumanocement/">Cusumano Cement & Home Improvements</a>
-                                </blockquote>
-                            </div>
-                        </div>
+        <section id="socials" class="section-dark">
+            <div class="container">
+                <h2 class="section-title">Follow Us on Social Media</h2>
+                <div class="socials-layout">
+                    <div class="social-card reveal-on-scroll">
+                        <h3>Facebook</h3>
+                        <p>See our latest projects, updates, and connect with our community.</p>
+                        <div id="facebook-embed-container"></div>
                     </div>
-                </div>
-                <div class="google-col">
-                    <div class="container" style="background:none;box-shadow:none;padding-top:0;padding-bottom:0;">
-                        <h2 style="color:var(--primary-color);font-size:2rem;margin-bottom:1rem;text-align:left;">Find Us on Google</h2>
-                        <div id="google-reviews"></div>
-                        <div class="google-reviews-row">
-                            <div class="google-map-col">                                <!-- Google Maps Embed for Cusumano Home Improvements -->
-                                <iframe
-                                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2972.123!2d-83.397!3d41.916!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zNDHCsDU0JzU3LjYiTiA4M8KwMjMnNDkuMiJX!5e0!3m2!1sen!2sus!4v1640000000000!5m2!1sen!2sus"
-                                    width="100%" height="350" style="border:0;border-radius:12px;box-shadow:0 2px 16px rgba(10,77,104,0.08);" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"
-                                    title="Cusumano Home Improvements on Google Maps"></iframe>
-                                <div style="font-size:1rem;color:#555;margin-top:0.5rem;">
-                                    <a href="https://maps.app.goo.gl/9KLJL3iSrCpxzbvU6" target="_blank" rel="noopener" style="color:var(--accent-color);text-decoration:underline;">
-                                        View on Google Maps &amp; See Reviews
-                                    </a>
-                                </div>
-                            </div>
-                            <div class="google-info-col">
-                                <div style="background:#fff;border-radius:10px;box-shadow:0 2px 12px rgba(10,77,104,0.08);padding:1.2rem 1rem;margin-bottom:1rem;">
-                                    <h3 style="margin:0 0 0.5rem 0;color:var(--primary-color);font-size:1.2rem;">Cusumano Home Improvements</h3>
-                                    <div style="color:#666;font-size:1rem;margin-bottom:0.5rem;">Monroe, MI</div>
-                                    <div style="margin-bottom:0.5rem;">
-                                        <span style="color:#f5a623;font-size:1.2rem;">&#9733;&#9733;&#9733;&#9733;&#9733;</span>
-                                        <span style="color:#666;font-size:0.95rem;">Google Reviews</span>
-                                    </div>
-                                    <a href="https://maps.app.goo.gl/9KLJL3iSrCpxzbvU6" target="_blank" rel="noopener" class="btn btn-primary" style="padding:0.6rem 1.2rem;font-size:1rem;margin-top:0.5rem;">Read Our Reviews</a>
-                                </div>
-                                <div style="font-size:0.95rem;color:#888;">
-                                    <em>Want to leave a review? <a href="https://g.page/r/CQw6vQn6vQw6EB0/review" target="_blank" rel="noopener" style="color:var(--accent-color);">Click here</a>.</em>
-                                </div>
-                            </div>
-                        </div>
+                    <div class="social-card reveal-on-scroll">
+                         <h3>Our Location</h3>
+                         <p>We proudly serve Monroe, Michigan, and the surrounding areas.</p>
+                         <div class="google-map-container" id="google-map-container"></div>
                     </div>
                 </div>
             </div>
         </section>
+
     </main>
 
-    <footer class="main-footer">
-        <p>&copy; 2025 Cusumano Home Improvements. All Rights Reserved.</p>
-        <p>Monroe, MI</p>
-        <p><a href="tel:734-777-8158" style="color: var(--light-gray);">734-777-8158</a> | <a href="mailto:copernan@yahoo.com" style="color: var(--light-gray);">copernan@yahoo.com</a></p>
-    </footer>
+    <footer class="main-footer" id="main-footer"></footer>
 
     <div class="admin-login-float">
-        <a href="admin.html" title="Admin Login">
-            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h7"/><polyline points="15 12 19 12 19 8 15 8 15 12"/><path d="M17 16v-4h-2V8a3 3 0 0 1 3-3h0a3 3 0 0 1 3 3v4h-2v4Z"/></svg>
-        </a>
-    </div>    <!-- Facebook SDK for JavaScript -->
-    <div id="fb-root"></div>
-    <script async defer crossorigin="anonymous" src="https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v19.0" nonce="cusumano" onload="window.fbAsyncInit = function() { /* Facebook loaded */ }" onerror="console.warn('Facebook SDK failed to load')"></script>    <script type="module">
-        // Suppress some third-party console errors
-        const originalConsoleError = console.error;
-        console.error = function(...args) {
-            const message = args.join(' ');
-            // Filter out known third-party errors that don't affect functionality
-            if (message.includes('Could not find element') || 
-                message.includes('DataStore.get: namespace is required') ||
-                message.includes('Search endpoint requested') ||
-                message.includes('DOMSubtreeModified')) {
-                return; // Don't log these
-            }
-            originalConsoleError.apply(console, args);
-        };
+        <a href="admin.html" title="Admin Login" aria-label="Admin Login"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 15v-4H7v-2h4V7h2v4h4v2h-4v4h-2z"/></svg></a>
+    </div>
 
-        // --- Firebase Imports ---
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-app.js";
-        import { getFirestore, collection, onSnapshot, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-firestore.js";
+    <div class="modal" id="service-modal"><div class="modal-content"><button class="close-btn">&times;</button><div id="modal-body"></div></div></div>
+    <div class="lightbox" id="gallery-lightbox"><button class="close-btn" aria-label="Close">&times;</button><button class="lightbox-nav lightbox-prev" aria-label="Previous">&#10094;</button><div class="lightbox-content"><img src="" alt="Gallery image"></div><button class="lightbox-nav lightbox-next" aria-label="Next">&#10095;</button></div>
+    
+    <div id="fb-root"></div>
+    <script async defer crossorigin="anonymous" src="https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v19.0" nonce="RANDOM_NONCE"></script>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+        import { getFirestore, doc, getDoc, getDocs, collection } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
         
-        // --- Your Firebase Configuration ---
-        // IMPORTANT: Ensure your Firebase Firestore security rules are properly configured to protect your data.
         const firebaseConfig = {
             apiKey: "AIzaSyBVtq6dAEuybJNmTTv8dXBxTVUgw1t0ZMk",
             authDomain: "cusumano-website.firebaseapp.com",
+            databaseURL: "https://cusumano-website-default-rtdb.firebaseio.com",
             projectId: "cusumano-website",
-            storageBucket: "cusumano-website.firebasestorage.app",
+            storageBucket: "cusumano-website.appspot.com",
             messagingSenderId: "20051552210",
             appId: "1:20051552210:web:7eb3b22baa3fec184e4a0b"
         };
-        // ----------------------------------------------------
+        
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const iconMap = {
+            home: `<svg class="service-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>`,
+            tool: `<svg class="service-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14.7 6.3a1 1 0 0 0-1.4 0l-1.3 1.3a1 1 0 0 0 0 1.4l1.3 1.3a1 1 0 0 0 1.4 0l1.3-1.3a1 1 0 0 0 0-1.4l-1.3-1.3z"></path><path d="M19.4 15.4a7 7 0 1 1-9.9-9.9"></path></svg>`,
+            truck: `<svg class="service-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="3" width="15" height="13"></rect><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon><circle cx="5.5" cy="18.5" r="2.5"></circle><circle cx="18.5" cy="18.5" r="2.5"></circle></svg>`,
+            hammer: `<svg class="service-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 21.5 2 22l.5-5.5L17 3z"></path></svg>`,
+            wrench: `<svg class="service-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14.7 6.3a1 1 0 0 0-1.4 0l-1.3 1.3a1 1 0 0 0 0 1.4l1.3 1.3a1 1 0 0 0 1.4 0l1.3-1.3a1 1 0 0 0 0-1.4l-1.3-1.3zM19.4 15.4a7.4 7.4 0 0 1-10.5 0L2.2 8.7a1 1 0 0 1 0-1.4l1.4-1.4a1 1 0 0 1 1.4 0l6.7 6.7"></path></svg>`,
+            paint: `<svg class="service-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 3h-3v4h4V3z"></path><path d="M12 3v4"></path><path d="M8 3v4"></path></svg>`,
+            saw: `<svg class="service-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21.1,12.3l-6.8,6.8c-0.8,0.8-2.1,0.8-2.8,0l-5.7-5.7c-0.8-0.8-0.8-2.1,0-2.8l6.8-6.8c0.8-0.8,2.1-0.8,2.8,0l5.7,5.7 C21.9,10.2,21.9,11.5,21.1,12.3z"></path><line x1="17" y1="7" x2="15" y2="9"></line></svg>`,
+            shield: `<svg class="service-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>`,
+        };
+        let siteDataCache = null;
+        let galleryImages = [];
 
-        let app, db;
-        try {
-            app = initializeApp(firebaseConfig);
-            db = getFirestore(app);
-        } catch (error) {
-            console.error("Firebase initialization failed. Please check your config.", error);
+        const defaultSiteData = {
+            heroHeadline: "Quality You Can Stand On",
+            heroCtaText: "Get a Free Quote",
+            heroSubtitle: "Professional home improvement services in Monroe, MI with over 20 years of experience",
+            about: "For over 20 years, Cusumano Home Improvements has been a family-owned and operated business proudly serving the Monroe, MI area. We are dedicated to delivering the highest quality of work, specializing in residential construction and convenient dumpster rentals. Our commitment is to our craft and, most importantly, to our customers' satisfaction.",
+            // Remove fake testimonials - will be replaced with real Google Reviews
+            googleReviews: [], // Will be populated with real reviews
+            serviceGroups: [
+                { 
+                    id: "sg1", 
+                    title: "Exterior & Construction", 
+                    description: "Transform your home's exterior with our comprehensive construction services.",
+                    services: "Garages\nDecks\nRoofing\nSiding\nAdditions\nNew Construction", 
+                    icon: "home" 
+                },
+                { 
+                    id: "sg2", 
+                    title: "Outdoor Living", 
+                    description: "Create the perfect outdoor space for relaxation and entertainment.",
+                    services: "Sunrooms\nPatio Rooms\nScreenrooms\nAwnings\nPergolas", 
+                    icon: "tool" 
+                },
+                { 
+                    id: "sg3", 
+                    title: "Concrete & Hardscaping", 
+                    description: "Durable concrete solutions for all your residential needs.",
+                    services: "Driveways\nSidewalks\nPatios\nCarports", 
+                    icon: "truck" 
+                },
+                { 
+                    id: "sg4", 
+                    title: "Structures & Remodeling", 
+                    description: "Complete structural work and interior remodeling services.",
+                    services: "Basement Finishing\nPole Barns\nSheds\nRemodeling", 
+                    icon: "hammer" 
+                },
+                { 
+                    id: "sg5", 
+                    title: "Doors & Handyman Work", 
+                    description: "Professional installation and general handyman services.",
+                    services: "Garage Doors\nDoors\nPatio Covers\nHandyman Work", 
+                    icon: "wrench" 
+                }
+            ],
+            contactPhone: "734-777-8158",
+            contactEmail: "copernan@yahoo.com",
+            facebookUrl: "https://www.facebook.com/cusumanocement/",
+            googleMapUrl: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d190162.7533827283!2d-83.5839212411832!3d41.9123958933454!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x883b655982052f6d%3A0x1e3604f57f1b6239!2sMonroe%2C%20MI!5e0!3m2!1sen!2sus!4v1622050000000!5m2!1sen!2sus"
+        };
+        
+        async function loadContent() {
+            try {
+                showLoadingState();
+                
+                const [docSnap, sliderDocs] = await Promise.all([
+                    getDoc(doc(db, 'siteContent', 'main')),
+                    getDocs(collection(db, 'sliderImages'))
+                ]);
+
+                let data = { ...defaultSiteData };
+                if (docSnap.exists() && Object.keys(docSnap.data()).length > 0) {
+                    data = { ...defaultSiteData, ...docSnap.data() };
+                }
+                
+                siteDataCache = data;
+                
+                // Load hero banner with fade-in effect
+                if (data.heroBannerUrl) {
+                    await loadHeroBanner(data.heroBannerUrl);
+                }
+                
+                renderPage(data);
+                
+                // Load gallery images
+                if (!sliderDocs.empty) {
+                    galleryImages = sliderDocs.docs
+                        .map(d => ({ url: d.data().url, id: d.id }))
+                        .filter(img => img.url)
+                        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+                    
+                    if (galleryImages.length > 0) {
+                        await renderGallery(galleryImages.map(img => img.url));
+                    } else {
+                        showGalleryError();
+                    }
+                } else {
+                    showGalleryError();
+                }
+                
+                hideLoadingState();
+                
+            } catch (error) { 
+                console.error('Error loading from Firestore:', error);
+                showErrorState();
+                renderPage(defaultSiteData);
+                hideLoadingState();
+            }
         }
 
-        const gallerySliderSection = document.getElementById('gallery-slider-section');
-        const sliderTrack = gallerySliderSection.querySelector('.slider-track');
-        const dotsContainer = gallerySliderSection.querySelector('#dots-container');
-        const prevBtn = gallerySliderSection.querySelector('#prevBtn');
-        const nextBtn = gallerySliderSection.querySelector('#nextBtn');
-        let slides = [];
-        let currentIndex = 0;
-        let intervalId;
+        function showLoadingState() {
+            const aboutContent = document.getElementById('about-content-text');
+            if (aboutContent) {
+                aboutContent.innerHTML = `
+                    <div class="content-loading">
+                        <div class="loading-spinner"></div>
+                        <p>Loading content...</p>
+                    </div>
+                `;
+            }
+        }
 
-        async function setupSliderListener() {
-            try {
-                if (!db) throw new Error("Firebase not initialized.");
-                const imagesCol = collection(db, 'sliderImages');
-                
-                onSnapshot(imagesCol, (snapshot) => {
-                    if (snapshot.empty) {
-                        gallerySliderSection.style.display = 'block';
-                        sliderTrack.innerHTML = `<div class="slide"><img src="https://placehold.co/1200x600/0a4d68/white?text=No+Gallery+Images+Available" alt="No gallery images available"></div>`;
-                        prevBtn.style.display = 'none';
-                        nextBtn.style.display = 'none';
-                        dotsContainer.style.display = 'none';
-                        return;
+        function hideLoadingState() {
+            // Remove loading states and show content
+        }
+
+        function showErrorState() {
+            const aboutContent = document.getElementById('about-content-text');
+            if (aboutContent) {
+                aboutContent.innerHTML = `
+                    <div class="error-state">
+                        <h3>Unable to load latest content</h3>
+                        <p>Showing default content. Please check your connection and refresh the page.</p>
+                    </div>
+                `;
+            }
+        }
+
+        function showGalleryError() {
+            const galleryContainer = document.getElementById('gallery-container');
+            galleryContainer.innerHTML = `
+                <div class="error-state">
+                    <h3>Gallery currently unavailable</h3>
+                    <p>Our project gallery is being updated. Please check back soon!</p>
+                </div>
+            `;
+        }
+
+        async function loadHeroBanner(imageUrl) {
+            return new Promise((resolve) => {
+                const img = new Image();
+                img.onload = () => {
+                    const heroBg = document.getElementById('hero-banner-bg');
+                    const heroContainer = document.querySelector('.hero-banner');
+                    
+                    // Calculate aspect ratios
+                    const imageAspectRatio = img.naturalWidth / img.naturalHeight;
+                    const containerAspectRatio = heroContainer.offsetWidth / heroContainer.offsetHeight;
+                    
+                    // Set background image
+                    heroBg.style.backgroundImage = `url('${imageUrl}')`;
+                    
+                    // Adjust background sizing based on aspect ratios
+                    if (imageAspectRatio > containerAspectRatio) {
+                        // Image is wider - fit to height
+                        heroBg.style.backgroundSize = 'auto 100%';
+                    } else {
+                        // Image is taller - fit to width  
+                        heroBg.style.backgroundSize = '100% auto';
                     }
                     
-                    prevBtn.style.display = 'block';
-                    nextBtn.style.display = 'block';
-                    dotsContainer.style.display = 'flex';
-                    gallerySliderSection.style.display = 'block';
-                    const imageUrls = snapshot.docs.map(doc => doc.data().url);
-                    buildSliderDOM(imageUrls);
+                    // Always ensure the image is fully contained
+                    heroBg.style.backgroundSize = 'contain';
+                    heroBg.classList.add('loaded');
+                    resolve();
+                };
+                img.onerror = () => {
+                    console.warn('Failed to load hero banner image');
+                    // Fallback gradient background
+                    const heroBg = document.getElementById('hero-banner-bg');
+                    heroBg.style.background = 'linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%)';
+                    resolve();
+                };
+                img.src = imageUrl;
+            });
+        }
 
-                }, (error) => {
-                    console.error("Error fetching slider images. This is likely a Firestore security rule issue.", error);
-                    gallerySliderSection.style.display = 'none';
+        function renderPage(data) {
+            const get = (id) => document.getElementById(id);
+            
+            // Logo handling
+            if (data.logoUrl) { 
+                const logoImg = get('site-logo-img');
+                const logoText = get('site-logo-text');
+                logoImg.src = data.logoUrl; 
+                logoImg.style.display = 'block'; 
+                logoText.style.display = 'none';
+            }
+            
+            // Hero section
+            if (data.heroHeadline) get('hero-headline').textContent = data.heroHeadline;
+            if (data.heroSubtitle) {
+                const subtitleEl = get('hero-subtitle');
+                if (subtitleEl) subtitleEl.textContent = data.heroSubtitle;
+            }
+            
+            const ctaButton = get('hero-cta-button');
+            if (data.heroCtaText) ctaButton.textContent = data.heroCtaText;
+            if (data.contactPhone) ctaButton.href = `tel:${data.contactPhone.replace(/\D/g, '')}`;
+            
+            // About section
+            if (data.about) {
+                get('about-content-text').innerHTML = `
+                    <p style="font-size: 1.15rem; line-height: 1.8; text-align: center; max-width: 800px; margin: 0 auto;">${data.about}</p>
+                `;
+            }
+            
+            // Services section
+            const servicesGrid = get('services-grid');
+            servicesGrid.innerHTML = '';
+            
+            // Always prefer Firebase data, only use defaults if absolutely necessary
+            let servicesToRender = [];
+            
+            if (data.serviceGroups && data.serviceGroups.length > 0) {
+                // Use service groups from Firebase
+                servicesToRender = data.serviceGroups;
+                console.log('Using service groups from Firebase:', servicesToRender.length);
+            } else if (defaultSiteData.serviceGroups && defaultSiteData.serviceGroups.length > 0) {
+                // Fallback to default service groups only if Firebase has none
+                servicesToRender = defaultSiteData.serviceGroups;
+                console.log('Using default service groups as fallback');
+            }
+            
+            if (servicesToRender.length > 0) {
+                servicesToRender.forEach(group => {
+                    const card = document.createElement('article');
+                    card.className = 'service-group-card reveal-on-scroll';
+                    card.dataset.groupId = group.id;
+                    
+                    const iconHTML = group.imageUrl ? 
+                        `<img src="${group.imageUrl}" alt="${group.title} photo" class="service-image">` : 
+                        (iconMap[group.icon] || iconMap['tool']);
+                    
+                    card.innerHTML = `
+                        <div class="service-image-container">${iconHTML}</div>
+                        <div class="service-details">
+                            <h3>${group.title}</h3>
+                            ${group.description ? `<p>${group.description}</p>` : ''}
+                            <ul>${Array.isArray(group.services) 
+                                ? group.services.filter(s => s && s.trim()).map(s => `<li>${s.trim()}</li>`).join('') 
+                                : (typeof group.services === 'string' 
+                                    ? group.services.split('\n').filter(s => s.trim()).map(s => `<li>${s.trim()}</li>`).join('')
+                                    : '')
+                            }</ul>
+                            <button class="btn btn-secondary btn-modal">View Details</button>
+                        </div>
+                    `;
+                    servicesGrid.appendChild(card);
                 });
-
-            } catch (error) {
-                console.error("Could not set up slider listener:", error);
-                gallerySliderSection.style.display = 'none';
+            } else {
+                get('services').style.display = 'none';
+            }
+            
+            // Contact section
+            const contactDetails = `
+                ${data.contactPhone ? `<p><strong>📞 Phone:</strong> <a href="tel:${data.contactPhone}">${data.contactPhone}</a></p>` : ''}
+                ${data.contactEmail ? `<p><strong>✉️ Email:</strong> <a href="mailto:${data.contactEmail}">${data.contactEmail}</a></p>` : ''}
+                <p><strong>📍 Service Area:</strong> Monroe, MI and surrounding areas</p>
+                <p><strong>🕒 Hours:</strong> Monday - Friday: 8 AM - 6 PM<br>Saturday: 9 AM - 4 PM</p>
+            `;
+            get('contact-details-column').innerHTML = contactDetails;
+            
+            // Footer
+            const currentYear = new Date().getFullYear();
+            get('main-footer').innerHTML = `
+                <p>&copy; ${currentYear} Cusumano Home Improvements. All Rights Reserved.</p>
+                <p>
+                    ${data.contactPhone ? `<a href="tel:${data.contactPhone}">${data.contactPhone}</a>` : ''} 
+                    ${data.contactPhone && data.contactEmail ? ' | ' : ''} 
+                    ${data.contactEmail ? `<a href="mailto:${data.contactEmail}">${data.contactEmail}</a>` : ''}
+                </p>
+                <p>Licensed & Insured • Monroe, Michigan</p>
+            `;
+       
+            // Social media
+            if (data.facebookUrl) {
+                const fbContainer = get('facebook-embed-container');
+                fbContainer.innerHTML = `
+                    <div class="fb-page" 
+                         data-href="${data.facebookUrl}" 
+                         data-tabs="timeline" 
+                         data-width="" 
+                         data-height="400" 
+                         data-small-header="false" 
+                         data-adapt-container-width="true" 
+                         data-hide-cover="false" 
+                         data-show-facepile="true">
+                        <blockquote cite="${data.facebookUrl}" class="fb-xfbml-parse-ignore">
+                            <a href="${data.facebookUrl}">Cusumano Home Improvements</a>
+                        </blockquote>
+                    </div>
+                `;
+                // Re-parse Facebook widgets
+                if (window.FB && window.FB.XFBML) {
+                    window.FB.XFBML.parse();
+                }
+            }
+            
+            // Google Maps
+            if (data.googleMapUrl) {
+                get('google-map-container').innerHTML = `
+                    <iframe src="${data.googleMapUrl}" 
+                            width="100%" 
+                            height="100%" 
+                            style="border:0;" 
+                            allowfullscreen="" 
+                            loading="lazy" 
+                            title="Our Service Area - Monroe, Michigan">
+                    </iframe>
+                `;
             }
         }
         
-        function buildSliderDOM(imageUrls) {
-            const currentImage = slides[currentIndex] ? slides[currentIndex].querySelector('img').src : null;
-            const newImageAtCurrentIndex = imageUrls[currentIndex];
+        async function renderGallery(images) {
+            const sliderEl = document.getElementById('main-slider');
+            const thumbsEl = document.getElementById('thumbnails');
+            const galleryContainer = document.getElementById('gallery-container');
+            const galleryLoading = document.querySelector('.gallery-loading');
 
-            if (sliderTrack.children.length === imageUrls.length && currentImage === newImageAtCurrentIndex) {
+            if (!images || images.length === 0) {
+                showGalleryError();
                 return;
             }
 
-            sliderTrack.innerHTML = '';
-            dotsContainer.innerHTML = '';
+            try {
+                // Hide loading state
+                if (galleryLoading) galleryLoading.style.display = 'none';
+                
+                // Show gallery elements
+                sliderEl.style.display = 'flex';
+                galleryContainer.style.display = 'block';
 
-            imageUrls.forEach((url, index) => {
-                const slide = document.createElement('div');
-                slide.className = 'slide';
-                slide.innerHTML = `<img src="${url}" alt="Homepage Slider Image ${index + 1}" onerror="this.onerror=null;this.src='https://placehold.co/1920x1080/ccc/333?text=Image+Not+Found';">`;
-                sliderTrack.appendChild(slide);
+                // Load the first image with fade-in effect
+                const firstImg = await loadImageWithFadeIn(images[0], 0);
+                sliderEl.innerHTML = '';
+                sliderEl.appendChild(firstImg);
 
-                const dot = document.createElement('div');
-                dot.className = 'dot';
-                dot.addEventListener('click', () => { goToSlide(index); resetInterval(); });
-                dotsContainer.appendChild(dot);
+                // Generate thumbnails
+                thumbsEl.innerHTML = await Promise.all(
+                    images.map(async (url, i) => {
+                        const thumb = await createThumbnail(url, i);
+                        return thumb.outerHTML;
+                    })
+                ).then(thumbnails => thumbnails.join(''));
+
+                // Set active thumbnail
+                const firstThumb = thumbsEl.querySelector('.thumb[data-index="0"]');
+                if (firstThumb) firstThumb.classList.add('active');
+
+            } catch (error) {
+                console.error('Error rendering gallery:', error);
+                showGalleryError();
+            }
+        }
+
+        function loadImageWithFadeIn(src, index) {
+            return new Promise((resolve) => {
+                const img = document.createElement('img');
+                img.src = src;
+                img.alt = `Gallery image ${index + 1}`;
+                img.dataset.index = index;
+                
+                img.onload = () => {
+                    img.classList.add('loaded');
+                    resolve(img);
+                };
+                
+                img.onerror = () => {
+                    console.warn(`Failed to load gallery image: ${src}`);
+                    resolve(img); // Still resolve to continue the process
+                };
+            });
+        }
+
+        function createThumbnail(src, index) {
+            return new Promise((resolve) => {
+                const thumb = document.createElement('img');
+                thumb.src = src;
+                thumb.alt = `Project thumbnail ${index + 1}`;
+                thumb.className = `thumb ${index === 0 ? 'active' : ''}`;
+                thumb.dataset.index = index;
+                
+                thumb.onload = () => resolve(thumb);
+                thumb.onerror = () => resolve(thumb);
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize content loading
+            loadContent();
+            
+            const get = (id) => document.getElementById(id);
+
+            // Enhanced mobile navigation
+            const hamburger = document.querySelector('.hamburger-menu');
+            const mobileNav = document.querySelector('.mobile-nav');
+            const mainHeader = get('main-header');
+            
+            hamburger.addEventListener('click', () => {
+                mobileNav.classList.add('active');
+                document.body.style.overflow = 'hidden'; // Prevent scrolling
+            });
+            
+            mobileNav.addEventListener('click', (e) => {
+                if (e.target.tagName === 'A' || e.target.classList.contains('close-mobile-nav')) {
+                    mobileNav.classList.remove('active');
+                    document.body.style.overflow = ''; // Restore scrolling
+                }
             });
 
-            slides = Array.from(sliderTrack.children);
-            if (slides.length > 0) {
-                 if (currentIndex >= slides.length) currentIndex = 0;
-                 updateSlider();
-                 resetInterval();
-            }
-        }
-
-        function updateSlider() {
-            if (slides.length === 0) return;
-            sliderTrack.style.transform = `translateX(-${currentIndex * 100}%)`;
-            document.querySelectorAll('.dot').forEach((dot, index) => dot.classList.toggle('active', index === currentIndex));
-        }
-        
-        function goToSlide(index) {
-            if (slides.length === 0) return;
-            currentIndex = (index + slides.length) % slides.length;
-            updateSlider();
-        }
-        
-        function nextSlide() { goToSlide(currentIndex + 1); }
-        function prevSlide() { goToSlide(currentIndex - 1); }
-        
-        function startInterval() {
-            clearInterval(intervalId);
-            if(slides.length > 1) intervalId = setInterval(nextSlide, 5000);
-        }
-        
-        function resetInterval() {
-            startInterval();
-        }
-
-        nextBtn.addEventListener('click', () => { nextSlide(); resetInterval(); });
-        prevBtn.addEventListener('click', () => { prevSlide(); resetInterval(); });
-
-        // --- Content Dynamic Loading ---
-        async function loadSiteContent() {
-            if (!db) return;
-            try {
-                const docRef = doc(db, 'siteContent', 'main');
-                const docSnap = await getDoc(docRef);
-                if (docSnap.exists()) {
-                    const data = docSnap.data();
-                    // Set logo if available
-                    const logoImg = document.getElementById('site-logo-img');
-                    const logoText = document.getElementById('site-logo-text');
-                    if (data.logoUrl) {
-                        logoImg.src = data.logoUrl;
-                        logoImg.style.display = 'inline-block';
-                        logoText.style.display = 'none';
-                    } else {
-                        logoImg.style.display = 'none';
-                        logoText.style.display = 'inline';
-                    }
-                    // Set hero banner background dynamically from Firestore (same API as slider)
-                    const heroBanner = document.getElementById('hero-banner');
-                    if (data.heroBannerUrl) {
-                        heroBanner.style.backgroundImage = `url('${data.heroBannerUrl}')`;
-                        heroBanner.style.backgroundSize = 'contain'; // Ensure full image is visible
-                        heroBanner.style.backgroundPosition = 'center';
-                        heroBanner.style.backgroundRepeat = 'no-repeat';
-                    } else {
-                        heroBanner.style.backgroundImage = "url('https://firebasestorage.googleapis.com/v0/b/cusumano-website.appspot.com/o/banner%2Fmain-banner.jpg?alt=media')";
-                        heroBanner.style.backgroundSize = 'contain'; // Ensure full image is visible
-                        heroBanner.style.backgroundPosition = 'center';
-                        heroBanner.style.backgroundRepeat = 'no-repeat';
-                    }
-                    // About
-                    document.getElementById('about-content').innerHTML = `<p>${data.about || ''}</p>`;
-                    // Services
-                    const servicesGrid = document.getElementById('services-grid');
-                    servicesGrid.innerHTML = '';
-                    (data.services || []).forEach(service => {
-                        const card = document.createElement('article');
-                        card.className = 'service-card';
-                        let iconHTML = '';
-                        if (service.imageUrl) {
-                            iconHTML = `<img src="${service.imageUrl}" alt="${service.label} icon" class="service-icon-img" loading="lazy">`;
-                        } else if (service.icon && service.icon.trim().startsWith('<svg')) {
-                            iconHTML = service.icon;
-                        } else if (service.icon && serviceIconSVGs[service.icon]) {
-                            iconHTML = serviceIconSVGs[service.icon];
-                        } else if (service.icon) {
-                            iconHTML = `<svg class="service-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="${service.icon}"></path></svg>`;
-                        } else {
-                            iconHTML = '';
-                        }
-                        card.innerHTML = `
-                            ${iconHTML}
-                            <h3>${service.label}</h3>
-                            <p>${service.value}</p>
-                        `;
-                        servicesGrid.appendChild(card);
-                    });
-                    // Contact
-                    document.getElementById('contact-intro').textContent = data.contactIntro || '';
-                    document.getElementById('contact-details-column').innerHTML = `
-                        <h3 style="font-family: var(--font-heading); color: var(--white); margin-top:0; margin-bottom:1rem;">Contact Directly</h3>
-                        <ul style="list-style:none; padding:0; margin:0 0 1.5rem 0; font-size:1.1rem; color: var(--white);">
-                            <li style="margin-bottom: 0.5rem;"><strong>Phone:</strong> <a href="tel:${data.contactPhone || ''}" style="color:var(--accent-color);text-decoration:underline;">${data.contactPhone || ''}</a></li>
-                            <li><strong>Email:</strong> <a href="mailto:${data.contactEmail || ''}" style="color:var(--accent-color);text-decoration:underline;">${data.contactEmail || ''}</a></li>
-                        </ul>
-                        <div style="font-size:1.1rem; color: var(--white); margin-bottom:1.5rem;">
-                            <strong>Cusumano Home Improvements</strong><br>
-                            ${data.contactAddress || ''}<br>
-                            A family owned company.
-                        </div>
-                        <a href="tel:${data.contactPhone || ''}" class="btn btn-secondary">Call Us Now</a>
-                    `;
+            // Enhanced scroll effects
+            let lastScrollY = window.scrollY;
+            
+            window.addEventListener('scroll', () => {
+                const currentScrollY = window.scrollY;
+                
+                // Header scroll effect
+                if (currentScrollY > 100) {
+                    mainHeader.classList.add('scrolled');
+                } else {
+                    mainHeader.classList.remove('scrolled');
                 }
-            } catch (e) {
-                console.error('Error loading site content:', e);
+                
+                // Hide/show header on scroll direction
+                if (currentScrollY > lastScrollY && currentScrollY > 500) {
+                    mainHeader.style.transform = 'translateY(-100%)';
+                } else {
+                    mainHeader.style.transform = 'translateY(0)';
+                }
+                
+                lastScrollY = currentScrollY;
+            });
+
+            // Enhanced intersection observer for animations
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            };
+            
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('is-visible');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, observerOptions);
+            
+            // Observe elements as they're added to the DOM
+            const observeNewElements = () => {
+                document.querySelectorAll('.reveal-on-scroll:not(.is-visible)').forEach(el => {
+                    observer.observe(el);
+                });
+            };
+            
+            // Initial observation
+            observeNewElements();
+            
+            // Re-observe after content loads
+            setTimeout(observeNewElements, 1000);
+
+            // Enhanced modal system
+            const serviceModal = get('service-modal');
+            const galleryLightbox = get('gallery-lightbox');
+            
+            const openModal = (modal) => {
+                modal.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            };
+            
+            const closeModal = (modal) => {
+                modal.classList.remove('active');
+                document.body.style.overflow = '';
+            };
+            
+            // Service modal handling
+            get('services-grid').addEventListener('click', e => {
+                const btn = e.target.closest('.btn-modal');
+                if (btn) {
+                    const groupData = siteDataCache?.serviceGroups?.find(g => g.id === btn.closest('.service-group-card').dataset.groupId);
+                    if (groupData) {
+                        const modalBody = get('modal-body');
+                        modalBody.innerHTML = `
+                            <h3 style="text-align:center; color: var(--primary-color); margin-bottom: 1.5rem;">${groupData.title}</h3>
+                            ${groupData.description ? `<p style="text-align: center; margin-bottom: 2rem; font-size: 1.1rem;">${groupData.description}</p>` : ''}
+                            <div style="background: var(--light-gray); padding: 1.5rem; border-radius: 8px;">
+                                <h4 style="margin-top: 0; color: var(--primary-color);">Services Include:</h4>
+                                <ul style="list-style: none; padding: 0;">
+                                    ${groupData.services.split('\n').filter(s=>s.trim()).map(s => `<li style="padding: 0.5rem 0; border-bottom: 1px solid #ddd;">✓ ${s.trim()}</li>`).join('')}
+                                </ul>
+                            </div>
+                            <div style="text-align: center; margin-top: 2rem;">
+                                <a href="#contact" class="btn btn-primary" onclick="document.getElementById('service-modal').classList.remove('active'); document.body.style.overflow = '';">Get a Quote</a>
+                            </div>
+                        `;
+                        openModal(serviceModal);
+                    }
+                }
+            });
+
+            // Enhanced gallery functionality
+            let currentLightboxIndex = 0;
+            const lightboxImg = galleryLightbox.querySelector('img');
+            
+            const updateLightboxImage = (index) => {
+                if (!galleryImages || galleryImages.length === 0) return;
+                
+                if (index < 0) index = galleryImages.length - 1;
+                if (index >= galleryImages.length) index = 0;
+                
+                currentLightboxIndex = index;
+                lightboxImg.src = galleryImages[index];
+                lightboxImg.alt = `Gallery image ${index + 1} of ${galleryImages.length}`;
+            };
+
+            get('gallery-container').addEventListener('click', async e => {
+                const target = e.target;
+                
+                if (target.matches('.main-slider img')) {
+                    const index = parseInt(target.dataset.index, 10);
+                    updateLightboxImage(index);
+                    openModal(galleryLightbox);
+                } else if (target.matches('.thumb')) {
+                    const index = parseInt(target.dataset.index, 10);
+                    const mainSliderImg = get('main-slider').querySelector('img');
+                    
+                    if (mainSliderImg) {
+                        // Fade out current image
+                        mainSliderImg.style.opacity = '0';
+                        
+                        setTimeout(async () => {
+                            const newImg = await loadImageWithFadeIn(galleryImages[index], index);
+                            get('main-slider').innerHTML = '';
+                            get('main-slider').appendChild(newImg);
+                        }, 150);
+                    }
+                    
+                    // Update active thumbnail
+                    document.querySelectorAll('.thumb').forEach(t => t.classList.remove('active'));
+                    target.classList.add('active');
+                }
+            });
+
+            // Lightbox navigation
+            document.querySelector('.lightbox-next').addEventListener('click', () => updateLightboxImage(currentLightboxIndex + 1));
+            document.querySelector('.lightbox-prev').addEventListener('click', () => updateLightboxImage(currentLightboxIndex - 1));
+            
+            // Keyboard navigation for lightbox
+            document.addEventListener('keydown', (e) => {
+                if (galleryLightbox.classList.contains('active')) {
+                    if (e.key === 'ArrowLeft') updateLightboxImage(currentLightboxIndex - 1);
+                    if (e.key === 'ArrowRight') updateLightboxImage(currentLightboxIndex + 1);
+                    if (e.key === 'Escape') closeModal(galleryLightbox);
+                }
+                if (serviceModal.classList.contains('active') && e.key === 'Escape') {
+                    closeModal(serviceModal);
+                }
+            });
+            
+            // Modal close handlers
+            serviceModal.addEventListener('click', e => { 
+                if (e.target === serviceModal || e.target.classList.contains('close-btn')) closeModal(serviceModal); 
+            });
+            galleryLightbox.addEventListener('click', e => { 
+                if (e.target === galleryLightbox || e.target.classList.contains('close-btn')) closeModal(galleryLightbox); 
+            });
+
+            // Enhanced form validation
+            const emailField = get('form-email');
+            const phoneField = get('form-phone');
+            const nameField = get('form-name');
+            const messageField = get('form-message');
+            const contactForm = get('contact-form');
+            
+            // Real-time validation
+            function validateField(field, validationRules) {
+                const value = field.value.trim();
+                let isValid = true;
+                let errorMessage = '';
+                
+                // Required field check
+                if (field.hasAttribute('required') && !value) {
+                    isValid = false;
+                    errorMessage = 'This field is required.';
+                } else if (value && validationRules) {
+                    // Type-specific validation
+                    if (validationRules.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+                        isValid = false;
+                        errorMessage = 'Please enter a valid email address.';
+                    }
+                    if (validationRules.phone && !/^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$/.test(value)) {
+                        isValid = false;
+                        errorMessage = 'Please enter a valid phone number.';
+                    }
+                    if (validationRules.minLength && value.length < validationRules.minLength) {
+                        isValid = false;
+                        errorMessage = `Must be at least ${validationRules.minLength} characters long.`;
+                    }
+                }
+                
+                // Update field appearance
+                const feedbackEl = field.parentNode.querySelector('.invalid-feedback');
+                if (isValid) {
+                    field.classList.remove('invalid');
+                    field.classList.add('valid');
+                    if (feedbackEl) feedbackEl.textContent = '';
+                } else {
+                    field.classList.remove('valid');
+                    field.classList.add('invalid');
+                    if (feedbackEl) feedbackEl.textContent = errorMessage;
+                }
+                
+                return isValid;
             }
-        }
-        document.addEventListener('DOMContentLoaded', () => {
-            setupSliderListener();
-            loadSiteContent();
+            
+            // Add validation event listeners
+            emailField.addEventListener('input', () => {
+                validateField(emailField, { email: true });
+            });
+            
+            phoneField.addEventListener('input', (e) => {
+                // Auto-format phone number
+                let value = e.target.value.replace(/\D/g, '');
+                if (value.length >= 6) {
+                    value = `(${value.slice(0,3)}) ${value.slice(3,6)}-${value.slice(6,10)}`;
+                } else if (value.length >= 3) {
+                    value = `(${value.slice(0,3)}) ${value.slice(3)}`;
+                }
+                e.target.value = value;
+                
+                if (value) validateField(phoneField, { phone: true });
+            });
+            
+            nameField.addEventListener('input', () => {
+                validateField(nameField, { minLength: 2 });
+            });
+            
+            messageField.addEventListener('input', () => {
+                validateField(messageField, { minLength: 10 });
+            });
+            
+            // Enhanced form submission
+            contactForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                
+                // Validate all fields
+                const validations = [
+                    validateField(nameField, { minLength: 2 }),
+                    validateField(emailField, { email: true }),
+                    validateField(messageField, { minLength: 10 })
+                ];
+                
+                // Validate phone if provided
+                if (phoneField.value.trim()) {
+                    validations.push(validateField(phoneField, { phone: true }));
+                }
+                
+                if (validations.every(v => v)) {
+                    // Show loading state
+                    const submitBtn = contactForm.querySelector('button[type="submit"]');
+                    const btnText = submitBtn.querySelector('.btn-text');
+                    const btnSpinner = submitBtn.querySelector('.btn-spinner');
+                    
+                    btnText.style.display = 'none';
+                    btnSpinner.style.display = 'inline-flex';
+                    submitBtn.disabled = true;
+                    
+                    // Submit form (this will redirect to FormSubmit)
+                    setTimeout(() => {
+                        contactForm.submit();
+                    }, 500);
+                } else {
+                    // Show error message
+                    const statusEl = contactForm.querySelector('.form-status');
+                    statusEl.innerHTML = '<div class="alert alert-danger">Please fix the errors above and try again.</div>';
+                    statusEl.style.display = 'block';
+                    
+                    setTimeout(() => {
+                        statusEl.style.display = 'none';
+                    }, 5000);
+                }
+            });
+
+            // Smooth scrolling for internal links
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const target = document.querySelector(this.getAttribute('href'));
+                    if (target) {
+                        target.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'start'
+                        });
+                    }
+                });
+            });
+
+            // Hero image resize handler for optimal display
+            let resizeTimeout;
+            window.addEventListener('resize', () => {
+                clearTimeout(resizeTimeout);
+                resizeTimeout = setTimeout(() => {
+                    const heroBg = document.getElementById('hero-banner-bg');
+                    if (heroBg && heroBg.style.backgroundImage && heroBg.style.backgroundImage !== 'none') {
+                        // Re-ensure the background sizing is optimal after resize
+                        heroBg.style.backgroundSize = 'contain';
+                    }
+                }, 250);
+            });
         });
-        // --- Static SVG Icon Map (match admin panel) ---
-        const serviceIconSVGs = {
-            home: `<svg class="service-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l9-9 9 9M4 10v10a1 1 0 001 1h3m10-11v10a1 1 0 01-1 1h-3m-4 0h4"/></svg>`,
-            clipboard: `<svg class="service-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false"><rect width="16" height="20" x="4" y="2" rx="2"/><path d="M9 2v4h6V2"/></svg>`,
-            shield: `<svg class="service-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>`,
-            truck: `<svg class="service-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false"><rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8h3l4 4v4a2 2 0 01-2 2h-1"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>`,
-            // ...add more icons as needed...
-        };
+
     </script>
 </body>
 </html>

@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Default Service Groups to Firebase</title>
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        h1 {
+            color: #0a4d68;
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        .container {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        pre {
+            background-color: #f0f0f0;
+            padding: 1rem;
+            border-radius: 4px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        .btn {
+            background-color: #0a4d68;
+            color: white;
+            border: none;
+            padding: 0.5rem 1.5rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background-color 0.3s ease;
+        }
+        .btn:hover {
+            background-color: #088395;
+        }
+        .btn:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        .status {
+            margin-top: 1rem;
+            padding: 0.5rem;
+            border-radius: 4px;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        .info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+        }
+        .section {
+            margin-bottom: 2rem;
+        }
+        textarea {
+            width: 100%;
+            height: 300px;
+            font-family: monospace;
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-bottom: 1rem;
+        }
+        .login-section {
+            margin-bottom: 2rem;
+        }
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Upload Default Service Groups to Firebase</h1>
+        
+        <div class="section login-section">
+            <h2>Login</h2>
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <input type="email" id="email" placeholder="Enter admin email">
+            </div>
+            <div class="form-group">
+                <label for="password">Password:</label>
+                <input type="password" id="password" placeholder="Enter password">
+            </div>
+            <button id="login-btn" class="btn">Login</button>
+            <div id="login-status" class="status"></div>
+        </div>
+        
+        <div class="section" id="upload-section" style="display: none;">
+            <h2>Default Service Groups</h2>
+            <p>Below are the current default service groups from index.html. You can edit them before uploading to Firebase:</p>
+            
+            <textarea id="service-groups-json"></textarea>
+            
+            <button id="upload-btn" class="btn">Upload to Firebase</button>
+            <button id="reset-btn" class="btn" style="background-color: #6c757d; margin-left: 10px;">Reset to Defaults</button>
+            <div id="upload-status" class="status"></div>
+        </div>
+        
+        <div class="section">
+            <h2>Instructions</h2>
+            <ol>
+                <li>Login with your admin credentials</li>
+                <li>Review the default service groups (edit if needed)</li>
+                <li>Click "Upload to Firebase" button</li>
+                <li>Once uploaded, these groups will be editable in the admin panel</li>
+                <li>You can then remove the hardcoded default groups from index.html</li>
+            </ol>
+        </div>
+    </div>
+
+    <!-- Firebase Scripts -->
+    <script type="module">
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBVtq6dAEuybJNmTTv8dXBxTVUgw1t0ZMk",
+            authDomain: "cusumano-website.firebaseapp.com",
+            databaseURL: "https://cusumano-website-default-rtdb.firebaseio.com",
+            projectId: "cusumano-website",
+            storageBucket: "cusumano-website.appspot.com",
+            messagingSenderId: "20051552210",
+            appId: "1:20051552210:web:7eb3b22baa3fec184e4a0b"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // Default service groups from index.html
+        const defaultServiceGroups = [
+            { 
+                id: "sg1", 
+                title: "Exterior & Construction", 
+                description: "Transform your home's exterior with our comprehensive construction services.",
+                services: ["Garages", "Decks", "Roofing", "Siding", "Additions", "New Construction"], 
+                icon: "home" 
+            },
+            { 
+                id: "sg2", 
+                title: "Outdoor Living", 
+                description: "Create the perfect outdoor space for relaxation and entertainment.",
+                services: ["Sunrooms", "Patio Rooms", "Screenrooms", "Awnings", "Pergolas"], 
+                icon: "tool" 
+            },
+            { 
+                id: "sg3", 
+                title: "Concrete & Hardscaping", 
+                description: "Durable concrete solutions for all your residential needs.",
+                services: ["Driveways", "Sidewalks", "Patios", "Carports"], 
+                icon: "truck" 
+            },
+            { 
+                id: "sg4", 
+                title: "Structures & Remodeling", 
+                description: "Complete structural work and interior remodeling services.",
+                services: ["Basement Finishing", "Pole Barns", "Sheds", "Remodeling"], 
+                icon: "hammer" 
+            },
+            { 
+                id: "sg5", 
+                title: "Doors & Handyman Work", 
+                description: "Professional installation and general handyman services.",
+                services: ["Garage Doors", "Doors", "Patio Covers", "Handyman Work"], 
+                icon: "wrench" 
+            }
+        ];
+
+        // Elements
+        const loginBtn = document.getElementById('login-btn');
+        const loginStatus = document.getElementById('login-status');
+        const uploadSection = document.getElementById('upload-section');
+        const serviceGroupsJson = document.getElementById('service-groups-json');
+        const uploadBtn = document.getElementById('upload-btn');
+        const resetBtn = document.getElementById('reset-btn');
+        const uploadStatus = document.getElementById('upload-status');
+
+        // Ensure services are arrays
+        function normalizeServiceGroups(groups) {
+            return groups.map(group => {
+                // Convert string services to arrays if needed
+                if (typeof group.services === 'string') {
+                    group.services = group.services.split('\n').filter(s => s.trim());
+                }
+                return {
+                    id: group.id || `group_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+                    title: group.title || '',
+                    description: group.description || '',
+                    services: Array.isArray(group.services) ? group.services : [],
+                    icon: group.icon || 'tool'
+                };
+            });
+        }
+
+        // Initialize service groups textarea
+        serviceGroupsJson.value = JSON.stringify(normalizeServiceGroups(defaultServiceGroups), null, 2);
+
+        // Login
+        loginBtn.addEventListener('click', async () => {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            if (!email || !password) {
+                loginStatus.textContent = 'Please enter email and password';
+                loginStatus.className = 'status error';
+                return;
+            }
+            
+            try {
+                loginBtn.disabled = true;
+                loginStatus.textContent = 'Logging in...';
+                loginStatus.className = 'status info';
+                
+                await signInWithEmailAndPassword(auth, email, password);
+                
+                loginStatus.textContent = 'Login successful!';
+                loginStatus.className = 'status success';
+                uploadSection.style.display = 'block';
+                
+                // Check if there are already service groups in Firebase
+                const docRef = doc(db, 'siteContent', 'main');
+                const docSnap = await getDoc(docRef);
+                
+                if (docSnap.exists() && docSnap.data().serviceGroups && docSnap.data().serviceGroups.length > 0) {
+                    uploadStatus.textContent = 'Warning: Service groups already exist in Firebase. Uploading will replace them.';
+                    uploadStatus.className = 'status info';
+                    
+                    // Show existing groups instead
+                    serviceGroupsJson.value = JSON.stringify(normalizeServiceGroups(docSnap.data().serviceGroups), null, 2);
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                loginStatus.textContent = `Login failed: ${error.message}`;
+                loginStatus.className = 'status error';
+                loginBtn.disabled = false;
+            }
+        });
+
+        // Upload service groups to Firebase
+        uploadBtn.addEventListener('click', async () => {
+            try {
+                let serviceGroups;
+                try {
+                    serviceGroups = JSON.parse(serviceGroupsJson.value);
+                } catch (e) {
+                    uploadStatus.textContent = 'Invalid JSON. Please check your formatting.';
+                    uploadStatus.className = 'status error';
+                    return;
+                }
+                
+                if (!Array.isArray(serviceGroups)) {
+                    uploadStatus.textContent = 'Service groups must be an array.';
+                    uploadStatus.className = 'status error';
+                    return;
+                }
+                
+                uploadBtn.disabled = true;
+                uploadStatus.textContent = 'Uploading...';
+                uploadStatus.className = 'status info';
+                
+                // Normalize service groups
+                const normalizedGroups = normalizeServiceGroups(serviceGroups);
+                
+                // Get existing document
+                const docRef = doc(db, 'siteContent', 'main');
+                const docSnap = await getDoc(docRef);
+                
+                let dataToUpdate = { serviceGroups: normalizedGroups, lastUpdated: new Date() };
+                
+                // If document exists, merge with existing data
+                if (docSnap.exists()) {
+                    const existing = docSnap.data();
+                    dataToUpdate = { ...existing, ...dataToUpdate };
+                }
+                
+                // Upload to Firebase
+                await setDoc(doc(db, 'siteContent', 'main'), dataToUpdate);
+                
+                uploadStatus.textContent = 'Service groups uploaded successfully! You can now edit them in the admin panel.';
+                uploadStatus.className = 'status success';
+            } catch (error) {
+                console.error('Upload error:', error);
+                uploadStatus.textContent = `Upload failed: ${error.message}`;
+                uploadStatus.className = 'status error';
+            } finally {
+                uploadBtn.disabled = false;
+            }
+        });
+
+        // Reset to defaults
+        resetBtn.addEventListener('click', () => {
+            if (confirm('Reset to default service groups? This will discard any changes you made in the editor.')) {
+                serviceGroupsJson.value = JSON.stringify(normalizeServiceGroups(defaultServiceGroups), null, 2);
+                uploadStatus.textContent = 'Reset to default service groups. Click Upload to save to Firebase.';
+                uploadStatus.className = 'status info';
+            }
+        });
+
+        // Check auth state
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                loginBtn.textContent = 'Logged In';
+                loginBtn.disabled = true;
+                loginStatus.textContent = `Logged in as ${user.email}`;
+                loginStatus.className = 'status success';
+                uploadSection.style.display = 'block';
+            }
+        });
+    </script>
+</body>
+</html>
