@@ -3,13 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self' https: data: 'unsafe-inline' 'unsafe-eval'">
+    <meta http-equiv="Content-Security-Policy" content="
+    default-src 'self' https: data:; 
+    style-src 'self' https: 'unsafe-inline'; 
+    script-src 'self' https: 'unsafe-eval' 'sha256-vvt4KWwuNr51XfE5m+hzeNEGhiOfZzG97ccfqGsPwvE=' 'sha256-A4P2YhCesmqc1Qi+X6lBIesVUpw3FGQpqMiEjYJd/QM=' 'sha256-jJi84tz1fCuv6Nj9Dx+LmdFP/p1500qCsQJTAdcXB2I=' 'sha256-e+ytBD4JowmW7f7y2JPVmolLCoVaQzHGE1Nl3ycyFbE=';
+">
     <meta http-equiv="X-Content-Type-Options" content="nosniff">
     <title>Admin Panel | Cusumano Home Improvements</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/browser-image-compression@2.0.1/dist/browser-image-compression.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.js"></script>
     <style>
         :root {
             --primary-color: #0a4d68;
@@ -85,33 +92,69 @@
             box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
         }
         
-        /* Service Groups Editor Styles */
+        /* Modern Service Groups Editor Styles */
         .service-group {
-            margin-bottom: 1rem;
-            transition: all 0.3s ease;
+            margin-bottom: 2rem;
+            transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+            opacity: 1;
+            transform: translateY(0);
         }
         
         .service-group.dragging {
-            opacity: 0.4;
+            opacity: 0.6;
             cursor: grabbing;
+            transform: rotate(3deg) scale(1.02);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+        }
+        
+        .service-group-card {
+            border: none;
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+            background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
+            overflow: hidden;
+        }
+        
+        .service-group-card:hover {
+            box-shadow: 0 12px 48px rgba(0, 0, 0, 0.12);
+            transform: translateY(-4px);
         }
         
         .service-group-card .card-header {
-            background-color: #f8f9fa;
-            padding: 0.75rem 1rem;
-            cursor: move;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+            padding: 1.5rem;
+            border: none;
+            display: flex;
+            align-items: center;
+        }
+        
+        .service-group-card .card-header .drag-handle {
+            margin-right: 0.5rem;
+        }
+        
+        .service-group-card .card-header h4 {
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+        
+        .service-group-card .card-body {
+            padding: 2rem;
         }
         
         .drag-handle {
             cursor: grab;
-            color: #999;
+            color: rgba(255, 255, 255, 0.8);
             font-size: 1.2rem;
             padding: 0 0.5rem;
-            transition: color 0.2s;
+            transition: all 0.2s ease;
+            border-radius: 6px;
         }
         
-        .service-group:hover .drag-handle {
-            color: #555;
+        .drag-handle:hover {
+            color: white;
+            background: rgba(255, 255, 255, 0.1);
         }
         
         .icon-preview {
@@ -140,120 +183,113 @@
             overflow-y: auto;
         }
         
+        /* Modern Service Items Styling */
         .service-item {
             display: flex;
             align-items: center;
-            margin-bottom: 0.5rem;
-            background: white;
-            padding: 0.5rem;
-            border-radius: 4px;
-            border: 1px solid #eee;
+            gap: 0.75rem;
+            margin-bottom: 0.75rem;
+            padding: 0.75rem;
+            background: #f8fafc;
+            border-radius: 8px;
+            transition: all 0.2s ease;
         }
         
-        .service-item:last-child {
-            margin-bottom: 0;
+        .service-item:hover {
+            background: #f1f5f9;
+            transform: translateX(4px);
         }
         
         .service-item-input {
-            flex-grow: 1;
-            margin-right: 0.5rem;
+            flex: 1;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 0.5rem 0.75rem;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
         }
         
-        /* Service image upload styles */
-        .service-image-preview {
-            width: 80px;
-            height: 80px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            background-color: #f8f9fa;
+        .service-item-input:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(10, 77, 104, 0.1);
+            outline: none;
+        }
+        
+        .remove-service-btn {
+            background: #ef4444;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 28px;
+            height: 28px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s ease;
             display: flex;
             align-items: center;
             justify-content: center;
-            overflow: hidden;
-            position: relative;
         }
         
-        .uploaded-image {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
+        .remove-service-btn:hover {
+            background: #dc2626;
+            transform: scale(1.1);
         }
         
-        .image-upload-container {
-            padding: 1rem;
-            background-color: #f8f9fa;
-            border-radius: 4px;
-            border: 1px dashed #ddd;
+        .add-service-btn {
+            background: linear-gradient(135deg, var(--secondary-color), var(--primary-color));
+            border: none;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            margin-top: 1rem;
         }
         
-        .upload-progress {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            height: 5px;
-            background-color: rgba(10, 77, 104, 0.7);
-            width: 0;
-            transition: width 0.3s ease;
-        }
-
-        .remove-service-btn {
-            padding: 0.25rem 0.5rem;
-            font-size: 1rem;
-            line-height: 1;
+        .add-service-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
         }
         
-        /* Better responsive design */
+        /* Enhanced Button Styling */
+        .btn-group .btn {
+            border-radius: 6px;
+            margin-left: 0.25rem;
+            padding: 0.5rem 0.75rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-outline-primary:hover {
+            background: var(--primary-color);
+            transform: translateY(-1px);
+        }
+        
+        .btn-outline-danger:hover {
+            background: #dc3545;
+            transform: translateY(-1px);
+        }
+        
+        /* Responsive Grid Layout */
+        .service-group-layout {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 2rem;
+            align-items: start;
+        }
+        
         @media (max-width: 768px) {
-            .admin-header { 
-                flex-direction: column; 
-                gap: 1rem; 
-                text-align: center; 
-                padding: 1rem 0.5rem;
+            .service-group-layout {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
             }
-            .admin-main { 
-                padding: 0 0.5rem; 
-                margin-top: 1rem;
+            
+            .service-image-upload-area {
+                height: 150px;
             }
-            .control-card { 
-                padding: 1rem; 
-                margin-bottom: 1rem;
-            }
-            .form-actions { 
-                flex-direction: column; 
-                gap: 0.5rem; 
-            }
-            .btn { 
-                width: 100%; 
-                padding: 0.75rem 1rem;
-                font-size: 0.9rem;
-            }
-            .form-control { 
-                font-size: 16px; /* Prevents zoom on iOS */
-            }
-            .table-responsive {
-                font-size: 0.8rem;
-            }
-            .activity-log {
-                max-height: 200px;
-                font-size: 0.85rem;
-            }
-            .nav-tabs .nav-link {
-                padding: 0.5rem 0.75rem;
-                font-size: 0.9rem;
-            }
-            .modal-dialog {
-                margin: 0.5rem;
-            }
-            .stats-grid {
-                grid-template-columns: 1fr 1fr;
-                gap: 0.5rem;
-            }
-            .stat-card {
-                padding: 1rem;
-            }
-            .card-header h5 {
-                font-size: 1rem;
+            
+            .service-group-card .card-body {
+                padding: 1.5rem;
             }
         }
         
@@ -417,148 +453,191 @@
             transform: rotate(-90deg);
         }
         
-        /* Enhanced session management */
-        .session-info {
-            position: fixed;
-            top: 10px;
-            left: 10px;
-            background: rgba(0,0,0,0.8);
-            color: white;
-            padding: 0.5rem 1rem;
-            border-radius: 4px;
-            font-size: 0.8rem;
-            z-index: 1000;
+        /* Unified spinner styles - deduplicated */
+        .spinner { 
+            border: 2px solid #f3f3f3; 
+            border-top: 2px solid var(--primary-color); 
+            border-radius: 50%; 
+            width: 20px; 
+            height: 20px; 
+            animation: spin 1s linear infinite; 
+            display: inline-block; 
+            margin-right: 8px; 
         }
         
-        /* Activity log styles */
-        .activity-log {
-            max-height: 300px;
-            overflow-y: auto;
-            background: #f8f9fa;
-            border-radius: 4px;
-            padding: 1rem;
-            font-family: monospace;
-            font-size: 0.875rem;
-        }
-        .log-entry {
-            margin-bottom: 0.5rem;
-            padding: 0.25rem;
-            border-left: 3px solid var(--info-color);
-            background: white;
-        }
-        .log-entry.success { border-left-color: var(--success-color); }
-        .log-entry.error { border-left-color: var(--danger-color); }
-        .log-entry.warning { border-left-color: var(--warning-color); }
-        
-        /* Stats cards */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
-            margin-bottom: 2rem;
-        }
-        .stat-card {
-            background: white;
-            padding: 1.5rem;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            text-align: center;
-            border-left: 4px solid var(--primary-color);
-        }
-        .stat-value {
-            font-size: 2rem;
-            font-weight: bold;
-            color: var(--primary-color);
-        }
-        .stat-label {
-            color: #666;
-            font-size: 0.875rem;
-            margin-top: 0.5rem;
-        }
-        
-        #admin-dashboard { display: none; }
-        .admin-header { display: flex; justify-content: space-between; align-items: center; padding: 1rem 2rem; background: var(--primary-color); color: white; }
-        .header-left {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-        .btn-home {
-            background-color: rgba(255, 255, 255, 0.2);
-            color: white;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 0.5rem 1rem;
-            border-radius: 4px;
-            transition: background-color 0.2s ease;
-            text-decoration: none;
-        }
-        .btn-home:hover {
-            background-color: rgba(255, 255, 255, 0.3);
-            color: white;
-        }
-        .btn-home svg {
-            width: 16px;
-            height: 16px;
-        }
-        .admin-header .user-info {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-        .admin-header .last-login {
-            font-size: 0.875rem;
-            opacity: 0.8;
-        }
-        .admin-main { max-width: 1100px; margin: 2rem auto; padding: 0 1rem; }
-        .control-card { background: white; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); padding: 2rem; margin-bottom: 2rem; position: relative; }
-        .control-card.collapsible .card-header {
-            cursor: pointer;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding-bottom: 1rem;
-            border-bottom: 1px solid #eee;
-            margin-bottom: 1rem;
-        }
-        .control-card.collapsible .card-content {
-            transition: max-height 0.3s ease;
-            overflow: hidden;
-        }
-        .control-card.collapsed .card-content {
-            max-height: 0;
-            margin: 0;
-            padding: 0;
-        }
-        .collapse-icon {
-            transition: transform 0.3s ease;
-        }
-        .control-card.collapsed .collapse-icon {
-            transform: rotate(-90deg);
-        }
-        
-        /* Loading spinner styles */
-        .spinner-border-sm {
+        .spinner.small {
             width: 0.875rem;
             height: 0.875rem;
             border-width: 0.125rem;
         }
-        
-        @keyframes spinner-border {
-            to { transform: rotate(360deg); }
+
+        /* Empty state styles */
+        .empty-state {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 400px;
+            padding: 3rem;
+        }
+        .empty-state-content {
+            text-align: center;
+            max-width: 400px;
         }
         
-        .spinner-border {
-            display: inline-block;
-            width: 1rem;
-            height: 1rem;
-            vertical-align: text-bottom;
-            border: 0.125rem solid currentColor;
-            border-right-color: transparent;
+        .empty-state-icon {
+            font-size: 4rem;
+            margin-bottom: 1.5rem;
+            opacity: 0.7;
+        }
+        
+        .empty-state h3 {
+            color: var(--dark-gray);
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+        
+        .empty-state p {
+            color: #6b7280;
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+        
+        .empty-state .btn {
+            padding: 0.75rem 2rem;
+            font-weight: 600;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+        }
+        
+        .empty-state .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(10, 77, 104, 0.3);
+        }
+        
+        /* Animation for new service groups */
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .service-group.new-group {
+            animation: slideInUp 0.5s ease-out;
+        }
+        
+        /* Loading states */
+        .service-image-upload-area.uploading {
+            pointer-events: none;
+        }
+        
+        .service-image-upload-area.uploading::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 12px;
+        }
+        
+        /* Success states */
+        .upload-success {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(34, 197, 94, 0.9);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .upload-success.show {
+            opacity: 1;
+        }
+
+        /* === IMAGE UPLOAD AREA STYLES === */
+        .service-image-upload-area {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border: 2px dashed #d1d5db;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+            overflow: hidden;
+            background: #f9fafb;
+        }
+
+        .service-image-upload-area:hover {
+            border-color: var(--primary-color);
+            background: #f0f9ff;
+        }
+
+        .service-image-preview {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: none;
+        }
+
+        .service-image-preview.has-image {
+            display: block;
+        }
+
+        .upload-prompt-text {
+            color: #6b7280;
+            font-size: 0.875rem;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        .upload-progress {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            transition: width 0.3s ease;
+            width: 0%;
+            opacity: 0;
+        }
+
+        .remove-image-btn {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            border: none;
             border-radius: 50%;
-            animation: spinner-border 0.75s linear infinite;
+            width: 24px;
+            height: 24px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: none;
         }
+
+        .remove-image-btn:hover {
+            background: var(--danger-color);
+            transform: scale(1.1);
+        }
+
+        /* ...existing code... */
     </style>
 </head>
 <body>
@@ -626,10 +705,10 @@
                 </div>
                 <div>
                     <h3>Recent Activity</h3>
-                    <div class="activity-log" id="activity-log">
+                    <div class="activity-log" id="overview-activity-log">
                         <div class="log-entry">Admin panel loaded</div>
                     </div>
-                    <button id="clear-log-btn" class="btn btn-secondary" style="margin-top: 1rem; font-size: 0.875rem; padding: 0.5rem 1rem;">Clear Log</button>
+                    <button id="overview-clear-log-btn" class="btn btn-secondary" style="margin-top: 1rem; font-size: 0.875rem; padding: 0.5rem 1rem;">Clear Log</button>
                 </div>
             </div>
             
@@ -738,9 +817,9 @@
                 <h2>Session Info & Activity Log</h2>
                 <div class="session-info" id="session-info">
                 </div>
-                <div class="activity-log" id="activity-log"></div>
+                <div class="activity-log" id="session-activity-log"></div>
                 <!-- Add missing clear log button -->
-                <button id="clear-log-btn" class="btn btn-secondary" style="margin-top: 1rem; font-size: 0.875rem; padding: 0.5rem 1rem;">Clear Log</button>
+                <button id="session-clear-log-btn" class="btn btn-secondary" style="margin-top: 1rem; font-size: 0.875rem; padding: 0.5rem 1rem;">Clear Log</button>
             </div>
             
             <!-- Statistics Overview -->
@@ -753,22 +832,64 @@
         </main>
     </div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
-        import { getFirestore, collection, addDoc, deleteDoc, doc, onSnapshot, setDoc, getDoc, getDocs, query, where, orderBy, runTransaction } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
-        import { getStorage, ref, uploadBytesResumable, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-storage.js";
+    <template id="service-group-template">
+        <div class="service-group" draggable="true">
+            <div class="card service-group-card">
+                <div class="card-header">
+                    <div class="drag-handle" title="Drag to reorder">☰</div>
+                    <h4 class="mb-0 flex-grow-1" data-role="title">Group #</h4>
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-sm btn-outline-light preview-group-btn" title="Preview this group">👁️</button>
+                        <button type="button" class="btn btn-sm btn-outline-light remove-group-btn" title="Delete this group">🗑️</button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="service-group-layout">
+                        <div class="image-section">
+                            <div class="form-group mb-3">
+                                <label class="form-label fw-bold">Service Image</label>
+                                <label class="service-image-upload-area" data-role="upload-label">
+                                    <img class="service-image-preview" data-role="image-preview" alt="Service preview">
+                                    <span class="upload-prompt-text" data-role="upload-prompt">Click to upload image</span>
+                                    <div class="upload-progress"></div>
+                                    <button type="button" class="remove-image-btn" title="Remove Image">×</button>
+                                </label>
+                                <input type="file" accept="image/*" style="display: none;" class="service-image-input">
+                                <small class="text-muted">Recommended: 16:9 aspect ratio, max 2MB</small>
+                            </div>
+                        </div>
+                        <div class="content-section">
+                            <div class="form-group mb-3">
+                                <label class="form-label fw-bold">Group Title</label>
+                                <input type="text" class="form-control group-title" placeholder="e.g. Home Renovation">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label fw-bold">Services Offered</label>
+                                <div class="service-items-container" data-role="service-list"></div>
+                                <button type="button" class="btn add-service-btn">+ Add Service</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
 
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+        import { getFirestore, collection, addDoc, deleteDoc, doc, onSnapshot, setDoc, getDoc, getDocs, query, where, orderBy, runTransaction } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+        import { getStorage, ref, uploadBytesResumable, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-storage.js";
+
+        // Firebase configuration
         const firebaseConfig = {
-            apiKey: "AIzaSyBVtq6dAEuybJNmTTv8dXBxTVUgw1t0ZMk",
-            authDomain: "cusumano-website.firebaseapp.com",
-            databaseURL: "https://cusumano-website-default-rtdb.firebaseio.com",
-            projectId: "cusumano-website",
-            storageBucket: "cusumano-website.appspot.com",
-            messagingSenderId: "20051552210",
-            appId: "1:20051552210:web:7eb3b22baa3fec184e4a0b"
+          apiKey: "AIzaSyBVtq6dAEuybJNmTTv8dXBxTVUgw1t0ZMk",
+          authDomain: "cusumano-website.firebaseapp.com",
+          projectId: "cusumano-website",
+          storageBucket: "cusumano-website.appspot.com",
+          // messagingSenderId and appId are optional for the services used in this app.
         };
-        
+
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
@@ -778,18 +899,164 @@
         let sessionTimer;
         let serviceGroups = [];
         
-        // Icon map for previews
-        const iconMap = {
-            home: `<svg class="service-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>`,
-            tool: `<svg class="service-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14.7 6.3a1 1 0 0 0-1.4 0l-1.3 1.3a1 1 0 0 0 0 1.4l1.3 1.3a1 1 0 0 0 1.4 0l1.3-1.3a1 1 0 0 0 0-1.4l-1.3-1.3z"></path><path d="M19.4 15.4a7 7 0 1 1-9.9-9.9"></path></svg>`,
-            truck: `<svg class="service-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="3" width="15" height="13"></rect><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon><circle cx="5.5" cy="18.5" r="2.5"></circle><circle cx="18.5" cy="18.5" r="2.5"></circle></svg>`,
-            hammer: `<svg class="service-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 21.5 2 22l.5-5.5L17 3z"></path></svg>`,
-            wrench: `<svg class="service-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>`,
-            paint: `<svg class="service-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 19l7-7 3 3-7 7-3-3z"></path><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"></path><path d="M2 2l7.586 7.586"></path><circle cx="11" cy="11" r="2"></circle></svg>`,
-            saw: `<svg class="service-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 6v12l6-6z"></path><path d="M6 12l-3 3 3 3 3-3-3-3z"></path><path d="M21 9l-9 9 3 3 9-9-3-3z"></path></svg>`,
-            shield: `<svg class="service-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>`
-        };
+        // Stub functions for unimplemented features
+        function setupImageListener() {
+            console.log('setupImageListener: Function not fully implemented');
+        }
+        
+        function setupHeroBannerListener() {
+            console.log('setupHeroBannerListener: Function not fully implemented');
+        }
+        
+        function setupLogoListener() {
+            console.log('setupLogoListener: Function not fully implemented');
+        }
+        
+        function loadVouchersList() {
+            console.log('loadVouchersList: Function not fully implemented');
+        }
+        
+        function initializeEnhancedFeatures() {
+            console.log('initializeEnhancedFeatures: Function not fully implemented');
+        }
 
+        // Wait for DOM to be fully loaded before accessing elements
+        document.addEventListener('DOMContentLoaded', () => {
+        
+        // Enhanced Image upload handler with advanced compression
+        async function handleServiceGroupImageUpload(file, idx) {
+            const uploadArea = document.querySelector(`label[for="service-image-upload-${idx}"]`);
+            if (!uploadArea) {
+                console.error(`Upload area not found for index ${idx}`);
+                return;
+            }
+            
+            const previewImg = uploadArea.querySelector('.service-image-preview');
+            const promptText = uploadArea.querySelector('.upload-prompt-text');
+            const progressEl = uploadArea.querySelector('.upload-progress');
+            const removeBtn = uploadArea.querySelector('.remove-image-btn');
+
+            // Validate file type and size
+            const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+            if (!validTypes.includes(file.type)) {
+                showNotification('Please select a valid image file (JPEG, PNG, or WebP)', 'error');
+                return;
+            }
+
+            if (file.size > 10 * 1024 * 1024) { // 10MB limit
+                showNotification('Image file is too large. Please select a file under 10MB.', 'error');
+                return;
+            }
+
+            // Show loading state
+            uploadArea.style.pointerEvents = 'none';
+            progressEl.style.opacity = '1';
+
+            // Show a temporary local preview
+            const localUrl = URL.createObjectURL(file);
+            previewImg.src = localUrl;
+            previewImg.style.display = 'block';
+            promptText.style.display = 'none';
+            progressEl.style.width = '5%';
+
+            // Enhanced compression options
+            const options = {
+                maxSizeMB: 0.8,
+                maxWidthOrHeight: 1200,
+                useWebWorker: true,
+                fileType: file.type === 'image/png' ? 'image/png' : 'image/jpeg',
+                quality: 0.85,
+                onProgress: (p) => {
+                    const compressProgress = 5 + (p * 35);
+                    progressEl.style.width = compressProgress + '%';
+                }
+            };
+
+            let fileToUpload;
+            try {
+                showNotification('Compressing image...', 'info');
+                fileToUpload = await imageCompression(file, options);
+                
+                const originalSizeMB = (file.size / 1024 / 1024).toFixed(2);
+                const compressedSizeMB = (fileToUpload.size / 1024 / 1024).toFixed(2);
+                const compressionRatio = ((1 - fileToUpload.size / file.size) * 100).toFixed(1);
+                
+                logActivity(`Image compressed: ${originalSizeMB}MB → ${compressedSizeMB}MB (${compressionRatio}% reduction)`, 'success');
+                progressEl.style.width = '45%';
+            } catch (error) {
+                console.error('Compression error:', error);
+                logActivity(`Image compression failed: ${error.message}. Uploading original.`, 'warning');
+                fileToUpload = file;
+                progressEl.style.width = '40%';
+            }
+
+            // Upload to Firebase Storage
+            const timestamp = Date.now();
+            const fileName = `${timestamp}_${fileToUpload.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
+            const storagePath = `service-group-images/${fileName}`;
+            const storageRef = ref(storage, storagePath);
+            const uploadTask = uploadBytesResumable(storageRef, fileToUpload);
+
+            uploadTask.on('state_changed',
+                (snapshot) => {
+                    const uploadProgress = 45 + (snapshot.bytesTransferred / snapshot.totalBytes) * 55;
+                    progressEl.style.width = uploadProgress + '%';
+                },
+                (error) => {
+                    console.error("Upload failed:", error);
+                    showNotification(`Upload failed for group #${idx + 1}: ${error.message}`, 'error');
+                    
+                    // Reset UI
+                    progressEl.style.width = '0%';
+                    progressEl.style.opacity = '0';
+                    uploadArea.style.pointerEvents = 'auto';
+                    URL.revokeObjectURL(localUrl);
+                    previewImg.style.display = 'none';
+                    promptText.style.display = 'block';
+                },
+                async () => {
+                    try {
+                        const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+                        
+                        // Clean up previous image if exists
+                        if (serviceGroups[idx].storagePath) {
+                            try {
+                                await deleteObject(ref(storage, serviceGroups[idx].storagePath));
+                                logActivity(`Previous image deleted: ${serviceGroups[idx].storagePath}`, 'info');
+                            } catch (deleteError) {
+                                console.warn('Failed to delete previous image:', deleteError);
+                            }
+                        }
+                        
+                        // Update data model
+                        serviceGroups[idx].imageUrl = downloadURL;
+                        serviceGroups[idx].storagePath = storagePath;
+
+                        // Update UI
+                        URL.revokeObjectURL(localUrl);
+                        previewImg.src = downloadURL;
+                        removeBtn.style.display = 'inline-block';
+                        removeBtn.dataset.idx = idx;
+                        removeBtn.dataset.path = storagePath;
+
+                        // Complete progress
+                        progressEl.style.width = '100%';
+                        setTimeout(() => {
+                            progressEl.style.width = '0%';
+                            progressEl.style.opacity = '0';
+                            uploadArea.style.pointerEvents = 'auto';
+                        }, 800);
+
+                        showNotification(`Image for "${serviceGroups[idx].title || `Group #${idx + 1}`}" uploaded successfully!`, 'success');
+                        saveContentDraft();
+                    } catch (error) {
+                        console.error('Failed to get download URL:', error);
+                        showNotification('Upload completed but failed to get image URL', 'error');
+                    }
+                }
+            );
+        }
+        
         // Utility functions
         function debounce(func, wait) {
             let timeout;
@@ -819,23 +1086,43 @@
         }
 
         function logActivity(message, type = 'info') {
-            const activityLog = document.getElementById('activity-log');
-            if (activityLog) {
-                const timestamp = new Date().toLocaleTimeString();
-                const logEntry = document.createElement('div');
-                logEntry.className = `log-entry ${type}`;
-                logEntry.innerHTML = `<strong>${timestamp}</strong> - ${message}`;
-                
-                // Add to top of log
-                activityLog.insertBefore(logEntry, activityLog.firstChild);
-                
-                // Keep only last 50 entries
-                while (activityLog.children.length > 50) {
-                    activityLog.removeChild(activityLog.lastChild);
+            const overviewLog = document.getElementById('overview-activity-log');
+            const sessionLog = document.getElementById('session-activity-log');
+            
+            const timestamp = new Date().toLocaleTimeString();
+            
+            // Create log entry for both logs
+            [overviewLog, sessionLog].forEach(activityLog => {
+                if (activityLog) {
+                    const logEntry = document.createElement('div');
+                    logEntry.className = `log-entry ${type}`;
+                    
+                    // Create timestamp element programmatically (XSS-safe)
+                    const timestampEl = document.createElement('strong');
+                    timestampEl.textContent = timestamp;
+                    
+                    // Add timestamp and separator
+                    logEntry.appendChild(timestampEl);
+                    logEntry.appendChild(document.createTextNode(' - '));
+                    
+                    // Add message content safely using textContent
+                    const messageEl = document.createTextNode(message);
+                    logEntry.appendChild(messageEl);
+                    
+                    // Add to top of log
+                    activityLog.insertBefore(logEntry, activityLog.firstChild);
+                    
+                    // Keep only last 50 entries
+                    while (activityLog.children.length > 50) {
+                        activityLog.removeChild(activityLog.lastChild);
+                    }
                 }
-            }
+            });
         }
 
+        // Note: This validation function only checks fields with the 'required' attribute.
+        // It does not validate fields without the required attribute (such as service group titles).
+        // Future development should consider expanding validation coverage.
         function validateForm(form) {
             if (!form) return { isValid: false, errors: ['Form not found'] };
             
@@ -1081,46 +1368,69 @@
         const saveContentBtn = document.getElementById('save-content-btn');
         const serviceGroupsContainer = document.getElementById('service-groups-fields');
         const sessionInfo = document.getElementById('session-info');
-        const activityLog = document.getElementById('activity-log');
+        const overviewActivityLog = document.getElementById('overview-activity-log');
+        const sessionActivityLog = document.getElementById('session-activity-log');
         const statsGrid = document.getElementById('stats-grid');
+        const heroHeadlineInput = document.getElementById('hero-headline');
+        const heroCtaTextInput = document.getElementById('hero-cta-text');
+        const contactPhoneInput = document.getElementById('contact-phone');
+        const contactEmailInput = document.getElementById('contact-email');
+        const facebookUrlInput = document.getElementById('facebook-url');
+        const googleMapUrlInput = document.getElementById('google-map-url');
         
         onAuthStateChanged(auth, async user => {
-            if (user && user.email === 'copio01@yahoo.com') {
-                loginScreen.style.display = 'none';
-                document.body.style.alignItems = 'flex-start';
-                document.body.style.justifyContent = 'flex-start';
-                adminDashboard.style.display = 'block';
-                
-                // Update last login time
-                const now = new Date();
-                const lastLoginEl = document.getElementById('last-login-time');
-                if (lastLoginEl) {
-                    lastLoginEl.textContent = now.toLocaleString();
-                }
-                
-                // Initialize enhanced features
-                initializeCollapsibleCards();
-                startSessionTimer();
-                
-                // Load all admin data
+            if (user) {
                 try {
-                    await Promise.all([
-                        loadWebsiteContent(),
-                        setupImageListener(),
-                        setupHeroBannerListener(),
-                        setupLogoListener(),
-                        loadVouchersList(),
-                        loadDashboardStats()
-                    ]);
+                    // Force token refresh and get ID token result with custom claims
+                    const idTokenResult = await user.getIdTokenResult(true);
                     
-                    // Initialize enhanced features after data loads
-                    initializeEnhancedFeatures();
-                    
-                    logActivity('Admin logged in successfully', 'success');
-                    showNotification('Welcome to the admin panel!', 'success');
+                    // Check for admin claim in the token
+                    if (idTokenResult.claims.admin) {
+                        loginScreen.style.display = 'none';
+                        document.body.style.alignItems = 'flex-start';
+                        document.body.style.justifyContent = 'flex-start';
+                        adminDashboard.style.display = 'block';
+                        
+                        // Update last login time
+                        const now = new Date();
+                        const lastLoginEl = document.getElementById('last-login-time');
+                        if (lastLoginEl) {
+                            lastLoginEl.textContent = now.toLocaleString();
+                        }
+                        
+                        // Initialize enhanced features
+                        initializeCollapsibleCards();
+                        startSessionTimer();
+                        
+                        // Load all admin data
+                        try {
+                            await Promise.all([
+                                loadWebsiteContent(),
+                                setupImageListener(),
+                                setupHeroBannerListener(),
+                                setupLogoListener(),
+                                loadVouchersList(),
+                                loadDashboardStats()
+                            ]);
+                            
+                            // Initialize enhanced features after data loads
+                            initializeEnhancedFeatures();
+                            
+                            logActivity('Admin logged in successfully', 'success');
+                            showNotification('Welcome to the admin panel!', 'success');
+                        } catch (error) {
+                            logActivity(`Error loading admin data: ${error.message}`, 'error');
+                            showNotification('Error loading some data. Please refresh the page.', 'error');
+                        }
+                    } else {
+                        // User is authenticated but does not have admin privileges
+                        showNotification('You are not authorized to access this panel.', 'error');
+                        await signOut(auth);
+                    }
                 } catch (error) {
-                    logActivity(`Error loading admin data: ${error.message}`, 'error');
-                    showNotification('Error loading some data. Please refresh the page.', 'error');
+                    console.error('Error checking admin claims:', error);
+                    showNotification('Authentication error. Please try again.', 'error');
+                    await signOut(auth);
                 }
             } else {
                 loginScreen.style.display = 'block';
@@ -1158,11 +1468,171 @@
             }
         });
 
+        // Event listeners for grant chips form and voucher form
+        document.getElementById('grant-chips-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            console.log('Grant chips form submitted - not fully implemented');
+            showNotification('Grant chips feature not fully implemented', 'warning');
+        });
+        
+        document.getElementById('generate-voucher-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            console.log('Generate voucher form submitted - not fully implemented');
+            showNotification('Generate voucher feature not fully implemented', 'warning');
+        });
+
         logoutBtn.addEventListener('click', async () => {
-            if (confirm('Are you sure you want to logout?')) {
+            showLogoutConfirmModal();
+        });
+
+        function showLogoutConfirmModal() {
+            // Create modal overlay
+            const modalOverlay = document.createElement('div');
+            modalOverlay.className = 'modal-overlay';
+            modalOverlay.style.cssText = 'display: flex; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1050; align-items: center; justify-content: center;';
+
+            // Create modal dialog
+            const modalDialog = document.createElement('div');
+            modalDialog.style.cssText = 'max-width: 400px; width: 90%; background: white; border-radius: 12px; box-shadow: 0 20px 40px rgba(0,0,0,0.2);';
+
+            // Create modal content
+            const modalHeader = document.createElement('div');
+            modalHeader.style.cssText = 'padding: 1.5rem 1.5rem 1rem; border-bottom: 1px solid #e5e7eb;';
+            
+            const modalTitle = document.createElement('h3');
+            modalTitle.style.cssText = 'margin: 0; color: var(--dark-gray); font-weight: 600;';
+            modalTitle.textContent = 'Confirm Logout';
+            
+            const modalText = document.createElement('p');
+            modalText.style.cssText = 'margin: 0.5rem 0 0; color: #6b7280;';
+            modalText.textContent = 'Are you sure you want to logout?';
+
+            modalHeader.appendChild(modalTitle);
+            modalHeader.appendChild(modalText);
+
+            // Create modal footer
+            const modalFooter = document.createElement('div');
+            modalFooter.style.cssText = 'padding: 1rem 1.5rem 1.5rem; display: flex; gap: 0.75rem; justify-content: flex-end;';
+
+            const cancelBtn = document.createElement('button');
+            cancelBtn.className = 'btn btn-secondary';
+            cancelBtn.style.cssText = 'padding: 0.5rem 1.5rem; border-radius: 8px; background: #6b7280; color: white; border: none; cursor: pointer;';
+            cancelBtn.textContent = 'Cancel';
+
+            const logoutBtn = document.createElement('button');
+            logoutBtn.className = 'btn btn-danger';
+            logoutBtn.style.cssText = 'padding: 0.5rem 1.5rem; border-radius: 8px; background: var(--danger-color); color: white; border: none; cursor: pointer;';
+            logoutBtn.textContent = 'Logout';
+
+            modalFooter.appendChild(cancelBtn);
+            modalFooter.appendChild(logoutBtn);
+
+            modalDialog.appendChild(modalHeader);
+            modalDialog.appendChild(modalFooter);
+            modalOverlay.appendChild(modalDialog);
+
+            // Event listeners
+            const closeModal = () => modalOverlay.remove();
+            
+            cancelBtn.addEventListener('click', closeModal);
+            
+            logoutBtn.addEventListener('click', async () => {
                 logActivity('Admin logged out', 'info');
                 await signOut(auth);
                 showNotification('Logged out successfully', 'info');
+                closeModal();
+            });
+
+            modalOverlay.addEventListener('click', (e) => {
+                if (e.target === modalOverlay) {
+                    closeModal();
+                }
+            });
+
+            // Add to document
+            document.body.appendChild(modalOverlay);
+        }
+
+        function showConfirmationModal(message, onConfirm) {
+            // Create modal overlay
+            const modalOverlay = document.createElement('div');
+            modalOverlay.className = 'modal-overlay';
+            modalOverlay.style.cssText = 'display: flex; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1050; align-items: center; justify-content: center;';
+
+            // Create modal dialog
+            const modalDialog = document.createElement('div');
+            modalDialog.style.cssText = 'max-width: 400px; width: 90%; background: white; border-radius: 12px; box-shadow: 0 20px 40px rgba(0,0,0,0.2);';
+
+            // Create modal content
+            const modalHeader = document.createElement('div');
+            modalHeader.style.cssText = 'padding: 1.5rem 1.5rem 1rem; border-bottom: 1px solid #e5e7eb;';
+            
+            const modalTitle = document.createElement('h3');
+            modalTitle.style.cssText = 'margin: 0; color: var(--dark-gray); font-weight: 600;';
+            modalTitle.textContent = 'Confirm Action';
+            
+            const modalText = document.createElement('p');
+            modalText.style.cssText = 'margin: 0.5rem 0 0; color: #6b7280;';
+            modalText.textContent = message;
+
+            modalHeader.appendChild(modalTitle);
+            modalHeader.appendChild(modalText);
+
+            // Create modal footer
+            const modalFooter = document.createElement('div');
+            modalFooter.style.cssText = 'padding: 1rem 1.5rem 1.5rem; display: flex; gap: 0.75rem; justify-content: flex-end;';
+
+            const cancelBtn = document.createElement('button');
+            cancelBtn.className = 'btn btn-secondary';
+            cancelBtn.style.cssText = 'padding: 0.5rem 1.5rem; border-radius: 8px; background: #6b7280; color: white; border: none; cursor: pointer;';
+            cancelBtn.textContent = 'Cancel';
+
+            const confirmBtn = document.createElement('button');
+            confirmBtn.className = 'btn btn-danger';
+            confirmBtn.style.cssText = 'padding: 0.5rem 1.5rem; border-radius: 8px; background: var(--danger-color); color: white; border: none; cursor: pointer;';
+            confirmBtn.textContent = 'Confirm';
+
+            modalFooter.appendChild(cancelBtn);
+            modalFooter.appendChild(confirmBtn);
+
+            modalDialog.appendChild(modalHeader);
+            modalDialog.appendChild(modalFooter);
+            modalOverlay.appendChild(modalDialog);
+
+            // Event listeners
+            const closeModal = () => modalOverlay.remove();
+            
+            cancelBtn.addEventListener('click', closeModal);
+            
+            confirmBtn.addEventListener('click', () => {
+                onConfirm();
+                closeModal();
+            });
+
+            modalOverlay.addEventListener('click', (e) => {
+                if (e.target === modalOverlay) {
+                    closeModal();
+                }
+            });
+
+            // Add to document
+            document.body.appendChild(modalOverlay);
+        }
+
+        // Event listeners for clear log buttons
+        document.getElementById('overview-clear-log-btn').addEventListener('click', () => {
+            const overviewLog = document.getElementById('overview-activity-log');
+            if (overviewLog) {
+                overviewLog.innerHTML = '<div class="log-entry">Activity log cleared</div>';
+                logActivity('Overview activity log cleared', 'info');
+            }
+        });
+
+        document.getElementById('session-clear-log-btn').addEventListener('click', () => {
+            const sessionLog = document.getElementById('session-activity-log');
+            if (sessionLog) {
+                sessionLog.innerHTML = '<div class="log-entry">Activity log cleared</div>';
+                logActivity('Session activity log cleared', 'info');
             }
         });
 
@@ -1174,26 +1644,19 @@
             loadVouchersList();
         }
 
-        // serviceGroups is already declared globally
-        const iconOptions = [
-            { name: 'Tool', value: 'tool' }, { name: 'Home', value: 'home' }, { name: 'Truck', value: 'truck' }, 
-            { name: 'Hammer', value: 'hammer' }, { name: 'Wrench', value: 'wrench' }, { name: 'Paint', value: 'paint' },
-            { name: 'Saw', value: 'saw' }, { name: 'Shield', value: 'shield' }
-        ];
-
         async function loadWebsiteContent() {
             const docRef = doc(db, 'siteContent', 'main');
             const docSnap = await getDoc(docRef);
             if (docSnap.exists()) {
                 const data = docSnap.data();
-                document.getElementById('hero-headline').value = data.heroHeadline || '';
-                document.getElementById('hero-cta-text').value = data.heroCtaText || '';
+                heroHeadlineInput.value = data.heroHeadline || '';
+                heroCtaTextInput.value = data.heroCtaText || '';
                 document.getElementById('about-text').value = data.about || '';
                 document.getElementById('testimonials-text').value = data.testimonials || '';
-                document.getElementById('contact-phone').value = data.contactPhone || '';
-                document.getElementById('contact-email').value = data.contactEmail || '';
-                document.getElementById('facebook-url').value = data.facebookUrl || '';
-                document.getElementById('google-map-url').value = data.googleMapUrl || '';
+                contactPhoneInput.value = data.contactPhone || '';
+                contactEmailInput.value = data.contactEmail || '';
+                facebookUrlInput.value = data.facebookUrl || '';
+                googleMapUrlInput.value = data.googleMapUrl || '';
                 
                 // Process service groups
                 if (data.serviceGroups && Array.isArray(data.serviceGroups)) {
@@ -1233,25 +1696,26 @@
             saveContentBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Saving...';
             saveContentBtn.disabled = true;
             
-            // Process service groups before saving
+            // REPLACE the existing 'processedServiceGroups' block with this one
             const processedServiceGroups = serviceGroups.map(group => {
-                // Create a clean copy of each group
+                // Create a clean copy of each group, removing temporary properties
                 return {
                     id: group.id || `group_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
                     title: group.title || '',
-                    icon: group.icon || 'tool',
-                    services: Array.isArray(group.services) ? group.services.filter(s => s.trim()) : []
+                    services: Array.isArray(group.services) ? group.services.filter(s => s.trim()) : [],
+                    imageUrl: group.imageUrl || '',
+                    storagePath: group.storagePath || '' // Keep this for deletion purposes
                 };
             });
             
             const dataToSave = {
-                heroHeadline: document.getElementById('hero-headline').value,
-                heroCtaText: document.getElementById('hero-cta-text').value,
+                heroHeadline: heroHeadlineInput.value,
+                heroCtaText: heroCtaTextInput.value,
                 about: document.getElementById('about-text').value,
-                contactPhone: document.getElementById('contact-phone').value,
-                contactEmail: document.getElementById('contact-email').value,
-                facebookUrl: document.getElementById('facebook-url').value,
-                googleMapUrl: document.getElementById('google-map-url').value,
+                contactPhone: contactPhoneInput.value,
+                contactEmail: contactEmailInput.value,
+                facebookUrl: facebookUrlInput.value,
+                googleMapUrl: googleMapUrlInput.value,
                 serviceGroups: processedServiceGroups,
                 lastUpdated: new Date()
             };
@@ -1286,94 +1750,141 @@
             }
         });
 
+        // Enhanced template-based rendering with modern features
         function renderServiceGroupFields() {
             serviceGroupsContainer.innerHTML = '';
-            
-            // If no service groups exist, show a message
-            if (serviceGroups.length === 0) {
-                const emptyMessage = document.createElement('div');
-                emptyMessage.className = 'alert alert-info';
-                emptyMessage.innerHTML = 'No service groups defined yet. Click the "Add Service Group" button below to create your first service group.';
-                serviceGroupsContainer.appendChild(emptyMessage);
+            const template = document.getElementById('service-group-template');
+
+            if (!serviceGroups || serviceGroups.length === 0) {
+                const emptyState = createEmptyState();
+                serviceGroupsContainer.appendChild(emptyState);
                 return;
             }
-            
+
             serviceGroups.forEach((group, idx) => {
-                const groupEl = document.createElement('div');
-                groupEl.className = 'service-group';
-                groupEl.dataset.id = group.id || `group_${Date.now()}_${idx}`;
-                groupEl.setAttribute('draggable', 'true');
+                const clone = template.content.cloneNode(true);
+
+                // Set top-level data attributes
+                const serviceGroupEl = clone.querySelector('.service-group');
+                serviceGroupEl.dataset.idx = idx;
+                serviceGroupEl.draggable = true;
+
+                // Populate the template clone with data
+                clone.querySelector('[data-role="title"]').textContent = `Group #${idx + 1}`;
                 
-                // Parse services from string to array if needed
-                const services = typeof group.services === 'string' 
-                    ? group.services.split('\n').filter(s => s.trim())
-                    : Array.isArray(group.services) ? group.services : [];
-                    
-                // Create service items HTML
-                const serviceItemsHtml = services.map((service, sIdx) => `
-                    <div class="service-item" data-group-idx="${idx}" data-service-idx="${sIdx}">
-                        <input type="text" class="form-control service-item-input" value="${service}" placeholder="Service description">
-                        <button type="button" class="btn btn-sm btn-danger remove-service-btn">×</button>
-                    </div>
-                `).join('');
+                const titleInput = clone.querySelector('.group-title');
+                titleInput.value = group.title || '';
+                titleInput.dataset.idx = idx;
                 
-                groupEl.innerHTML = `
-                    <div class="card service-group-card mb-4">
-                        <div class="card-header d-flex align-items-center">
-                            <div class="drag-handle me-2" title="Drag to reorder">☰</div>
-                            <h4 class="mb-0 flex-grow-1">Group #${idx + 1}</h4>
-                            <div class="btn-group">
-                                <button type="button" class="btn btn-sm btn-outline-primary preview-group-btn" data-idx="${idx}" title="Preview this group">👁️</button>
-                                <button type="button" class="btn btn-sm btn-outline-danger remove-group-btn" data-idx="${idx}" title="Delete this group">🗑️</button>
-                            </div>
-                        </div>
-                        <div class="card-body">
-                            <div class="form-group mb-3">
-                                <label>Group Title</label>
-                                <input type="text" class="form-control group-title" value="${group.title || ''}" data-idx="${idx}" placeholder="e.g. Home Renovation">
-                            </div>
-                            <div class="form-group mb-3">
-                                <label>Service Image</label>
-                                <div class="image-upload-container">
-                                    <div class="d-flex align-items-center mb-2">
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                `;
+                const addBtn = clone.querySelector('.add-service-btn');
+                addBtn.dataset.idx = idx;
                 
-                serviceGroupsContainer.appendChild(groupEl);
+                const removeBtn = clone.querySelector('.remove-group-btn');
+                removeBtn.dataset.idx = idx;
                 
-                // Show icon preview
-                updateIconPreview(idx, group.icon);
+                const previewBtn = clone.querySelector('.preview-group-btn');
+                previewBtn.dataset.idx = idx;
+
+                // Handle image display with enhanced UI
+                const previewImg = clone.querySelector('[data-role="image-preview"]');
+                const prompt = clone.querySelector('[data-role="upload-prompt"]');
+                const removeImageBtn = clone.querySelector('.remove-image-btn');
+                const uploadLabel = clone.querySelector('[data-role="upload-label"]');
+                const fileInput = clone.querySelector('.service-image-input');
+
+                fileInput.id = `service-image-upload-${idx}`;
+                fileInput.dataset.idx = idx;
+                uploadLabel.setAttribute('for', fileInput.id);
+
+                if (group.imageUrl) {
+                    previewImg.src = group.imageUrl;
+                    previewImg.style.display = 'block';
+                    prompt.style.display = 'none';
+                    removeImageBtn.style.display = 'inline-block';
+                    removeImageBtn.dataset.idx = idx;
+                    removeImageBtn.dataset.path = group.storagePath || '';
+                } else {
+                    previewImg.style.display = 'none';
+                    prompt.style.display = 'flex';
+                    removeImageBtn.style.display = 'none';
+                }
+
+                // Render service items with enhanced styling
+                const serviceListContainer = clone.querySelector('[data-role="service-list"]');
+                serviceListContainer.innerHTML = '';
+                
+                if (group.services && group.services.length > 0) {
+                    group.services.forEach((service, sIdx) => {
+                        const serviceItemEl = document.createElement('div');
+                        serviceItemEl.className = 'service-item';
+                        serviceItemEl.dataset.serviceIdx = sIdx;
+                        
+                        // Create input element
+                        const input = document.createElement('input');
+                        input.type = 'text';
+                        input.className = 'form-control service-item-input';
+                        input.value = service || '';
+                        input.placeholder = 'Enter service description...';
+
+                        // Create remove button
+                        const removeButton = document.createElement('button');
+                        removeButton.type = 'button';
+                        removeButton.className = 'remove-service-btn';
+                        removeButton.title = 'Remove this service';
+                        removeButton.textContent = '×';
+
+                        // Append elements safely
+                        serviceItemEl.append(input, removeButton);
+                        serviceListContainer.appendChild(serviceItemEl);
+                    });
+                } else {
+                    // Show helpful message when no services exist
+                    const helpText = document.createElement('div');
+                    helpText.className = 'text-muted fst-italic mb-2';
+                    helpText.textContent = 'No services added yet. Click "Add Service" to get started.';
+                    serviceListContainer.appendChild(helpText);
+                }
+
+                serviceGroupsContainer.appendChild(clone);
             });
+            
+            // Setup drag and drop after rendering
+            setupServiceGroupsDragAndDrop();
         }
         
-        // Function to update icon preview
-        function updateIconPreview(idx, iconValue) {
-            const previewEl = document.getElementById(`icon-preview-${idx}`);
-            if (!previewEl) return;
-            
-            previewEl.innerHTML = iconMap[iconValue] || '';
-        }
+        // Enhanced add service group with animation
         document.getElementById('add-service-group-btn').addEventListener('click', () => {
-            serviceGroups.push({ 
+            const newGroup = { 
                 id: `group_${Date.now()}`, 
                 title: '', 
-                services: [], 
-                icon: 'tool' 
-            });
+                services: [],
+                imageUrl: '',
+                storagePath: ''
+            };
+            
+            serviceGroups.push(newGroup);
             renderServiceGroupFields();
             
-            // Scroll to the newly added group
+            // Add animation class to new group
             setTimeout(() => {
-                const lastGroup = serviceGroupsContainer.lastElementChild;
-                if (lastGroup) {
-                    lastGroup.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                const newGroupElement = serviceGroupsContainer.lastElementChild;
+                if (newGroupElement) {
+                    newGroupElement.classList.add('new-group');
+                    newGroupElement.scrollIntoView({ 
+                        behavior: 'smooth', 
+                        block: 'center' 
+                    });
+                    
+                    // Focus on title input
+                    const titleInput = newGroupElement.querySelector('.group-title');
+                    if (titleInput) {
+                        setTimeout(() => titleInput.focus(), 300);
+                    }
                 }
             }, 100);
             
-            showNotification('New service group added', 'info');
+            showNotification(`New service group added! (${serviceGroups.length} total)`, 'success');
+            saveContentDraft();
         });
         
         // Enhanced event delegation for service group interactions
@@ -1386,16 +1897,12 @@
                 serviceGroups[idx].title = e.target.value;
             }
             
-            // Group icon change
-            if (e.target.classList.contains('group-icon')) {
-                serviceGroups[idx].icon = e.target.value;
-                updateIconPreview(idx, e.target.value);
-            }
-            
             // Service item change
             if (e.target.classList.contains('service-item-input')) {
-                const groupIdx = parseInt(e.target.closest('[data-group-idx]').dataset.groupIdx);
-                const serviceIdx = parseInt(e.target.closest('[data-service-idx]').dataset.serviceIdx);
+                const serviceGroup = e.target.closest('.service-group');
+                const groupIdx = parseInt(serviceGroup.dataset.idx);
+                const serviceItem = e.target.closest('.service-item');
+                const serviceIdx = parseInt(serviceItem.dataset.serviceIdx);
                 
                 if (!isNaN(groupIdx) && !isNaN(serviceIdx)) {
                     // Ensure services is an array
@@ -1414,24 +1921,65 @@
             saveContentDraft();
         });
         
+        // Event delegation for service image uploads
+        serviceGroupsContainer.addEventListener('change', e => {
+            if (e.target.classList.contains('service-image-input') && e.target.files.length > 0) {
+                const idx = parseInt(e.target.dataset.idx);
+                if (!isNaN(idx)) {
+                    handleServiceGroupImageUpload(e.target.files[0], idx);
+                }
+            }
+        });
+        
         // Click event handling with delegation
         serviceGroupsContainer.addEventListener('click', e => {
+            const target = e.target;
+            
             // Remove group button
-            if (e.target.classList.contains('remove-group-btn')) {
-                const idx = parseInt(e.target.dataset.idx);
+            if (target.classList.contains('remove-group-btn')) {
+                const idx = parseInt(target.dataset.idx);
                 if (isNaN(idx)) return;
                 
-                if(confirm(`Are you sure you want to remove group "${serviceGroups[idx].title || 'Untitled'}"?`)) {
+                showConfirmationModal(`Are you sure you want to remove group "${serviceGroups[idx].title || 'Untitled'}"?`, () => {
+                    // Delete associated image if it exists
+                    const groupToDelete = serviceGroups[idx];
+                    if (groupToDelete.storagePath) {
+                        deleteObject(ref(storage, groupToDelete.storagePath)).then(() => {
+                            logActivity(`Image ${groupToDelete.storagePath} deleted from Storage.`, 'success');
+                        }).catch(err => {
+                            logActivity(`Failed to delete image for group: ${err.message}`, 'error');
+                        });
+                    }
                     serviceGroups.splice(idx, 1);
                     renderServiceGroupFields();
                     showNotification('Service group removed', 'info');
                     saveContentDraft();
-                }
+                });
+            }
+            // Remove image button
+            else if (target.classList.contains('remove-image-btn')) {
+                e.preventDefault(); // Prevent the label from triggering file input
+                const idx = parseInt(target.dataset.idx, 10);
+                const storagePath = target.dataset.path;
+
+                showConfirmationModal('Are you sure you want to remove this image?', () => {
+                    if (storagePath) {
+                        deleteObject(ref(storage, storagePath)).then(() => {
+                            logActivity(`Image ${storagePath} deleted from Storage.`, 'success');
+                        }).catch(err => {
+                            logActivity(`Failed to delete image from Storage: ${err.message}`, 'error');
+                        });
+                    }
+                    serviceGroups[idx].imageUrl = '';
+                    serviceGroups[idx].storagePath = '';
+                    renderServiceGroupFields(); // Re-render to update the UI
+                    saveContentDraft();
+                });
             }
             
             // Add new service to a group
             if (e.target.classList.contains('add-service-btn')) {
-                const groupIdx = parseInt(e.target.dataset.groupIdx);
+                const groupIdx = parseInt(e.target.dataset.idx);
                 if (isNaN(groupIdx)) return;
                 
                 // Ensure services is an array
@@ -1447,8 +1995,8 @@
                 
                 // Focus the newly added service input
                 setTimeout(() => {
-                    const serviceContainers = document.querySelectorAll(`[data-group-idx="${groupIdx}"] .service-item`);
-                    const lastService = serviceContainers[serviceContainers.length - 1];
+                    const serviceGroups = document.querySelectorAll(`.service-group[data-idx="${groupIdx}"] .service-item`);
+                    const lastService = serviceGroups[serviceGroups.length - 1];
                     if (lastService) {
                         const input = lastService.querySelector('input');
                         if (input) {
@@ -1460,8 +2008,10 @@
             
             // Remove service item
             if (e.target.classList.contains('remove-service-btn')) {
-                const groupIdx = parseInt(e.target.closest('[data-group-idx]').dataset.groupIdx);
-                const serviceIdx = parseInt(e.target.closest('[data-service-idx]').dataset.serviceIdx);
+                const serviceGroup = e.target.closest('.service-group');
+                const groupIdx = parseInt(serviceGroup.dataset.idx);
+                const serviceItem = e.target.closest('.service-item');
+                const serviceIdx = parseInt(serviceItem.dataset.serviceIdx);
                 
                 if (!isNaN(groupIdx) && !isNaN(serviceIdx)) {
                     // Ensure services is an array
@@ -1479,57 +2029,154 @@
                 }
             }
             
-            // Preview group
+            // Preview group with enhanced modal
             if (e.target.classList.contains('preview-group-btn')) {
                 const idx = parseInt(e.target.dataset.idx);
                 if (isNaN(idx)) return;
                 
-                previewServiceGroup(serviceGroups[idx]);
+                previewServiceGroup(serviceGroups[idx], idx);
             }
         });
         
-        // Preview service group in a modal
-        function previewServiceGroup(group) {
-            // Create modal HTML
-            const modalHtml = `
-                <div class="modal" id="previewModal" tabindex="-1" style="display:block; background: rgba(0,0,0,0.5);">
-                    <div class="modal-dialog modal-lg">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h5 class="modal-title">Service Group Preview</h5>
-                                <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="document.getElementById('previewModal').remove()">
-                                    <span aria-hidden="true">&times;</span>
-                                </button>
-                            </div>
-                            <div class="modal-body">
-                                <div class="service-group-preview" style="padding: 1rem; background: #f8f9fa; border-radius: 8px;">
-                                    <div style="display: flex; align-items: center; margin-bottom: 1rem;">
-                                        <div style="width: 50px; height: 50px; margin-right: 1rem;">
-                                            ${iconMap[group.icon] || ''}
-                                        </div>
-                                        <h3 style="margin: 0;">${group.title || 'Untitled Group'}</h3>
-                                    </div>
-                                    <ul style="list-style-type: none; padding-left: 0;">
-                                        ${Array.isArray(group.services) 
-                                            ? group.services.map(service => `<li style="padding: 0.5rem; background: white; margin-bottom: 0.5rem; border-left: 3px solid var(--primary-color);">${service || 'Untitled service'}</li>`).join('') 
-                                            : (typeof group.services === 'string' 
-                                                ? group.services.split('\n').filter(s => s.trim()).map(service => `<li style="padding: 0.5rem; background: white; margin-bottom: 0.5rem; border-left: 3px solid var(--primary-color);">${service}</li>`).join('')
-                                                : '<li>No services defined</li>')}
-                                    </ul>
-                                </div>
-                            </div>
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" onclick="document.getElementById('previewModal').remove()">Close</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `;
+        // Enhanced service group preview with modern modal - XSS-safe implementation
+        function previewServiceGroup(group, idx) {
+            // Create modal overlay
+            const modalOverlay = document.createElement('div');
+            modalOverlay.className = 'modal-overlay';
+            modalOverlay.id = 'previewModal';
+            modalOverlay.style.cssText = 'display: flex; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 1050; align-items: center; justify-content: center;';
+
+            // Create modal dialog
+            const modalDialog = document.createElement('div');
+            modalDialog.className = 'modal-dialog';
+            modalDialog.style.cssText = 'max-width: 600px; width: 90%; max-height: 90vh; overflow-y: auto;';
+
+            // Create modal content container
+            const modalContent = document.createElement('div');
+            modalContent.className = 'modal-content';
+            modalContent.style.cssText = 'background: white; border-radius: 16px; box-shadow: 0 20px 40px rgba(0,0,0,0.2);';
+
+            // Create modal content
+            const modalHeader = document.createElement('div');
+            modalHeader.className = 'modal-header';
+            modalHeader.style.cssText = 'background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); color: white; padding: 1.5rem; border-radius: 16px 16px 0 0;';
+
+            const modalTitle = document.createElement('h5');
+            modalTitle.className = 'modal-title';
+            modalTitle.style.cssText = 'font-weight: 600; margin: 0;';
+            modalTitle.textContent = `Preview: ${group.title || `Group #${idx + 1}`}`;
+
+            const closeBtn = document.createElement('button');
+            closeBtn.type = 'button';
+            closeBtn.className = 'btn-close btn-close-white';
+            closeBtn.style.cssText = 'background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer; padding: 0; width: 30px; height: 30px;';
+            closeBtn.textContent = '×';
+
+            modalHeader.appendChild(modalTitle);
+            modalHeader.appendChild(closeBtn);
+
+            // Create modal body
+            const modalBody = document.createElement('div');
+            modalBody.className = 'modal-body';
+            modalBody.style.cssText = 'padding: 2rem;';
+
+            const serviceGroupPreview = document.createElement('div');
+            serviceGroupPreview.className = 'service-group-preview';
+
+            // Add image if present
+            if (group.imageUrl) {
+                const imageContainer = document.createElement('div');
+                imageContainer.style.cssText = 'margin-bottom: 1.5rem;';
+                
+                const image = document.createElement('img');
+                image.src = group.imageUrl;
+                image.alt = group.title || 'Service Group Image';
+                image.style.cssText = 'width: 100%; height: 200px; object-fit: cover; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);';
+                
+                imageContainer.appendChild(image);
+                serviceGroupPreview.appendChild(imageContainer);
+            }
+
+            // Add title
+            const titleElement = document.createElement('h3');
+            titleElement.style.cssText = 'margin: 0 0 1rem 0; color: var(--dark-gray); font-weight: 600;';
+            titleElement.textContent = group.title || 'Untitled Group';
+            serviceGroupPreview.appendChild(titleElement);
+
+            // Add services
+            if (group.services && group.services.length > 0) {
+                const servicesContainer = document.createElement('div');
+                servicesContainer.style.cssText = 'background: #f8fafc; padding: 1.5rem; border-radius: 12px;';
+
+                const servicesTitle = document.createElement('h6');
+                servicesTitle.style.cssText = 'margin: 0 0 1rem 0; color: var(--primary-color); font-weight: 600; text-transform: uppercase; font-size: 0.875rem; letter-spacing: 0.5px;';
+                servicesTitle.textContent = 'Services Offered';
+
+                const servicesList = document.createElement('ul');
+                servicesList.style.cssText = 'list-style: none; padding: 0; margin: 0;';
+
+                group.services.filter(s => s && s.trim()).forEach(service => {
+                    const listItem = document.createElement('li');
+                    listItem.style.cssText = 'padding: 0.75rem; background: white; margin-bottom: 0.5rem; border-left: 4px solid var(--primary-color); border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);';
+                    listItem.textContent = service.trim();
+                    servicesList.appendChild(listItem);
+                });
+
+                servicesContainer.appendChild(servicesTitle);
+                servicesContainer.appendChild(servicesList);
+                serviceGroupPreview.appendChild(servicesContainer);
+            } else {
+                const emptyState = document.createElement('div');
+                emptyState.style.cssText = 'text-align: center; padding: 2rem; color: #6b7280;';
+
+                const icon = document.createElement('div');
+                icon.style.cssText = 'font-size: 3rem; margin-bottom: 1rem; opacity: 0.5;';
+                icon.textContent = '📝';
+
+                const message = document.createElement('p');
+                message.textContent = 'No services have been added to this group yet.';
+
+                emptyState.appendChild(icon);
+                emptyState.appendChild(message);
+                serviceGroupPreview.appendChild(emptyState);
+            }
+
+            modalBody.appendChild(serviceGroupPreview);
+
+            // Create modal footer
+            const modalFooter = document.createElement('div');
+            modalFooter.className = 'modal-footer';
+            modalFooter.style.cssText = 'padding: 1.5rem; border-top: 1px solid #e5e7eb; background: #f9fafb; border-radius: 0 0 16px 16px;';
+
+            const closeButton = document.createElement('button');
+            closeButton.type = 'button';
+            closeButton.className = 'btn btn-secondary';
+            closeButton.style.cssText = 'padding: 0.5rem 1.5rem; border-radius: 8px;';
+            closeButton.textContent = 'Close Preview';
+
+            modalFooter.appendChild(closeButton);
+
+            // Assemble modal
+            modalContent.appendChild(modalHeader);
+            modalContent.appendChild(modalBody);
+            modalContent.appendChild(modalFooter);
+            modalDialog.appendChild(modalContent);
+            modalOverlay.appendChild(modalDialog);
+
+            // Add event listeners
+            const closeModal = () => modalOverlay.remove();
+            closeBtn.addEventListener('click', closeModal);
+            closeButton.addEventListener('click', closeModal);
             
-            // Add modal to document
-            const modalContainer = document.createElement('div');
-            modalContainer.innerHTML = modalHtml;
-            document.body.appendChild(modalContainer.firstChild);
+            // Click outside to close
+            modalOverlay.addEventListener('click', (e) => {
+                if (e.target === modalOverlay) {
+                    closeModal();
+                }
+            });
+
+            // Add to document
+            document.body.appendChild(modalOverlay);
         }
         
         // Save draft of content changes
@@ -1539,8 +2186,8 @@
                 timestamp: new Date().toISOString(),
                 serviceGroups: serviceGroups,
                 // Add other form fields here
-                heroHeadline: document.getElementById('hero-headline')?.value,
-                heroCtaText: document.getElementById('hero-cta-text')?.value,
+                heroHeadline: heroHeadlineInput?.value,
+                heroCtaText: heroCtaTextInput?.value,
                 about: document.getElementById('about-text')?.value,
                 contactPhone: document.getElementById('contact-phone')?.value,
                 contactEmail: document.getElementById('contact-email')?.value,
@@ -1551,428 +2198,108 @@
             localStorage.setItem('adminDraft', JSON.stringify(draft));
         }
         
-        // Setup drag and drop for reordering service groups
+        // Enhanced empty state and visual feedback
+        function createEmptyState() {
+            const emptyState = document.createElement('div');
+            emptyState.className = 'empty-state';
+            emptyState.innerHTML = `
+                <div class="empty-state-content">
+                    <div class="empty-state-icon">📋</div>
+                    <h3>No Service Groups Yet</h3>
+                    <p>Create your first service group to start organizing your services. Groups help customers understand your offerings better.</p>
+                    <button type="button" class="btn btn-primary btn-lg">
+                        <span>+ Create First Group</span>
+                    </button>
+                </div>
+            `;
+            
+            // Attach event listener programmatically for CSP compliance
+            const createGroupBtn = emptyState.querySelector('.btn');
+            if (createGroupBtn) {
+                createGroupBtn.addEventListener('click', () => {
+                    document.getElementById('add-service-group-btn').click();
+                });
+            }
+            
+            return emptyState;
+        }
+
+        // Enhanced drag and drop setup
         function setupServiceGroupsDragAndDrop() {
-            let draggedItem = null;
+            if (!serviceGroupsContainer) return;
+            
+            let draggedElement = null;
+            let draggedIndex = -1;
             
             serviceGroupsContainer.addEventListener('dragstart', (e) => {
                 if (e.target.classList.contains('service-group')) {
-                    draggedItem = e.target;
-                    setTimeout(() => {
-                        e.target.style.opacity = '0.4';
-                    }, 0);
+                    draggedElement = e.target;
+                    draggedIndex = parseInt(e.target.dataset.idx);
+                    e.target.classList.add('dragging');
+                    e.dataTransfer.effectAllowed = 'move';
+                    e.dataTransfer.setData('text/html', e.target.outerHTML);
                 }
             });
             
             serviceGroupsContainer.addEventListener('dragend', (e) => {
                 if (e.target.classList.contains('service-group')) {
-                    e.target.style.opacity = '1';
-                    draggedItem = null;
+                    e.target.classList.remove('dragging');
+                    draggedElement = null;
+                    draggedIndex = -1;
                 }
             });
             
             serviceGroupsContainer.addEventListener('dragover', (e) => {
                 e.preventDefault();
-                if (draggedItem) {
-                    const targetGroup = e.target.closest('.service-group');
-                    if (targetGroup && targetGroup !== draggedItem) {
-                        const rect = targetGroup.getBoundingClientRect();
-                        const middle = rect.y + rect.height / 2;
-                        
-                        if (e.clientY < middle) {
-                            serviceGroupsContainer.insertBefore(draggedItem, targetGroup);
-                        } else {
-                            serviceGroupsContainer.insertBefore(draggedItem, targetGroup.nextSibling);
-                        }
-                        
-                        // Update the serviceGroups array to match the new DOM order
-                        const newOrder = Array.from(serviceGroupsContainer.querySelectorAll('.service-group')).map(group => {
-                            return serviceGroups.find(g => g.id === group.dataset.id);
-                        }).filter(Boolean);
-                        
-                        serviceGroups = newOrder;
-                    }
+               
+                e.dataTransfer.dropEffect = 'move';
+                
+                const afterElement = getDragAfterElement(serviceGroupsContainer, e.clientY);
+                if (afterElement == null) {
+                    serviceGroupsContainer.appendChild(draggedElement);
+                } else {
+                    serviceGroupsContainer.insertBefore(draggedElement, afterElement);
                 }
             });
-        }
-        
-        // Call this after rendering service groups
-        document.addEventListener('DOMContentLoaded', () => {
-            if (serviceGroupsContainer) {
-                setupServiceGroupsDragAndDrop();
-            }
-        });
-
-        const imageGalleryContainer = document.getElementById('image-gallery-container');
-        const imageUploadInput = document.getElementById('image-upload-input');
-        const uploadBtn = document.getElementById('upload-btn');
-        const heroImageUploadInput = document.getElementById('hero-image-upload-input');
-        const heroUploadBtn = document.getElementById('hero-upload-btn');
-        const currentHeroBanner = document.getElementById('current-hero-banner');
-        const logoImageUploadInput = document.getElementById('logo-image-upload-input');
-        const logoUploadBtn = document.getElementById('logo-upload-btn');
-        const currentLogoImage = document.getElementById('current-logo-image');
-
-        function setupImageListener() {
-            onSnapshot(query(collection(db, 'sliderImages'), orderBy('createdAt', 'desc')), snapshot => {
-                imageGalleryContainer.innerHTML = '';
-                snapshot.forEach(doc => {
-                    const data = doc.data();
-                    const card = document.createElement('div');
-                    card.className = 'img-card';
-                    card.innerHTML = `<img src="${data.url}" alt="Slider Image"><button class="delete-btn" data-id="${doc.id}" data-path="${data.path}">&times;</button>`;
-                    imageGalleryContainer.appendChild(card);
-                });
-            });
-        }
-
-        imageGalleryContainer.addEventListener('click', async e => {
-            if (e.target.classList.contains('delete-btn')) {
-                if (!confirm('Delete this image?')) return;
-                const docId = e.target.dataset.id;
-                const storagePath = e.target.dataset.path;
-                await deleteDoc(doc(db, 'sliderImages', docId));
-                if (storagePath) await deleteObject(ref(storage, storagePath));
-            }
-        });
-        
-        function handleUpload(fileInput, storageFolder, docIdToUpdate, fieldName) {
-             const file = fileInput.files[0];
-             if (!file) return;
-             const storagePath = `${storageFolder}/${Date.now()}_${file.name}`;
-             const uploadTask = uploadBytesResumable(ref(storage, storagePath), file);
-             
-             uploadTask.on('state_changed', null, 
-                (error) => console.error("Upload error", error),
-                () => getDownloadURL(uploadTask.snapshot.ref).then(async (url) => {
-                    if (docIdToUpdate) {
-                       await setDoc(doc(db, 'siteContent', docIdToUpdate), { [fieldName]: url }, { merge: true });
-                    } else {
-                       await addDoc(collection(db, storageFolder), { url, path: storagePath, createdAt: new Date() });
-                    }
-                })
-             );
-        }
-        
-        uploadBtn.onclick = () => handleUpload(imageUploadInput, 'sliderImages');
-        heroUploadBtn.onclick = () => handleUpload(heroImageUploadInput, 'assets', 'main', 'heroBannerUrl');
-        logoUploadBtn.onclick = () => handleUpload(logoImageUploadInput, 'assets', 'main', 'logoUrl');
-
-        function setupHeroBannerListener() {
-             onSnapshot(doc(db, 'siteContent', 'main'), docSnap => {
-                if(docSnap.exists() && docSnap.data().heroBannerUrl) currentHeroBanner.querySelector('img').src = docSnap.data().heroBannerUrl;
-             });
-        }
-        function setupLogoListener() {
-            onSnapshot(doc(db, 'siteContent', 'main'), docSnap => {
-                if(docSnap.exists() && docSnap.data().logoUrl) currentLogoImage.querySelector('img').src = docSnap.data().logoUrl;
-            });
-        }
-        const grantChipsForm = document.getElementById('grant-chips-form');
-        const generateVoucherForm = document.getElementById('generate-voucher-form');
-        const vouchersList = document.getElementById('vouchers-list');
-        const refreshVouchersBtn = document.getElementById('refresh-vouchers-btn');
-
-        grantChipsForm.addEventListener('submit', async e => {
-            e.preventDefault();
             
-            const submitBtn = e.target.querySelector('button[type="submit"]');
-            const originalText = submitBtn.textContent;
-            
-            if (!validateForm(grantChipsForm)) {
-                showNotification('Please fill in all required fields', 'error');
-                return;
-            }
-
-            submitBtn.innerHTML = '<span class="spinner"></span>Processing...';
-            submitBtn.disabled = true;
-            
-            const displayName = document.getElementById('grant-player-name').value;
-            const chipsToAdd = parseInt(document.getElementById('grant-chips-amount').value, 10);
-            const msgEl = document.getElementById('grant-chips-msg');
-            
-            try {
-                const q = query(collection(db, 'construction21_users'), where('displayName', '==', displayName));
-                const snap = await getDocs(q);
-                
-                if (snap.empty) { 
-                    msgEl.textContent = 'Player not found.';
-                    msgEl.style.color = 'var(--danger-color)';
-                    showNotification('Player not found', 'error');
-                    logActivity(`Failed to grant chips: Player "${displayName}" not found`, 'error');
-                    return; 
-                }
-                
-                const userDoc = snap.docs[0];
-                await runTransaction(db, async t => {
-                    const doc = await t.get(userDoc.ref);
-                    const newChips = (doc.data().chips || 0) + chipsToAdd;
-                    t.update(userDoc.ref, { chips: newChips });
-                    
-                    msgEl.textContent = `Granted ${chipsToAdd} chips. New balance: ${newChips}.`;
-                    msgEl.style.color = 'var(--success-color)';
-                    showNotification(`Granted ${chipsToAdd} chips to ${displayName}`, 'success');
-                    logActivity(`Granted ${chipsToAdd} chips to ${displayName}. New balance: ${newChips}`, 'success');
-                    
-                    // Clear form
-                    grantChipsForm.reset();
-                });
-            } catch (error) {
-                msgEl.textContent = `Error: ${error.message}`;
-                msgEl.style.color = 'var(--danger-color)';
-                showNotification(`Error granting chips: ${error.message}`, 'error');
-                logActivity(`Error granting chips: ${error.message}`, 'error');
-            } finally {
-                submitBtn.textContent = originalText;
-                submitBtn.disabled = false;
-            }
-        });
-
-        // Enhanced voucher generation
-        generateVoucherForm.addEventListener('submit', async e => {
-            e.preventDefault();
-            
-            const submitBtn = e.target.querySelector('button[type="submit"]');
-            const originalText = submitBtn.textContent;
-            
-            if (!validateForm(generateVoucherForm)) {
-                showNotification('Please fill in all required fields', 'error');
-                return;
-            }
-
-            submitBtn.innerHTML = '<span class="spinner"></span>Generating...';
-            submitBtn.disabled = true;
-            
-            const chips = parseInt(document.getElementById('voucher-chips-amount').value, 10);
-            const days = parseInt(document.getElementById('voucher-expiry-days').value, 10);
-            const description = document.getElementById('voucher-description').value;
-            const msgEl = document.getElementById('generate-voucher-message');
-            
-            try {
-                const code = 'CHI' + Date.now().toString(36).toUpperCase().slice(-3) + Math.random().toString(36).substring(2, 8).toUpperCase();
-                const expiryDate = new Date();
-                expiryDate.setDate(expiryDate.getDate() + days);
-                
-                await setDoc(doc(db, 'chipVouchers', code), { 
-                    code, 
-                    chips, 
-                    description, 
-                    createdAt: new Date(), 
-                    expiresAt: expiryDate, 
-                    isRedeemed: false 
-                });
-                
-                msgEl.innerHTML = `<strong>Generated code: <span style="background: #f0f0f0; padding: 0.5rem; border-radius: 4px; font-family: monospace;">${code}</span></strong>`;
-                msgEl.style.color = 'var(--success-color)';
-                showNotification(`Voucher ${code} generated successfully`, 'success');
-                logActivity(`Generated voucher ${code} for ${chips} chips (expires in ${days} days)`, 'success');
-                
-                // Clear form
-                generateVoucherForm.reset();
-                document.getElementById('voucher-expiry-days').value = '30'; // Reset to default
-                
-                // Refresh vouchers list
-                await loadVouchersList();
-                await loadDashboardStats();
-            } catch (error) {
-                msgEl.textContent = `Error: ${error.message}`;
-                msgEl.style.color = 'var(--danger-color)';
-                showNotification(`Error generating voucher: ${error.message}`, 'error');
-                logActivity(`Error generating voucher: ${error.message}`, 'error');
-            } finally {
-                submitBtn.textContent = originalText;
-                submitBtn.disabled = false;
-            }
-        });
-
-        // Enhanced voucher list loading
-        async function loadVouchersList() {
-            try {
-                const q = query(collection(db, 'chipVouchers'), orderBy('createdAt', 'desc'));
-                const snap = await getDocs(q);
-                
-                const vouchersHtml = snap.docs.map(doc => {
-                    const v = doc.data();
-                    const redeemed = v.isRedeemed ? `(Redeemed by ${v.redeemedBy})` : '(Active)';
-                    const statusClass = v.isRedeemed ? 'danger' : 'success';
-                    const expiryDate = v.expiresAt ? new Date(v.expiresAt.toDate()).toLocaleDateString() : 'No expiry';
-                    
-                    return `
-                        <div style="padding: 0.75rem; margin-bottom: 0.5rem; background: #f8f9fa; border-radius: 4px; border-left: 3px solid var(--${statusClass}-color);">
-                            <strong>${v.code}</strong>: ${v.chips} chips - <span style="color: var(--${statusClass}-color);">${redeemed}</span><br>
-                            <small>Description: ${v.description || 'None'} | Expires: ${expiryDate}</small>
-                        </div>
-                    `;
-                }).join('');
-                
-                vouchersList.innerHTML = vouchersHtml || '<p style="color: #666; text-align: center;">No vouchers found</p>';
-                logActivity(`Loaded ${snap.size} vouchers`, 'info');
-            } catch (error) {
-                vouchersList.innerHTML = '<p style="color: var(--danger-color);">Error loading vouchers</p>';
-                logActivity(`Error loading vouchers: ${error.message}`, 'error');
-            }
-        }
-        
-        // Enhanced refresh functionality
-        refreshVouchersBtn.addEventListener('click', async () => {
-            const originalText = refreshVouchersBtn.textContent;
-            refreshVouchersBtn.innerHTML = '<span class="spinner"></span>Refreshing...';
-            refreshVouchersBtn.disabled = true;
-            
-            try {
-                await loadVouchersList();
-                showNotification('Vouchers list refreshed', 'success');
-            } finally {
-                refreshVouchersBtn.textContent = originalText;
-                refreshVouchersBtn.disabled = false;
-            }
-        });
-
-        // Add clear log functionality (check if element exists)
-        document.addEventListener('DOMContentLoaded', () => {
-            const clearLogBtn = document.getElementById('clear-log-btn');
-            if (clearLogBtn) {
-                clearLogBtn.addEventListener('click', () => {
-                    if (confirm('Clear activity log?')) {
-                        const activityLog = document.getElementById('activity-log');
-                        if (activityLog) {
-                            activityLog.innerHTML = '<div class="log-entry">Activity log cleared</div>';
-                            showNotification('Activity log cleared', 'info');
-                        }
-                    }
-                });
-            }
-        });
-
-        // Keyboard shortcuts
-        document.addEventListener('keydown', (e) => {
-            // Ctrl+S to save content
-            if (e.ctrlKey && e.key === 's') {
+            serviceGroupsContainer.addEventListener('drop', (e) => {
                 e.preventDefault();
-                if (document.getElementById('site-editor-card').style.display !== 'none') {
-                    saveContentBtn.click();
+                if (draggedIndex === -1) return;
+                
+                // Calculate new position
+                const allGroups = [...serviceGroupsContainer.children];
+                const newIndex = allGroups.indexOf(draggedElement);
+                
+                if (newIndex !== draggedIndex) {
+                    // Reorder the serviceGroups array
+                    const [movedGroup] = serviceGroups.splice(draggedIndex, 1);
+                    serviceGroups.splice(newIndex, 0, movedGroup);
+                    
+                    // Re-render to update indices
+                    renderServiceGroupFields();
+                    saveContentDraft();
+                    showNotification('Service groups reordered', 'success');
                 }
-            }
-            
-            // Ctrl+L to clear log
-            if (e.ctrlKey && e.key === 'l') {
-                e.preventDefault();
-                const clearLogBtn = document.getElementById('clear-log-btn');
-                if (clearLogBtn) clearLogBtn.click();
-            }
-            
-            // Escape to collapse all cards
-            if (e.key === 'Escape') {
-                document.querySelectorAll('.control-card.collapsible').forEach(card => {
-                    card.classList.add('collapsed');
-                });
-            }
-        });
-
-        // Auto-save draft functionality for content
-        let autoSaveTimer;
-        function setupAutoSave() {
-            const formInputs = document.querySelectorAll('#site-editor-form input, #site-editor-form textarea');
-            formInputs.forEach(input => {
-                input.addEventListener('input', () => {
-                    clearTimeout(autoSaveTimer);
-                    autoSaveTimer = setTimeout(() => {
-                        // Save to localStorage as draft
-                        const draftData = {
-                            heroHeadline: document.getElementById('hero-headline').value,
-                            heroCtaText: document.getElementById('hero-cta-text').value,
-                            about: document.getElementById('about-text').value,
-                            testimonials: document.getElementById('testimonials-text').value,
-                            contactPhone: document.getElementById('contact-phone').value,
-                            contactEmail: document.getElementById('contact-email').value,
-                            facebookUrl: document.getElementById('facebook-url').value,
-                            googleMapUrl: document.getElementById('google-map-url').value,
-                            timestamp: new Date().toISOString()
-                        };
-                        localStorage.setItem('adminDraft', JSON.stringify(draftData));
-                        logActivity('Draft auto-saved', 'info');
-                    }, 5000); // Auto-save after 5 seconds of inactivity
-                });
             });
         }
-
-        // Load draft on startup
-        function loadDraft() {
-            const draft = localStorage.getItem('adminDraft');
-            if (draft) {
-                const draftData = JSON.parse(draft);
-                const draftAge = Date.now() - new Date(draftData.timestamp).getTime();
+        
+        function getDragAfterElement(container, y) {
+            const draggableElements = [...container.querySelectorAll('.service-group:not(.dragging)')];
+            
+            return draggableElements.reduce((closest, child) => {
+                const box = child.getBoundingClientRect();
+                const offset = y - box.top - box.height / 2;
                 
-                // Only load if draft is less than 24 hours old
-                if (draftAge < 24 * 60 * 60 * 1000) {
-                    if (confirm('Found unsaved draft. Load it?')) {
-                        Object.keys(draftData).forEach(key => {
-                            const element = document.getElementById(key.replace(/([A-Z])/g, '-$1').toLowerCase());
-                            if (element && draftData[key]) {
-                                element.value = draftData[key];
-                            }
-                        });
-
-                        showNotification('Draft loaded', 'info');
-                        logActivity('Draft loaded from localStorage', 'info');
-                    }
+                if (offset < 0 && offset > closest.offset) {
+                    return { offset: offset, element: child };
+                } else {
+                    return closest;
                 }
-            }
+            }, { offset: Number.NEGATIVE_INFINITY }).element;
         }
-
-        // Confirmation dialog for destructive actions
-        function confirmAction(message, onConfirm, confirmText = 'Confirm', cancelText = 'Cancel') {
-            return new Promise((resolve) => {
-                const modal = document.createElement('div');
-                modal.className = 'modal fade';
-                modal.innerHTML = `
-                    <div class="modal-dialog">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h5 class="modal-title">Confirm Action</h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                            </div>
-                            <div class="modal-body">
-                                <p>${message}</p>
-                            </div>
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">${cancelText}</button>
-                                <button type="button" class="btn btn-danger confirm-btn">${confirmText}</button>
-                            </div>
-                        </div>
-                    </div>
-                `;
-                
-                document.body.appendChild(modal);
-                
-                const bootstrapModal = new bootstrap.Modal(modal);
-                bootstrapModal.show();
-                
-                modal.querySelector('.confirm-btn').addEventListener('click', () => {
-                    bootstrapModal.hide();
-                    resolve(true);
-                    if (onConfirm) onConfirm();
-                });
-                
-                modal.addEventListener('hidden.bs.modal', () => {
-                    document.body.removeChild(modal);
-                    resolve(false);
-                });
-            });
-        }
-
-        // Initialize enhanced features after authentication
-        function initializeEnhancedFeatures() {
-            setupAutoSave();
-            loadDraft();
-            
-            // Add tooltip functionality
-            document.querySelectorAll('[title]').forEach(element => {
-                element.style.cursor = 'help';
-            });
-            
-            logActivity('Enhanced admin features initialized', 'success');
-        }
+        
+        // ...existing code...
+        }); // End of DOMContentLoaded event listener
     </script>
     
     <script>
