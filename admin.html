@@ -1469,21 +1469,29 @@
         });
 
         // Event listeners for grant chips form and voucher form
-        document.getElementById('grant-chips-form').addEventListener('submit', (e) => {
-            e.preventDefault();
-            console.log('Grant chips form submitted - not fully implemented');
-            showNotification('Grant chips feature not fully implemented', 'warning');
-        });
+        const grantChipsForm = document.getElementById('grant-chips-form');
+        if (grantChipsForm) {
+            grantChipsForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                console.log('Grant chips form submitted - not fully implemented');
+                showNotification('Grant chips feature not fully implemented', 'warning');
+            });
+        }
         
-        document.getElementById('generate-voucher-form').addEventListener('submit', (e) => {
-            e.preventDefault();
-            console.log('Generate voucher form submitted - not fully implemented');
-            showNotification('Generate voucher feature not fully implemented', 'warning');
-        });
+        const generateVoucherForm = document.getElementById('generate-voucher-form');
+        if (generateVoucherForm) {
+            generateVoucherForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                console.log('Generate voucher form submitted - not fully implemented');
+                showNotification('Generate voucher feature not fully implemented', 'warning');
+            });
+        }
 
-        logoutBtn.addEventListener('click', async () => {
-            showLogoutConfirmModal();
-        });
+        if (logoutBtn) {
+            logoutBtn.addEventListener('click', async () => {
+                showLogoutConfirmModal();
+            });
+        }
 
         function showLogoutConfirmModal() {
             // Create modal overlay
