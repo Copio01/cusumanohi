@@ -117,7 +117,9 @@
         
         .hero-background {
             position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
+            top: 0; left: 0;
+            width: 100%;
+            height: 100%;
             background-size: contain;
             background-position: center;
             background-repeat: no-repeat;
@@ -623,6 +625,352 @@
         .admin-login-float { position: fixed; bottom: 20px; right: 20px; z-index: 1001; }
         .admin-login-float a { display: flex; align-items: center; justify-content: center; width: 50px; height: 50px; background-color: var(--primary-color); color: var(--white); border-radius: 50%; text-decoration: none; box-shadow: var(--shadow-md); transition: transform 0.2s; }
         .admin-login-float a:hover { transform: scale(1.1); }
+
+        /* --- AI Chat Widget Styles --- */
+        .ai-chat-widget {
+            position: fixed;
+            bottom: 100px;
+            right: 20px;
+            z-index: 1500;
+            font-family: var(--font-body);
+        }
+
+        .chat-toggle-btn {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            border: none;
+            color: var(--white);
+            cursor: pointer;
+            box-shadow: 0 4px 20px rgba(10, 77, 104, 0.3);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .chat-toggle-btn:hover {
+            transform: scale(1.1) translateY(-2px);
+            box-shadow: 0 8px 30px rgba(10, 77, 104, 0.4);
+        }
+
+        .chat-toggle-btn .chat-icon {
+            transition: transform 0.3s ease;
+        }
+
+        .chat-toggle-btn.active .chat-icon {
+            transform: rotate(180deg);
+        }
+
+        .chat-notification-dot {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            width: 12px;
+            height: 12px;
+            background: var(--accent-color);
+            border-radius: 50%;
+            border: 2px solid var(--white);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.2); opacity: 0.7; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .chat-window {
+            position: absolute;
+            bottom: 80px;
+            right: 0;
+            width: 380px;
+            height: 600px;
+            background: var(--white);
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+            transform: scale(0) translateY(20px);
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            overflow: hidden;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .chat-window.active {
+            transform: scale(1) translateY(0);
+            opacity: 1;
+        }
+
+        .chat-header {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: var(--white);
+            padding: 1rem 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .chat-header h3 {
+            margin: 0;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--white);
+        }
+
+        .chat-header p {
+            margin: 0;
+            font-size: 0.85rem;
+            opacity: 0.9;
+        }
+
+        .chat-status {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.8rem;
+        }
+
+        .chat-status-dot {
+            width: 8px;
+            height: 8px;
+            background: #4ade80;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        .chat-messages {
+            height: 400px;
+            overflow-y: auto;
+            padding: 1rem;
+            background: #f8f9fa;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .chat-messages::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .chat-messages::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        .chat-messages::-webkit-scrollbar-thumb {
+            background: #d1d5db;
+            border-radius: 10px;
+        }
+
+        .chat-message {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            animation: messageSlideIn 0.3s ease-out;
+        }
+
+        @keyframes messageSlideIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .chat-message.user {
+            flex-direction: row-reverse;
+        }
+
+        .chat-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .chat-avatar.ai {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: var(--white);
+        }
+
+        .chat-avatar.user {
+            background: #e5e7eb;
+            color: #6b7280;
+        }
+
+        .chat-bubble {
+            max-width: 250px;
+            padding: 0.75rem 1rem;
+            border-radius: 18px;
+            font-size: 0.9rem;
+            line-height: 1.4;
+            word-wrap: break-word;
+        }
+
+        .chat-bubble.ai {
+            background: var(--white);
+            border: 1px solid #e5e7eb;
+            border-radius: 18px 18px 18px 4px;
+        }
+
+        .chat-bubble.user {
+            background: var(--primary-color);
+            color: var(--white);
+            border-radius: 18px 18px 4px 18px;
+        }
+
+        .chat-actions {
+            margin-top: 0.5rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .chat-action-btn {
+            padding: 0.4rem 0.8rem;
+            background: var(--accent-color);
+            color: var(--dark-gray);
+            border: none;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .chat-action-btn:hover {
+            background: #ffb93a;
+            transform: translateY(-1px);
+        }
+
+        .chat-input-area {
+            padding: 1rem;
+            background: var(--white);
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .chat-input-form {
+            display: flex;
+            gap: 0.5rem;
+            align-items: flex-end;
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 0.75rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            resize: none;
+            max-height: 100px;
+            min-height: 40px;
+            font-family: inherit;
+            transition: border-color 0.2s ease;
+        }
+
+        .chat-input:focus {
+            outline: none;
+            border-color: var(--accent-color);
+        }
+
+        .chat-send-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--accent-color);
+            border: none;
+            color: var(--dark-gray);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+        }
+
+        .chat-send-btn:hover {
+            background: #ffb93a;
+            transform: scale(1.05);
+        }
+
+        .chat-send-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .typing-indicator {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: var(--white);
+            border-radius: 18px 18px 18px 4px;
+            border: 1px solid #e5e7eb;
+        }
+
+        .typing-dots {
+            display: flex;
+            gap: 0.2rem;
+        }
+
+        .typing-dot {
+            width: 6px;
+            height: 6px;
+            background: #9ca3af;
+            border-radius: 50%;
+            animation: typingBounce 1.4s infinite ease-in-out;
+        }
+
+        .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+        .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+
+        @keyframes typingBounce {
+            0%, 80%, 100% { transform: scale(0.8); opacity: 0.5; }
+            40% { transform: scale(1); opacity: 1; }
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .ai-chat-widget {
+                bottom: 80px;
+                right: 15px;
+            }
+
+            .chat-window {
+                width: calc(100vw - 30px);
+                height: 70vh;
+                max-height: 500px;
+                bottom: 70px;
+                right: -15px;
+            }
+
+            .chat-toggle-btn {
+                width: 55px;
+                height: 55px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .chat-window {
+                width: calc(100vw - 20px);
+                right: -10px;
+            }
+
+            .chat-bubble {
+                max-width: 200px;
+            }
+        }
+
+        /* --- Firebase and Dynamic Content Styles --- */
+        /* Add any additional styles for Firebase-loaded content here */
     </style>
 </head>
 <body>
@@ -770,6 +1118,62 @@
 
     <div class="admin-login-float">
         <a href="admin.html" title="Admin Login" aria-label="Admin Login"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 15v-4H7v-2h4V7h2v4h4v2h-4v4h-2z"/></svg></a>
+    </div>
+
+    <!-- AI Chat Widget -->
+    <div class="ai-chat-widget" id="ai-chat-widget">
+        <button class="chat-toggle-btn" id="chat-toggle-btn" aria-label="Toggle AI Assistant">
+            <svg class="chat-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                <path d="M13 8H7"></path>
+                <path d="M17 12H7"></path>
+            </svg>
+            <div class="chat-notification-dot" id="chat-notification" style="display: none;"></div>
+        </button>
+        
+        <div class="chat-window" id="chat-window">
+            <div class="chat-header">
+                <div>
+                    <h3>Cusumano AI Assistant</h3>
+                    <p>Your guide to home improvement</p>
+                </div>
+                <div class="chat-status">
+                    <div class="chat-status-dot"></div>
+                    <span>Online</span>
+                </div>
+            </div>
+            
+            <div class="chat-messages" id="chat-messages">
+                <div class="chat-message">
+                    <div class="chat-avatar ai">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M17.657 18.657A8 8 0 0 1 6.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.657 7.343A8 8 0 0 0 18 12c0 2-.5 4-2.343 6.657z"></path>
+                        </svg>
+                    </div>
+                    <div class="chat-bubble ai">
+                        Hello! I'm the Cusumano AI Assistant. I can answer questions about our services, experience, and service area. How can I help you today?
+                    </div>
+                </div>
+            </div>
+            
+            <div class="chat-input-area">
+                <form class="chat-input-form" id="chat-form">
+                    <textarea 
+                        class="chat-input" 
+                        id="chat-input" 
+                        placeholder="Ask about our services..."
+                        rows="1"
+                        maxlength="500"
+                    ></textarea>
+                    <button type="submit" class="chat-send-btn" id="chat-send-btn" aria-label="Send message">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="22" y1="2" x2="11" y2="13"></line>
+                            <polygon points="22,2 15,22 11,13 2,9 22,2"></polygon>
+                        </svg>
+                    </button>
+                </form>
+            </div>
+        </div>
     </div>
 
     <div class="modal" id="service-modal"><div class="modal-content"><button class="close-btn">&times;</button><div id="modal-body"></div></div></div>
@@ -1666,8 +2070,341 @@
                     }
                 }, 250);
             });
+
+            // Initialize AI Chat Widget
+            initializeAIChat();
         });
 
+        // AI Chat Widget Functionality
+        function initializeAIChat() {
+            const chatWidget = document.getElementById('ai-chat-widget');
+            const toggleBtn = document.getElementById('chat-toggle-btn');
+            const chatWindow = document.getElementById('chat-window');
+            const chatMessages = document.getElementById('chat-messages');
+            const chatForm = document.getElementById('chat-form');
+            const chatInput = document.getElementById('chat-input');
+            const sendBtn = document.getElementById('chat-send-btn');
+            
+            let isOpen = false;
+            let isProcessing = false;
+            let chatHistory = [];
+            const MAX_HISTORY_LENGTH = 10;
+            const MAX_RETRIES = 3;
+
+            // Master prompt for the AI assistant
+            const masterPrompt = `
+                **[START PROMPT]**
+
+                **1. ROLE AND GOAL**
+                You are the "Cusumano AI Assistant." You are a professional, helpful, and knowledgeable virtual assistant for Cusumano Home Improvements, a local, family-owned business in Monroe, Michigan. Your primary goal is to answer user questions accurately based *only* on the context provided below and to guide them to contact the company for a "free, no-obligation quote." You are a friendly guide, not a salesperson or a contractor.
+
+                **2. PERSONA AND TONE**
+                - **Professional & Trustworthy:** Your language is clear, confident, and reliable.
+                - **Helpful & Knowledgeable:** You are an expert on the services Cusumano offers.
+                - **Concise:** Provide direct answers without unnecessary fluff.
+                - **Friendly, but not overly casual:** Use a welcoming tone. Address the user directly. Avoid slang and emojis.
+
+                **3. KNOWLEDGE BASE (Your ONLY Source of Truth)**
+                ---
+                **## Company Information:**
+                * **Name:** Cusumano Home Improvements
+                * **Experience:** Over 50 years of quality craftsmanship.
+                * **Ownership:** Family-owned and operated.
+                * **Location:** Based in Monroe, Michigan.
+                * **Service Area:** We proudly serve Monroe, MI, and the surrounding areas.
+
+                **## Core Values & Guarantees:**
+                * We are fully Licensed & Insured.
+                * We provide Free, No-Obligation Estimates.
+                * Our tagline and promise is "Quality You Can Stand On."
+
+                **## Services Offered:**
+                You can answer questions about the following specific services. They are grouped by category:
+                * **Exterior & Construction:** Garages (building and repair), Decks, Roofing, Siding, Home Additions, New Construction projects
+                * **Outdoor Living:** Sunrooms, Patio Rooms, Screenrooms, Awnings, Pergolas
+                * **Concrete & Hardscaping:** Driveways, Sidewalks, Patios, Carports
+                * **Structures & Remodeling:** Basement Finishing, Pole Barns, Sheds, General Remodeling
+                * **Doors & Handyman Work:** Garage Doors, Entry Doors & Patio Doors, Patio Covers, General Handyman Work
+                * **Dumpster Rentals:** We offer convenient dumpster rental services for job sites or home cleanouts.
+
+                **## Contact Information & Primary Call to Action (CTA):**
+                * **Primary Goal for Users:** To get a Free Quote.
+                * **Phone Number:** 734-777-8158
+                * **Email:** copernan@yahoo.com
+                ---
+
+                **4. RULES AND DIRECTIVES (You MUST follow these rules at all times)**
+                * **RULE #1: THE GOLDEN RULE OF PRICING.** If a user asks *any* question about price, cost, estimates, or how much something might be, you MUST NOT invent a number or a range. You MUST respond with a polite deflection that directs them to the free quote process.
+                  * **Your response MUST include the action tags [ACTION:SHOW_CALL_BUTTON] and [ACTION:SHOW_QUOTE_FORM_LINK].**
+                  * **Example Response:** "That's a great question. Project costs can vary depending on materials, size, and specific details. The best way to get an accurate price is through a free, no-obligation quote. You can call us or fill out the contact form on our site to schedule one! [ACTION:SHOW_CALL_BUTTON] [ACTION:SHOW_QUOTE_FORM_LINK]"
+                * **RULE #2: NEVER INVENT INFORMATION.** If the user asks about a service NOT listed in your knowledge base (e.g., "Do you do plumbing?"), you must state that it's not a service you have information on and redirect them.
+                  * **Example Response:** "I don't have information on plumbing services, but we specialize in a wide range of construction and remodeling projects. Can I help you with decks, roofing, siding, or another one of our listed services?"
+                * **RULE #3: NO DIY OR TECHNICAL ADVICE.** Do not explain *how* to do a project. If asked "How do I build a deck?", your response should be, "We have over 50 years of experience building high-quality decks. Our team can handle the entire process for you, ensuring it's built to last. Would you like to get a free quote for a new deck? [ACTION:SHOW_QUOTE_FORM_LINK]"
+                * **RULE #4: BE A HELPFUL AI.** Do not pretend to be a human. It's okay to use "I" and "my" in the context of being an assistant (e.g., "I can help with that..."), but do not claim to have personal experiences.
+                * **RULE #5: ALWAYS END WITH A HELPFUL PROMPT OR CTA.** After answering a question, always guide the conversation forward. Ask a clarifying question or suggest a relevant next step. If the user seems ready to contact, use the action tags.
+
+                **5. INTERACTIVE CAPABILITIES**
+                * You can include special tags in your response to show buttons to the user.
+                * [ACTION:SHOW_CALL_BUTTON]: Use this when mentioning calling the business. It will show a "Call Now" button.
+                * [ACTION:SHOW_QUOTE_FORM_LINK]: Use this when mentioning a quote or the contact form. It will show a "Get a Free Quote" button.
+                * You can use both tags in the same response.
+
+                **[END PROMPT]**
+            `;
+
+            // Helper functions
+            function isMobile() {
+                return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+            }
+
+            function sanitizeInput(input) {
+                return input.replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#x27;');
+            }
+
+            function scrollToBottom() {
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+
+            function manageHistoryLength() {
+                if (chatHistory.length > MAX_HISTORY_LENGTH * 2) {
+                    chatHistory = [chatHistory[0], ...chatHistory.slice(-MAX_HISTORY_LENGTH * 2 + 1)];
+                }
+            }
+
+            function isOnline() {
+                return navigator.onLine;
+            }
+
+            // Toggle chat window
+            toggleBtn.addEventListener('click', () => {
+                isOpen = !isOpen;
+                chatWindow.classList.toggle('active', isOpen);
+                toggleBtn.classList.toggle('active', isOpen);
+                
+                if (isOpen) {
+                    chatInput.focus();
+                    document.getElementById('chat-notification').style.display = 'none';
+                }
+            });
+
+            // Close chat when clicking outside
+            document.addEventListener('click', (e) => {
+                if (isOpen && !chatWidget.contains(e.target)) {
+                    isOpen = false;
+                    chatWindow.classList.remove('active');
+                    toggleBtn.classList.remove('active');
+                }
+            });
+
+            // Auto-resize textarea
+            chatInput.addEventListener('input', function() {
+                this.style.height = 'auto';
+                this.style.height = Math.min(this.scrollHeight, 100) + 'px';
+            });
+
+            // Handle Enter key
+            chatInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    chatForm.dispatchEvent(new Event('submit'));
+                }
+            });
+
+            // Display user message
+            function displayUserMessage(message) {
+                const sanitizedMessage = sanitizeInput(message);
+                const messageEl = document.createElement('div');
+                messageEl.className = 'chat-message user';
+                messageEl.innerHTML = `
+                    <div class="chat-avatar user">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="12" cy="7" r="4"></circle>
+                        </svg>
+                    </div>
+                    <div class="chat-bubble user">${sanitizedMessage}</div>
+                `;
+                chatMessages.appendChild(messageEl);
+                scrollToBottom();
+            }
+
+            // Display AI message with action buttons
+            function displayAiMessage(message) {
+                const showCallButton = message.includes('[ACTION:SHOW_CALL_BUTTON]');
+                const showQuoteButton = message.includes('[ACTION:SHOW_QUOTE_FORM_LINK]');
+                const cleanMessage = message.replace(/\[ACTION:.*?\]/g, '').trim();
+
+                const messageEl = document.createElement('div');
+                messageEl.className = 'chat-message';
+                
+                let actionsHTML = '';
+                if (showCallButton || showQuoteButton) {
+                    actionsHTML = '<div class="chat-actions">';
+                    if (showCallButton && isMobile()) {
+                        actionsHTML += `
+                            <a href="tel:734-777-8158" class="chat-action-btn">
+                                <svg width="14" height="14" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"></path>
+                                </svg>
+                                Call Now
+                            </a>
+                        `;
+                    }
+                    if (showQuoteButton) {
+                        actionsHTML += `
+                            <a href="#contact" class="chat-action-btn" onclick="document.getElementById('chat-window').classList.remove('active'); document.getElementById('chat-toggle-btn').classList.remove('active');">
+                                <svg width="14" height="14" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd"></path>
+                                </svg>
+                                Get Quote
+                            </a>
+                        `;
+                    }
+                    actionsHTML += '</div>';
+                }
+
+                messageEl.innerHTML = `
+                    <div class="chat-avatar ai">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M17.657 18.657A8 8 0 0 1 6.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.657 7.343A8 8 0 0 0 18 12c0 2-.5 4-2.343 6.657z"></path>
+                        </svg>
+                    </div>
+                    <div class="chat-bubble ai">
+                        ${cleanMessage}
+                        ${actionsHTML}
+                    </div>
+                `;
+                chatMessages.appendChild(messageEl);
+                scrollToBottom();
+            }
+
+            // Show typing indicator
+            function showTypingIndicator() {
+                const typingEl = document.createElement('div');
+                typingEl.className = 'chat-message';
+                typingEl.id = 'typing-indicator';
+                typingEl.innerHTML = `
+                    <div class="chat-avatar ai">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M17.657 18.657A8 8 0 0 1 6.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.657 7.343A8 8 0 0 0 18 12c0 2-.5 4-2.343 6.657z"></path>
+                        </svg>
+                    </div>
+                    <div class="typing-indicator">
+                        <div class="typing-dots">
+                            <div class="typing-dot"></div>
+                            <div class="typing-dot"></div>
+                            <div class="typing-dot"></div>
+                        </div>
+                    </div>
+                `;
+                chatMessages.appendChild(typingEl);
+                scrollToBottom();
+            }
+
+            // Remove typing indicator
+            function removeTypingIndicator() {
+                const indicator = document.getElementById('typing-indicator');
+                if (indicator) {
+                    indicator.remove();
+                }
+            }
+
+            // Handle form submission
+            chatForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                if (isProcessing) return;
+                
+                const userMessage = chatInput.value.trim();
+                if (!userMessage) return;
+
+                if (!isOnline()) {
+                    displayAiMessage("You appear to be offline. Please check your connection and try again.");
+                    return;
+                }
+
+                isProcessing = true;
+                sendBtn.disabled = true;
+                
+                displayUserMessage(userMessage);
+                chatInput.value = '';
+                chatInput.style.height = 'auto';
+                showTypingIndicator();
+
+                chatHistory.push({ role: "user", parts: [{ text: userMessage }] });
+                manageHistoryLength();
+                
+                let retries = 0;
+                
+                while (retries < MAX_RETRIES) {
+                    try {
+                        const payload = {
+                            systemInstruction: {
+                                parts: [{ text: masterPrompt }]
+                            },
+                            contents: chatHistory 
+                        };
+                        
+                        // Use the same API key as your standalone chat
+                        const apiKey = "AIzaSyDyrpmjFvn7zPtZPtSUosLawSdzO_e2DNc";
+                        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+                        const response = await fetch(apiUrl, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(payload)
+                        });
+
+                        if (!response.ok) {
+                            const errorText = await response.text();
+                            console.error(`API Error: ${response.status}`, errorText);
+                            throw new Error(`Request failed: ${response.status}`);
+                        }
+
+                        const result = await response.json();
+                        removeTypingIndicator();
+
+                        if (result.candidates && result.candidates.length > 0 && result.candidates[0].content.parts.length > 0) {
+                            const aiMessage = result.candidates[0].content.parts[0].text;
+                            displayAiMessage(aiMessage);
+                            chatHistory.push({ role: "model", parts: [{ text: aiMessage }] });
+                        } else {
+                            displayAiMessage("I'm sorry, I couldn't process that. Could you please rephrase your question?");
+                        }
+                        
+                        break; // Success, exit retry loop
+
+                    } catch (error) {
+                        console.error("Error calling Gemini API:", error);
+                        retries++;
+                        
+                        if (retries >= MAX_RETRIES) {
+                            removeTypingIndicator();
+                            displayAiMessage("I'm having trouble connecting right now. Please try again in a moment or contact us directly at 734-777-8158.");
+                        } else {
+                            await new Promise(resolve => setTimeout(resolve, 1000 * retries));
+                        }
+                    }
+                }
+                
+                isProcessing = false;
+                sendBtn.disabled = false;
+                chatInput.focus();
+            });
+
+            // Network status handling
+            window.addEventListener('offline', () => {
+                if (isOpen) {
+                    displayAiMessage("You appear to be offline. Please check your connection and try again.");
+                }
+            });
+
+            window.addEventListener('online', () => {
+                if (isOpen) {
+                    displayAiMessage("Connection restored! You can continue chatting.");
+                }
+            });
+        }
     </script>
 </body>
 </html>
