@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cusumano AI Assistant</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        /* Custom Styles */
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f0f4f8;
+        }
+
+        .font-poppins {
+            font-family: 'Poppins', sans-serif;
+        }
+
+        /* Custom Scrollbar */
+        #chat-window::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        #chat-window::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        #chat-window::-webkit-scrollbar-thumb {
+            background: #d1d5db;
+            border-radius: 10px;
+        }
+
+        #chat-window::-webkit-scrollbar-thumb:hover {
+            background: #9ca3af;
+        }
+        
+        /* Typing indicator animation */
+        .typing-indicator span {
+            height: 8px;
+            width: 8px;
+            float: left;
+            margin: 0 1px;
+            background-color: #9E9E9E;
+            display: block;
+            border-radius: 50%;
+            opacity: 0.4;
+            animation: bob 1s infinite;
+        }
+
+        .typing-indicator span:nth-of-type(2) {
+            animation-delay: 0.15s;
+        }
+
+        .typing-indicator span:nth-of-type(3) {
+            animation-delay: 0.3s;
+        }
+
+        @keyframes bob {
+            10% { transform: translateY(-10px); background-color: #757575; }
+            50% { transform: translateY(0); background-color: #9E9E9E; }
+        }
+
+        /* Styles for interactive buttons in chat */
+        .chat-action-buttons {
+            margin-top: 12px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .chat-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.2s ease;
+            border: 1px solid transparent;
+        }
+
+        .btn-call {
+            background-color: #2a9d8f;
+            color: white;
+        }
+        .btn-call:hover {
+            background-color: #268a7e;
+        }
+
+        .btn-quote {
+            background-color: transparent;
+            color: #0a4d68;
+            border-color: #0a4d68;
+        }
+        .btn-quote:hover {
+            background-color: #0a4d68;
+            color: white;
+        }
+
+    </style>
+</head>
+<body class="antialiased bg-gray-100 flex items-center justify-center min-h-screen">
+
+    <div class="w-full max-w-2xl mx-auto bg-white rounded-2xl shadow-2xl flex flex-col h-[90vh] my-4">
+        <!-- Header -->
+        <header class="bg-gradient-to-r from-[#0a4d68] to-[#088395] text-white p-5 rounded-t-2xl shadow-md flex items-center justify-between">
+            <div>
+                <h1 class="text-xl font-poppins font-bold">Cusumano AI Assistant</h1>
+                <p class="text-sm opacity-90 font-roboto">Your guide to home improvement</p>
+            </div>
+            <div class="flex items-center space-x-2">
+                 <span class="relative flex h-3 w-3">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+                </span>
+                <span class="text-sm font-medium">Online</span>
+            </div>
+        </header>
+
+        <!-- Chat Window -->
+        <div id="chat-window" class="flex-1 p-6 overflow-y-auto space-y-6">
+            <!-- Initial Welcome Message -->
+            <div class="flex items-start gap-3">
+                <div class="flex-shrink-0 h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
+                    <svg class="w-6 h-6 text-[#0a4d68]" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.657 7.343A8 8 0 0118 18c-1 .5-3 1-5 1s-4.5-1.455-6.343-2.657z"></path></svg>
+                </div>
+                <div class="bg-gray-100 p-4 rounded-lg rounded-tl-none max-w-lg">
+                    <p class="text-gray-800 text-sm font-roboto">
+                        Hello! I'm the Cusumano AI Assistant. I can answer questions about our services, experience, and service area. How can I help you today?
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Input Area -->
+        <footer class="bg-white p-4 border-t border-gray-200 rounded-b-2xl">
+            <form id="chat-form" class="flex items-center gap-4">
+                <input type="text" id="user-input" placeholder="Ask about our services..." class="flex-1 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#f5a623] focus:border-transparent transition duration-300" autocomplete="off">
+                <button type="submit" class="bg-[#f5a623] text-[#0a4d68] font-bold py-3 px-5 rounded-lg hover:bg-opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#f5a623] transition duration-300 flex items-center justify-center">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                </button>
+            </form>
+        </footer>
+    </div>
+
+    <script type="module">
+        const chatWindow = document.getElementById('chat-window');
+        const chatForm = document.getElementById('chat-form');
+        const userInput = document.getElementById('user-input');
+        
+        let chatHistory = [];
+
+        // The master prompt for the Gemini AI, which acts as a system instruction
+        const masterPrompt = `
+            **[START PROMPT]**
+
+            **1. ROLE AND GOAL**
+            You are the "Cusumano AI Assistant." You are a professional, helpful, and knowledgeable virtual assistant for Cusumano Home Improvements, a local, family-owned business in Monroe, Michigan. Your primary goal is to answer user questions accurately based *only* on the context provided below and to guide them to contact the company for a "free, no-obligation quote." You are a friendly guide, not a salesperson or a contractor.
+
+            **2. PERSONA AND TONE**
+            - **Professional & Trustworthy:** Your language is clear, confident, and reliable.
+            - **Helpful & Knowledgeable:** You are an expert on the services Cusumano offers.
+            - **Concise:** Provide direct answers without unnecessary fluff.
+            - **Friendly, but not overly casual:** Use a welcoming tone. Address the user directly. Avoid slang and emojis.
+
+            **3. KNOWLEDGE BASE (Your ONLY Source of Truth)**
+            ---
+            **## Company Information:**
+            * **Name:** Cusumano Home Improvements
+            * **Experience:** Over 50 years of quality craftsmanship.
+            * **Ownership:** Family-owned and operated.
+            * **Location:** Based in Monroe, Michigan.
+            * **Service Area:** We proudly serve Monroe, MI, and the surrounding areas.
+
+            **## Core Values & Guarantees:**
+            * We are fully Licensed & Insured.
+            * We provide Free, No-Obligation Estimates.
+            * Our tagline and promise is "Quality You Can Stand On."
+
+            **## Services Offered:**
+            You can answer questions about the following specific services. They are grouped by category:
+            * **Exterior & Construction:** Garages (building and repair), Decks, Roofing, Siding, Home Additions, New Construction projects
+            * **Outdoor Living:** Sunrooms, Patio Rooms, Screenrooms, Awnings, Pergolas
+            * **Concrete & Hardscaping:** Driveways, Sidewalks, Patios, Carports
+            * **Structures & Remodeling:** Basement Finishing, Pole Barns, Sheds, General Remodeling
+            * **Doors & Handyman Work:** Garage Doors, Entry Doors & Patio Doors, Patio Covers, General Handyman Work
+            * **Dumpster Rentals:** We offer convenient dumpster rental services for job sites or home cleanouts.
+
+            **## Contact Information & Primary Call to Action (CTA):**
+            * **Primary Goal for Users:** To get a Free Quote.
+            * **Phone Number:** 734-777-8158
+            * **Email:** copernan@yahoo.com
+            ---
+
+            **4. RULES AND DIRECTIVES (You MUST follow these rules at all times)**
+            * **RULE #1: THE GOLDEN RULE OF PRICING.** If a user asks *any* question about price, cost, estimates, or how much something might be, you MUST NOT invent a number or a range. You MUST respond with a polite deflection that directs them to the free quote process.
+              * **Your response MUST include the action tags [ACTION:SHOW_CALL_BUTTON] and [ACTION:SHOW_QUOTE_FORM_LINK].**
+              * **Example Response:** "That's a great question. Project costs can vary depending on materials, size, and specific details. The best way to get an accurate price is through a free, no-obligation quote. You can call us or fill out the contact form on our site to schedule one! [ACTION:SHOW_CALL_BUTTON] [ACTION:SHOW_QUOTE_FORM_LINK]"
+            * **RULE #2: NEVER INVENT INFORMATION.** If the user asks about a service NOT listed in your knowledge base (e.g., "Do you do plumbing?"), you must state that it's not a service you have information on and redirect them.
+              * **Example Response:** "I don't have information on plumbing services, but we specialize in a wide range of construction and remodeling projects. Can I help you with decks, roofing, siding, or another one of our listed services?"
+            * **RULE #3: NO DIY OR TECHNICAL ADVICE.** Do not explain *how* to do a project. If asked "How do I build a deck?", your response should be, "We have over 50 years of experience building high-quality decks. Our team can handle the entire process for you, ensuring it's built to last. Would you like to get a free quote for a new deck? [ACTION:SHOW_QUOTE_FORM_LINK]"
+            * **RULE #4: BE A HELPFUL AI.** Do not pretend to be a human. It's okay to use "I" and "my" in the context of being an assistant (e.g., "I can help with that..."), but do not claim to have personal experiences.
+            * **RULE #5: ALWAYS END WITH A HELPFUL PROMPT OR CTA.** After answering a question, always guide the conversation forward. Ask a clarifying question or suggest a relevant next step. If the user seems ready to contact, use the action tags.
+
+            **5. INTERACTIVE CAPABILITIES**
+            * You can include special tags in your response to show buttons to the user.
+            * `[ACTION:SHOW_CALL_BUTTON]`: Use this when mentioning calling the business. It will show a "Call Now" button.
+            * `[ACTION:SHOW_QUOTE_FORM_LINK]`: Use this when mentioning a quote or the contact form. It will show a "Get a Free Quote" button.
+            * You can use both tags in the same response.
+
+            **[END PROMPT]**
+        `;
+
+        // Helper function to detect mobile devices
+        function isMobile() {
+            return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        }
+
+        // Function to scroll to the bottom of the chat window
+        function scrollToBottom() {
+            chatWindow.scrollTop = chatWindow.scrollHeight;
+        }
+
+        // Function to display a user's message
+        function displayUserMessage(message) {
+            const messageElement = document.createElement('div');
+            messageElement.className = 'flex items-start gap-3 justify-end';
+            messageElement.innerHTML = `
+                <div class="bg-[#0a4d68] text-white p-4 rounded-lg rounded-tr-none max-w-lg">
+                    <p class="text-sm font-roboto">${message}</p>
+                </div>
+                <div class="flex-shrink-0 h-10 w-10 rounded-full bg-gray-300 flex items-center justify-center">
+                    <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                </div>
+            `;
+            chatWindow.appendChild(messageElement);
+            scrollToBottom();
+        }
+
+        // Function to display an AI's message, now with button parsing
+        function displayAiMessage(message) {
+            const showCallButton = message.includes('[ACTION:SHOW_CALL_BUTTON]');
+            const showQuoteButton = message.includes('[ACTION:SHOW_QUOTE_FORM_LINK]');
+
+            // Clean the message for display
+            const cleanMessage = message.replace(/\[ACTION:.*?\]/g, '').trim();
+
+            const messageElement = document.createElement('div');
+            messageElement.className = 'flex items-start gap-3';
+            
+            let buttonsHTML = '';
+            if (showCallButton || showQuoteButton) {
+                buttonsHTML += '<div class="chat-action-buttons">';
+                if (showCallButton && isMobile()) {
+                     buttonsHTML += `<a href="tel:734-777-8158" class="chat-button btn-call">
+                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"></path></svg>
+                        Call Now
+                    </a>`;
+                }
+                if (showQuoteButton) {
+                    // This assumes the main page has a contact section with id="contact"
+                    buttonsHTML += `<a href="#contact" class="chat-button btn-quote">
+                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd"></path></svg>
+                        Get a Free Quote
+                    </a>`;
+                }
+                buttonsHTML += '</div>';
+            }
+
+            messageElement.innerHTML = `
+                <div class="flex-shrink-0 h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
+                    <svg class="w-6 h-6 text-[#0a4d68]" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.657 7.343A8 8 0 0118 18c-1 .5-3 1-5 1s-4.5-1.455-6.343-2.657z"></path></svg>
+                </div>
+                <div class="bg-gray-100 p-4 rounded-lg rounded-tl-none max-w-lg">
+                    <p class="text-gray-800 text-sm font-roboto">${cleanMessage}</p>
+                    ${buttonsHTML}
+                </div>
+            `;
+            chatWindow.appendChild(messageElement);
+            scrollToBottom();
+        }
+
+        // Function to show the typing indicator
+        function showTypingIndicator() {
+            const indicatorElement = document.createElement('div');
+            indicatorElement.id = 'typing-indicator';
+            indicatorElement.className = 'flex items-start gap-3';
+            indicatorElement.innerHTML = `
+                <div class="flex-shrink-0 h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
+                     <svg class="w-6 h-6 text-[#0a4d68]" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.657 7.343A8 8 0 0118 18c-1 .5-3 1-5 1s-4.5-1.455-6.343-2.657z"></path></svg>
+                </div>
+                <div class="bg-gray-100 p-4 rounded-lg rounded-tl-none">
+                    <div class="typing-indicator">
+                        <span></span><span></span><span></span>
+                    </div>
+                </div>
+            `;
+            chatWindow.appendChild(indicatorElement);
+            scrollToBottom();
+        }
+
+        // Function to remove the typing indicator
+        function removeTypingIndicator() {
+            const indicator = document.getElementById('typing-indicator');
+            if (indicator) {
+                indicator.remove();
+            }
+        }
+
+        // Handle form submission
+        chatForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const userMessage = userInput.value.trim();
+            if (!userMessage) return;
+
+            displayUserMessage(userMessage);
+            userInput.value = '';
+            showTypingIndicator();
+
+            // Add user message to history for context
+            chatHistory.push({ role: "user", parts: [{ text: userMessage }] });
+            
+            try {
+                // Construct the payload using the more robust multi-turn format
+                const payload = {
+                    systemInstruction: {
+                        parts: [{ text: masterPrompt }]
+                    },
+                    contents: chatHistory 
+                };
+                const apiKey = ""; // API key is handled by the environment
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    throw new Error(`API request failed with status ${response.status}`);
+                }
+
+                const result = await response.json();
+                removeTypingIndicator();
+
+                if (result.candidates && result.candidates.length > 0 && result.candidates[0].content.parts.length > 0) {
+                    const aiMessage = result.candidates[0].content.parts[0].text;
+                    displayAiMessage(aiMessage);
+                    // Add AI response to history
+                    chatHistory.push({ role: "model", parts: [{ text: aiMessage }] });
+                } else {
+                    displayAiMessage("I'm sorry, I couldn't process that. Could you please rephrase?");
+                }
+
+            } catch (error) {
+                console.error("Error calling Gemini API:", error);
+                removeTypingIndicator();
+                displayAiMessage("I'm having trouble connecting right now. Please try again in a moment.");
+            }
+        });
+    </script>
+</body>
+</html>
