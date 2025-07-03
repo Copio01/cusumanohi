@@ -972,6 +972,9 @@
         /* --- Firebase and Dynamic Content Styles --- */
         /* Add any additional styles for Firebase-loaded content here */
     </style>
+    
+    <!-- Load API configuration -->
+    <script src="js/config.js"></script>
 </head>
 <body>
     <header class="main-header" id="main-header">
@@ -2551,8 +2554,8 @@ Ready to begin? [ACTION:SHOW_QUOTE_FORM_LINK] [ACTION:SHOW_CALL_BUTTON]`,
                             contents: chatHistory 
                         };
 
-                        const apiKey = "AIzaSyDyrpmjFvn7zPtZPtSUosLawSdzO_e2DNc";
-                        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+                        const apiKey = API_CONFIG.GEMINI_API_KEY;
+                        const apiUrl = `${API_CONFIG.GEMINI_API_URL}?key=${apiKey}`;
                         
                         const response = await fetch(apiUrl, {
                             method: 'POST',
