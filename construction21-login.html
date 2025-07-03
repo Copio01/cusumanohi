@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Construction 21 — Login</title>
-    <link rel="icon" href="./img/cropped-CusumanoH-Ico-1-32x32.png">
+    <!-- <link rel="icon" href="./img/cropped-CusumanoH-Ico-1-32x32.png"> -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Roboto+Condensed:wght@700&display=swap" rel="stylesheet">
@@ -145,6 +145,28 @@
         .strength-bar.weak { background-color: var(--color-danger); }
         .strength-bar.medium { background-color: #ffc107; }
         .strength-bar.strong { background-color: var(--color-success); }
+        
+        .message {
+            padding: 0.75rem;
+            margin-top: 1rem;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            text-align: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .message.error {
+            background-color: rgba(255, 82, 82, 0.15);
+            border: 1px solid var(--color-danger);
+            color: var(--color-danger);
+            opacity: 1;
+        }
+        .message.success {
+            background-color: rgba(118, 255, 3, 0.15);
+            border: 1px solid var(--color-success);
+            color: var(--color-success);
+            opacity: 1;
+        }
     </style>
 </head>
 <body>
@@ -285,17 +307,33 @@
         // --- Firebase Auth Logic ---
         onAuthStateChanged(auth, async (user) => {
             if (user) {
-                const userDocRef = doc(db, "users", user.uid);
-                const docSnap = await getDoc(userDocRef);
-                if (!docSnap.exists()) {
-                    await setDoc(userDocRef, {
-                        displayName: user.displayName || 'Player',
-                        email: user.email,
-                        chips: 10000,
-                        stats: { handsPlayed: 0, totalWagered: 0, netWinnings: 0, blackjacks: 0, biggestWin: 0 }
-                    });
+                try {
+                    const userDocRef = doc(db, "users", user.uid);
+                    const docSnap = await getDoc(userDocRef);
+                    if (!docSnap.exists()) {
+                        await setDoc(userDocRef, {
+                            displayName: user.displayName || 'Player',
+                            email: user.email,
+                            chips: 10000,
+                            stats: { handsPlayed: 0, totalWagered: 0, netWinnings: 0, blackjacks: 0, biggestWin: 0 }
+                        });
+                    }
+                } catch (error) {
+                    console.error('Firestore error:', error);
+                    // Continue to redirect even if Firestore fails
                 }
-                window.location.href = 'construction21.html';
+                
+                // Try to redirect to the game page
+                try {
+                    window.location.href = 'construction21.html';
+                } catch (error) {
+                    console.error('Redirect error:', error);
+                    // Fallback - show success message
+                    const successMessage = document.createElement('div');
+                    successMessage.className = 'message success';
+                    successMessage.textContent = 'Login successful! Welcome to Construction 21.';
+                    document.querySelector('.auth-card__content').appendChild(successMessage);
+                }
             }
         });
         
@@ -303,9 +341,16 @@
             e.preventDefault();
             const email = document.getElementById('login-email').value;
             const password = document.getElementById('login-password').value;
+            
+            // Clear previous messages
+            loginMessage.textContent = '';
+            loginMessage.className = 'message';
+            
             try {
                 await signInWithEmailAndPassword(auth, email, password);
+                // onAuthStateChanged will handle the redirect
             } catch (error) {
+                console.error('Login error:', error);
                 loginMessage.textContent = 'Invalid credentials. Please try again.';
                 loginMessage.className = 'message error';
             }
@@ -316,16 +361,23 @@
             const name = document.getElementById('signup-name').value;
             const email = document.getElementById('signup-email').value;
             const password = document.getElementById('signup-password').value;
-             if (password.length < 6) {
+            
+            // Clear previous messages
+            signupMessage.textContent = '';
+            signupMessage.className = 'message';
+            
+            if (password.length < 6) {
                 signupMessage.textContent = 'Password must be at least 6 characters.';
                 signupMessage.className = 'message error';
                 return;
             }
+            
             try {
                 const userCredential = await createUserWithEmailAndPassword(auth, email, password);
                 const user = userCredential.user;
                 // The onAuthStateChanged listener will handle document creation and redirect
             } catch (error) {
+                console.error('Signup error:', error);
                 signupMessage.textContent = 'Failed to create account. Email may already be in use.';
                 signupMessage.className = 'message error';
             }
@@ -334,11 +386,17 @@
         forgotForm.addEventListener('submit', async e => {
             e.preventDefault();
             const email = document.getElementById('forgot-email').value;
+            
+            // Clear previous messages
+            forgotMessage.textContent = '';
+            forgotMessage.className = 'message';
+            
             try {
                 await sendPasswordResetEmail(auth, email);
                 forgotMessage.textContent = 'Password reset email sent! Check your inbox.';
                 forgotMessage.className = 'message success';
             } catch (error) {
+                console.error('Password reset error:', error);
                 forgotMessage.textContent = 'Could not send reset email. Please check the address.';
                 forgotMessage.className = 'message error';
             }
@@ -346,10 +404,16 @@
 
         googleSigninBtn.addEventListener('click', async () => {
             const provider = new GoogleAuthProvider();
+            
+            // Clear previous messages
+            loginMessage.textContent = '';
+            loginMessage.className = 'message';
+            
             try {
                 await signInWithPopup(auth, provider);
                 // onAuthStateChanged will handle the rest.
             } catch (error) {
+                console.error('Google signin error:', error);
                 loginMessage.textContent = 'Could not sign in with Google. Please try again.';
                 loginMessage.className = 'message error';
             }

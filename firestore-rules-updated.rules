@@ -1,0 +1,143 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // --- Helper Functions ---
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isAdmin() {
+      return isAuthenticated() && request.auth.token.admin == true;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isValidEmail() {
+      return isAuthenticated() && request.auth.token.email_verified == true;
+    }
+
+    // --- Website Content & Administration ---
+    match /siteContent/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /siteSettings/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /sliderImages/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /serviceGroups/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // --- User Management ---
+    match /roles/{uid} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+
+    match /drafts/{userId} {
+      allow read, write: if isOwner(userId);
+    }
+
+    // --- Audit & Security ---
+    match /auditLogs/{logId} {
+      allow create: if isAuthenticated();
+      allow read: if isAdmin();
+      allow update, delete: if false;
+    }
+
+    // --- Construction 21 Game Data ---
+    // FIXED: Changed to match your login code that uses "users" collection
+    match /users/{userId} {
+      allow read, write: if isOwner(userId);
+      // Allow admins to update only chips field for voucher redemption
+      allow update: if isAdmin() &&
+                      request.resource.data.diff(resource.data).affectedKeys()
+                        .hasOnly(['chips']);
+    }
+
+    match /construction21_leaderboard/{userId} {
+      allow read: if isAuthenticated();
+      allow write: if isOwner(userId);
+    }
+
+    // --- Chip Voucher System ---
+    match /chipVouchers/{voucherId} {
+      allow create, delete: if isAdmin();
+      allow read: if isAuthenticated();
+      allow update: if (isAdmin()) || 
+                    (isAuthenticated() &&
+                      !resource.data.isRedeemed &&
+                      request.resource.data.isRedeemed == true &&
+                      request.resource.data.redeemedBy == request.auth.token.email &&
+                      request.resource.data.redeemedAt != null &&
+                      request.resource.data.diff(resource.data).affectedKeys()
+                        .hasOnly(['isRedeemed','redeemedBy','redeemedAt']));
+    }
+
+    // --- Other Game Leaderboards ---
+    // Secured: Only authenticated users can write scores
+    match /snakeLeaderboard/{docId} {
+      allow read: if true;
+      allow write: if isAuthenticated() && isValidEmail();
+    }
+
+    match /hammerballLeaderboard/{docId} {
+      allow read: if true;
+      allow write: if isAuthenticated() && isValidEmail();
+    }
+
+    match /brickbreakerLeaderboard/{docId} {
+      allow read: if true;
+      allow write: if isAuthenticated() && isValidEmail();
+    }
+
+    match /flappyhammerLeaderboard/{docId} {
+      allow read: if true;
+      allow write: if isAuthenticated() && isValidEmail();
+    }
+
+    // --- Multiplayer 21 (if you add it) ---
+    match /multiplayer21_rooms/{roomId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated();
+      allow update: if isAuthenticated() && 
+                      (request.auth.uid in resource.data.players ||
+                       request.auth.uid == resource.data.host);
+      allow delete: if isAuthenticated() && 
+                      request.auth.uid == resource.data.host;
+    }
+
+    // --- Legacy Collections (Kept for backward compatibility) ---
+    match /game_users_custom_auth/{userId} {
+      allow read: if isAuthenticated();
+      allow write: if false; // Legacy, read-only
+    }
+
+    match /artifacts/{appId}/users/{userId}/{data=**} {
+      allow read, write: if isOwner(userId);
+    }
+
+    match /artifacts/{appId}/public/data/leaderboard/{userId} {
+      allow read: if isAuthenticated();
+      allow write: if isOwner(userId);
+    }
+
+    // --- Catch-all deny rule for security ---
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

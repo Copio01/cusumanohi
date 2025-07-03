@@ -778,9 +778,18 @@ function showOutcomeModal(results) {
     DOMElements.actionBar.querySelectorAll('.action-button').forEach(btn => {
         btn.disabled = true;
     });
-    
-    // Show the outcome modal and disable actions until modal is dismissed
+      // Show the outcome modal and disable actions until modal is dismissed
     showModal(DOMElements.outcomeModal);
+    
+    // Update rebet button state based on previous bets and available chips
+    const modalRebetBtn = document.getElementById('modal-rebet-btn');
+    if (modalRebetBtn) {
+        const totalLastBet = game.bets.main + game.bets.pp + game.bets.plus3;
+        const canRebet = totalLastBet > 0 && game.chips >= totalLastBet;
+        modalRebetBtn.disabled = !canRebet;
+        modalRebetBtn.textContent = canRebet ? `🔄 Rebet ($${totalLastBet})` : '🔄 Rebet';
+    }
+    
       // Add a button to dismiss the modal and start a new game
     const modalNewGameBtn = document.getElementById('modal-new-game-btn');
     if (modalNewGameBtn) {
@@ -789,6 +798,39 @@ function showOutcomeModal(results) {
             // Use the proper new game action instead of just resetGameState
             startNewGame();
         }, { once: true }); // Use once: true to prevent multiple handlers
+    }
+    
+    // Add rebet button functionality
+    if (modalRebetBtn) {
+        modalRebetBtn.addEventListener('click', () => {
+            hideModal(DOMElements.outcomeModal);
+            // Check if there were previous bets and if player has enough chips
+            const lastBets = {
+                main: game.bets.main,
+                pp: game.bets.pp,
+                plus3: game.bets.plus3
+            };
+            const totalLastBet = lastBets.main + lastBets.pp + lastBets.plus3;
+            
+            if (totalLastBet > 0 && game.chips >= totalLastBet) {
+                // Use the rebet method from the game logic
+                if (game.rebet()) {
+                    // Update the UI to show the rebet amounts
+                    updateBetSpot('main', game.bets.main);
+                    updateBetSpot('pp', game.bets.pp);
+                    updateBetSpot('plus3', game.bets.plus3);
+                    updateChipsDisplay();
+                    
+                    // Auto-start the game after rebet
+                    if (game.canDealCards()) {
+                        startGameRound();
+                    }
+                }
+            } else {
+                // Show message if can't rebet
+                alert('Cannot rebet: ' + (totalLastBet === 0 ? 'No previous bets' : 'Insufficient chips'));
+            }
+        }, { once: true });
     }
     
     // Force game state reset when modal is closed
