@@ -1872,7 +1872,7 @@
                 if (index >= galleryImages.length) index = 0;
                 
                 currentLightboxIndex = index;
-                lightboxImg.src = galleryImages[index];
+                lightboxImg.src = galleryImages[index].url;
                 lightboxImg.alt = `Gallery image ${index + 1} of ${galleryImages.length}`;
             };
 
@@ -1892,7 +1892,7 @@
                         mainSliderImg.style.opacity = '0';
                         
                         setTimeout(async () => {
-                            const newImg = await loadImageWithFadeIn(galleryImages[index], index);
+                            const newImg = await loadImageWithFadeIn(galleryImages[index].url, index);
                             get('main-slider').innerHTML = '';
                             get('main-slider').appendChild(newImg);
                         }, 150);
