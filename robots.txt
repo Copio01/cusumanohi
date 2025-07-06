@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://cusumanohi.com/sitemap.xml
+
+# Disallow admin area
+Disallow: /admin/
+Disallow: /admin.html
