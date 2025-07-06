@@ -31,6 +31,7 @@
             --shadow-sm: 0 2px 8px rgba(0,0,0,0.05);
             --shadow-md: 0 6px 16px rgba(0,0,0,0.08);
             --shadow-lg: 0 10px 30px rgba(0,0,0,0.1);
+            --vh: 1vh; /* Custom viewport height for mobile */
         }
         *, *::before, *::after { box-sizing: border-box; }
         html { scroll-behavior: smooth; scroll-padding-top: 80px; }
@@ -966,6 +967,231 @@
 
             .chat-bubble {
                 max-width: 200px;
+            }
+        }
+
+        /* --- Enhanced Mobile Optimizations --- */
+        @media (max-width: 768px) {
+            /* Container adjustments for mobile */
+            .container {
+                width: 95%;
+                padding: 3rem 0;
+            }
+            
+            /* Typography scaling for mobile */
+            h1 { font-size: 2.2rem; }
+            h2.section-title { font-size: 2rem; margin-bottom: 2.5rem; }
+            h3 { font-size: 1.3rem; }
+            
+            /* Hero section mobile optimization */
+            .hero-banner { 
+                height: calc(var(--vh, 1vh) * 70); 
+                min-height: 500px;
+                max-height: 600px;
+            }
+            
+            .hero-overlay {
+                padding: 2rem 1rem;
+                text-align: center;
+            }
+            
+            .hero-overlay h1 { 
+                font-size: 2.2rem; 
+                margin-bottom: 1rem;
+                line-height: 1.2;
+            }
+            
+            .hero-overlay p { 
+                font-size: 1.1rem; 
+                margin-bottom: 2rem;
+            }
+            
+            /* Service cards mobile optimization */
+            .service-group-card {
+                margin-bottom: 2rem;
+                padding: 1.5rem;
+            }
+            
+            .service-group-card h3 { 
+                font-size: 1.4rem; 
+                margin-bottom: 1rem;
+            }
+            
+            .service-group-card p { 
+                font-size: 0.95rem; 
+                line-height: 1.6;
+            }
+            
+            /* Gallery mobile optimization */
+            .gallery-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 0.5rem;
+            }
+            
+            .gallery-item {
+                aspect-ratio: 1;
+                border-radius: 8px;
+                overflow: hidden;
+            }
+            
+            /* Contact form mobile optimization */
+            .contact-layout {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+            
+            .contact-form {
+                padding: 1.5rem;
+            }
+            
+            .contact-form input,
+            .contact-form textarea {
+                font-size: 16px; /* Prevents zoom on iOS */
+                padding: 0.75rem;
+            }
+            
+            .contact-form button {
+                font-size: 1rem;
+                padding: 0.75rem 1.5rem;
+            }
+            
+            /* Button improvements for mobile */
+            .btn {
+                padding: 0.75rem 1.5rem;
+                font-size: 1rem;
+                min-height: 44px; /* Better touch target */
+            }
+            
+            /* Navigation improvements */
+            .mobile-nav a {
+                font-size: 1.5rem;
+                margin: 1rem 0;
+                padding: 0.5rem 1rem;
+                width: 80%;
+                text-align: center;
+                border-radius: 8px;
+                transition: background-color 0.3s ease;
+            }
+            
+            .mobile-nav a:hover {
+                background-color: rgba(255, 255, 255, 0.1);
+            }
+            
+            /* Improved touch targets */
+            .hamburger-menu {
+                padding: 8px;
+                min-width: 44px;
+                min-height: 44px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+            
+            .close-mobile-nav {
+                background: none;
+                border: none;
+                min-width: 44px;
+                min-height: 44px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+        }
+
+        /* Small mobile devices */
+        @media (max-width: 480px) {
+            .container {
+                width: 100%;
+                padding: 2rem 1rem;
+            }
+            
+            /* Further typography scaling */
+            h1 { font-size: 1.8rem; }
+            h2.section-title { font-size: 1.6rem; }
+            h3 { font-size: 1.2rem; }
+            
+            /* Hero adjustments for small screens */
+            .hero-overlay h1 { 
+                font-size: 1.8rem; 
+                line-height: 1.1;
+            }
+            
+            .hero-overlay p { 
+                font-size: 1rem; 
+            }
+            
+            /* Single column gallery for very small screens */
+            .gallery-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+            
+            /* Service cards compact layout */
+            .service-group-card {
+                padding: 1rem;
+            }
+            
+            .service-group-card h3 { 
+                font-size: 1.2rem; 
+            }
+            
+            .service-group-card p { 
+                font-size: 0.9rem; 
+            }
+            
+            /* Navigation for small screens */
+            .mobile-nav a {
+                font-size: 1.3rem;
+                width: 90%;
+            }
+        }
+
+        /* Landscape orientation optimization */
+        @media (max-width: 768px) and (orientation: landscape) {
+            .hero-banner {
+                height: 90vh;
+                max-height: 500px;
+            }
+            
+            .hero-overlay {
+                padding: 1.5rem;
+            }
+            
+            .hero-overlay h1 { 
+                font-size: 2rem; 
+            }
+            
+            .hero-overlay p { 
+                font-size: 1rem; 
+            }
+        }
+
+        /* High DPI mobile screens */
+        @media (max-width: 768px) and (-webkit-min-device-pixel-ratio: 2) {
+            .hero-background {
+                background-size: cover;
+                background-position: center;
+            }
+            
+            .gallery-item img {
+                image-rendering: -webkit-optimize-contrast;
+            }
+        }
+
+        /* Improved focus states for mobile accessibility */
+        @media (max-width: 768px) {
+            .hamburger-menu:focus,
+            .close-mobile-nav:focus,
+            .mobile-nav a:focus {
+                outline: 2px solid var(--accent-color);
+                outline-offset: 2px;
+            }
+            
+            .btn:focus,
+            .contact-form input:focus,
+            .contact-form textarea:focus {
+                outline: 2px solid var(--primary-color);
+                outline-offset: 2px;
             }
         }
 
@@ -2612,6 +2838,144 @@ Ready to begin? [ACTION:SHOW_QUOTE_FORM_LINK] [ACTION:SHOW_CALL_BUTTON]`,
                     displayAiMessage("Hello! I'm here to help with your home improvement questions. What can I assist you with today?", welcomeActions);
                 }
             }, 1000);
+        }
+
+        // Mobile-specific enhancements
+        function initMobileOptimizations() {
+            // Prevent zoom on input focus for iOS
+            const inputs = document.querySelectorAll('input, textarea');
+            inputs.forEach(input => {
+                input.addEventListener('touchstart', () => {
+                    input.style.fontSize = '16px';
+                });
+            });
+
+            // Smooth scrolling for mobile navigation
+            const mobileNavLinks = document.querySelectorAll('.mobile-nav a[href^="#"]');
+            mobileNavLinks.forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const target = document.querySelector(link.getAttribute('href'));
+                    if (target) {
+                        // Close mobile menu first
+                        document.querySelector('.mobile-nav').classList.remove('active');
+                        
+                        // Then scroll to target
+                        setTimeout(() => {
+                            target.scrollIntoView({ behavior: 'smooth' });
+                        }, 300);
+                    }
+                });
+            });
+
+            // Enhanced touch feedback for mobile
+            const touchElements = document.querySelectorAll('button, .btn, .mobile-nav a, .hamburger-menu');
+            touchElements.forEach(element => {
+                element.addEventListener('touchstart', function() {
+                    this.style.opacity = '0.7';
+                });
+                
+                element.addEventListener('touchend', function() {
+                    setTimeout(() => {
+                        this.style.opacity = '';
+                    }, 150);
+                });
+            });
+
+            // Handle viewport height changes on mobile (for address bar)
+            function handleViewportHeight() {
+                const vh = window.innerHeight * 0.01;
+                document.documentElement.style.setProperty('--vh', `${vh}px`);
+            }
+            
+            handleViewportHeight();
+            window.addEventListener('resize', handleViewportHeight);
+            window.addEventListener('orientationchange', () => {
+                setTimeout(handleViewportHeight, 100);
+            });
+
+            // Improve chat widget on mobile
+            const chatWidget = document.querySelector('.ai-chat-widget');
+            const chatWindow = document.querySelector('.chat-window');
+            
+            if (chatWidget && chatWindow) {
+                // Adjust chat window position on mobile keyboard
+                const chatInput = chatWindow.querySelector('.chat-input');
+                if (chatInput) {
+                    chatInput.addEventListener('focus', () => {
+                        if (window.innerWidth <= 768) {
+                            setTimeout(() => {
+                                chatWindow.style.transform = 'translateY(-100px)';
+                                chatWindow.style.transition = 'transform 0.3s ease';
+                            }, 300);
+                        }
+                    });
+                    
+                    chatInput.addEventListener('blur', () => {
+                        if (window.innerWidth <= 768) {
+                            chatWindow.style.transform = '';
+                        }
+                    });
+                }
+            }
+
+            // Swipe gestures for mobile gallery
+            const galleryItems = document.querySelectorAll('.gallery-item');
+            galleryItems.forEach(item => {
+                let startX = 0;
+                let startY = 0;
+                
+                item.addEventListener('touchstart', (e) => {
+                    startX = e.touches[0].clientX;
+                    startY = e.touches[0].clientY;
+                });
+                
+                item.addEventListener('touchmove', (e) => {
+                    if (Math.abs(e.touches[0].clientX - startX) > 10) {
+                        e.preventDefault(); // Prevent scrolling when swiping
+                    }
+                });
+            });
+
+            // Optimize loading for mobile
+            if (window.innerWidth <= 768) {
+                // Lazy load images that are not immediately visible
+                const images = document.querySelectorAll('img[data-src]');
+                const imageObserver = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            const img = entry.target;
+                            img.src = img.dataset.src;
+                            img.removeAttribute('data-src');
+                            imageObserver.unobserve(img);
+                        }
+                    });
+                });
+                
+                images.forEach(img => imageObserver.observe(img));
+            }
+
+            // Better tap highlights for mobile
+            const style = document.createElement('style');
+            style.textContent = `
+                @media (max-width: 768px) {
+                    * {
+                        -webkit-tap-highlight-color: rgba(10, 77, 104, 0.1);
+                    }
+                    
+                    .btn, button {
+                        -webkit-tap-highlight-color: rgba(245, 166, 35, 0.3);
+                    }
+                }
+            `;
+            document.head.appendChild(style);
+        }
+
+        // Initialize mobile optimizations when DOM is loaded
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initMobileOptimizations);
+        } else {
+            initMobileOptimizations();
         }
     </script>
 </body>
