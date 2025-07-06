@@ -2087,27 +2087,27 @@
             function loadScript() {
                 if (attempts >= maxAttempts) return;
                 
-                try {
-                    const script = document.createElement('script');
-                    script.async = true;
+            color: var(--secondary-color);
+            text-decoration: none; document.createElement('script');
+        }           script.async = true;
                     script.defer = true;
-                    script.crossOrigin = "anonymous";
-                    script.src = "https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v19.0";
-                    script.nonce = "RANDOM_NONCE";
+        .breadcrumbs a:hover {ssOrigin = "anonymous";
+            text-decoration: underline;://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v19.0";
+        }           script.nonce = "RANDOM_NONCE";
                     
-                    // Handle load errors
-                    script.onerror = function() {
-                        attempts++;
+        /* --- Firebase and Dynamic Content Styles --- */
+        /* Add any additional styles for Firebase-loaded content here */
+    </style>            attempts++;
                         setTimeout(loadScript, 1000); // Retry after 1 second
-                    };
-                    
+    <!-- Load API configuration -->
+    <script src="js/config.js"></script>
                     document.body.appendChild(script);
-                } catch (err) {
-                    attempts++;
-                    setTimeout(loadScript, 1000); // Retry after 1 second
-                }
-            }
-            
+    <!-- Google Analytics (Replace with your actual tracking ID) -->
+    <!--            attempts++;
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+    <script>    }
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
             loadScript();
         })();
     </script>
