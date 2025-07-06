@@ -10,8 +10,8 @@
     <!-- Enhanced Meta Description -->
     <meta name="description" content="Trusted home improvement contractor in Monroe, MI with 50+ years experience. Expert deck construction, roofing, siding, remodeling & dumpster rentals. Family-owned. Free estimates available.">
     
-    <!-- Expanded Keywords -->
-    <meta name="keywords" content="home improvement Monroe MI, deck construction, roofing contractor, siding installation, remodeling, garage construction, dumpster rental, bathroom remodeling Monroe Michigan, kitchen renovation, home addition contractor">
+    <!-- Theme Color for Mobile Browser -->
+    <meta name="theme-color" content="#0a4d68">
     
     <!-- Author and canonical URL -->
     <meta name="author" content="Cusumano Home Improvements">
@@ -22,6 +22,9 @@
     <meta property="og:title" content="Monroe MI Home Improvement Contractor | 50+ Years Experience">
     <meta property="og:description" content="Professional home improvement services in Monroe, MI. Expert deck building, roofing, siding, and remodeling with 50+ years experience. Free estimates.">
     <meta property="og:image" content="https://cusumanohi.com/images/cusumano-home-improvements.jpg">
+    <meta property="og:image:alt" content="A beautiful home improved by Cusumano Home Improvements in Monroe, MI">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
     <meta property="og:url" content="https://cusumanohi.com/">
     <meta property="og:site_name" content="Cusumano Home Improvements">
     
@@ -1661,7 +1664,7 @@
     <header class="main-header" id="main-header">
         <div class="header-content">
             <a href="/" class="logo">
-                <img id="site-logo-img" src="" alt="Company Logo" style="display: none;">
+                <img id="site-logo-img" src="" alt="Cusumano Home Improvements Logo - Monroe, MI" style="display: none;">
                 <span id="site-logo-text">Cusumano Home Improvements</span>
             </a>
             <nav class="main-nav">
@@ -1985,7 +1988,7 @@
     </div>
 
     <div class="modal" id="service-modal"><div class="modal-content"><button class="close-btn">&times;</button><div id="modal-body"></div></div></div>
-    <div class="lightbox" id="gallery-lightbox"><button class="close-btn" aria-label="Close">&times;</button><button class="lightbox-nav lightbox-prev" aria-label="Previous">&#10094;</button><div class="lightbox-content"><img src="" alt="Gallery image"></div><button class="lightbox-nav lightbox-next" aria-label="Next">&#10095;</button></div>
+    <div class="lightbox" id="gallery-lightbox"><button class="close-btn" aria-label="Close">&times;</button><button class="lightbox-nav lightbox-prev" aria-label="Previous">&#10094;</button><div class="lightbox-content"><img src="" alt="Project gallery image by Cusumano Home Improvements"></div><button class="lightbox-nav lightbox-next" aria-label="Next">&#10095;</button></div>
     
     <div id="fb-root"></div>
     <!-- Comprehensive Facebook SDK error suppression and defensive loading -->
@@ -2187,14 +2190,30 @@
             googleMapUrl: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d190162.7533827283!2d-83.5839212411832!3d41.9123958933454!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x883b655982052f6d%3A0x1e3604f57f1b6239!2sMonroe%2C%20MI!5e0!3m2!1sen!2sus!4v1622050000000!5m2!1sen!2sus"
         };
         
-        async function loadContent() {
+        // Firebase retry logic
+        async function loadFirebaseDataWithRetry(retryCount = 0, maxRetries = 3) {
             try {
-                showLoadingState();
-                
                 const [docSnap, sliderDocs] = await Promise.all([
                     getDoc(doc(db, 'siteContent', 'main')),
                     getDocs(collection(db, 'sliderImages'))
                 ]);
+                return { docSnap, sliderDocs };
+            } catch (error) {
+                console.error(`Firebase loading error (attempt ${retryCount + 1}/${maxRetries + 1}):`, error);
+                if (retryCount < maxRetries) {
+                    console.log(`Retrying Firebase connection (${retryCount + 1}/${maxRetries})...`);
+                    await new Promise(resolve => setTimeout(resolve, 1000 * (retryCount + 1))); // Exponential backoff
+                    return loadFirebaseDataWithRetry(retryCount + 1, maxRetries);
+                }
+                throw error;
+            }
+        }
+
+        async function loadContent() {
+            try {
+                showLoadingState();
+                
+                const { docSnap, sliderDocs } = await loadFirebaseDataWithRetry();
 
                 let data = { ...defaultSiteData };
                 if (docSnap.exists() && Object.keys(docSnap.data()).length > 0) {
@@ -2316,6 +2335,12 @@
         function renderPage(data) {
             const get = (id) => document.getElementById(id);
             
+            // Ensure services section is always visible
+            const servicesSection = get('services');
+            if (servicesSection) {
+                servicesSection.style.display = 'block';
+            }
+            
             // Logo handling
             if (data.logoUrl) { 
                 const logoImg = get('site-logo-img');
@@ -2334,7 +2359,7 @@
             
             const ctaButton = get('hero-cta-button');
             if (data.heroCtaText) ctaButton.textContent = data.heroCtaText;
-            if (data.contactPhone) ctaButton.href = `tel:${data.contactPhone.replace(/\D/g, '')}`;
+            // Keep the CTA button linked to the contact section, not the phone number
             
             // About section
             if (data.about) {
@@ -2345,7 +2370,13 @@
             
             // Services section
             const servicesGrid = get('services-grid');
-            servicesGrid.innerHTML = '';
+            // Show loading state initially
+            servicesGrid.innerHTML = `
+                <div class="content-loading" style="text-align:center; padding: 2rem;">
+                    <div class="loading-spinner"></div>
+                    <p>Loading services...</p>
+                </div>
+            `;
             
             // Always prefer Firebase data, only use defaults if absolutely necessary
             let servicesToRender = [];
@@ -2360,13 +2391,15 @@
             }
             
             if (servicesToRender.length > 0) {
+                // Clear loading state and render services
+                servicesGrid.innerHTML = '';
                 servicesToRender.forEach(group => {
                     const card = document.createElement('article');
                     card.className = 'service-group-card reveal-on-scroll';
                     card.dataset.groupId = group.id;
                     
                     const iconHTML = group.imageUrl ? 
-                        `<img src="${group.imageUrl}" alt="${group.title} photo" class="service-image">` : 
+                        `<img src="${group.imageUrl}" alt="${group.title} by Cusumano Home Improvements" class="service-image">` : 
                         (iconMap[group.icon] || iconMap['tool']);
                     
                     card.innerHTML = `
@@ -2386,7 +2419,21 @@
                     servicesGrid.appendChild(card);
                 });
             } else {
-                get('services').style.display = 'none';
+                // Instead of hiding, show a retry message
+                servicesGrid.innerHTML = `
+                    <div class="content-loading" style="text-align:center; padding: 2rem;">
+                        <p>Unable to load services at this time.</p>
+                        <button class="btn btn-secondary" onclick="loadContent()">Reload Services</button>
+                    </div>
+                `;
+                
+                // Optional: Try reloading the services after a delay
+                setTimeout(() => {
+                    if (servicesGrid.querySelector('.content-loading')) {
+                        console.log('Retrying services load...');
+                        loadContent();
+                    }
+                }, 2000);
             }
             
             // Contact section
