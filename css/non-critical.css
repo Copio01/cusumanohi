@@ -1,0 +1,258 @@
+/* Non-critical CSS for Cusumano Home Improvements */
+
+/* --- About & Why Choose Us Section --- */
+.about-content {
+    text-align: center;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.about-content p {
+    font-size: 1.1rem;
+    line-height: 1.8;
+}
+
+.trust-badges {
+    display: flex;
+    justify-content: space-around;
+    text-align: center;
+    flex-wrap: wrap;
+    gap: 2rem;
+    margin-bottom: 4rem;
+}
+
+.badge {
+    flex: 1;
+    min-width: 150px;
+}
+
+.badge-icon {
+    font-size: 2.5rem;
+    color: var(--secondary-color);
+    margin-bottom: 0.5rem;
+}
+
+.badge h4 {
+    margin: 0;
+    color: var(--primary-color);
+}
+
+/* --- Services Section --- */
+.services-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 5rem;
+}
+
+.service-group-card {
+    display: grid;
+    grid-template-columns: 1fr 1.1fr;
+    gap: 3rem;
+    align-items: center;
+}
+
+.service-group-card:nth-child(even) {
+    grid-template-columns: 1.1fr 1fr;
+}
+
+.service-group-card:nth-child(even) .service-image-container {
+    grid-column: 2;
+    grid-row: 1;
+}
+
+.service-image-container {
+    width: 100%;
+    aspect-ratio: 4/3;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #f0f2f5;
+    border-radius: 12px;
+}
+
+.service-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 12px;
+}
+
+.service-image-container:hover .service-image {
+    transform: scale(1.02);
+    transition: transform 0.3s ease;
+}
+
+.service-icon {
+    stroke-width: 1.5;
+    color: var(--secondary-color);
+    width: 80px;
+    height: 80px;
+}
+
+.service-details h3 {
+    font-size: 2rem;
+}
+
+.service-details ul {
+    list-style: none;
+    padding-left: 0;
+}
+
+.service-details li {
+    padding-left: 1.5rem;
+    position: relative;
+    margin-bottom: 0.5rem;
+}
+
+.service-details li:hover {
+    transform: translateX(5px);
+    transition: transform 0.2s ease;
+}
+
+.service-details li::before {
+    content: '✓';
+    color: var(--accent-color);
+    position: absolute;
+    left: 0;
+    font-weight: 700;
+}
+
+/* --- Gallery Section --- */
+.gallery-container {
+    position: relative;
+}
+
+.main-slider {
+    background-color: var(--light-gray);
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.main-slider img {
+    width: 100%;
+    height: 60vh;
+    object-fit: cover;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+}
+
+.main-slider img:hover {
+    transform: scale(1.02);
+}
+
+.thumbnails {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.thumb {
+    width: 100px;
+    height: 70px;
+    object-fit: cover;
+    border-radius: 6px;
+    cursor: pointer;
+    border: 3px solid transparent;
+    transition: border-color 0.3s, transform 0.3s;
+}
+
+.thumb:hover {
+    transform: scale(1.05);
+}
+
+.thumb.active {
+    border-color: var(--accent-color);
+}
+
+/* --- Social & Contact --- */
+.contact-layout {
+    display: grid;
+    grid-template-columns: 1fr 1.2fr;
+    gap: 3rem;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+    position: relative;
+}
+
+.field-element {
+    width: 100%;
+    padding: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.field-element:focus {
+    border-color: var(--accent-color);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(245, 166, 35, 0.25);
+}
+
+/* --- Footer --- */
+.main-footer {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--dark-gray) 100%);
+    color: var(--white);
+    text-align: center;
+    padding: 3rem 2rem 2rem;
+    margin-top: 5rem;
+}
+
+.main-footer p {
+    margin: 0.5rem 0;
+    opacity: 0.9;
+}
+
+.main-footer a {
+    color: var(--accent-color);
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.main-footer a:hover {
+    color: var(--white);
+    text-decoration: underline;
+}
+
+/* --- Responsive Adjustments --- */
+@media (max-width: 992px) {
+    .main-nav {
+        display: none;
+    }
+    
+    .hamburger-menu {
+        display: block;
+    }
+    
+    .contact-layout,
+    .socials-layout,
+    .service-group-card,
+    .service-group-card:nth-child(even) {
+        grid-template-columns: 1fr;
+    }
+    
+    .service-group-card:nth-child(even) .service-image-container {
+        grid-column: 1;
+    }
+}
+
+@media (max-width: 768px) {
+    .hero-overlay h1 {
+        font-size: 2.5rem;
+    }
+    
+    h2.section-title {
+        font-size: 2.2rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .hero-cta-group {
+        flex-direction: column;
+        gap: 1rem;
+    }
+}

@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
+    <!-- Optimization toggle for performance testing -->
+    <script src="js/optimization-toggle.js"></script>
+    
     <!-- Enhanced SEO Title -->
     <title>Home Improvement Contractor Monroe MI | Cusumano Home Improvements | Decks, Roofing, Siding & Remodeling Since 1973</title>
     
@@ -51,21 +54,201 @@
     <!-- <meta name="google-site-verification" content="your-google-verification-code"> -->
     <!-- <meta name="msvalidate.01" content="your-bing-verification-code"> -->
     
-    <!-- Additional Performance Hints -->
-    <link rel="preload" href="/images/hero-banner.jpg" as="image">
+    <!-- Performance Optimizations -->
+    <!-- Critical Resource Preloads -->
+    <link rel="preload" href="/images/hero-banner.jpg" as="image" fetchpriority="high">
+    <link rel="preload" href="/images/logo.svg" as="image">
+    <link rel="preload" href="/images/services/deck-construction.jpg" as="image">
+    
+    <!-- Navigation Prefetching -->
     <link rel="prefetch" href="#about">
     <link rel="prefetch" href="#services">
     <link rel="prefetch" href="#contact">
     
+    <!-- Font Optimization -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Poppins:wght@600;700&family=Righteous&display=swap" as="style">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Poppins:wght@600;700&family=Righteous&display=swap" rel="stylesheet">
-
-    <!-- Performance Optimization -->
-    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Poppins:wght@600;700&display=swap" as="style">
+    
+    <!-- Third-party DNS Prefetching -->
     <link rel="dns-prefetch" href="//www.googletagmanager.com">
     <link rel="dns-prefetch" href="//www.google-analytics.com">
     <link rel="dns-prefetch" href="//connect.facebook.net">
+    
+    <!-- Critical CSS Inlined for Fast Rendering -->
+    <style data-critical="true">
+    /* Critical CSS for Cusumano Home Improvements */
+    :root {
+        --primary-color: #0a4d68;
+        --secondary-color: #088395;
+        --accent-color: #f5a623;
+        --white: #ffffff;
+        --light-gray: #f8f9fa;
+        --dark-gray: #343a40;
+        --danger-color: #dc3545;
+        --success-color: #28a745;
+        --font-heading: 'Poppins', sans-serif;
+        --font-body: 'Roboto', sans-serif;
+        --font-special: 'Righteous', cursive;
+        --shadow-sm: 0 2px 5px rgba(0, 0, 0, 0.1);
+        --shadow-md: 0 4px 10px rgba(0, 0, 0, 0.15);
+        --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.2);
+    }
+    
+    /* Reset & Base Styles */
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+    
+    body {
+        font-family: var(--font-body);
+        line-height: 1.6;
+        color: var(--dark-gray);
+        background-color: var(--white);
+    }
+    
+    img {
+        max-width: 100%;
+        height: auto;
+    }
+    
+    a {
+        text-decoration: none;
+        color: var(--secondary-color);
+        transition: color 0.3s ease;
+    }
+    
+    a:hover {
+        color: var(--primary-color);
+    }
+    
+    /* Typography */
+    h1, h2, h3, h4, h5, h6 {
+        font-family: var(--font-heading);
+        font-weight: 700;
+        line-height: 1.2;
+        margin-bottom: 1rem;
+        color: var(--primary-color);
+    }
+    
+    h1 { font-size: 3rem; }
+    h2 { font-size: 2.5rem; }
+    h3 { font-size: 1.75rem; }
+    p { margin-bottom: 1rem; }
+    
+    /* Layout */
+    .container {
+        width: 90%;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 4rem 0;
+    }
+    
+    .section-title {
+        text-align: center;
+        margin-bottom: 3rem;
+        position: relative;
+    }
+    
+    /* Header & Navigation */
+    .main-header {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        z-index: 1000;
+        background-color: var(--white);
+        box-shadow: var(--shadow-sm);
+        transition: all 0.3s ease;
+    }
+    
+    .header-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem 2rem;
+        max-width: 1400px;
+        margin: 0 auto;
+    }
+    
+    .logo {
+        display: flex;
+        align-items: center;
+        font-family: var(--font-special);
+        font-size: 1.5rem;
+        color: var(--primary-color);
+        font-weight: 700;
+    }
+    
+    /* Hero Banner - Above the fold */
+    .hero-banner {
+        height: 80vh;
+        min-height: 600px;
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-top: 70px;
+    }
+    
+    .hero-background {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: url('/images/hero-banner.jpg');
+        background-size: cover;
+        background-position: center;
+        z-index: -1;
+    }
+    
+    .hero-overlay {
+        text-align: center;
+        color: var(--white);
+        padding: 2rem;
+        max-width: 800px;
+        z-index: 1;
+    }
+    
+    .hero-overlay h1 {
+        font-size: 3.5rem;
+        margin-bottom: 1.5rem;
+        color: var(--white);
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    }
+    
+    /* Critical Buttons */
+    .btn {
+        display: inline-block;
+        padding: 1rem 2.5rem;
+        border-radius: 50px;
+        text-decoration: none;
+        font-weight: 700;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        border: none;
+        font-family: var(--font-heading);
+    }
+    
+    .btn-primary {
+        background: var(--accent-color);
+        color: var(--dark-gray);
+        box-shadow: var(--shadow-md);
+    }
+    
+    .btn-secondary {
+        background: rgba(255, 255, 255, 0.8);
+        color: var(--primary-color);
+    }
+    </style>
+    
+    <!-- Non-critical CSS loaded asynchronously -->
+    <link rel="preload" href="/css/non-critical.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="/css/non-critical.css"></noscript>
 
     <!-- Structured Data - Local Business Schema -->
     <script type="application/ld+json">
@@ -439,6 +622,16 @@
         }
 
         .nav-link:hover::after, .nav-link:focus::after {
+            transform: scaleX(1);
+        }
+        
+        /* Current page indicator */
+        .nav-link.current {
+            color: var(--primary-color);
+            font-weight: 700;
+        }
+        
+        .nav-link.current::after {
             transform: scaleX(1);
         }
 
@@ -2065,6 +2258,12 @@
         .breadcrumbs {
             padding: 1rem 0;
             font-size: 0.9rem;
+            display: none; /* Hide breadcrumbs on home page */
+        }
+        
+        /* Show breadcrumbs on other pages if needed */
+        .breadcrumbs.show {
+            display: block;
         }
 
         .breadcrumbs ol {
@@ -2100,7 +2299,7 @@
     </style>
     
     <!-- Load API configuration -->
-    <script src="js/config.js"></script>
+    <script src="js/config.js" onerror="console.error('Failed to load config.js. Please ensure the file exists and contains valid API keys.')"></script>
 
     <!-- Google Analytics (Replace with your actual tracking ID) -->
     <!-- 
@@ -2123,6 +2322,7 @@
             
             <nav class="main-nav" aria-label="Primary navigation">
                 <ul class="nav-list">
+                    <li class="nav-item"><a href="/" class="nav-link">Home</a></li>
                     <li class="nav-item"><a href="#about" class="nav-link">About</a></li>
                     <li class="nav-item dropdown">
                         <a href="#services" class="nav-link has-dropdown">Services 
@@ -2159,6 +2359,9 @@
                 </div>
                 <nav class="mobile-nav-content">
                     <ul class="mobile-nav-list">
+                        <li class="mobile-nav-item">
+                            <a href="/" class="mobile-nav-link">Home</a>
+                        </li>
                         <li class="mobile-nav-item">
                             <a href="#about" class="mobile-nav-link">About</a>
                         </li>
@@ -3511,10 +3714,41 @@
 
             // Initialize AI Chat Widget
             initializeAIChat();
+            
+            // Highlight current page in navigation
+            highlightCurrentPage();
         });
+        
+        // Function to highlight current page in navigation
+        function highlightCurrentPage() {
+            const currentPath = window.location.pathname;
+            const navLinks = document.querySelectorAll('.nav-link');
+            
+            navLinks.forEach(link => {
+                if (link.getAttribute('href') === '/' && (currentPath === '/' || currentPath.endsWith('index.html'))) {
+                    link.classList.add('current');
+                }
+            });
+        }
 
         // AI Chat Widget Functionality
         function initializeAIChat() {
+            // Check if API_CONFIG is loaded
+            if (typeof API_CONFIG === 'undefined') {
+                console.error('API_CONFIG not found. Please ensure js/config.js exists and is properly configured.');
+                // Hide the chat widget or show an error state
+                const chatWidget = document.getElementById('ai-chat-widget');
+                if (chatWidget) {
+                    // Instead of hiding, show a fallback message
+                    const toggleBtn = chatWidget.querySelector('#chat-toggle-btn');
+                    if (toggleBtn) {
+                        toggleBtn.style.background = '#dc3545'; // Red background to indicate issue
+                        toggleBtn.title = 'Chat temporarily unavailable - Call us at 734-777-8158';
+                    }
+                }
+                return;
+            }
+            
             const chatWidget = document.getElementById('ai-chat-widget');
             const toggleBtn = document.getElementById('chat-toggle-btn');
             const chatWindow = document.getElementById('chat-window');
@@ -3530,34 +3764,28 @@
             const MAX_RETRIES = 3;
 
             // Master prompt for the AI assistant
-            const masterPrompt = `
-                You are the Cusumano AI Assistant for Cusumano Home Improvements, a family-owned business in Monroe, Michigan with over 50 years of experience.
-
-                **COMPANY INFO:**
-                - Name: Cusumano Home Improvements
-                - Experience: 50+ years of quality craftsmanship
-                - Location: Monroe, Michigan and surrounding areas
-                - Status: Family-owned, Licensed & Insured
-                - Motto: "Quality You Can Stand On"
-                - Contact: 734-777-8158, copernan@yahoo.com
-
-                **SERVICES:**
-                - Exterior & Construction: Garages, Decks, Roofing, Siding, Additions, New Construction
-                - Outdoor Living: Sunrooms, Patio Rooms, Screenrooms, Awnings, Pergolas
-                - Concrete & Hardscaping: Driveways, Sidewalks, Patios, Carports
-                - Structures & Remodeling: Basement Finishing, Pole Barns, Sheds, Remodeling
-                - Doors & Handyman: Garage Doors, Entry Doors, Patio Covers, Handyman Work
-                - Dumpster Rentals: Convenient rental services
-
-                **RULES:**
-                1. NEVER give specific prices - always direct to free quote: [ACTION:SHOW_QUOTE_FORM_LINK]
-                2. For calls, use: [ACTION:SHOW_CALL_BUTTON]
-                3. Stay professional and helpful
-                4. Only discuss services we actually offer
-                5. Always end with a helpful prompt or call-to-action
-
-                Be concise, friendly, and always guide users toward getting a free quote or contacting us.
-            `;
+            const masterPrompt = "You are the Cusumano AI Assistant for Cusumano Home Improvements, a family-owned business in Monroe, Michigan with over 50 years of experience.\n\n" +
+                "**COMPANY INFO:**\n" +
+                "- Name: Cusumano Home Improvements\n" +
+                "- Experience: 50+ years of quality craftsmanship\n" +
+                "- Location: Monroe, Michigan and surrounding areas\n" +
+                "- Status: Family-owned, Licensed & Insured\n" +
+                "- Motto: \"Quality You Can Stand On\"\n" +
+                "- Contact: 734-777-8158, copernan@yahoo.com\n\n" +
+                "**SERVICES:**\n" +
+                "- Exterior & Construction: Garages, Decks, Roofing, Siding, Additions, New Construction\n" +
+                "- Outdoor Living: Sunrooms, Patio Rooms, Screenrooms, Awnings, Pergolas\n" +
+                "- Concrete & Hardscaping: Driveways, Sidewalks, Patios, Carports\n" +
+                "- Structures & Remodeling: Basement Finishing, Pole Barns, Sheds, Remodeling\n" +
+                "- Doors & Handyman: Garage Doors, Entry Doors, Patio Covers, Handyman Work\n" +
+                "- Dumpster Rentals: Convenient rental services\n\n" +
+                "**RULES:**\n" +
+                "1. NEVER give specific prices - always direct to free quote: [ACTION:SHOW_QUOTE_FORM_LINK]\n" +
+                "2. For calls, use: [ACTION:SHOW_CALL_BUTTON]\n" +
+                "3. Stay professional and helpful\n" +
+                "4. Only discuss services we actually offer\n" +
+                "5. Always end with a helpful prompt or call-to-action\n\n" +
+                "Be concise, friendly, and always guide users toward getting a free quote or contacting us.";
 
             // Comprehensive trigger system
             const triggerResponses = {
@@ -3821,21 +4049,19 @@ Ready to begin? [ACTION:SHOW_QUOTE_FORM_LINK] [ACTION:SHOW_CALL_BUTTON]`,
             // Display user message
             function displayUserMessage(message) {
                 const sanitizedMessage = sanitizeInput(message);
-                const messageEl = document.createElement('div');
-                messageEl.className = 'chat-message user';
-                messageEl.innerHTML = `
-                    <div class="chat-avatar user">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                            <circle cx="12" cy="7" r="4"></circle>
-                        </svg>
-                    </div>
-                    <div class="chat-bubble user">${sanitizedMessage}</div>
-                `;
-                chatMessages.appendChild(messageEl);
-                scrollToBottom();
+                const msgElement = document.createElement('div');
+                msgElement.className = 'chat-message user';
+                msgElement.innerHTML = 
+                    '<div class="chat-avatar user">' +
+                        '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
+                            '<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>' +
+                            '<circle cx="12" cy="7" r="4"></circle>' +
+                        '</svg>' +
+                    '</div>' +
+                    '<div class="chat-bubble user">' + sanitizedMessage + '</div>';
+                chatMessages.appendChild(msgElement);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
             }
-
             // Display AI message with action buttons
             function displayAiMessage(message, actions = []) {
                 // Action tag detection for API responses
@@ -3850,7 +4076,7 @@ Ready to begin? [ACTION:SHOW_QUOTE_FORM_LINK] [ACTION:SHOW_CALL_BUTTON]`,
                 if (actions && actions.length) {
                     actionsHTML += '<div class="chat-actions">';
                     for (const action of actions) {
-                        actionsHTML += `<a href="${action.href}" class="chat-action-btn" ${action.href.startsWith('http') || action.href.endsWith('.html') ? 'target="_blank"' : ''}>${action.icon || ''}${action.label}</a>`;
+                        actionsHTML += '<a href="' + action.href + '" class="chat-action-btn" ' + (action.href.startsWith('http') || action.href.endsWith('.html') ? 'target="_blank"' : '') + '>' + (action.icon || '') + action.label + '</a>';
                     }
                     actionsHTML += '</div>';
                 }
@@ -3860,7 +4086,7 @@ Ready to begin? [ACTION:SHOW_QUOTE_FORM_LINK] [ACTION:SHOW_CALL_BUTTON]`,
                     if (message.includes(tag)) {
                         if (!actionsHTML.includes(btn.label)) {
                             if (!actionsHTML) actionsHTML = '<div class="chat-actions">';
-                            actionsHTML += `<a href="${btn.href}" class="chat-action-btn" ${btn.href.startsWith('#') ? '' : 'target="_blank"'}>${btn.icon}${btn.label}</a>`;
+                            actionsHTML += '<a href="' + btn.href + '" class="chat-action-btn" ' + (btn.href.startsWith('#') ? '' : 'target="_blank"') + '>' + btn.icon + btn.label + '</a>';
                             if (!actionsHTML.endsWith('</div>')) actionsHTML += '</div>';
                         }
                     }
@@ -3871,17 +4097,16 @@ Ready to begin? [ACTION:SHOW_QUOTE_FORM_LINK] [ACTION:SHOW_CALL_BUTTON]`,
                 
                 const messageEl = document.createElement('div');
                 messageEl.className = 'chat-message';
-                messageEl.innerHTML = `
-                    <div class="chat-avatar ai">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M17.657 18.657A8 8 0 0 1 6.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.657 7.343A8 8 0 0 0 18 12c0 2-.5 4-2.343 6.657z"></path>
-                        </svg>
-                    </div>
-                    <div class="chat-bubble ai">
-                        ${cleanMessage.replace(/\n/g, '<br>')}
-                        ${actionsHTML}
-                    </div>
-                `;
+                messageEl.innerHTML = 
+                    '<div class="chat-avatar ai">' +
+                        '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">' +
+                            '<path d="M17.657 18.657A8 8 0 0 1 6.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.657 7.343A8 8 0 0 0 18 12c0 2-.5 4-2.343 6.657z"></path>' +
+                        '</svg>' +
+                    '</div>' +
+                    '<div class="chat-bubble ai">' +
+                        cleanMessage.replace(/\n/g, '<br>') +
+                        actionsHTML +
+                    '</div>';
                 chatMessages.appendChild(messageEl);
                 scrollToBottom();
             }
@@ -3914,18 +4139,17 @@ Ready to begin? [ACTION:SHOW_QUOTE_FORM_LINK] [ACTION:SHOW_CALL_BUTTON]`,
                 const typingEl = document.createElement('div');
                 typingEl.className = 'chat-message typing-indicator';
                 typingEl.id = 'typing-indicator';
-                typingEl.innerHTML = `
-                    <div class="chat-avatar ai">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M17.657 18.657A8 8 0 0 1 6.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.657 7.343A8 8 0 0 0 18 12c0 2-.5 4-2.343 6.657z"></path>
-                        </svg>
-                    </div>
-                    <div class="chat-bubble ai typing">
-                        <span></span>
-                        <span></span>
-                        <span></span>
-                    </div>
-                `;
+                typingEl.innerHTML = 
+                    '<div class="chat-avatar ai">' +
+                        '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">' +
+                            '<path d="M17.657 18.657A8 8 0 0 1 6.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.657 7.343A8 8 0 0 0 18 12c0 2-.5 4-2.343 6.657z"></path>' +
+                        '</svg>' +
+                    '</div>' +
+                    '<div class="chat-bubble ai typing">' +
+                        '<span></span>' +
+                        '<span></span>' +
+                        '<span></span>' +
+                    '</div>';
                 chatMessages.appendChild(typingEl);
                 scrollToBottom();
             }
@@ -3990,6 +4214,17 @@ Ready to begin? [ACTION:SHOW_QUOTE_FORM_LINK] [ACTION:SHOW_CALL_BUTTON]`,
                         };
 
                         const apiKey = API_CONFIG.GEMINI_API_KEY;
+                        
+                        // Check if API key is configured
+                        if (!apiKey || apiKey === "YOUR_ACTUAL_GEMINI_API_KEY_HERE") {
+                            removeTypingIndicator();
+                            displayAiMessage("The AI chat is not configured yet. Please contact us directly at 734-777-8158 for assistance. [ACTION:SHOW_CALL_BUTTON]");
+                            isProcessing = false;
+                            sendBtn.disabled = false;
+                            chatInput.focus();
+                            return;
+                        }
+                        
                         const apiUrl = `${API_CONFIG.GEMINI_API_URL}?key=${apiKey}`;
                         
                         const response = await fetch(apiUrl, {
@@ -4037,6 +4272,7 @@ Ready to begin? [ACTION:SHOW_QUOTE_FORM_LINK] [ACTION:SHOW_CALL_BUTTON]`,
 
             // Initialize with welcome message
             setTimeout(() => {
+                console.log('Initializing AI chat widget...');
                 const welcomeActions = [
                     { label: 'Get a Quote', href: '#contact', icon: '📋' },
                     { label: 'Call Us', href: 'tel:734-777-8158', icon: '📞' },
@@ -4046,6 +4282,7 @@ Ready to begin? [ACTION:SHOW_QUOTE_FORM_LINK] [ACTION:SHOW_CALL_BUTTON]`,
                 if (chatMessages.children.length <= 1) {
                     displayAiMessage("Hello! I'm here to help with your home improvement questions. What can I assist you with today?", welcomeActions);
                 }
+                console.log('AI chat widget initialized successfully');
             }, 1000);
         }
 
@@ -4166,17 +4403,15 @@ Ready to begin? [ACTION:SHOW_QUOTE_FORM_LINK] [ACTION:SHOW_CALL_BUTTON]`,
 
             // Better tap highlights for mobile
             const style = document.createElement('style');
-            style.textContent = `
-                @media (max-width: 768px) {
-                    * {
-                        -webkit-tap-highlight-color: rgba(10, 77, 104, 0.1);
-                    }
-                    
-                    .btn, button {
-                        -webkit-tap-highlight-color: rgba(245, 166, 35, 0.3);
-                    }
-                }
-            `;
+            style.textContent = 
+                '@media (max-width: 768px) {' +
+                    '* {' +
+                        '-webkit-tap-highlight-color: rgba(10, 77, 104, 0.1);' +
+                    '}' +
+                    '.btn, button {' +
+                        '-webkit-tap-highlight-color: rgba(245, 166, 35, 0.3);' +
+                    '}' +
+                '}';
             document.head.appendChild(style);
         }
 
@@ -4220,5 +4455,21 @@ Ready to begin? [ACTION:SHOW_QUOTE_FORM_LINK] [ACTION:SHOW_CALL_BUTTON]`,
             initFAQ();
         }
     </script>
+
+    <!-- Performance Optimization Scripts -->
+    <!-- Critical resource preloader (high priority) -->
+    <script src="js/critical-resource-preloader.js" data-resources="hero-banner.jpg,logo.svg,services/deck-construction.jpg" defer></script>
+    
+    <!-- Service worker for offline capabilities and caching (non-blocking) -->
+    <script src="js/sw-register.js" async></script>
+    
+    <!-- Optimize image loading (can be deferred) -->
+    <script src="js/intelligent-image-loader.js" data-auto-init="true" defer></script>
+    
+    <!-- Performance monitoring (debug mode, lowest priority) -->
+    <script src="js/performance-monitor.js" data-debug="true" defer></script>
+    
+    <!-- Performance benchmark tool (only loads when ?perf parameter is present) -->
+    <script src="js/performance-benchmark.js" defer></script>
 </body>
 </html>
