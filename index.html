@@ -1667,98 +1667,134 @@
             height: 400px;
             overflow-y: auto;
             padding: 1rem;
-            background: #f8f9fa;
+            background: #fff;
             display: flex;
             flex-direction: column;
-            gap: 1rem;
+            gap: 0.5rem;
+            scroll-behavior: smooth;
         }
 
         .chat-messages::-webkit-scrollbar {
-            width: 6px;
+            width: 3px;
         }
 
         .chat-messages::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 10px;
+            background: transparent;
         }
 
         .chat-messages::-webkit-scrollbar-thumb {
-            background: #d1d5db;
+            background: rgba(0, 0, 0, 0.2);
             border-radius: 10px;
+        }
+
+        .chat-messages::-webkit-scrollbar-thumb:hover {
+            background: rgba(0, 0, 0, 0.3);
         }
 
         .chat-message {
             display: flex;
-            align-items: flex-start;
-            gap: 0.75rem;
+            align-items: flex-end;
+            gap: 0.5rem;
+            margin-bottom: 0.25rem;
             animation: messageSlideIn 0.3s ease-out;
         }
 
         @keyframes messageSlideIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+            from { 
+                opacity: 0; 
+                transform: translateY(10px); 
+            }
+            to { 
+                opacity: 1; 
+                transform: translateY(0); 
+            }
         }
 
         .chat-message.user {
             flex-direction: row-reverse;
+            justify-content: flex-start;
+        }
+
+        .chat-message.user .chat-bubble {
+            text-align: left;
         }
 
         .chat-avatar {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
+            width: 24px !important;
+            height: 24px !important;
+            border-radius: 50% !important;
             display: flex;
             align-items: center;
             justify-content: center;
             flex-shrink: 0;
+            font-size: 0.7rem !important;
+            font-weight: 500 !important;
+            margin-bottom: 2px;
+            border: none !important;
+            box-shadow: none !important;
         }
 
         .chat-avatar.ai {
-            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
-            color: var(--white);
+            background: #007aff !important;
+            color: #fff !important;
         }
 
         .chat-avatar.user {
-            background: #e5e7eb;
-            color: #6b7280;
+            background: #34c759 !important;
+            color: #fff !important;
         }
 
+        /* iPhone-style Chat Bubbles - Updated 2025-07-09 01:55 */
         .chat-bubble {
-            max-width: 250px;
-            padding: 0.75rem 1rem;
-            border-radius: 18px;
-            font-size: 0.9rem;
-            line-height: 1.4;
+            max-width: 260px !important;
+            padding: 0.75rem 1rem !important;
+            font-size: 0.9rem !important;
+            line-height: 1.4 !important;
             word-wrap: break-word;
+            position: relative;
+            border-radius: 18px !important;
+            margin: 2px 0 !important;
+            border: none !important;
+            box-shadow: none !important;
         }
 
         .chat-bubble.ai {
-            background: var(--white);
-            border: 1px solid #e5e7eb;
-            border-radius: 18px 18px 18px 4px;
+            background: #e9ecef !important;
+            color: #000 !important;
+            border-radius: 18px 18px 18px 4px !important;
+            margin-left: 0;
+            margin-right: auto;
         }
 
         .chat-bubble.user {
-            background: var(--primary-color);
-            color: var(--white);
-            border-radius: 18px 18px 4px 18px;
+            background: #007aff !important;
+            color: #fff !important;
+            border-radius: 18px 18px 4px 18px !important;
+            margin-left: auto;
+            margin-right: 0;
+        }
+
+        /* Remove the CSS triangle pointers for cleaner iPhone look */
+        .chat-bubble.ai::before,
+        .chat-bubble.user::before {
+            display: none;
         }
 
         .chat-actions {
             margin-top: 0.5rem;
             display: flex;
             flex-wrap: wrap;
-            gap: 0.5rem;
+            gap: 0.4rem;
         }
 
         .chat-action-btn {
             padding: 0.4rem 0.8rem;
-            background: var(--accent-color);
-            color: var(--dark-gray);
-            border: none;
-            border-radius: 20px;
+            background: rgba(0, 122, 255, 0.1);
+            color: #007aff;
+            border: 1px solid rgba(0, 122, 255, 0.3);
+            border-radius: 16px;
             font-size: 0.8rem;
-            font-weight: 600;
+            font-weight: 500;
             cursor: pointer;
             transition: all 0.2s ease;
             text-decoration: none;
@@ -1768,14 +1804,20 @@
         }
 
         .chat-action-btn:hover {
-            background: #ffb93a;
-            transform: translateY(-1px);
+            background: rgba(0, 122, 255, 0.2);
+            border-color: rgba(0, 122, 255, 0.5);
+            transform: none; /* Remove transform for more iPhone-like feel */
+        }
+
+        .chat-action-btn:active {
+            background: rgba(0, 122, 255, 0.3);
+            transform: scale(0.98);
         }
 
         .chat-input-area {
             padding: 1rem;
-            background: var(--white);
-            border-top: 1px solid #e5e7eb;
+            background: #fff;
+            border-top: 1px solid #e5e5ea;
         }
 
         .chat-input-form {
@@ -1786,29 +1828,34 @@
 
         .chat-input {
             flex: 1;
-            padding: 0.75rem;
-            border: 2px solid #e5e7eb;
-            border-radius: 20px;
+            padding: 0.6rem 1rem;
+            border: 1px solid #d1d1d6;
+            border-radius: 18px;
             font-size: 0.9rem;
             resize: none;
             max-height: 100px;
-            min-height: 40px;
+            min-height: 36px;
             font-family: inherit;
             transition: border-color 0.2s ease;
+            background: #fff;
         }
 
         .chat-input:focus {
             outline: none;
-            border-color: var(--accent-color);
+            border-color: #007aff;
+        }
+
+        .chat-input::placeholder {
+            color: #8e8e93;
         }
 
         .chat-send-btn {
-            width: 40px;
-            height: 40px;
+            width: 36px;
+            height: 36px;
             border-radius: 50%;
-            background: var(--accent-color);
+            background: #007aff;
             border: none;
-            color: var(--dark-gray);
+            color: #fff;
             cursor: pointer;
             display: flex;
             align-items: center;
@@ -1818,12 +1865,16 @@
         }
 
         .chat-send-btn:hover {
-            background: #ffb93a;
-            transform: scale(1.05);
+            background: #0056d3;
+            transform: none; /* Remove transform for iPhone-like feel */
+        }
+
+        .chat-send-btn:active {
+            transform: scale(0.95);
         }
 
         .chat-send-btn:disabled {
-            opacity: 0.5;
+            opacity: 0.3;
             cursor: not-allowed;
             transform: none;
         }
@@ -1832,31 +1883,43 @@
             display: flex;
             align-items: center;
             gap: 0.5rem;
-            padding: 0.5rem 1rem;
-            background: var(--white);
+            padding: 0.75rem 1rem;
+            background: #e9ecef;
             border-radius: 18px 18px 18px 4px;
-            border: 1px solid #e5e7eb;
+            margin: 2px 0;
+            max-width: 80px;
+        }
+
+        .typing-text {
+            display: none; /* Hide text for cleaner iPhone look */
         }
 
         .typing-dots {
             display: flex;
-            gap: 0.2rem;
+            gap: 0.25rem;
         }
 
         .typing-dot {
             width: 6px;
             height: 6px;
-            background: #9ca3af;
+            background: #8e8e93;
             border-radius: 50%;
-            animation: typingBounce 1.4s infinite ease-in-out;
+            animation: typingDot 1.4s infinite ease-in-out;
         }
 
         .typing-dot:nth-child(1) { animation-delay: -0.32s; }
         .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+        .typing-dot:nth-child(3) { animation-delay: 0s; }
 
-        @keyframes typingBounce {
-            0%, 80%, 100% { transform: scale(0.8); opacity: 0.5; }
-            40% { transform: scale(1); opacity: 1; }
+        @keyframes typingDot {
+            0%, 80%, 100% {
+                transform: scale(0.8);
+                opacity: 0.4;
+            }
+            40% {
+                transform: scale(1.1);
+                opacity: 1;
+            }
         }
 
         /* Mobile Responsive */
@@ -2633,12 +2696,17 @@
             <div class="chat-messages" id="chat-messages">
                 <div class="chat-message">
                     <div class="chat-avatar ai">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M17.657 18.657A8 8 0 0 1 6.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.657 7.343A8 8 0 0 0 18 12c0 2-.5 4-2.343 6.657z"></path>
-                        </svg>
+                        🏠
                     </div>
                     <div class="chat-bubble ai">
-                        Hello! I'm the Cusumano AI Assistant. I can answer questions about our services, experience, and service area. How can I help you today?
+                        <strong>Welcome!</strong> I'm your Cusumano AI Assistant. I can help you with:
+                        <br><br>
+                        • Service information & pricing
+                        <br>• Project planning & timelines  
+                        <br>• Our 50+ years of experience
+                        <br>• Free quote requests
+                        <br><br>
+                        What can I help you with today?
                     </div>
                 </div>
             </div>
@@ -3734,18 +3802,29 @@
         // AI Chat Widget Functionality
         function initializeAIChat() {
             // Check if API_CONFIG is loaded
-            if (typeof API_CONFIG === 'undefined') {
-                console.error('API_CONFIG not found. Please ensure js/config.js exists and is properly configured.');
-                // Hide the chat widget or show an error state
+            if (typeof API_CONFIG === 'undefined' || typeof window.API_CONFIG === 'undefined') {
+                console.warn('API_CONFIG not found. Chat will use fallback responses only.');
+                // Show fallback chat functionality
                 const chatWidget = document.getElementById('ai-chat-widget');
                 if (chatWidget) {
-                    // Instead of hiding, show a fallback message
                     const toggleBtn = chatWidget.querySelector('#chat-toggle-btn');
                     if (toggleBtn) {
-                        toggleBtn.style.background = '#dc3545'; // Red background to indicate issue
-                        toggleBtn.title = 'Chat temporarily unavailable - Call us at 734-777-8158';
+                        toggleBtn.style.background = '#f39c12'; // Orange background to indicate limited functionality
+                        toggleBtn.title = 'Chat available with basic responses - Call 734-777-8158 for immediate help';
                     }
                 }
+                // Initialize with fallback responses only
+                initializeFallbackChat();
+                return;
+            }
+
+            // Use window.API_CONFIG if available
+            const config = window.API_CONFIG || API_CONFIG;
+            
+            // Check if Gemini is available
+            if (!config.GEMINI_API_KEY || config.features?.aiChat === false) {
+                console.warn('Gemini AI not available. Using fallback chat responses.');
+                initializeFallbackChat();
                 return;
             }
             
@@ -4052,12 +4131,7 @@ Ready to begin? [ACTION:SHOW_QUOTE_FORM_LINK] [ACTION:SHOW_CALL_BUTTON]`,
                 const msgElement = document.createElement('div');
                 msgElement.className = 'chat-message user';
                 msgElement.innerHTML = 
-                    '<div class="chat-avatar user">' +
-                        '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
-                            '<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>' +
-                            '<circle cx="12" cy="7" r="4"></circle>' +
-                        '</svg>' +
-                    '</div>' +
+                    '<div class="chat-avatar user">👤</div>' +
                     '<div class="chat-bubble user">' + sanitizedMessage + '</div>';
                 chatMessages.appendChild(msgElement);
                 chatMessages.scrollTop = chatMessages.scrollHeight;
@@ -4098,11 +4172,7 @@ Ready to begin? [ACTION:SHOW_QUOTE_FORM_LINK] [ACTION:SHOW_CALL_BUTTON]`,
                 const messageEl = document.createElement('div');
                 messageEl.className = 'chat-message';
                 messageEl.innerHTML = 
-                    '<div class="chat-avatar ai">' +
-                        '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">' +
-                            '<path d="M17.657 18.657A8 8 0 0 1 6.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.657 7.343A8 8 0 0 0 18 12c0 2-.5 4-2.343 6.657z"></path>' +
-                        '</svg>' +
-                    '</div>' +
+                    '<div class="chat-avatar ai">🏠</div>' +
                     '<div class="chat-bubble ai">' +
                         cleanMessage.replace(/\n/g, '<br>') +
                         actionsHTML +
@@ -4140,15 +4210,12 @@ Ready to begin? [ACTION:SHOW_QUOTE_FORM_LINK] [ACTION:SHOW_CALL_BUTTON]`,
                 typingEl.className = 'chat-message typing-indicator';
                 typingEl.id = 'typing-indicator';
                 typingEl.innerHTML = 
-                    '<div class="chat-avatar ai">' +
-                        '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">' +
-                            '<path d="M17.657 18.657A8 8 0 0 1 6.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.657 7.343A8 8 0 0 0 18 12c0 2-.5 4-2.343 6.657z"></path>' +
-                        '</svg>' +
-                    '</div>' +
-                    '<div class="chat-bubble ai typing">' +
-                        '<span></span>' +
-                        '<span></span>' +
-                        '<span></span>' +
+                    '<div class="chat-avatar ai">🏠</div>' +
+                    '<div class="typing-text">Assistant is typing</div>' +
+                    '<div class="typing-dots">' +
+                        '<div class="typing-dot"></div>' +
+                        '<div class="typing-dot"></div>' +
+                        '<div class="typing-dot"></div>' +
                     '</div>';
                 chatMessages.appendChild(typingEl);
                 scrollToBottom();
@@ -4283,6 +4350,171 @@ Ready to begin? [ACTION:SHOW_QUOTE_FORM_LINK] [ACTION:SHOW_CALL_BUTTON]`,
                     displayAiMessage("Hello! I'm here to help with your home improvement questions. What can I assist you with today?", welcomeActions);
                 }
                 console.log('AI chat widget initialized successfully');
+            }, 1000);
+        }
+
+        // Fallback chat function when Gemini is not available
+        function initializeFallbackChat() {
+            console.log('Initializing fallback chat (Gemini disabled)');
+            
+            const chatWidget = document.getElementById('ai-chat-widget');
+            const toggleBtn = document.getElementById('chat-toggle-btn');
+            const chatWindow = document.getElementById('chat-window');
+            const chatMessages = document.getElementById('chat-messages');
+            const chatForm = document.getElementById('chat-form');
+            const chatInput = document.getElementById('chat-input');
+            const sendBtn = document.getElementById('chat-send-btn');
+            
+            if (!chatWidget || !toggleBtn || !chatWindow) {
+                console.warn('Chat widget elements not found');
+                return;
+            }
+            
+            let isOpen = false;
+            let isProcessing = false;
+
+            // Basic trigger responses (simplified version)
+            const fallbackTriggers = {
+                'services|what do you do|help': 'We offer deck construction, roofing, siding, garages, remodeling, and dumpster rentals. Call 734-777-8158 for details! [ACTION:SHOW_CALL_BUTTON]',
+                'contact|phone|call|quote': 'Call us at 734-777-8158 or email copernan@yahoo.com for a free quote! [ACTION:SHOW_CALL_BUTTON]',
+                'deck|roofing|siding|garage': 'We specialize in quality construction with 50+ years experience! Call 734-777-8158 for your free estimate. [ACTION:SHOW_CALL_BUTTON]',
+                'games|play|fun': 'Check out our games collection! [ACTION:PLAY_GAMES]',
+                'hours|when|open': 'Contact us at 734-777-8158 to schedule a consultation at your convenience! [ACTION:SHOW_CALL_BUTTON]'
+            };
+
+            // Helper functions
+            function isMobile() {
+                return window.innerWidth <= 768 || /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+            }
+
+            function scrollToBottom() {
+                if (chatMessages) {
+                    chatMessages.scrollTop = chatMessages.scrollHeight;
+                }
+            }
+
+            function displayUserMessage(message) {
+                const messageEl = document.createElement('div');
+                messageEl.className = 'message user-message';
+                messageEl.textContent = message;
+                chatMessages.appendChild(messageEl);
+                scrollToBottom();
+            }
+
+            function displayAiMessage(message, actions = []) {
+                const messageEl = document.createElement('div');
+                messageEl.className = 'message ai-message';
+                
+                // Handle action placeholders
+                let processedMessage = message
+                    .replace(/\[ACTION:SHOW_CALL_BUTTON\]/g, '')
+                    .replace(/\[ACTION:SHOW_QUOTE_FORM_LINK\]/g, '')
+                    .replace(/\[ACTION:PLAY_GAMES\]/g, '');
+                
+                messageEl.textContent = processedMessage;
+                
+                // Add action buttons
+                if (message.includes('[ACTION:SHOW_CALL_BUTTON]')) {
+                    const callBtn = document.createElement('a');
+                    callBtn.href = 'tel:734-777-8158';
+                    callBtn.className = 'chat-action-btn';
+                    callBtn.textContent = '📞 Call Now';
+                    messageEl.appendChild(callBtn);
+                }
+                
+                if (message.includes('[ACTION:PLAY_GAMES]')) {
+                    const gamesBtn = document.createElement('a');
+                    gamesBtn.href = 'Games.html';
+                    gamesBtn.className = 'chat-action-btn';
+                    gamesBtn.textContent = '🎮 Play Games';
+                    messageEl.appendChild(gamesBtn);
+                }
+                
+                chatMessages.appendChild(messageEl);
+                scrollToBottom();
+            }
+
+            function getFallbackResponse(message) {
+                const lowerMessage = message.toLowerCase();
+                
+                for (const [triggers, response] of Object.entries(fallbackTriggers)) {
+                    const triggerArray = triggers.split('|');
+                    if (triggerArray.some(trigger => lowerMessage.includes(trigger))) {
+                        return response;
+                    }
+                }
+                
+                return "Thanks for your message! For the best assistance, please call us at 734-777-8158. Our experienced team is ready to help! [ACTION:SHOW_CALL_BUTTON]";
+            }
+
+            // Toggle chat window
+            toggleBtn.addEventListener('click', () => {
+                isOpen = !isOpen;
+                chatWindow.classList.toggle('active', isOpen);
+                toggleBtn.classList.toggle('active', isOpen);
+                
+                if (isOpen && isMobile()) {
+                    chatWidget.style.position = 'fixed';
+                    chatWidget.style.top = '0';
+                    chatWidget.style.left = '0';
+                    chatWidget.style.width = '100%';
+                    chatWidget.style.height = '100%';
+                    chatWidget.style.zIndex = '10000';
+                } else if (!isOpen && isMobile()) {
+                    chatWidget.style.position = '';
+                    chatWidget.style.top = '';
+                    chatWidget.style.left = '';
+                    chatWidget.style.width = '';
+                    chatWidget.style.height = '';
+                    chatWidget.style.zIndex = '';
+                }
+                
+                if (isOpen && chatInput) {
+                    setTimeout(() => chatInput.focus(), 100);
+                }
+            });
+
+            // Close chat when clicking outside (desktop only)
+            document.addEventListener('click', (e) => {
+                if (!isMobile() && isOpen && !chatWidget.contains(e.target)) {
+                    isOpen = false;
+                    chatWindow.classList.remove('active');
+                    toggleBtn.classList.remove('active');
+                }
+            });
+
+            // Handle form submission
+            if (chatForm) {
+                chatForm.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    
+                    if (isProcessing || !chatInput?.value.trim()) return;
+                    
+                    const userMessage = chatInput.value.trim();
+                    chatInput.value = '';
+                    
+                    displayUserMessage(userMessage);
+                    
+                    isProcessing = true;
+                    if (sendBtn) sendBtn.disabled = true;
+                    
+                    // Simulate typing delay
+                    setTimeout(() => {
+                        const response = getFallbackResponse(userMessage);
+                        displayAiMessage(response);
+                        
+                        isProcessing = false;
+                        if (sendBtn) sendBtn.disabled = false;
+                        if (chatInput) chatInput.focus();
+                    }, 1000);
+                });
+            }
+
+            // Initialize with welcome message
+            setTimeout(() => {
+                if (chatMessages && chatMessages.children.length === 0) {
+                    displayAiMessage("Hello! I'm here to help with basic questions. For detailed assistance, please call us at 734-777-8158! [ACTION:SHOW_CALL_BUTTON]");
+                }
             }, 1000);
         }
 
