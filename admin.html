@@ -6,7 +6,8 @@
     <meta http-equiv="Content-Security-Policy" content="
     default-src 'self' https: data:; 
     style-src 'self' https: 'unsafe-inline'; 
-    script-src 'self' https: 'unsafe-eval' 'sha256-vvt4KWwuNr51XfE5m+hzeNEGhiOfZzG97ccfqGsPwvE=' 'sha256-A4P2YhCesmqc1Qi+X6lBIesVUpw3FGQpqMiEjYJd/QM=' 'sha256-jJi84tz1fCuv6Nj9Dx+LmdFP/p1500qCsQJTAdcXB2I=' 'sha256-e+ytBD4JowmW7f7y2JPVmolLCoVaQzHGE1Nl3ycyFbE=' 'sha256-y1tz6mHm/n1BPPRfwAXr7hGszBN+rBzaekjWWBPFkg4=' 'sha256-Dsk5hXDj0baNH9VEiVhGixNZluAgMONP9K1K1YsytVQ=';
+    script-src 'self' https: 'unsafe-eval' 'sha256-vvt4KWwuNr51XfE5m+hzeNEGhiOfZzG97ccfqGsPwvE=' 'sha256-A4P2YhCesmqc1Qi+X6lBIesVUpw3FGQpqMiEjYJd/QM=' 'sha256-jJi84tz1fCuv6Nj9Dx+LmdFP/p1500qCsQJTAdcXB2I=' 'sha256-e+ytBD4JowmW7f7y2JPVmolLCoVaQzHGE1Nl3ycyFbE=' 'sha256-y1tz6mHm/n1BPPRfwAXr7hGszBN+rBzaekjWWBPFkg4=' 'sha256-Dsk5hXDj0baNH9VEiVhGixNZluAgMONP9K1K1YsytVQ=' 'sha256-sLW9u7uhevosktCXT3+s41K+hlRy2r05uBtGBniVbK8=';
+    worker-src 'self' blob:;
     frame-src 'self' https://*.facebook.com https://facebook.com https://*.google.com https://google.com https://*.gstatic.com https://maps.googleapis.com;
 ">
     <meta http-equiv="X-Content-Type-Options" content="nosniff">
@@ -1122,11 +1123,11 @@
                 try {
                     showNotification('Compressing image...', 'info');
                     
-                    // Enhanced compression options
+                    // Enhanced compression options - disable web worker if CSP blocks it
                     const options = {
                         maxSizeMB: 0.8,
                         maxWidthOrHeight: 1200,
-                        useWebWorker: true,
+                        useWebWorker: false, // Disable web worker to avoid CSP issues
                         fileType: file.type === 'image/png' ? 'image/png' : 'image/jpeg',
                         quality: 0.85,
                         onProgress: (p) => {
@@ -1157,12 +1158,19 @@
 
             // Upload to Firebase Storage
             try {
+                // Check if Firebase Storage is available and accessible
+                if (!storage) {
+                    throw new Error('Firebase Storage is not initialized');
+                }
+
                 const timestamp = Date.now();
                 const fileName = `${timestamp}_${fileToUpload.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
                 const storagePath = `service-group-images/${fileName}`;
                 const storageRef = ref(storage, storagePath);
                 
                 console.log('Uploading to Firebase Storage:', storagePath);
+                logActivity(`Starting upload: ${fileName} (${(fileToUpload.size / 1024 / 1024).toFixed(2)}MB)`, 'info');
+                
                 const uploadTask = uploadBytesResumable(storageRef, fileToUpload);
 
                 uploadTask.on('state_changed',
@@ -1173,7 +1181,23 @@
                     },
                     (error) => {
                         console.error("Upload failed:", error);
-                        showNotification(`Upload failed: ${error.message}`, 'error');
+                        
+                        // Provide more specific error messages
+                        let errorMessage = 'Upload failed';
+                        if (error.code === 'storage/unauthorized') {
+                            errorMessage = 'Upload failed: Insufficient permissions. Please check Firebase security rules.';
+                        } else if (error.code === 'storage/canceled') {
+                            errorMessage = 'Upload was canceled.';
+                        } else if (error.code === 'storage/quota-exceeded') {
+                            errorMessage = 'Upload failed: Storage quota exceeded.';
+                        } else if (error.code === 'storage/invalid-format') {
+                            errorMessage = 'Upload failed: Invalid file format.';
+                        } else if (error.message) {
+                            errorMessage = `Upload failed: ${error.message}`;
+                        }
+                        
+                        showNotification(errorMessage, 'error');
+                        logActivity(`Upload error: ${error.code || 'Unknown'} - ${error.message || 'No details'}`, 'error');
                         
                         // Reset UI
                         progressEl.style.width = '0%';
